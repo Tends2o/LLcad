@@ -25,7 +25,7 @@ Diese Zuordnung verhindert, dass die lauffähige lokale Version mit einer vollst
 - `reports/mcp-workflow.json` und `mcp-model.step` belegen den vollständigen Werkzeugablauf mit null Browserinteraktionen. Dies ist kein erfundener LLM-/Zielhosttest.
 - `reports/llm-eval.json` belegt drei tatsächliche Modellturns im installierten Codex-Host. Der Grader prüft die gespeicherte Geometrie und Werkzeugaufrufe; Modellbehauptungen allein zählen nicht als Erfolg. Die früheren Konfigurationsfehler sind in `reports/llm-eval-initial.json` als fehlgeschlagener Versuch dokumentiert.
 - `reports/codex-host.json` und `codex-host-model.step` belegen den ausgeführten Modellierablauf im tatsächlich installierten Codex-App-Server. Der Test startet keinen Modellturn und ersetzt keine LLM-Reasoning-Abnahme.
-- `reports/rebuild-existing-plan.json` und `rebuild-existing-applied.json` dokumentieren vier tatsächlich neu berechnete Beispielmodelle, die unveränderten Konstruktionen, den Messvergleich, Prüfdigests und den Erhalt ihrer alten Revisionen.
+- `reports/rebuild-existing-plan.json` und `rebuild-existing-applied.json` dokumentieren fünf tatsächlich neu berechnete vorhandene Modelle, die unveränderten Konstruktionen, den Messvergleich, Prüfdigests und den Erhalt ihrer alten Revisionen.
 - `reports/demo/report.json` und `reports/demo/model.step` stammen aus der ausgeführten 20-µm-Detailkorrektur.
 - `reports/npm-audit.json`, `python-audit.json`, `license-inventory.json` und die SBOM-Dateien einschließlich nativer OpenVDB-Abhängigkeiten dokumentieren die geprüften Abhängigkeiten.
 
