@@ -1,7 +1,7 @@
 {
   "application_version": "0.1.0",
   "ir_schema_version": "1",
-  "created": "2026-09-14T12:37:52.774Z",
+  "created": "2026-09-14T12:39:18.216Z",
   "status": "not_released",
   "operator_registry_hash": "965f19721ddde2a71937947c574f0209f490a0e97f33bbfabc0bf29540b83e4b",
   "worker_source_digest": "f376ddee32d4d424ea32e6a467528c2b9c7ef13da149dece5ba23d0d4a0d3f07",
@@ -28,7 +28,7 @@
   },
   "local_codex_transport_tests": {
     "report": "reports/codex-host.json",
-    "status": "missing_or_stale",
+    "status": "passed",
     "model_turns": 0
   },
   "benchmark_report": "reports/benchmark.json",

@@ -23,9 +23,9 @@ Diese Zuordnung verhindert, dass die lauffähige lokale Version mit einer vollst
 - `reports/benchmark.json` enthält Laufzeiten, Rechnerdaten, Buildhash, Stichprobenzahlen und Messgrenzen.
 - `reports/browser.json`, `viewer.png` und `viewer-candidate.png` stammen aus einem ausgeführten Chromium-Ablauf.
 - `reports/mcp-workflow.json` und `mcp-model.step` belegen den vollständigen Werkzeugablauf mit null Browserinteraktionen. Dies ist kein erfundener LLM-/Zielhosttest.
-- `reports/llm-eval.json` belegt drei tatsächliche Modellturns im installierten Codex-Host. Der Grader prüft die gespeicherte Geometrie und Werkzeugaufrufe; Modellbehauptungen allein zählen nicht als Erfolg. Die früheren Konfigurationsfehler sind in `reports/llm-eval-initial.json` als fehlgeschlagener Versuch dokumentiert.
+- `reports/llm-eval.json` belegt drei tatsächliche Modellturns im installierten Codex-Host für den dort angegebenen früheren Build. Dieser historische Nachweis ist noch kein LLM-Abnahmelauf für den aktuellen Transformationsbuild. Der Grader prüft die gespeicherte Geometrie und Werkzeugaufrufe; Modellbehauptungen allein zählen nicht als Erfolg. Die früheren Konfigurationsfehler sind in `reports/llm-eval-initial.json` als fehlgeschlagener Versuch dokumentiert.
 - `reports/codex-host.json` und `codex-host-model.step` belegen den ausgeführten Modellierablauf im tatsächlich installierten Codex-App-Server. Der Test startet keinen Modellturn und ersetzt keine LLM-Reasoning-Abnahme.
-- `reports/rebuild-existing-plan.json` und `rebuild-existing-applied.json` dokumentieren fünf tatsächlich neu berechnete vorhandene Modelle, die unveränderten Konstruktionen, den Messvergleich, Prüfdigests und den Erhalt ihrer alten Revisionen.
+- `reports/rebuild-existing-plan.json` und `rebuild-existing-applied.json` dokumentieren sechs tatsächlich neu berechnete vorhandene Modelle, die unveränderten Konstruktionen, den Messvergleich, Prüfdigests und den Erhalt ihrer alten Revisionen.
 - `reports/demo/report.json` und `reports/demo/model.step` stammen aus der ausgeführten 20-µm-Detailkorrektur.
 - `reports/npm-audit.json`, `python-audit.json`, `license-inventory.json` und die SBOM-Dateien einschließlich nativer OpenVDB-Abhängigkeiten dokumentieren die geprüften Abhängigkeiten.
 

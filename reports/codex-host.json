@@ -1,8 +1,8 @@
 {
   "status": "passed",
-  "created": "2026-09-14T11:57:08.685Z",
-  "registry_hash": "af800c792598352567cef23f2924cda0c177e89035e1337d7ae6cb7a4f596101",
-  "implementation_hash": "4dbe7cb598fa7281dc44566476f0c3f4f8319508cb0bff8ad1018e3d8e49c9d1",
+  "created": "2026-09-14T12:38:31.882Z",
+  "registry_hash": "965f19721ddde2a71937947c574f0209f490a0e97f33bbfabc0bf29540b83e4b",
+  "implementation_hash": "cf6158e6db9702e9d99c08b66a498a06204c244184dcbb81ab7db4783caed4fb",
   "scope": "Installed Codex app-server MCP transport and deterministic CAD workflow; no model turn or LLM reasoning evaluation.",
   "model_turns": 0,
   "browser_interactions": 0,
@@ -38,6 +38,7 @@
     "cad_job_get",
     "cad_job_get",
     "cad_job_get",
+    "cad_job_get",
     "cad_job_get"
   ],
   "host": "llcad-host-check/0.154.0 (Debian 13.0.0; x86_64) dumb (llcad-host-check; 1)",
@@ -65,9 +66,9 @@
     "cad_validate"
   ],
   "simultaneous_connections": 2,
-  "model_id": "model-0b538567-5bad-4e35-9bec-7b6d9e04772d",
-  "original_revision": "rev-b26694fd-358a-4a1e-8923-af80d77462f8",
-  "edited_revision": "rev-266c5e18-3e9d-491b-98b0-2414f8113dae",
+  "model_id": "model-d0fcbd06-668c-4f03-9292-7559adcc0f25",
+  "original_revision": "rev-1fbb3dc2-6c38-4176-b466-fd17a6505ed8",
+  "edited_revision": "rev-e3142711-2783-428e-ad01-1b4283448efd",
   "measurements": {
     "status": "ok",
     "measurements": {
@@ -82,6 +83,11 @@
         3
       ],
       "volume_integration_relative_error_estimate": 9.34924652315925e-16,
+      "native_tolerances_mm": {
+        "vertex": 1.000000025962512e-7,
+        "edge": 1e-7,
+        "face": 1e-7
+      },
       "solids": 1,
       "precision_solid_only": true,
       "faces": 10,
@@ -93,7 +99,7 @@
       },
       "geometry_hash": "3f9b19f96034a98b59cc1715bda9b32ee9d077c4ec93a1747b02c217a3ff21dd",
       "engine_build": "OCCT-7.9.3.1.1/mathforge-1",
-      "cache_key": "d99ffc2f61b9e9bacd088978d6d824718f0e9a27048b4a6a685ce901d9f06d14",
+      "cache_key": "f6224ded4eba448d2c8112eb4830d777222f52c0dd24a35b273b7396ac431721",
       "topology": {
         "version": 2,
         "face_count": 10,
@@ -106,12 +112,12 @@
     "assumptions": [],
     "artifacts": [],
     "recommended_next_actions": [],
-    "model_id": "model-0b538567-5bad-4e35-9bec-7b6d9e04772d",
-    "revision": "rev-266c5e18-3e9d-491b-98b0-2414f8113dae",
+    "model_id": "model-d0fcbd06-668c-4f03-9292-7559adcc0f25",
+    "revision": "rev-e3142711-2783-428e-ad01-1b4283448efd",
     "metric": "all",
     "unit": "mm",
     "coverage": "registered_geometric_measurement",
-    "trace_id": "trace-46af4b71-e031-4adb-8fcf-4b060d84e2c3"
+    "trace_id": "trace-9244a366-6ea9-4542-b133-e04421845583"
   },
   "comparison": {
     "status": "ok",
@@ -122,9 +128,9 @@
     "assumptions": [],
     "artifacts": [],
     "recommended_next_actions": [],
-    "model_id": "model-0b538567-5bad-4e35-9bec-7b6d9e04772d",
-    "from_revision": "rev-b26694fd-358a-4a1e-8923-af80d77462f8",
-    "to_revision": "rev-266c5e18-3e9d-491b-98b0-2414f8113dae",
+    "model_id": "model-d0fcbd06-668c-4f03-9292-7559adcc0f25",
+    "from_revision": "rev-1fbb3dc2-6c38-4176-b466-fd17a6505ed8",
+    "to_revision": "rev-e3142711-2783-428e-ad01-1b4283448efd",
     "changed_features": [
       "feat-groove-07"
     ],
@@ -181,7 +187,7 @@
     ],
     "volume_delta": -1.5079644737234048,
     "coverage": "declared_dimensions_and_per_feature_hashes",
-    "trace_id": "trace-40f4d5a5-9b28-4398-8464-9d17b6a1c99d"
+    "trace_id": "trace-2e62654a-3fd4-4c9d-bc5c-52d45b9fbf67"
   },
   "roundtrip": {
     "status": "checks_passed_within_profile",
@@ -198,6 +204,11 @@
         3
       ],
       "volume_integration_relative_error_estimate": 1.2048932050195552e-15,
+      "native_tolerances_mm": {
+        "vertex": 1.00000002596251e-7,
+        "edge": 1e-7,
+        "face": 1e-7
+      },
       "solids": 1,
       "precision_solid_only": true,
       "faces": 11,
@@ -215,6 +226,11 @@
         3
       ],
       "volume_integration_relative_error_estimate": 1.2048932050195552e-15,
+      "native_tolerances_mm": {
+        "vertex": 1e-7,
+        "edge": 1e-7,
+        "face": 1e-7
+      },
       "solids": 1,
       "precision_solid_only": true,
       "faces": 11,
