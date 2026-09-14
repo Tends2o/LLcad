@@ -1,8 +1,8 @@
 {
   "status": "passed",
-  "created": "2026-09-14T14:08:32.366Z",
-  "registry_hash": "5517f762953c935dc2c25494e21aaff6ada4edf373c98a6de758588514cfa0f3",
-  "implementation_hash": "1fff49b153df6e50f38961c663523b06a0315bc7610b66ac0c2f774070f692aa",
+  "created": "2026-09-14T18:19:02.146Z",
+  "registry_hash": "2c5919ecd79be717580ff8beb597454b584fd703537f831ad1216f179c70dd1c",
+  "implementation_hash": "5847e281b77d28d5478326775060837ea14267aeaffda211b5806cf80e072726",
   "scope": "Installed Codex app-server MCP transport and deterministic CAD workflow; no model turn or LLM reasoning evaluation.",
   "model_turns": 0,
   "browser_interactions": 0,
@@ -11,6 +11,7 @@
     "cad_create_model",
     "cad_plan_edit",
     "cad_apply_patch",
+    "cad_job_get",
     "cad_job_get",
     "cad_job_get",
     "cad_job_get",
@@ -35,6 +36,7 @@
     "cad_measure",
     "cad_compare",
     "cad_export",
+    "cad_job_get",
     "cad_job_get",
     "cad_job_get",
     "cad_job_get",
@@ -62,12 +64,13 @@
     "cad_render",
     "cad_revert",
     "cad_solve_constraints",
+    "cad_structure",
     "cad_validate"
   ],
   "simultaneous_connections": 2,
-  "model_id": "model-6183bd0e-8185-4c7d-b1e1-b4576d526e95",
-  "original_revision": "rev-7e1b9729-0b52-4cb0-ac6d-e3683c1b0420",
-  "edited_revision": "rev-942cf8a0-82d9-4a46-8601-39837fce74c2",
+  "model_id": "model-ae91850e-2d03-4ef0-b47c-4e8902872d40",
+  "original_revision": "rev-0157ddc9-ba55-4f81-9f1c-37295b57764a",
+  "edited_revision": "rev-cd27a1d4-50c6-4fca-bb72-2c8c0afeb721",
   "measurements": {
     "status": "ok",
     "measurements": {
@@ -97,8 +100,19 @@
         "remaining_wall": 2.18
       },
       "geometry_hash": "479bd697c0c23aab9c6effdaf77dd801bf684e8b5a651d794edde6516beb940b",
+      "local_frame": "world",
+      "local_bounds": [
+        -20,
+        -20,
+        0,
+        20,
+        20,
+        3
+      ],
+      "coordinate_frame": "world",
+      "dimension_frame": "world",
       "engine_build": "OCCT-7.9.3.1.1/mathforge-1",
-      "cache_key": "9b3afa9c56c0ee00991fffd145eb00c5b61cc1aad868e954c58500dc77b87038",
+      "cache_key": "7d4475912549d3b833e66f7e1fb537709f47be0d120b17e03fa5928aa5b34959",
       "topology": {
         "version": 3,
         "face_count": 10,
@@ -111,12 +125,13 @@
     "assumptions": [],
     "artifacts": [],
     "recommended_next_actions": [],
-    "model_id": "model-6183bd0e-8185-4c7d-b1e1-b4576d526e95",
-    "revision": "rev-942cf8a0-82d9-4a46-8601-39837fce74c2",
+    "model_id": "model-ae91850e-2d03-4ef0-b47c-4e8902872d40",
+    "revision": "rev-cd27a1d4-50c6-4fca-bb72-2c8c0afeb721",
     "metric": "all",
+    "measurement_frame": "world",
     "unit": "mm",
     "coverage": "registered_geometric_measurement",
-    "trace_id": "trace-b3785193-6060-47c4-8bc5-28d48442ff2e"
+    "trace_id": "trace-697b448e-c8ca-4438-b9e0-f827aa958b4d"
   },
   "comparison": {
     "status": "ok",
@@ -127,9 +142,10 @@
     "assumptions": [],
     "artifacts": [],
     "recommended_next_actions": [],
-    "model_id": "model-6183bd0e-8185-4c7d-b1e1-b4576d526e95",
-    "from_revision": "rev-7e1b9729-0b52-4cb0-ac6d-e3683c1b0420",
-    "to_revision": "rev-942cf8a0-82d9-4a46-8601-39837fce74c2",
+    "model_id": "model-ae91850e-2d03-4ef0-b47c-4e8902872d40",
+    "from_revision": "rev-0157ddc9-ba55-4f81-9f1c-37295b57764a",
+    "to_revision": "rev-cd27a1d4-50c6-4fca-bb72-2c8c0afeb721",
+    "structure_changed": false,
     "changed_features": [
       "feat-groove-07"
     ],
@@ -186,7 +202,7 @@
     ],
     "volume_delta": -1.5079644737234048,
     "coverage": "declared_dimensions_and_per_feature_hashes",
-    "trace_id": "trace-afecd379-3679-4002-b904-7d9b627495e3"
+    "trace_id": "trace-8a1e4705-80e0-4a02-854b-c7e08c7100ab"
   },
   "roundtrip": {
     "status": "checks_passed_within_profile",
