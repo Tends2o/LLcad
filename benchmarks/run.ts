@@ -1,4 +1,6 @@
 import { cpus, totalmem, platform, release } from "node:os";
+import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import { writeFileSync, mkdirSync } from "node:fs";
 import {
   setup,
@@ -133,6 +135,16 @@ try {
     }),
   );
   const organicMs = performance.now() - organicStart;
+  const fieldEvaluation = spawnSync(
+    ".venv/bin/python",
+    ["benchmarks/field-evaluation.py"],
+    { encoding: "utf8", timeout: 45000, maxBuffer: 1024 * 1024 },
+  );
+  assert.equal(
+    fieldEvaluation.status,
+    0,
+    fieldEvaluation.stderr || String(fieldEvaluation.error),
+  );
   const report = {
     status: "measured",
     created: new Date().toISOString(),
@@ -156,6 +168,7 @@ try {
     assembly_100_instances_full_pipeline_ms: assemblyMs,
     stress_at_instance_limit: stressReport,
     organic_full_pipeline_with_preview_ms: organicMs,
+    field_evaluation: JSON.parse(fieldEvaluation.stdout),
     budget_rejection_verified: budgetRejected,
     worker_metrics: metrics,
     error_rate: 0,

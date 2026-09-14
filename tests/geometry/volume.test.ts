@@ -122,3 +122,93 @@ test("isolated OpenVDB roundtrip and private spatial reuse survive restart and a
     rmSync(env.dir, { recursive: true, force: true });
   }
 });
+
+test("existing compact details can be revised while protected regions still block global edits", async () => {
+  const env = setup(),
+    s = env.service;
+  try {
+    const ir = structuredClone(organic),
+      construction: any = ir.features[0].construction;
+    construction.expression = {
+      op: "local_field_delta",
+      source: construction.expression,
+      center: ["5", "0", "0"],
+      radius: "1",
+      amplitude: "0.04",
+    };
+    const model = await importFixture(s, ir);
+    const change = async (revision: string, before: any, after: any) => {
+      const draft = call(s, "cad_apply_patch", {
+        model_id: model.model_id,
+        base_revision: revision,
+        idempotency_key: id("detail"),
+        operations: [
+          {
+            op: "set_field",
+            feature_id: "organic",
+            expected_hash: hash(before),
+            expression: after,
+          },
+        ],
+      });
+      await finish(s, draft);
+      const validation = await finish(
+        s,
+        call(s, "cad_validate", {
+          model_id: model.model_id,
+          base_revision: revision,
+          transaction_id: draft.transaction_id,
+          idempotency_key: id("validate"),
+        }),
+      );
+      return { draft, validation };
+    };
+    const modified = { ...construction.expression, amplitude: "0.02" };
+    const good = await change(
+      model.revision,
+      construction.expression,
+      modified,
+    );
+    assert.equal(good.validation.status, "checks_passed_within_profile");
+    assert.equal(
+      good.validation.checks.find((c: any) => c.check_id === "remote-protected")
+        .guarantee,
+      "exact_for_declared_domain",
+    );
+    const committed = call(s, "cad_commit", {
+      model_id: model.model_id,
+      base_revision: model.revision,
+      transaction_id: good.draft.transaction_id,
+      validation_digest: good.validation.digest,
+      idempotency_key: id("commit"),
+    });
+    const bad = await change(committed.revision, modified, {
+      ...modified,
+      source: { ...modified.source, radius: "5.01" },
+    });
+    assert.equal(bad.validation.status, "failed");
+    assert.equal(
+      bad.validation.checks.find((c: any) => c.check_id === "remote-protected")
+        .status,
+      "failed",
+    );
+    const rejected = s.call(principal, "cad_commit", {
+      model_id: model.model_id,
+      base_revision: committed.revision,
+      transaction_id: bad.draft.transaction_id,
+      validation_digest: bad.validation.digest,
+      idempotency_key: id("reject"),
+    });
+    assert.equal(rejected.status, "failed");
+    assert.equal(
+      s.store.model(principal, model.model_id).head,
+      committed.revision,
+    );
+    assert.equal(
+      s.store.revision(principal, model.model_id, model.revision).ir_hash,
+      hash(ir),
+    );
+  } finally {
+    await env.close();
+  }
+});

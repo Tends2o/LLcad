@@ -1,14 +1,14 @@
 {
   "status": "passed",
-  "created": "2026-09-14T12:31:25.930Z",
-  "registry_hash": "965f19721ddde2a71937947c574f0209f490a0e97f33bbfabc0bf29540b83e4b",
-  "implementation_hash": "cf6158e6db9702e9d99c08b66a498a06204c244184dcbb81ab7db4783caed4fb",
+  "created": "2026-09-14T13:03:05.092Z",
+  "registry_hash": "c06ba78af8863c6cdc8d07a330843aca7b8c58948c19c0f0921e2e2a616ee82f",
+  "implementation_hash": "50ac7d356ff9e00847c701c03f0e116a1e0f269c565e6a4749a33cf2649431a1",
   "transport": "MCP Streamable HTTP",
   "client": "official SDK",
   "browser_interactions": 0,
-  "model_id": "model-b2a91c61-5201-4ca3-a113-f8c5c547a748",
-  "original_revision": "rev-68ebf997-1925-4264-8ea2-663034bf5160",
-  "edited_revision": "rev-ac02d9a8-f7fa-46ec-a55a-0c49fc9096aa",
+  "model_id": "model-d61434d3-f263-48bb-a762-c1b9bff556e5",
+  "original_revision": "rev-1e3fcefc-1e23-4ed0-a7e9-140c23fa25ac",
+  "edited_revision": "rev-e5d17d9a-568a-407f-859f-dde7ab5faba2",
   "calls": [
     "cad_capabilities",
     "cad_list_models",
@@ -32,7 +32,6 @@
     "cad_plan_edit",
     "cad_apply_patch",
     "cad_apply_patch",
-    "cad_job_get",
     "cad_job_get",
     "cad_job_get",
     "cad_job_get",
@@ -84,7 +83,7 @@
       },
       "geometry_hash": "3f9b19f96034a98b59cc1715bda9b32ee9d077c4ec93a1747b02c217a3ff21dd",
       "engine_build": "OCCT-7.9.3.1.1/mathforge-1",
-      "cache_key": "a85d8ca8ed2385af138c9c18cd35f4ac31aae464d78d00caaade710e42a1cea3",
+      "cache_key": "9f5d58b3e826c50416084cd0ee43b886317802b0b9f5ab7a2b21cb4c672b4ded",
       "topology": {
         "version": 2,
         "face_count": 10,
@@ -97,12 +96,12 @@
     "assumptions": [],
     "artifacts": [],
     "recommended_next_actions": [],
-    "model_id": "model-b2a91c61-5201-4ca3-a113-f8c5c547a748",
-    "revision": "rev-ac02d9a8-f7fa-46ec-a55a-0c49fc9096aa",
+    "model_id": "model-d61434d3-f263-48bb-a762-c1b9bff556e5",
+    "revision": "rev-e5d17d9a-568a-407f-859f-dde7ab5faba2",
     "metric": "all",
     "unit": "mm",
     "coverage": "registered_geometric_measurement",
-    "trace_id": "trace-2640ab7a-0cd5-4f6d-b7e7-229a575d3d21"
+    "trace_id": "trace-ebf99813-e662-4be6-8638-dc459c52d15b"
   },
   "comparison": {
     "status": "ok",
@@ -113,9 +112,9 @@
     "assumptions": [],
     "artifacts": [],
     "recommended_next_actions": [],
-    "model_id": "model-b2a91c61-5201-4ca3-a113-f8c5c547a748",
-    "from_revision": "rev-68ebf997-1925-4264-8ea2-663034bf5160",
-    "to_revision": "rev-ac02d9a8-f7fa-46ec-a55a-0c49fc9096aa",
+    "model_id": "model-d61434d3-f263-48bb-a762-c1b9bff556e5",
+    "from_revision": "rev-1e3fcefc-1e23-4ed0-a7e9-140c23fa25ac",
+    "to_revision": "rev-e5d17d9a-568a-407f-859f-dde7ab5faba2",
     "changed_features": [
       "feat-groove-07"
     ],
@@ -172,7 +171,7 @@
     ],
     "volume_delta": -1.5079644737234048,
     "coverage": "declared_dimensions_and_per_feature_hashes",
-    "trace_id": "trace-04699ef1-c1d2-42fe-9ce5-6fabd6742b4e"
+    "trace_id": "trace-6fba770b-85df-4b8f-b1cb-847cfcf17ade"
   },
   "roundtrip": {
     "status": "checks_passed_within_profile",

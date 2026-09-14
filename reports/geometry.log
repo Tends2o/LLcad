@@ -11,7 +11,13 @@ test_affine_field_is_conservative_and_cache_support_uses_inverse_coordinates (te
 test_axis_angle_roundtrip_and_oriented_plane (test_affine.AffineTests.test_axis_angle_roundtrip_and_oriented_plane) ... ok
 test_native_shear_reflection_normals_winding_and_inverse (test_affine.AffineTests.test_native_shear_reflection_normals_winding_and_inverse) ... ok
 test_piecewise_curve_does_not_report_a_one_sided_derivative_as_global (test_analysis.AnalysisTests.test_piecewise_curve_does_not_report_a_one_sided_derivative_as_global) ... ok
+test_compilation_snapshot_and_sampler_do_not_follow_mutable_input (test_compiled_fields.CompiledFieldTests.test_compilation_snapshot_and_sampler_do_not_follow_mutable_input) ... ok
+test_depth_node_and_unknown_operator_guards (test_compiled_fields.CompiledFieldTests.test_depth_node_and_unknown_operator_guards) ... ok
+test_every_registered_operator_and_nested_combinations_match_reference (test_compiled_fields.CompiledFieldTests.test_every_registered_operator_and_nested_combinations_match_reference) ... ok
+test_extracted_mesh_uses_compiled_gradients_and_outward_normals (test_compiled_fields.CompiledFieldTests.test_extracted_mesh_uses_compiled_gradients_and_outward_normals) ... ok
+test_compact_deformation_retains_relevance_of_shifted_source (test_field_cache.FieldCacheTests.test_compact_deformation_retains_relevance_of_shifted_source) ... ok
 test_cross_resolution_and_compact_support_and_registry_binding (test_field_cache.FieldCacheTests.test_cross_resolution_and_compact_support_and_registry_binding) ... ok
+test_nested_transforms_compact_edits_and_repeated_samples (test_field_cache.FieldCacheTests.test_nested_transforms_compact_edits_and_repeated_samples) ... ok
 test_vdb_grid_budget_rejects_before_allocation (test_field_cache.FieldCacheTests.test_vdb_grid_budget_rejects_before_allocation) ... ok
 test_capsule_endpoints_and_degenerate_segment (test_field_primitives.FieldPrimitiveTests.test_capsule_endpoints_and_degenerate_segment) ... ok
 test_constant_and_compact_variable_shell (test_field_primitives.FieldPrimitiveTests.test_constant_and_compact_variable_shell) ... ok
@@ -40,7 +46,7 @@ test_step_brep_stl_roundtrip (test_native.NativeGeometryTests.test_step_brep_stl
 ******        Transfer Mode = 0  I.E.  As Is       ******[0m
 [32;1m******        Transferring Shape, ShapeType = 2                      ******[0m
 [32;1m** WorkSession : Sending all data[0m
-[32;1m Step File Name : /tmp/tmpugm6y65m/shape.step(32 ents)  Write  Done[0m
+[32;1m Step File Name : /tmp/tmp_qop5ekc/shape.step(32 ents)  Write  Done[0m
 ok
 test_transform_inverse_and_instance_volume (test_native.NativeGeometryTests.test_transform_inverse_and_instance_volume) ... ok
 test_explicit_rational_quarter_circle_uses_weights_and_clamped_basis (test_nurbs.NurbsTests.test_explicit_rational_quarter_circle_uses_weights_and_clamped_basis) ... ok
@@ -50,6 +56,6 @@ test_registered_history_preserves_the_existing_geometry_contract (test_topology.
 test_unknown_history_is_never_replaced_with_a_geometric_guess (test_topology.TopologyTests.test_unknown_history_is_never_replaced_with_a_geometric_guess) ... ok
 
 ----------------------------------------------------------------------
-Ran 37 tests in 2.616s
+Ran 43 tests in 2.912s
 
 OK

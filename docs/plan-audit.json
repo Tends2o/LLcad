@@ -286,11 +286,25 @@
       "source_line": 237,
       "source_end_line": 268,
       "source_sha256": "7c9a49312c4e0c6e48588fea370b73546b2b2768b8b1442fb431e6c937d1e257",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "informational",
+      "status": "verified",
+      "requirements": [
+        "Endliche indexierte Dreiecksnetze als Darstellungsbasis gekrümmter Näherungen einordnen.",
+        "Die Würfel-Hausdorff-Schranke nur unter den angegebenen Voraussetzungen einer nichtleeren kompakten Menge und aller treffenden Gitterwürfel verwenden.",
+        "Daraus keine Rand-, Topologie- oder Effizienzgarantie ableiten."
+      ],
+      "evidence": [
+        "docs/math-foundations.md",
+        "workers/cad-occt/geometry.py",
+        "workers/cad-occt/fields.py",
+        "tests/roundtrip/exports.test.ts",
+        "tests/geometry/test_native.py"
+      ],
+      "notes": "Mathematische Einordnung einer endlichen Darstellungsbasis; keine Anforderung eines universellen Erkennungs-/Rekonstruktionsalgorithmus.",
+      "review": {
+        "scope_match": true,
+        "findings": "Die Hausdorff-Schranke ist durch Inklusion und den Würfeldurchmesser direkt hergeleitet, einschließlich Nichtleere/Kompaktheit und h>0. Rand-/Topologie-/Effizienzfolgerungen werden ausdrücklich ausgeschlossen. Tatsächliche indexierte Vorschauen werden als abgeleitet und ohne universelles Oberflächenzertifikat behandelt; registrierte Roundtriptests prüfen den konkreten Pfad."
+      }
     },
     {
       "id": "6.2",
@@ -331,7 +345,7 @@
       "notes": "Aktueller vollständiger Entwicklungsprüflauf bestanden; Bereitstellung ist separat in Abschnitt 27 zu prüfen.",
       "review": {
         "scope_match": true,
-        "findings": "Allgemeine native affine Transformation, freie Achsendrehung, exakte Prüfung von Determinante/Inverse/Konditionierung, inverse-transponierte Normalen und nach außen gerichtete gespiegelte Dreiecke durch native Tests belegt. Die native Kopier-/Transformationshistorie erhält alle sechs Testflächen, die ursprüngliche Geometrie bleibt unverändert. Vollständiger Lauf mit 70 TS- und 37 Python-Tests bestanden."
+        "findings": "Allgemeine native affine Transformation, freie Achsendrehung, exakte Prüfung von Determinante/Inverse/Konditionierung, inverse-transponierte Normalen und nach außen gerichtete gespiegelte Dreiecke durch native Tests belegt. Die native Kopier-/Transformationshistorie erhält alle sechs Testflächen, die ursprüngliche Geometrie bleibt unverändert. Vollständiger Lauf mit 73 TS- und 43 Python-Tests bestanden."
       }
     },
     {
@@ -680,11 +694,23 @@
       "source_line": 840,
       "source_end_line": 869,
       "source_sha256": "b8e3cbefae929b019a48c4ae43ea2fb6ccb63c510511d9367d4ebeaf6892ebfb",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Kompakte Wendland-Stützen mit exakt verschwindenden Fernwirkungen und explizitem Branch auswerten.",
+        "Geschützte Fernregionen gegen die Vereinigung betroffener Stützen prüfen.",
+        "Feldamplitude nicht als exakte Oberflächenverschiebung ausgeben; gewünschte Verschiebungen nachmessen oder invers einstellen."
+      ],
+      "evidence": [
+        "workers/cad-occt/fields.py",
+        "workers/cad-occt/field_cache.py",
+        "packages/compiler/field-regions.ts",
+        "packages/validation/index.ts",
+        "tests/geometry/test_field_cache.py",
+        "tests/unit/field-regions.test.ts",
+        "tests/geometry/volume.test.ts"
+      ],
+      "notes": "Kompakte Felder und exakter rationaler Schutzvergleich für neue und vorhandene äußere Lokaloperationen sind implementiert. Allgemeine gemessene/invers eingestellte Oberflächenverschiebungen und Schutzbeweise unter beliebigen Transformationen bleiben offen."
     },
     {
       "id": "7.3",
@@ -1160,11 +1186,22 @@
       "source_line": 1414,
       "source_end_line": 1425,
       "source_sha256": "0d1bc26ea5c6d0796a62f4835a3807ed5b6c25c8919f8546464bd5b21747ea70",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Beim Commit aktuelle Basisrevision mit Compare-and-Swap prüfen.",
+        "Prüfdigest an exakten Kandidaten, Geometrie, Registry und Policy binden und aktuelle Rechte prüfen.",
+        "Artefakte vor dem Commit dauerhaft speichern; Revision, Zeiger, Commit und Outbox atomar schreiben.",
+        "Veraltete Patches nur als neue Kandidaten mit neuen Prüfungen behandeln."
+      ],
+      "evidence": [
+        "packages/model-service/index.ts",
+        "packages/model-service/store.ts",
+        "packages/job-service/index.ts",
+        "tests/security/transactions.test.ts",
+        "tests/security/recovery.test.ts"
+      ],
+      "notes": "Digest-/Policy-/Rechteprüfung und Compare-and-Swap liegen im synchronen BEGIN-IMMEDIATE-Deduplizierungsblock. Tests belegen doppelte Aufrufe, unveränderte alte Revisionen, Stale- und Fremdnachweisabwehr sowie dauerhafte Outbox. Blobdateien werden derzeit synchron geschrieben, aber ohne explizites Dateisystem-fsync vor dem Datenbank-Commit; die verlangte Haltbarkeit bei Stromverlust ist damit noch nicht vollständig belegt."
     },
     {
       "id": "14.3",
@@ -1172,11 +1209,30 @@
       "source_line": 1426,
       "source_end_line": 1431,
       "source_sha256": "2ce402d0d4cccf4afc5e4770cfd53c48e3f914d6431a6db7a92fa02ff17abce8",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "verified",
+      "requirements": [
+        "Idempotenzschlüssel an Mandant, Besitzer und Hash der normalisierten Werkzeug-/Modell-/Basisargumente binden.",
+        "Gleiche Aufrufe dauerhaft deduplizieren, abweichende Argumente beim selben Schlüssel abweisen.",
+        "Transaktionen, leases mit Fencing und idempotente Artefaktablage statt eines systemübergreifenden Exactly-once-Versprechens einsetzen.",
+        "Wiederholungen dürfen keinen zusätzlichen Commit auslösen."
+      ],
+      "evidence": [
+        "packages/model-service/store.ts",
+        "packages/model-service/index.ts",
+        "packages/job-service/index.ts",
+        "packages/job-service/scheduler.ts",
+        "tests/security/transactions.test.ts",
+        "tests/security/recovery.test.ts",
+        "tests/security/scheduler.test.ts",
+        "reports/verification.json",
+        "reports/tests.log"
+      ],
+      "notes": "Nachweis für den eingesetzten einzelnen lokalen Store-Inhaber mit SQLite-Transaktionen; kein Anspruch einer systemübergreifenden Exactly-once-Garantie.",
+      "review": {
+        "scope_match": true,
+        "findings": "Requestargumente werden strikt geparst und kanonisch gehasht. Idempotenzlookup, Wirkung und gespeichertes Ergebnis liegen im selben BEGIN IMMEDIATE. Der doppelte Commit liefert dieselbe Revision; abweichendes Payload und konkurrierender Stale-Kandidat scheitern. Abgelaufene Leases werden mit neuer Kennung beansprucht und verspätete Resultate/Abbrüche gegengeprüft. Tests zählen tatsächlich Jobs und Revisionen und prüfen verlorene Workerleases, persistente Queue und unveränderte Commit-Outbox nach Folgefehlern."
+      }
     },
     {
       "id": "14.4",
@@ -1280,11 +1336,23 @@
       "source_line": 1536,
       "source_end_line": 1543,
       "source_sha256": "3f308626443f8725d0702fa16ed84fc12a732dfae949de64a121d37c522713bf",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Instanzen, räumliche Kandidatenindizes, vorberechnete Ableitungen und gültige Solver-Faktorisierungen zur Wiederverwendung einsetzen.",
+        "Feld-AST vorbereiten, lokal tessellieren, Artefakte komprimiert übertragen und native Warm-Worker bereitstellen.",
+        "Unveränderliche unabhängige Auswertungen parallelisieren, ohne ungeprüft native veränderliche Objekte zu teilen.",
+        "Tool-Roundtrips durch zusammenhängende Inspektion/Validierung reduzieren, ohne ungeprüfte Änderungen zu committen."
+      ],
+      "evidence": [
+        "workers/cad-occt/fields.py",
+        "workers/cad-occt/field_cache.py",
+        "benchmarks/field-evaluation.py",
+        "benchmarks/run.ts",
+        "tests/geometry/test_compiled_fields.py",
+        "docs/compiled-fields.md"
+      ],
+      "notes": "Registrierte Instanzen und zusammengefasste Inspektion vorhanden. Feld-AST wird in begrenzte vertrauenswürdige Closures kompiliert; statische Cacheteilbäume werden einmal gehasht, wiederholte Punkte getrennt gespeichert. Mikrobenchmark ist Teil der Buildmessung. Räumliche Kandidatenindizes, allgemeine Ableitungsvorbereitung/Faktorisierungsreuse, lokale Tessellation, komprimierte Übertragung, unveränderliche Teileparallelität und native Warm-Worker bleiben offen."
     },
     {
       "id": "15.6",
@@ -1927,11 +1995,18 @@
       "source_line": 1989,
       "source_end_line": 1994,
       "source_sha256": "aa9a400501a9b79a1d9eb2ee1105e55f29dc18acaf11d8e4e4d0be9b9e1a3331",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Nut-/Durchmesseränderung, einzelne Instanz, geschützte Außenform, verdeckte Innenkante und Wiederfinden nach Topologieänderung mit tatsächlichen Sprachaufträgen prüfen.",
+        "Auswahl, Parameter, Schutzbedingungen, Rückfragen, Werkzeuganzahl, Nachweisqualität und echte Mehrdeutigkeit auswerten."
+      ],
+      "evidence": [
+        "scripts/llm-eval.ts",
+        "tests/llm-evals/README.md",
+        "reports/llm-eval.json"
+      ],
+      "notes": "Sechs synthetische lokale Fälle sind mit 87 tatsächlich protokollierten CAD-Aufrufen bestanden: Nut, Durchmesser, Mehrdeutigkeit, einzelne Instanz, bestehende lokale Feldkorrektur und Tasche im gedrehten Bauteil. Verdeckte Innenkante und Wiederfinden nach Topologieänderung fehlen noch im tatsächlichen LLM-Test, obwohl native Historiengates separat getestet werden."
     },
     {
       "id": "24.4",
@@ -1963,11 +2038,19 @@
       "source_line": 2007,
       "source_end_line": 2012,
       "source_sha256": "6e9137e251a0be55fe3e1e7a837b09694f42b205a4e1e942c16243d73009397f",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Vom getesteten Modell getrennte neue Formkombinationen und Detailaufgaben bereitstellen.",
+        "Strukturierte Anforderungen anhand gespeicherter Prüfberichte und Geometrie auswerten; Selbstaussagen reichen nicht.",
+        "Planungsfehler, falsche Auswahl, Kernelgrenze, Solverfehler, unklare Absicht, Sicherheitsblock und Budgetgrenze getrennt zählen."
+      ],
+      "evidence": [
+        "scripts/llm-eval.ts",
+        "tests/llm-evals/README.md",
+        "reports/llm-eval.json"
+      ],
+      "notes": "Auswertungsquelle und Fixtures sind für das getestete Modell nicht zugänglich; nur CAD-Werkzeuge und Sprachauftrag werden bereitgestellt. Sechs lokale Aufgaben sind bestanden, einschließlich neuer Instanz-/Feld-/Rotationskombinationen; 87 CAD-Aufrufe, null Browseraktionen. Breiter unabhängiger Korpus und vollständige feingliedrige Fehlerklassifikation bleiben offen; kein allgemeiner Erfolgssatz aus wenigen Beispielen."
     },
     {
       "id": "24.7",

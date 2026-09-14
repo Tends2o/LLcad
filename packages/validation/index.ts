@@ -6,6 +6,7 @@ import { POLICY_HASH } from "../policy/index.js";
 import { patchContinuity } from "../compiler/patches.js";
 import { Decimal } from "decimal.js";
 import { equationValues, checkEquation } from "../compiler/constraints.js";
+import { sameFieldInRegion } from "../compiler/field-regions.js";
 type Check = {
   check_id: string;
   target: string;
@@ -270,42 +271,20 @@ export function validate(
       ) {
         const sameDomain =
           hash(f.construction.domain) === hash(old.construction.domain);
-        let expression = f.construction.expression;
-        const target = hash(old.construction.expression);
-        proven = true;
-        let iterations = 0;
-        while (hash(expression) !== target && iterations++ < 32) {
-          if (!["local_field_delta", "local_deform"].includes(expression.op)) {
-            proven = false;
-            break;
-          }
-          const center = expression.center.map(Number),
-            min = c.min.map(Number),
-            max = c.max.map(Number);
-          const distance = Math.hypot(
-            ...center.map((x: number, i: number) =>
-              Math.max(min[i] - x, 0, x - max[i]),
-            ),
+        proven =
+          sameDomain &&
+          sameFieldInRegion(
+            old.construction.expression,
+            f.construction.expression,
+            c,
           );
-          const effectRadius =
-            Number(expression.radius) +
-            (expression.op === "local_deform"
-              ? Math.hypot(...expression.displacement.map(Number))
-              : 0);
-          if (distance < effectRadius) {
-            proven = false;
-            break;
-          }
-          expression = expression.source;
-        }
-        proven = proven && sameDomain && hash(expression) === target;
       } else if (old) proven = hash(old) === hash(f);
       add(
         c.id,
         f.id,
         proven,
         proven,
-        "compact_support_disjoint_from_AABB",
+        "exact_rational_compact_support_disjoint_from_AABB",
         "entire_protected_region",
         "exact_for_declared_domain",
       );

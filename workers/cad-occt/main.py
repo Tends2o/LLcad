@@ -19,7 +19,7 @@ def run(request):
                 with open(cached) as h:previous=json.load(h)
             samplers[fid]=Sampler(f['construction']['expression'],plan['registry_hash'],previous)
             field_results[fid]=f
-            facts[fid]=field_facts(f)
+            facts[fid]=field_facts(f,samplers[fid].compiled)
             continue
         deps=[shapes[d] for d in f['depends_on']]
         key=f['cache_key'];cache='cache/'+key+'.brep'
