@@ -29,6 +29,8 @@ const buildFiles = [
   "packages/semantic-ir/units.ts",
   "packages/semantic-ir/hash.ts",
   "packages/semantic-ir/schema.ts",
+  "packages/semantic-ir/identifiers.ts",
+  "packages/semantic-ir/access.ts",
   "packages/validation/index.ts",
   "packages/policy/index.ts",
   "requirements.lock",

@@ -9,9 +9,16 @@ import { LIMITS, checkDepth } from "../compiler/index.js";
 import { modern } from "./adapters/protocol_2026_07_28.js";
 import { legacy } from "./adapters/legacy_tested.js";
 import { LEGACY_VERSIONS } from "./versions.js";
+import { ApprovalVerifier } from "../policy/approvals.js";
+import { AccessPayload } from "../semantic-ir/access.js";
+import { assertResult } from "../model-service/result-contracts.js";
 export function createApp(service: ModelService, config: AuthConfig) {
   const app = express(),
     auth = new Auth(config);
+  const approvals = new ApprovalVerifier(
+    config.dataRoot,
+    new URL("/api/policy/approvals", config.publicURL).toString(),
+  );
   app.disable("x-powered-by");
   const publicOrigin = new URL(config.publicURL).origin,
     host = new URL(config.publicURL).host;
@@ -154,14 +161,56 @@ export function createApp(service: ModelService, config: AuthConfig) {
       service.call(res.locals.principal, req.params.name as ToolName, req.body),
     ),
   );
+  app.get("/api/policy/requests/:id", authenticate, rate, (req, res) => {
+    const row = service.store.get(
+      "SELECT model FROM approval_requests WHERE id=?",
+      String(req.params.id),
+    );
+    requireThat(row, "ACCESS_DENIED", "Freigabeantrag nicht zugänglich.");
+    const result = service.store.access.request(
+      res.locals.principal,
+      row.model,
+      String(req.params.id),
+    );
+    assertResult(AccessPayload, result, "access_request");
+    res.json(result);
+  });
+  app.post(
+    "/api/policy/approvals/:id",
+    authenticate,
+    rate,
+    async (req, res, next) => {
+      try {
+        requireThat(
+          req.body &&
+            Object.keys(req.body).length === 1 &&
+            typeof req.body.approval_jwt === "string",
+          "NEEDS_APPROVAL",
+          "Gebundene signierte Bestätigung erforderlich.",
+        );
+        const claims = await approvals.verify(req.body.approval_jwt);
+        res.json(
+          service.store.access.approve(
+            res.locals.principal,
+            String(req.params.id),
+            claims,
+          ),
+        );
+      } catch (error) {
+        next(error);
+      }
+    },
+  );
   app.get("/api/models", authenticate, rate, (req, res) => {
     const p = res.locals.principal;
     authorize(p, "model:read");
+    const visible = service.store.access.visible(p);
     res.json({
       models: service.store.all(
-        "SELECT id,name,head,created FROM models WHERE tenant=? AND owner=? ORDER BY created DESC LIMIT 100",
-        p.tenant,
-        p.user,
+        "SELECT id,name,head,created FROM models WHERE " +
+          visible.sql +
+          " ORDER BY created DESC LIMIT 100",
+        ...visible.params,
       ),
     });
   });

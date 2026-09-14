@@ -1,5 +1,7 @@
 import { z } from "zod";
-export const Id = z.string().regex(/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$/);
+import { Id } from "./identifiers.js";
+import { AccessTool } from "./access.js";
+export { Id } from "./identifiers.js";
 export const DecimalString = z
   .string()
   .max(48)
@@ -517,6 +519,7 @@ export const Patch = z.strictObject({
 export type Patch = z.infer<typeof Patch>;
 export const ReadBinding = { model_id: Id, revision: Id.optional() };
 export const ToolSchemas = {
+  cad_access: AccessTool,
   cad_capabilities: z.strictObject({}),
   cad_list_models: z.strictObject({
     query: z.string().max(200).default(""),
@@ -650,6 +653,10 @@ export const ToolSchemas = {
   }),
 };
 export type ToolName = keyof typeof ToolSchemas;
+/** MCP requires an explicit object root even for unions of object modes. */
+export function inputJSONSchema(tool: ToolName) {
+  return { ...z.toJSONSchema(ToolSchemas[tool]), type: "object" as const };
+}
 export const READ_TOOLS = new Set<ToolName>([
   "cad_capabilities",
   "cad_list_models",

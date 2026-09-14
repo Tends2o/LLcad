@@ -89,7 +89,7 @@ Getrennt implementiert und lokal getestet:
 | `2025-03-26`, `2025-06-18`, `2025-11-25` | Offizielles TypeScript-SDK 1.30.0 mit `initialize`, Versionsaushandlung und Streamable HTTP |
 | `2026-07-28` | Separater Adapter mit `server/discover`, erforderlichen Anfrage-Metadaten, Header-Abgleich und `resultType` |
 
-Alle 22 Werkzeuge sind in [Schnittstellen](docs/api.md) beschrieben. Zusätzlich zum HTTP-Endpunkt ist der lokale stdio-Transport implementiert und mit Wiederverbindung getestet. Die [Kompatibilitätsmatrix](docs/compatibility-matrix.md) trennt Protokolltests von noch nicht ausgeführten Hosttests.
+Alle 23 Werkzeuge sind in [Schnittstellen](docs/api.md) beschrieben. Zusätzlich zum HTTP-Endpunkt ist der lokale stdio-Transport implementiert und mit Wiederverbindung getestet. Die [Kompatibilitätsmatrix](docs/compatibility-matrix.md) trennt Protokolltests von noch nicht ausgeführten Hosttests.
 
 ## Entwicklung und Betrieb
 

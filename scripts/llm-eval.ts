@@ -17,7 +17,11 @@ import { SCOPES } from "../packages/policy/index.js";
 import { INSTRUCTIONS } from "../packages/mcp-gateway/tools.js";
 import { REGISTRY_HASH } from "../packages/compiler/index.js";
 import { IMPLEMENTATION_HASH } from "../packages/compiler/build.js";
-import { hash } from "../packages/semantic-ir/hash.js";
+import {
+  ApprovalVerifier,
+  signApproval,
+} from "../packages/policy/approvals.js";
+import { hash, id } from "../packages/semantic-ir/hash.js";
 import { faces } from "../packages/model-service/selections.js";
 
 const root = mkdtempSync(join(tmpdir(), "llcad-llm-eval-"));
@@ -34,7 +38,7 @@ service.call = ((p, name, args) => {
 }) as typeof service.call;
 const p = { tenant: "local", user: "local-user", scopes: SCOPES };
 const cases: any[] = [];
-const expectedCaseCount = 8;
+const expectedCaseCount = 9;
 const moduleDevice = ModelIR.parse({
   schema_version: "1",
   unit: "mm",
@@ -342,11 +346,56 @@ try {
       prompt:
         "Vertiefe im Modulgerät die innere Dichtungsnut des Gehäuses im Wartungsmodul um 20 µm. Das Referenzmodul bleibt unverändert. Erhalte Nutbreite, Bohrungen, Außenmaße und beide Einbaulagen. Prüfe die Restwand und übernimm die Änderung. Löse die Auswahl selbst anhand der Projektstruktur auf.",
     },
+    {
+      name: "Freigegebenes Prüfteil",
+      kind: "shared_project",
+      ir: housing,
+      prompt:
+        "Vertiefe im freigegebenen Prüfteil die innere Dichtungsnut um 20 µm. Prüfe zuvor deinen erlaubten Bearbeitungsumfang. Erhalte Nutbreite, Bohrung und Außenmaße, prüfe die Restwand und übernimm die Änderung innerhalb der bestehenden Freigabe. Erledige alles selbst über die CAD-Werkzeuge.",
+    },
   ];
   assert.equal(fixtures.length, expectedCaseCount);
   const models = [];
   for (const fixture of fixtures) {
-    const model = await importFixture(service, fixture.ir, p);
+    const owner =
+      fixture.kind === "shared_project" ? { ...p, user: "fixture-owner" } : p;
+    const model = await importFixture(service, fixture.ir, owner);
+    if (fixture.kind === "shared_project") {
+      const request = call(
+        service,
+        "cad_access",
+        {
+          mode: "propose",
+          model_id: model.model_id,
+          base_revision: model.revision,
+          change: {
+            action: "grant",
+            grant: {
+              recipient: p.user,
+              role: "editor",
+              can_export: false,
+              edit_scope: {
+                kind: "features",
+                feature_ids: ["feat-groove-07", "feat-hole-01"],
+              },
+              budget: { jobs: 4, seconds_per_job: 45 },
+              expires_at: new Date(Date.now() + 3600000).toISOString(),
+            },
+          },
+          idempotency_key: id("fixture-grant"),
+        },
+        owner,
+      );
+      const audience = new URL("/api/policy/approvals", url).toString();
+      const verifier = new ApprovalVerifier(data, audience);
+      service.store.access.approve(
+        owner,
+        request.approval_request_id,
+        await verifier.verify(
+          await signApproval(data, audience, request, request.action_digest),
+        ),
+      );
+    }
     service.store.run(
       "UPDATE models SET name=? WHERE id=?",
       fixture.name,
@@ -406,7 +455,7 @@ try {
         "The user authorizes candidate creation, validation and commit for requested changes. Ask in natural language only if the intended geometry is actually ambiguous. No manual clicks or user-supplied IDs. Use job polling until completion.",
     });
     assert.ok(
-      Object.keys(inventory.tools).length >= 22,
+      Object.keys(inventory.tools).length >= 23,
       JSON.stringify(inventory),
     );
     const thread = await host.request("thread/read", {
@@ -468,6 +517,7 @@ try {
       );
       const featureId = {
         groove: "feat-groove-07",
+        shared_project: "feat-groove-07",
         diameter: "feat-hole-01",
         single_instance: "occurrence-1",
         local_detail: "organic",
@@ -579,12 +629,15 @@ try {
               original.geometry.facts[fid].geometry_hash,
           );
         } else {
-          const target =
-            fixture.kind === "groove" || fixture.kind === "framed_hierarchy"
-              ? 0.82
-              : fixture.kind === "diameter"
-                ? 2
-                : 2.3;
+          const target = [
+            "groove",
+            "framed_hierarchy",
+            "shared_project",
+          ].includes(fixture.kind)
+            ? 0.82
+            : fixture.kind === "diameter"
+              ? 2
+              : 2.3;
           checks.measurement =
             Math.abs(
               actual.geometry.facts[featureId].dimensions[parameter] - target,
@@ -611,6 +664,19 @@ try {
         "cad_validate",
         "cad_commit",
       ].every((name) => tools.some((t) => t.tool === name));
+      if (fixture.kind === "shared_project") {
+        const access = service.store.access.inspect(p, model.model_id, 0, 8);
+        checks.scoped_shared_project =
+          access.role === "editor" &&
+          access.own_grant?.used_jobs === 2 &&
+          service.store.model(p, model.model_id).owner === "fixture-owner" &&
+          tools.some(
+            (t) => t.tool === "cad_access" && t.arguments.mode === "inspect",
+          ) &&
+          tools.every(
+            (t) => t.tool !== "cad_access" || t.arguments.mode === "inspect",
+          );
+      }
       if (fixture.kind === "groove")
         checks.step_roundtrip = service.store
           .all(
@@ -696,7 +762,7 @@ try {
         model_turns: cases.length,
         browser_interactions: 0,
         scope:
-          "eight_synthetic_local_host_tasks_including_hierarchy_and_local_frames_not_general_or_remote_acceptance",
+          "nine_synthetic_local_host_tasks_including_scoped_shared_project_not_general_or_remote_acceptance",
         cases,
       },
       null,

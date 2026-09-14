@@ -3,6 +3,9 @@
   "type": "object",
   "anyOf": [
     {
+      "$ref": "cad_access.result.schema.json"
+    },
+    {
       "$ref": "cad_capabilities.result.schema.json"
     },
     {

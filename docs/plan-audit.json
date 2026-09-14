@@ -1352,10 +1352,10 @@
         "reports/verification.json",
         "docs/result-contracts.md"
       ],
-      "notes": "22 fachliche Werkzeuge mit strikten Eingängen und eigenen versionierten Ausgangsverträgen, identischen generierten/angekündigten Schemas und beiden strukturierten Protokolladaptern. Laufzeit- und unabhängige SDK-Schemaprüfung tatsächlich serialisierter Integrationsantworten; geschlossene Wurzeln und fachliche Felder, ausdrücklich begrenzte JSON-Metadatendomänen.",
+      "notes": "23 fachliche Werkzeuge mit strikten Eingängen und eigenen versionierten Ausgangsverträgen, identischen generierten/angekündigten Schemas und beiden strukturierten Protokolladaptern. Laufzeit- und unabhängige SDK-Schemaprüfung tatsächlich serialisierter Integrationsantworten; geschlossene Wurzeln und fachliche Felder, ausdrücklich begrenzte JSON-Metadatendomänen.",
       "review": {
         "scope_match": true,
-        "findings": "Originalabschnitt mit fachlichen Aufgaben, Versionierung und structuredContent gegen die 22 Werkzeugdefinitionen und identisch exportierten Verträge geprüft. SDK-Prüfung tatsächlicher Integrationsantworten einschließlich Tupeln/rekursiven Daten besteht. Offene Metadaten sind benannte JSON-Domänen, keine offenen Werkzeugwurzeln."
+        "findings": "Originalabschnitt mit fachlichen Aufgaben, Versionierung und structuredContent gegen die 23 Werkzeugdefinitionen und identisch exportierten Verträge geprüft. SDK-Prüfung tatsächlicher Integrationsantworten einschließlich Tupeln/rekursiven Daten besteht. Offene Metadaten sind benannte JSON-Domänen, keine offenen Werkzeugwurzeln."
       }
     },
     {
@@ -1577,7 +1577,7 @@
         "packages/job-service/index.ts",
         "tests/security/transactions.test.ts"
       ],
-      "notes": "Statisches Pflichtregister, synchrone Prüfungen, Audit und Commit-Outbox sind vorhanden. Vollständige Abdeckung aller Ereignisse und Zeitbudget-/Auditfehler wird mit der Hook-Matrix getrennt geprüft."
+      "notes": "Dynamisches Laden aus Modellen ist ausgeschlossen. Gebundene Zustimmungen für Projektgrants sind separat implementiert; vollständig typisierte unveränderliche Hook-Kontexte und die gesamte aktionsbezogene Freigabematrix bleiben offen."
     },
     {
       "id": "12.2",
@@ -2304,7 +2304,7 @@
         "docs/operating-runbook.md",
         "tests/security/transactions.test.ts"
       ],
-      "notes": "Das lokale Bedrohungsmodell und Negativtests sind vorhanden. Die vollständige Schutzregelabnahme, Projektrollen und reale externe Hostumgebung bleiben gesondert offen."
+      "notes": "Das lokale Bedrohungsmodell, Projektrollen und Negativtests sind vorhanden. Die vollständige Schutzregelabnahme und reale externe Hostumgebung bleiben gesondert offen."
     },
     {
       "id": "18.2",
@@ -2324,7 +2324,7 @@
         "tests/security/transactions.test.ts",
         "tests/security/recovery.test.ts"
       ],
-      "notes": "Strikte ASTs, private Artefakte, isolierte Parser, Blockierung externer Referenzen, Rechte-, Budget- und Wiederherstellungstests sind vorhanden. Breiter nativer Angriffs-/Importkorpus, projektbezogene Freigaben und aktionsgebundene Veröffentlichung fehlen."
+      "notes": "Strikte ASTs, private und aktuell autorisierte Artefakte, isolierte Parser, blockierte externe Referenzen, Projektrollen und Rechte-/Budgettests sind vorhanden. Öffentliche aktionsgebundene Veröffentlichung und breiter nativer Angriffs-/Importkorpus bleiben offen."
     },
     {
       "id": "18.3",
@@ -2342,9 +2342,15 @@
       "evidence": [
         "packages/policy/index.ts",
         "packages/model-service/store.ts",
-        "tests/security/transactions.test.ts"
+        "tests/security/transactions.test.ts",
+        "packages/model-service/access.ts",
+        "packages/policy/approvals.ts",
+        "scripts/approve-project.ts",
+        "tests/security/project-access.test.ts",
+        "tests/security/project-approval.test.ts",
+        "docs/project-access.md"
       ],
-      "notes": "Die aktuelle Grenze ist Mandant plus Eigentümer mit separaten Modell-Scopes. Projektmitgliedschaften, Rollen, Freigabe-/Widerrufsverwaltung und einmalige aktionsgebundene Zustimmungstokens fehlen. Reale Freigaben an Dritte wurden nicht ausgeführt."
+      "notes": "Projektrollen, Modell-/Featuregrenzen, Scope-Schnittmenge, Auftragsbudget, Ablauf, Grant-Ersatz/Widerruf und mit jose signierte einmalige an Akteur/Modell/Basis/Kandidat/Aktion/Empfänger/Budget/Policy/ACL gebundene Zustimmung sind lokal implementiert. Separater vertrauenswürdiger Helper und HTTP-Route, kein MCP-Signierer. Synthetische Sicherheits- und OAuth-HTTP-Tests; keine realen Grants an Dritte. Vertrauliche Teilansichten, externe Weitergabe, Geldkostenfreigaben, Schutzregel-Ausnahmen und reale externe Host-Zustimmungsabnahme bleiben offen."
     },
     {
       "id": "18.4",

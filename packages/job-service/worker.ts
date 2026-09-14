@@ -61,6 +61,21 @@ export class Worker {
     }
   }
   async run(store: Store, tenant: string, request: any) {
+    const seconds = request.policy_budget_seconds ?? LIMITS.job_seconds;
+    const expires = request.policy_expires_at ?? null;
+    requireThat(
+      Number.isInteger(seconds) &&
+        seconds >= 1 &&
+        seconds <= LIMITS.job_seconds,
+      "BUDGET_EXCEEDED",
+      "Ungültiges genehmigtes Workerbudget.",
+    );
+    requireThat(
+      expires === null ||
+        (Number.isSafeInteger(expires) && expires > Date.now()),
+      "ACCESS_DENIED",
+      "Workerfreigabe ist abgelaufen.",
+    );
     requireThat(
       Worker.probe(),
       "SANDBOX_UNAVAILABLE",
@@ -229,10 +244,19 @@ export class Worker {
         child.once("exit", () => this.killGroup(child));
         let errors = "",
           timedOut = false;
-        const timer = setTimeout(() => {
-          timedOut = true;
-          this.killGroup(child);
-        }, LIMITS.job_seconds * 1000);
+        const timer = setTimeout(
+          () => {
+            timedOut = true;
+            this.killGroup(child);
+          },
+          Math.max(
+            0,
+            Math.min(
+              seconds * 1000,
+              expires === null ? Infinity : expires - Date.now(),
+            ),
+          ),
+        );
         this.process.stderr?.on("data", (chunk) => {
           if (errors.length < 4096) errors += chunk.toString();
         });

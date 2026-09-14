@@ -1,6 +1,11 @@
 import { writeFileSync, mkdirSync } from "node:fs";
 import { z } from "zod";
-import { ModelIR, Patch, ToolSchemas } from "../packages/semantic-ir/schema.js";
+import {
+  ModelIR,
+  Patch,
+  ToolSchemas,
+  inputJSONSchema,
+} from "../packages/semantic-ir/schema.js";
 import { OPERATORS, REGISTRY_HASH } from "../packages/compiler/index.js";
 import {
   FailureResponse,
@@ -22,7 +27,9 @@ const schemas: Record<string, unknown> = {
   }),
 };
 for (const [name, schema] of Object.entries(ToolSchemas)) {
-  schemas[name + ".schema.json"] = z.toJSONSchema(schema);
+  schemas[name + ".schema.json"] = inputJSONSchema(
+    name as keyof typeof ToolSchemas,
+  );
   schemas[name + ".result.schema.json"] = outputJSONSchema(
     name as keyof typeof ToolSchemas,
   );

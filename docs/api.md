@@ -7,7 +7,8 @@ Die Eingabeschemas unter `schemas/cad_*.schema.json` und die werkzeugspezifische
 | Werkzeug | Ergebnis und Wirkung |
 |---|---|
 | `cad_capabilities` | Tatsächliche Operatoren, Formate, Limits und Grenzen |
-| `cad_list_models` | Eigene Modelle nach Name/Zweck suchen und seitenweise lesen; keine bekannten Modell-IDs oder Viewer-Bedienung nötig |
+| `cad_list_models` | Eigene und ausdrücklich freigegebene Modelle nach Name/Zweck suchen und seitenweise lesen; keine bekannten Modell-IDs oder Viewer-Bedienung nötig |
+| `cad_access` | Aktuelle Rolle, Feature-Grenze und Budget lesen; als Eigentümer gebundene Grant-/Widerrufsanträge erstellen und ihren Status lesen; gesonderte vertrauenswürdige Bestätigung erforderlich |
 | `cad_create_model` | Privates leeres Modell; eigener Idempotenzschlüssel |
 | `cad_get_model` | Revisionsübersicht mit Buildkompatibilität und Seiten von höchstens 64 Features |
 | `cad_structure` | Versionierte Projekt-, Baugruppen-, Teil- und Rahmenpakete mit Suche, Paging, Definitionen, Ausdehnungen und Strukturhash |
@@ -30,6 +31,8 @@ Die Eingabeschemas unter `schemas/cad_*.schema.json` und die werkzeugspezifische
 | `cad_job_cancel` | Fachlicher Jobabbruch mit Fencing |
 
 Alle mutierenden Modelloperationen verlangen eine exakte Basisrevision und einen 16–128 Zeichen langen Idempotenzschlüssel. Ein Schlüssel darf pro Eigentümer nur für dieselbe normalisierte Operation wiederverwendet werden. Für Planen, Anwenden, Validieren und Committen jeweils unterschiedliche Schlüssel verwenden.
+
+Projektrollen, Budgetreservierungen, Ablauf, Widerruf und den gesonderten Policy-Pfad beschreibt [Projektfreigaben](project-access.md). Die Feature-Grenze betrifft Änderungen; Leserechte umfassen das gesamte Modell einschließlich Historie.
 
 ## Ablauf
 

@@ -88,7 +88,7 @@ test("2026 discovery, tools, metadata, header mismatch, unknown version and unkn
     );
     response = await rpc(env.url, "tools/list");
     json = await response.json();
-    assert.equal(json.result.tools.length, 22);
+    assert.equal(json.result.tools.length, 23);
     assert.equal(
       json.result.tools.find((t: any) => t.name === "cad_render").annotations
         .readOnlyHint,
@@ -138,7 +138,7 @@ test("official legacy SDK initialization, tool schemas and structured result", a
       }),
     );
     const tools = await client.listTools();
-    assert.equal(tools.tools.length, 22);
+    assert.equal(tools.tools.length, 23);
     const result = await client.callTool({
       name: "cad_capabilities",
       arguments: {},

@@ -1,5 +1,5 @@
 import { Store } from "../model-service/store.js";
-import { Principal, authorize } from "../policy/index.js";
+import { Principal } from "../policy/index.js";
 import { Gates } from "../../hooks/server-registry/index.js";
 import { Worker } from "./worker.js";
 import { id, hash } from "../semantic-ir/hash.js";
@@ -37,7 +37,9 @@ export class Jobs {
     kind: string,
     request: any,
     tx?: string,
-  ) {
+  ): any {
+    if (!this.store.db.isTransaction)
+      return this.store.atomic(() => this.enqueue(p, model, kind, request, tx));
     const count = this.store.get(
       "SELECT COUNT(*) AS n FROM jobs WHERE tenant=? AND owner=? AND state IN ('queued','running')",
       p.tenant,
@@ -61,6 +63,7 @@ export class Jobs {
       JSON.stringify(request),
       new Date().toISOString(),
     );
+    this.store.access.reserveJob(p, model, jid, kind);
     this.store.run(
       "INSERT INTO outbox VALUES(?,?,?,0)",
       id("out"),
@@ -79,10 +82,24 @@ export class Jobs {
       recommended_next_actions: ["cad_job_get"],
     };
   }
-  get(p: Principal, jid: string) {
+  authorize(p: Principal, jid: string, cancel = false) {
     const j = this.store.get("SELECT * FROM jobs WHERE id=?", jid);
     requireThat(j, "ACCESS_DENIED", "Job nicht zugänglich.");
-    authorize(p, "model:read", j);
+    const m = this.store.model(
+      p,
+      j.model,
+      cancel ? "model:edit" : "model:read",
+    );
+    if (cancel)
+      requireThat(
+        j.owner === p.user || m.owner === p.user,
+        "ACCESS_DENIED",
+        "Nur Ersteller oder Projekteigentümer können diesen Job abbrechen.",
+      );
+    return j;
+  }
+  get(p: Principal, jid: string) {
+    const j = this.authorize(p, jid);
     const result = {
       job_id: j.id,
       model_id: j.model,
@@ -104,9 +121,7 @@ export class Jobs {
     return result;
   }
   cancel(p: Principal, jid: string) {
-    const j = this.store.get("SELECT * FROM jobs WHERE id=?", jid);
-    requireThat(j, "ACCESS_DENIED", "Job nicht zugänglich.");
-    authorize(p, "model:edit", j);
+    const j = this.authorize(p, jid, true);
     if (["succeeded", "failed", "cancelled"].includes(j.state))
       return this.get(p, jid);
     this.store.run(
@@ -159,12 +174,9 @@ export class Jobs {
         "KERNEL_FAILURE",
         "Wiederholungsbudget für Worker ausgeschöpft.",
       );
+      const authorization = this.store.access.checkJob(job);
       const request = JSON.parse(job.request),
-        p: Principal = {
-          tenant: job.tenant,
-          user: job.owner,
-          scopes: ["model:read", "model:edit"],
-        };
+        p = authorization.principal;
       let result: any;
       if (job.kind === "validate") {
         const tx = this.store.transaction(p, job.tx);
@@ -210,6 +222,8 @@ export class Jobs {
           ...request,
           cache_owner: job.owner,
           cache_model: job.model,
+          policy_budget_seconds: authorization.seconds,
+          policy_expires_at: authorization.expires,
         });
         assertResult(
           NativeWorkerResult,
@@ -233,6 +247,7 @@ export class Jobs {
           job.id,
         );
         if (current?.state !== "running" || current.lease !== lease) return;
+        this.store.access.checkJob(job);
         for (const f of request.plan?.features ?? []) {
           const blob = result.blobs?.[f.cache_key + ".field.json"];
           if (blob)
@@ -543,6 +558,9 @@ export class Jobs {
       await new Promise((r) => setTimeout(r, 30));
     }
     throw new Error("Job wait timeout");
+  }
+  cancelRevoked(jobs: string[]) {
+    if (this.activeID && jobs.includes(this.activeID)) this.active?.cancel();
   }
   async close() {
     this.closed = true;

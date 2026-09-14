@@ -121,8 +121,33 @@ test("imported originals remain hash-bound in private export packages and mismat
         idempotency_key: id("step"),
       }),
     );
-    const original = step.artifacts.find(
+    const derived = step.artifacts.find(
       (a: any) => a.manifest.filename === "model.step",
+    );
+    // Model-bound artifacts cannot silently become another project's source.
+    // Simulate an explicit new private upload of the STEP bytes instead.
+    const original = s.store.artifact(
+      principal,
+      s.store.readBlob(derived.hash),
+      "application/step",
+      null,
+      null,
+      { source: "user_upload" },
+    );
+    const target = call(s, "cad_create_model", {
+      name: "Import boundary",
+      idempotency_key: id("create"),
+    });
+    assert.equal(
+      s.call(principal, "cad_import", {
+        model_id: target.model_id,
+        base_revision: target.revision,
+        artifact_id: derived.artifact_id,
+        source_unit: "mm",
+        format: "step",
+        idempotency_key: id("cross-project"),
+      }).errors[0].code,
+      "OUT_OF_SCOPE",
     );
     const importedIR = {
       schema_version: "1",

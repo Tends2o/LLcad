@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { AccessPayload } from "./access.js";
 import {
   Constraint,
   Feature,
@@ -575,6 +576,7 @@ const plan = z.strictObject({
   committed: z.literal(false),
 });
 export const ToolPayloadSchemas = {
+  cad_access: AccessPayload,
   cad_capabilities: capabilities,
   cad_list_models: z.strictObject({
     models: z.array(

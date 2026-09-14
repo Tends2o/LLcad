@@ -1,14 +1,20 @@
-import { z } from "zod";
-import { ToolSchemas, READ_TOOLS, ToolName } from "../semantic-ir/schema.js";
+import {
+  ToolSchemas,
+  READ_TOOLS,
+  ToolName,
+  inputJSONSchema,
+} from "../semantic-ir/schema.js";
 import { outputJSONSchema } from "../semantic-ir/results.js";
 export const SERVER_INFO = { name: "mathforge-3d", version: "0.1.0" };
 export const INSTRUCTIONS =
-  "Operate CAD entirely through tools; never require the user to click in the viewer. Discover existing private models with cad_list_models and identify features with cad_find and cad_inspect. Read the current revision before editing. Apply a bounded patch, poll its job, validate the candidate, then commit with the returned validation digest. Always preserve units and protected constraints. Resolve genuine ambiguity through semantic tool queries or a short natural-language clarification. Preview is not validation.";
+  "Operate CAD entirely through tools; never require the user to click in the viewer. Discover owned and explicitly shared models with cad_list_models and identify features with cad_find and cad_inspect. Read the current revision before editing. For shared projects, inspect cad_access for the existing role, feature scope and job budget. Grant changes require explicit user authorization through the trusted policy host. Apply a bounded patch, poll its job, validate the candidate, then commit with the returned validation digest. Always preserve units and protected constraints. Resolve genuine ambiguity through semantic tool queries or a short natural-language clarification. Preview is not validation.";
 export const descriptions: Record<ToolName, string> = {
+  cad_access:
+    "Inspect your current role, feature scope and remaining job budget for a model project. Owners can inspect all grants or propose a grant/revocation using the exact current base_revision. Proposals disclose the recipient, permissions, budget and expiry and require a separately authenticated trusted policy confirmation; this tool cannot approve or fabricate confirmation tokens. Read a proposal's state with mode:request. Permission changes invalidate pending work from the previous grant version. Ordinary CAD edits continue through plan, candidate, validate and commit within the existing grant.",
   cad_capabilities:
     "Read implemented operators, formats, precision profiles and resource limits.",
   cad_list_models:
-    "Discover the authenticated user's private models by name or purpose, with bounded pagination. Use this before asking the user for a model ID or viewer interaction.",
+    "Discover the authenticated user's own or explicitly shared model projects by name or purpose, with bounded pagination. cad_access reveals the current role and permitted edit scope. Use discovery before asking the user for a model ID or viewer interaction.",
   cad_create_model:
     "Create an empty, private mathematical model. Add geometry with a candidate patch.",
   cad_get_model:
@@ -54,7 +60,7 @@ export function toolDefinitions() {
     name,
     title: name.replace("cad_", "").replaceAll("_", " "),
     description: descriptions[name as ToolName],
-    inputSchema: z.toJSONSchema(schema),
+    inputSchema: inputJSONSchema(name as ToolName),
     outputSchema: outputJSONSchema(name as ToolName),
     annotations: {
       readOnlyHint: READ_TOOLS.has(name as ToolName) && name !== "cad_measure",

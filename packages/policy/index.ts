@@ -8,11 +8,22 @@ export const SCOPES = [
   "model:edit",
   "model:commit",
   "model:export",
+  "model:publish",
 ];
+export const ROLE_SCOPES = {
+  reader: ["model:read"],
+  designer: ["model:read", "model:edit"],
+  reviewer: ["model:read", "model:commit"],
+  editor: ["model:read", "model:edit", "model:commit"],
+};
 export const POLICY = {
-  version: 1,
+  version: 2,
   scopes: SCOPES,
-  object_acl: "tenant_and_owner",
+  object_acl: "tenant_project_owner_or_current_expiring_grant",
+  project_boundary: "one_model_and_its_versioned_project_structure",
+  roles: ROLE_SCOPES,
+  grant_limits: { jobs: 1000, seconds_per_job: 45, validity_days: 365 },
+  approval_path: "separate_operator_JWS_with_one_time_bound_request",
   mandatory_hooks: true,
   external_publication: false,
   worker_sandbox: "bubblewrap",

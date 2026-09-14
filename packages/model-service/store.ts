@@ -12,13 +12,16 @@ import { bytesHash, hash, id } from "../semantic-ir/hash.js";
 import { requireThat } from "../semantic-ir/errors.js";
 import { Principal, authorize } from "../policy/index.js";
 import { durableBlob, prepareBlobStorage } from "./durable-files.js";
+import { ProjectAccess } from "./access.js";
 
 export class Store {
   db!: DatabaseSync;
   root: string;
   private lock: number;
+  access: ProjectAccess;
   constructor(root: string) {
     this.root = resolve(root);
+    this.access = new ProjectAccess(this);
     const firstCreated = mkdirSync(this.root, { recursive: true, mode: 0o700 });
     mkdirSync(join(this.root, "blobs"), { recursive: true, mode: 0o700 });
     this.lock = openSync(join(this.root, ".store.lock"), "a", 0o600);
@@ -41,7 +44,7 @@ export class Store {
       const version = (this.db.prepare("PRAGMA user_version").get() as any)
         .user_version;
       requireThat(
-        [0, 1, 2, 3, 4].includes(version),
+        [0, 1, 2, 3, 4, 5].includes(version),
         "BUILD_MISMATCH",
         "Unbekannte Datenbankschemaversion; explizite Migration erforderlich.",
       );
@@ -77,6 +80,43 @@ export class Store {
             from_store_version: version,
             to_store_version: 4,
             synchronized_blobs: synchronized,
+          });
+        });
+      if (version < 5)
+        this.atomic(() => {
+          this.db.exec(`
+          CREATE TABLE IF NOT EXISTS model_acl(model TEXT PRIMARY KEY REFERENCES models(id) ON DELETE CASCADE,generation INTEGER NOT NULL);
+          CREATE TABLE IF NOT EXISTS model_grants(id TEXT UNIQUE NOT NULL,model TEXT NOT NULL REFERENCES models(id) ON DELETE CASCADE,tenant TEXT NOT NULL,recipient TEXT NOT NULL,spec TEXT NOT NULL,state TEXT NOT NULL,version INTEGER NOT NULL,expires INTEGER NOT NULL,created TEXT NOT NULL,PRIMARY KEY(model,recipient));
+          CREATE TABLE IF NOT EXISTS approval_requests(id TEXT PRIMARY KEY,tenant TEXT NOT NULL,owner TEXT NOT NULL,model TEXT NOT NULL REFERENCES models(id) ON DELETE CASCADE,proposal TEXT NOT NULL,digest TEXT NOT NULL,state TEXT NOT NULL,expires INTEGER NOT NULL,created TEXT NOT NULL,result TEXT);
+          CREATE TABLE IF NOT EXISTS approval_consumptions(nonce TEXT PRIMARY KEY,request TEXT NOT NULL REFERENCES approval_requests(id) ON DELETE CASCADE,expires INTEGER NOT NULL);
+          CREATE TABLE IF NOT EXISTS job_authorizations(job TEXT PRIMARY KEY REFERENCES jobs(id) ON DELETE CASCADE,grant_id TEXT,grant_version INTEGER,scope TEXT NOT NULL,seconds INTEGER NOT NULL);
+          CREATE TABLE IF NOT EXISTS grant_actions(id TEXT PRIMARY KEY,grant_id TEXT NOT NULL REFERENCES model_grants(id) ON DELETE CASCADE,grant_version INTEGER NOT NULL,kind TEXT NOT NULL);
+          CREATE TABLE IF NOT EXISTS transaction_authorizations(tx TEXT PRIMARY KEY REFERENCES transactions(id) ON DELETE CASCADE,grant_id TEXT,grant_version INTEGER);
+          CREATE TABLE IF NOT EXISTS artifact_models(artifact TEXT NOT NULL REFERENCES artifacts(id) ON DELETE CASCADE,model TEXT NOT NULL REFERENCES models(id) ON DELETE CASCADE,PRIMARY KEY(artifact,model));
+          CREATE INDEX IF NOT EXISTS model_grants_recipient ON model_grants(tenant,recipient,state,expires);
+          CREATE INDEX IF NOT EXISTS job_authorizations_grant ON job_authorizations(grant_id,grant_version);
+          CREATE INDEX IF NOT EXISTS grant_actions_grant ON grant_actions(grant_id,grant_version);
+          CREATE INDEX IF NOT EXISTS transaction_authorizations_grant ON transaction_authorizations(grant_id,grant_version);
+          PRAGMA user_version=5;
+        `);
+          // Existing source uploads become readable only through projects whose
+          // retained revisions already reference them. Do not alter old rows.
+          this.run(`INSERT OR IGNORE INTO artifact_models(artifact,model)
+            SELECT a.id,r.model FROM revisions r JOIN models m ON m.id=r.model,
+            json_each(r.ir,'$.features') f JOIN artifacts a
+              ON a.id=json_extract(f.value,'$.construction.artifact_id')
+            WHERE json_extract(f.value,'$.construction.operator')='imported'
+              AND a.tenant=m.tenant AND a.owner=m.owner
+              AND (a.model IS NULL OR a.model=r.model)`);
+          this.audit("project_access_migrated", {
+            from_store_version: 4,
+            to_store_version: 5,
+            existing_models_kept_private: this.get(
+              "SELECT COUNT(*) AS n FROM models",
+            ).n,
+            existing_source_links: this.get(
+              "SELECT COUNT(*) AS n FROM artifact_models",
+            ).n,
           });
         });
       chmodSync(join(this.root, "models.sqlite"), 0o600);
@@ -169,10 +209,7 @@ export class Store {
     });
   }
   model(p: Principal, model: string, scope = "model:read") {
-    const row = this.get("SELECT * FROM models WHERE id=?", model);
-    requireThat(row, "ACCESS_DENIED", "Modell nicht zugänglich.");
-    authorize(p, scope, row);
-    return row;
+    return this.access.context(p, model, scope).model;
   }
   revision(p: Principal, model: string, revision?: string) {
     const m = this.model(p, model);
@@ -191,7 +228,7 @@ export class Store {
   transaction(p: Principal, tx: string) {
     const row = this.get("SELECT * FROM transactions WHERE id=?", tx);
     requireThat(row, "ACCESS_DENIED", "Kandidat nicht zugänglich.");
-    authorize(p, "model:read", row);
+    this.model(p, row.model);
     return {
       ...row,
       plan: JSON.parse(row.plan),
@@ -239,6 +276,8 @@ export class Store {
     revision: string | null,
     manifest: Record<string, unknown>,
   ) {
+    authorize(p, "model:read");
+    if (model) this.model(p, model);
     const h = this.blob(data),
       aid = id("art");
     this.run(
@@ -267,8 +306,48 @@ export class Store {
   getArtifact(p: Principal, aid: string) {
     const row = this.get("SELECT * FROM artifacts WHERE id=?", aid);
     requireThat(row, "ACCESS_DENIED", "Artefakt nicht zugänglich.");
-    authorize(p, "model:read", row);
+    authorize(p, "model:read");
+    requireThat(
+      row.tenant === p.tenant,
+      "ACCESS_DENIED",
+      "Artefakt nicht zugänglich.",
+    );
+    if (row.model) this.model(p, row.model);
+    else if (row.owner !== p.user) {
+      const visible = this.access.visible(p, "m");
+      requireThat(
+        this.get(
+          "SELECT 1 FROM artifact_models a JOIN models m ON m.id=a.model WHERE a.artifact=? AND " +
+            visible.sql,
+          aid,
+          ...visible.params,
+        ),
+        "ACCESS_DENIED",
+        "Artefakt nicht zugänglich.",
+      );
+    }
     return { ...row, manifest: JSON.parse(row.manifest) };
+  }
+  bindArtifact(p: Principal, aid: string, model: string) {
+    const artifact = this.getArtifact(p, aid);
+    this.model(p, model, "model:edit");
+    requireThat(
+      !artifact.model || artifact.model === model,
+      "OUT_OF_SCOPE",
+      "Abgeleitete Artefakte eines anderen Projekts dürfen nicht still geteilt werden.",
+    );
+    requireThat(
+      artifact.owner === p.user ||
+        artifact.model === model ||
+        this.get(
+          "SELECT 1 FROM artifact_models WHERE artifact=? AND model=?",
+          aid,
+          model,
+        ),
+      "NEEDS_APPROVAL",
+      "Quelldatei ist nicht für dieses Projekt freigegeben.",
+    );
+    this.run("INSERT OR IGNORE INTO artifact_models VALUES(?,?)", aid, model);
   }
   close() {
     this.db.close();

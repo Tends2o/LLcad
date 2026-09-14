@@ -58,6 +58,7 @@ export class ModelService {
     this.store = new Store(root);
     this.gates = new Gates((event, data) => this.store.audit(event, data));
     this.jobs = new Jobs(this.store, this.gates);
+    this.store.access.onRevoked = (jobs) => this.jobs.cancelRevoked(jobs);
   }
   async close() {
     await this.jobs.close();
@@ -81,6 +82,16 @@ export class ModelService {
       this.gates.run("before_request", { trace_id: trace, tool });
       const args: any = parse(ToolSchemas[tool], input);
       if (args.model_id) this.store.model(p, args.model_id, scopeFor(tool));
+      if (tool === "cad_access" && args.mode !== "inspect")
+        this.store.access.context(p, args.model_id, "model:publish");
+      if (args.transaction_id) {
+        const tx = this.store.transaction(p, args.transaction_id);
+        if (["cad_validate", "cad_commit"].includes(tool))
+          this.store.access.checkTransaction(tx);
+      }
+      if (args.job_id)
+        this.jobs.authorize(p, args.job_id, tool === "cad_job_cancel");
+      if (args.artifact_id) this.store.getArtifact(p, args.artifact_id);
       const run = () => this.dispatch(p, tool, args);
       let response: any;
       const check = (result: any) => {
@@ -98,6 +109,20 @@ export class ModelService {
               "Antwort ist an ein anderes Ziel gebunden.",
               { contract: tool },
             );
+        if (result.model_id)
+          this.store.model(p, result.model_id, scopeFor(tool));
+        if (
+          result.transaction_id &&
+          [
+            "cad_apply_patch",
+            "cad_import",
+            "cad_revert",
+            "cad_rebuild",
+          ].includes(tool)
+        ) {
+          const tx = this.store.transaction(p, result.transaction_id);
+          if (tx.state !== "committed") this.store.access.checkTransaction(tx);
+        }
       };
       if (args.idempotency_key)
         this.store.dedupe(p, args.idempotency_key, { tool, args }, run, check);
@@ -187,9 +212,11 @@ export class ModelService {
     return plan;
   }
   candidate(p: Principal, a: any, plan: any) {
+    const base = this.store.revision(p, a.model_id, a.base_revision);
+    this.store.access.checkEdit(p, a.model_id, base.ir, plan);
     for (const f of plan.features)
       if (f.construction.operator === "imported")
-        this.store.getArtifact(p, f.construction.artifact_id);
+        this.store.bindArtifact(p, f.construction.artifact_id, a.model_id);
     const tx = id("tx"),
       candidate = id("candidate");
     this.store.run(
@@ -203,6 +230,7 @@ export class ModelService {
       "planned",
       JSON.stringify(plan),
     );
+    this.store.access.bindTransaction(p, a.model_id, tx);
     return {
       ...this.jobs.enqueue(
         p,
@@ -231,10 +259,17 @@ export class ModelService {
   }
   dispatch(p: Principal, tool: ToolName, a: any): any {
     switch (tool) {
+      case "cad_access":
+        if (a.mode === "inspect")
+          return this.store.access.inspect(p, a.model_id, a.offset, a.limit);
+        if (a.mode === "propose") return this.store.access.propose(p, a);
+        return this.store.access.request(p, a.model_id, a.approval_request_id);
       case "cad_list_models": {
+        const visible = this.store.access.visible(p);
         const where =
-          "tenant=? AND owner=? AND instr(lower(name || ' ' || purpose), lower(?)) > 0";
-        const parameters = [p.tenant, p.user, a.query];
+          visible.sql +
+          " AND instr(lower(name || ' ' || purpose), lower(?)) > 0";
+        const parameters = [...visible.params, a.query];
         const total = this.store.get(
           "SELECT COUNT(*) AS n FROM models WHERE " + where,
           ...parameters,
@@ -951,6 +986,7 @@ export class ModelService {
       case "cad_validate": {
         this.mustFresh(p, a);
         const tx = this.bindTx(p, a);
+        this.store.access.checkTransaction(tx);
         requireThat(
           tx.plan.registry_hash === REGISTRY_HASH,
           "BUILD_MISMATCH",
@@ -977,9 +1013,11 @@ export class ModelService {
       }
       case "cad_commit": {
         const tx = this.bindTx(p, a);
+        this.store.access.checkTransaction(tx);
+        this.store.access.checkEditForCommit(p, tx);
         this.mustFresh(p, a);
         this.gates.run("before_commit", { transaction_id: tx.id }, () => {
-          authorize(p, "model:commit", this.store.model(p, a.model_id));
+          this.store.model(p, a.model_id, "model:commit");
           requireThat(
             tx.state === "validated" &&
               tx.validation?.status === "checks_passed_within_profile",
@@ -1056,6 +1094,12 @@ export class ModelService {
       case "cad_discard": {
         const tx = this.bindTx(p, a);
         requireThat(
+          tx.owner === p.user ||
+            this.store.model(p, a.model_id).owner === p.user,
+          "ACCESS_DENIED",
+          "Nur Ersteller oder Projekteigentümer können diesen Kandidaten verwerfen.",
+        );
+        requireThat(
           tx.state !== "committed",
           "CONSTRAINT_CONFLICT",
           "Übernommene Revisionen können nicht verworfen werden.",
@@ -1073,6 +1117,17 @@ export class ModelService {
       }
       case "cad_rebuild": {
         const base = this.mustFresh(p, a);
+        const permission = this.store.access.context(
+          p,
+          a.model_id,
+          "model:edit",
+        );
+        requireThat(
+          !permission.grant ||
+            permission.grant.spec.edit_scope.kind === "model",
+          "NEEDS_APPROVAL",
+          "Neuberechnung benötigt eine Freigabe für das gesamte Projekt.",
+        );
         requireThat(
           a.target_registry_hash === REGISTRY_HASH,
           "BUILD_MISMATCH",
@@ -1168,6 +1223,7 @@ export class ModelService {
           artifact_id: a.artifact_id,
         });
         const artifact = this.store.getArtifact(p, a.artifact_id);
+        this.store.bindArtifact(p, a.artifact_id, a.model_id);
         const data = this.store.readBlob(artifact.hash);
         requireThat(
           data.length <= LIMITS.max_artifact_bytes,
@@ -1286,6 +1342,7 @@ export class ModelService {
         });
         if (a.format === "ir") {
           const serialized = JSON.stringify(r.ir, null, 2);
+          this.store.access.reserveIRExport(p, a.model_id);
           const restored = compile(JSON.parse(serialized));
           requireThat(
             hash(restored.ir) === hash(r.ir),

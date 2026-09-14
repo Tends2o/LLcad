@@ -15,10 +15,10 @@ export function exportPackage(
   format: string,
 ) {
   const row = store.get(
-    "SELECT validation,plan FROM transactions WHERE committed_revision=? AND tenant=? AND owner=? AND state='committed'",
+    "SELECT validation,plan FROM transactions WHERE committed_revision=? AND model=? AND tenant=? AND state='committed'",
     revision.id,
+    revision.model,
     p.tenant,
-    p.user,
   );
   requireThat(
     row,

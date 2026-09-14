@@ -127,6 +127,7 @@ export function resolveSelection(
     );
     requireThat(h, "AMBIGUOUS_SELECTION", "Auswahl ist nicht verfügbar.");
     authorize(p, "model:read", h);
+    store.model(p, h.model);
     requireThat(
       h.model === args.model_id && h.expires > Date.now(),
       "STALE_REVISION",

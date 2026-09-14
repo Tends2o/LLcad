@@ -37,7 +37,7 @@ test("local MCP starts without an HTTP service, browser login or token prompt an
           client.getInstructions() ?? "",
           /never require the user to click/i,
         );
-        assert.equal((await client.listTools()).tools.length, 22);
+        assert.equal((await client.listTools()).tools.length, 23);
         if (pass === 0) {
           const created = await client.callTool({
             name: "cad_create_model",
