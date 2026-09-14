@@ -7,6 +7,7 @@ import { patchContinuity } from "../compiler/patches.js";
 import { Decimal } from "decimal.js";
 import { equationValues, checkEquation } from "../compiler/constraints.js";
 import { sameFieldInRegion } from "../compiler/field-regions.js";
+import { compileStructure } from "../compiler/structure.js";
 type Check = {
   check_id: string;
   target: string;
@@ -264,6 +265,13 @@ export function validate(
     } else if (c.kind === "protected_region") {
       const old = baseIR.features.find((x) => x.id === f.id);
       let proven = !old;
+      const oldFrames = compileStructure(baseIR).placements,
+        newFrames = compileStructure(ir).placements;
+      const regionFrame = c.local_frame ?? "world";
+      const sameFrame =
+        !!old &&
+        old.local_frame === f.local_frame &&
+        oldFrames[old.local_frame].hash === newFrames[f.local_frame].hash;
       if (
         old &&
         f.construction.operator === "field" &&
@@ -273,12 +281,17 @@ export function validate(
           hash(f.construction.domain) === hash(old.construction.domain);
         proven =
           sameDomain &&
+          sameFrame &&
+          f.local_frame === regionFrame &&
           sameFieldInRegion(
             old.construction.expression,
             f.construction.expression,
             c,
           );
-      } else if (old) proven = hash(old) === hash(f);
+      } else if (old)
+        proven =
+          !!baseResult?.facts?.[f.id] &&
+          baseResult.facts[f.id].geometry_hash === fact?.geometry_hash;
       add(
         c.id,
         f.id,
@@ -307,11 +320,17 @@ export function validate(
   return { ...body, digest: hash(body) };
 }
 export function compare(before: ModelIR, after: ModelIR, bg: any, ag: any) {
+  const oldFrames = compileStructure(before).placements,
+    newFrames = compileStructure(after).placements;
   return {
+    structure_changed:
+      hash(before.structure ?? null) !== hash(after.structure ?? null),
     changed_features: after.features
       .filter(
         (f) =>
-          hash(f) !== hash(before.features.find((x) => x.id === f.id) ?? null),
+          hash(f) !==
+            hash(before.features.find((x) => x.id === f.id) ?? null) ||
+          oldFrames[f.local_frame]?.hash !== newFrames[f.local_frame]?.hash,
       )
       .map((f) => f.id),
     removed_features: before.features

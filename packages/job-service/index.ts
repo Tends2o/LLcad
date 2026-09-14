@@ -239,22 +239,27 @@ export class Jobs {
             tx.id,
           );
           for (const f of request.plan.features) {
-            const blob = result.blobs[f.cache_key + ".brep"];
-            if (blob)
-              this.store.run(
-                "INSERT OR IGNORE INTO cache VALUES(?,?,?)",
-                job.tenant,
-                f.cache_key,
-                blob,
-              );
-            const topology = result.blobs[f.cache_key + ".topology.json"];
-            if (topology)
-              this.store.run(
-                "INSERT OR IGNORE INTO cache VALUES(?,?,?)",
-                job.tenant,
-                f.cache_key + ":topology",
-                topology,
-              );
+            for (const key of new Set<string>([
+              f.cache_key,
+              f.local_cache_key ?? f.cache_key,
+            ])) {
+              const blob = result.blobs[key + ".brep"];
+              if (blob)
+                this.store.run(
+                  "INSERT OR IGNORE INTO cache VALUES(?,?,?)",
+                  job.tenant,
+                  key,
+                  blob,
+                );
+              const topology = result.blobs[key + ".topology.json"];
+              if (topology)
+                this.store.run(
+                  "INSERT OR IGNORE INTO cache VALUES(?,?,?)",
+                  job.tenant,
+                  key + ":topology",
+                  topology,
+                );
+            }
           }
           result = {
             status: "candidate_ready",

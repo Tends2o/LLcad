@@ -9,6 +9,7 @@ import { equationValues, checkEquation } from "./constraints.js";
 import { validateBasis, validateSurface, refineSurface } from "./nurbs.js";
 import * as Rational from "./bernstein.js";
 import { affineContract } from "./affine.js";
+import { compileStructure, contextHash } from "./structure.js";
 type Param = {
   dimension: "length" | "angle" | "scalar";
   min?: number;
@@ -407,6 +408,7 @@ function fieldContractNode(
 export function compile(input: unknown) {
   checkDepth(input);
   const ir = parse<ModelIR>(ModelIR, input);
+  const structure = compileStructure(ir);
   const map = new Map<string, Feature>();
   let instances = 0;
   const expanded = new Map<string, number>();
@@ -431,11 +433,6 @@ export function compile(input: unknown) {
     f.depends_on.forEach(visit);
     const name = f.construction.operator,
       contract = OPERATORS[name];
-    requireThat(
-      f.local_frame === "world",
-      "OUT_OF_SCOPE",
-      "Nur explizite Weltkoordinaten werden in Schema 1 unterstützt.",
-    );
     requireThat(
       f.depends_on.length >= contract.refs[0] &&
         f.depends_on.length <= contract.refs[1],
@@ -680,10 +677,21 @@ export function compile(input: unknown) {
     hashes[f.id] = hash({
       registry: REGISTRY_HASH,
       feature: f,
+      frame: structure.placements[f.local_frame].hash,
       inputs: f.depends_on.map((d) => hashes[d]),
       tolerance: ir.tolerance,
     });
-    compiled.push({ ...f, values, cache_key: hashes[f.id], field });
+    compiled.push({
+      ...f,
+      values,
+      cache_key: hashes[f.id],
+      local_cache_key:
+        f.local_frame === "world"
+          ? hashes[f.id]
+          : hash([hashes[f.id], "local"]),
+      placement: structure.placements[f.local_frame],
+      field,
+    });
     visiting.delete(fid);
     visited.add(fid);
   }
@@ -698,6 +706,19 @@ export function compile(input: unknown) {
     "Zu viele exakte Patchanschlussprüfungen.",
   );
   for (const c of ir.constraints) {
+    if (c.kind === "protected_region")
+      requireThat(
+        Object.hasOwn(structure.placements, c.local_frame ?? "world"),
+        "INVALID_SCHEMA",
+        "Unbekannter Rahmen der Schutzregion.",
+      );
+    if (c.kind === "patch_continuity")
+      requireThat(
+        map.get(c.feature_id)?.local_frame ===
+          map.get(c.neighbor_feature_id)?.local_frame,
+        "OUT_OF_SCOPE",
+        "Patchanschluss benötigt einen gemeinsamen expliziten Bezugsrahmen.",
+      );
     if (c.kind === "equation") checkEquation(c, equationValues(ir, c.bindings));
     requireThat(
       map.has(c.feature_id),
@@ -781,6 +802,8 @@ export function compile(input: unknown) {
     tolerance,
     profile: ir.profile,
     registry_hash: REGISTRY_HASH,
+    structure_hash: structure.structure_hash,
+    structure: structure.structure,
     estimate: {
       features: compiled.length,
       instances,
@@ -796,6 +819,15 @@ export function applyPatch(base: ModelIR, patch: Patch) {
     report: ReturnType<typeof refineSurface>["report"];
   }[] = [];
   for (const op of patch.operations) {
+    if (op.op === "set_structure") {
+      requireThat(
+        hash(ir.structure ?? null) === op.expected_hash,
+        "STALE_REVISION",
+        "Die Projektstruktur wurde bereits geändert.",
+      );
+      ir.structure = op.structure;
+      continue;
+    }
     if (op.op === "add_feature") {
       requireThat(
         !ir.features.some((f) => f.id === op.feature.id),
@@ -822,7 +854,15 @@ export function applyPatch(base: ModelIR, patch: Patch) {
     }
     const f = ir.features.find((f) => f.id === op.feature_id);
     requireThat(f, "AMBIGUOUS_SELECTION", "Feature nicht eindeutig auflösbar.");
-    if (op.op === "set_pattern_occurrence") {
+    if (op.op === "set_feature_context") {
+      requireThat(
+        contextHash(f) === op.expected_hash,
+        "STALE_REVISION",
+        "Der Featurekontext wurde bereits geändert.",
+      );
+      f.owner_part = op.owner_part;
+      f.local_frame = op.local_frame;
+    } else if (op.op === "set_pattern_occurrence") {
       requireThat(
         f.construction.operator === "pattern" ||
           f.construction.operator === "circular_pattern",
@@ -1010,9 +1050,14 @@ export function applyPatch(base: ModelIR, patch: Patch) {
     changed.add(f.id);
   }
   const plan = compile(ir);
+  const previous = compile(base);
   const dirty = new Set(changed);
   for (const f of plan.features)
-    if (f.depends_on.some((d: string) => dirty.has(d))) dirty.add(f.id);
+    if (
+      previous.hashes[f.id] !== plan.hashes[f.id] ||
+      f.depends_on.some((d: string) => dirty.has(d))
+    )
+      dirty.add(f.id);
   for (const c of base.constraints) {
     if (c.kind === "protected_parameter") {
       const before = base.features.find((f) => f.id === c.feature_id)!,

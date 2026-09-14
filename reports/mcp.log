@@ -2,4 +2,4 @@
 > mathforge-3d@0.1.0 test:mcp
 > tsx scripts/mcp-workflow.ts
 
-MCP workflow passed: 43 tool calls, zero browser interactions, STEP export verified.
+MCP workflow passed: 42 tool calls, zero browser interactions, STEP export verified.

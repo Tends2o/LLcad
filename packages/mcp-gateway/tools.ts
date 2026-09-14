@@ -12,6 +12,8 @@ export const descriptions: Record<ToolName, string> = {
     "Create an empty, private mathematical model. Add geometry with a candidate patch.",
   cad_get_model:
     "Read a revision summary, feature page, quality status and geometric measurements.",
+  cad_structure:
+    "Discover versioned project, assembly, part and frame summaries. Page by kind, optionally filter by entity_id or query. Includes structural definitions, their shared structure_hash, world bounds and provenance. Use cad_find with owner_part to locate that part's features. Edit structure through a normal set_structure candidate patch using the returned hash; feature ownership/frame changes use set_feature_context and the context_hash from cad_inspect.",
   cad_find:
     "Find semantic features in an exact revision. Multiple results require an explicit selection.",
   cad_inspect:

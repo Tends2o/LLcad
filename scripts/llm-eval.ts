@@ -34,7 +34,76 @@ service.call = ((p, name, args) => {
 }) as typeof service.call;
 const p = { tenant: "local", user: "local-user", scopes: SCOPES };
 const cases: any[] = [];
-const expectedCaseCount = 7;
+const expectedCaseCount = 8;
+const moduleDevice = ModelIR.parse({
+  schema_version: "1",
+  unit: "mm",
+  features: ["a", "b"].flatMap((module) =>
+    housing.features.map((f) => ({
+      ...f,
+      id: `module-${module}-${f.id}`,
+      owner_part: `part-${module}`,
+      local_frame: `frame-${module}`,
+      depends_on: f.depends_on.map((id) => `module-${module}-${id}`),
+    })),
+  ),
+  outputs: ["module-a-feat-hole-01", "module-b-feat-hole-01"],
+  constraints: [
+    ...["a", "b"].flatMap((module) =>
+      housing.constraints.map((c) => ({
+        ...c,
+        id: `module-${module}-${c.id}`,
+        feature_id: `module-${module}-${c.feature_id}`,
+      })),
+    ),
+    ...housing.features.map((f) => ({
+      id: `reference-${f.id}`,
+      kind: "protected_feature",
+      feature_id: `module-a-${f.id}`,
+    })),
+  ],
+  structure: {
+    project: { id: "project-device", semantic_name: "Modulgerät" },
+    frames: [
+      {
+        id: "frame-a",
+        semantic_name: "Referenzlage",
+        parent: "world",
+        translation: ["-50", "0", "0"],
+        axis: ["0", "0", "1"],
+        angle: { value: "0", unit: "deg" },
+      },
+      {
+        id: "frame-b",
+        semantic_name: "Wartungslage",
+        parent: "world",
+        translation: ["1000", "-500", "20"],
+        axis: ["1", "1", "1"],
+        angle: { value: "60", unit: "deg" },
+      },
+    ],
+    assemblies: [
+      {
+        id: "assembly-a",
+        semantic_name: "Referenzmodul",
+        local_frame: "frame-a",
+      },
+      {
+        id: "assembly-b",
+        semantic_name: "Wartungsmodul",
+        local_frame: "frame-b",
+      },
+    ],
+    parts: ["a", "b"].map((module) => ({
+      id: `part-${module}`,
+      semantic_name: "Gehäuse",
+      assembly: `assembly-${module}`,
+      local_frame: `frame-${module}`,
+      authoritative_representation: "brep",
+      outputs: [`module-${module}-feat-hole-01`],
+    })),
+  },
+});
 let server: any, host: CodexHostClient | undefined;
 try {
   // Bind first so Auth's exact Host allowlist receives the assigned port.
@@ -266,6 +335,13 @@ try {
       prompt:
         "Verschiebe in der Kugelanordnung nur die Kugel auf der positiven Y-Achse um 2 mm nach oben in positiver Z-Richtung. Die anderen drei Kugeln und alle Kugelradien bleiben erhalten. Prüfe und übernimm die Änderung. Erledige die Auswahl selbst anhand des Modells.",
     },
+    {
+      name: "Modulgerät",
+      kind: "framed_hierarchy",
+      ir: moduleDevice,
+      prompt:
+        "Vertiefe im Modulgerät die innere Dichtungsnut des Gehäuses im Wartungsmodul um 20 µm. Das Referenzmodul bleibt unverändert. Erhalte Nutbreite, Bohrungen, Außenmaße und beide Einbaulagen. Prüfe die Restwand und übernimm die Änderung. Löse die Auswahl selbst anhand der Projektstruktur auf.",
+    },
   ];
   assert.equal(fixtures.length, expectedCaseCount);
   const models = [];
@@ -397,6 +473,7 @@ try {
         local_detail: "organic",
         new_combination: "fixture-pocket",
         circular_occurrence: "ball-ring",
+        framed_hierarchy: "module-b-feat-groove-07",
       }[fixture.kind]!;
       const modified = actual.ir.features.find((f: any) => f.id === featureId);
       checks.committed =
@@ -503,7 +580,7 @@ try {
           );
         } else {
           const target =
-            fixture.kind === "groove"
+            fixture.kind === "groove" || fixture.kind === "framed_hierarchy"
               ? 0.82
               : fixture.kind === "diameter"
                 ? 2
@@ -516,6 +593,18 @@ try {
       }
       checks.only_requested_parameter_changed =
         hash(preserved) === hash(original.ir);
+      if (fixture.kind === "framed_hierarchy") {
+        checks.hierarchy_discovered = tools.some(
+          (t) => t.tool === "cad_structure",
+        );
+        checks.local_measurement =
+          actual.geometry.facts[featureId].dimension_frame === "frame-b";
+        checks.reference_unchanged = housing.features.every(
+          (f) =>
+            actual.geometry.facts[`module-a-${f.id}`].geometry_hash ===
+            original.geometry.facts[`module-a-${f.id}`].geometry_hash,
+        );
+      }
       checks.required_tools = [
         "cad_inspect",
         "cad_apply_patch",
@@ -607,7 +696,7 @@ try {
         model_turns: cases.length,
         browser_interactions: 0,
         scope:
-          "seven_synthetic_local_host_tasks_including_circular_occurrence_selection_not_general_or_remote_acceptance",
+          "eight_synthetic_local_host_tasks_including_hierarchy_and_local_frames_not_general_or_remote_acceptance",
         cases,
       },
       null,

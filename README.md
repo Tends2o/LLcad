@@ -60,6 +60,7 @@ npm start
 - Ausdrückliche Neuberechnung nach einem Buildwechsel mit `cad_rebuild`, vollständiger Prüfung und unveränderten alten Revisionen.
 - Dauerhafte SQLite-Revisionen, isolierte Kandidaten, Inhaltscache, Jobs mit Fencing, Idempotenz, Pflichtprüfungen, Compare-and-Swap und Audit-/Outbox-Verarbeitung.
 - Authentifizierung und objektbezogene Eigentümerprüfung für Modelle, Jobs, Auswahlen, Ressourcen und Dateien.
+- Versionierte Projekte, Baugruppen und Teile, getrennte geometrische Hoheiten und hierarchische lokale Bezugsrahmen; LLM-Abfragen über `cad_structure`.
 - Native Flächenherkunft für registrierte Primitive, boolesche Operationen, Nut/Bohrung/Tasche, Transformationen und Instanzen; gespeicherte Flächenhandles und ausdrückliche eindeutige Neuzuordnung. Teilungen, Zusammenführungen und unbekannte Herkunft werden sicher abgewiesen.
 - Dauerhafte faire Jobverteilung zwischen Nutzern, Offline-Betriebssperre, geprüfter Backup-/Restorepfad und mandantenbezogene Löschung des aktiven Datenspeichers.
 - IR-/STEP-/STL-Import sowie IR-, STEP-, B-Rep-, STL-, GLB- und OpenVDB-Export mit erneuter Prüfung. Mesh- und Feldvorschauen behalten ihren ausdrücklich begrenzten Nachweisstatus.
@@ -88,7 +89,7 @@ Getrennt implementiert und lokal getestet:
 | `2025-03-26`, `2025-06-18`, `2025-11-25` | Offizielles TypeScript-SDK 1.30.0 mit `initialize`, Versionsaushandlung und Streamable HTTP |
 | `2026-07-28` | Separater Adapter mit `server/discover`, erforderlichen Anfrage-Metadaten, Header-Abgleich und `resultType` |
 
-Alle 21 Werkzeuge sind in [Schnittstellen](docs/api.md) beschrieben. Zusätzlich zum HTTP-Endpunkt ist der lokale stdio-Transport implementiert und mit Wiederverbindung getestet. Die [Kompatibilitätsmatrix](docs/compatibility-matrix.md) trennt Protokolltests von noch nicht ausgeführten Hosttests.
+Alle 22 Werkzeuge sind in [Schnittstellen](docs/api.md) beschrieben. Zusätzlich zum HTTP-Endpunkt ist der lokale stdio-Transport implementiert und mit Wiederverbindung getestet. Die [Kompatibilitätsmatrix](docs/compatibility-matrix.md) trennt Protokolltests von noch nicht ausgeführten Hosttests.
 
 ## Entwicklung und Betrieb
 

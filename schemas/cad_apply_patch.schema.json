@@ -26,6 +26,385 @@
             "properties": {
               "op": {
                 "type": "string",
+                "const": "set_structure"
+              },
+              "expected_hash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "structure": {
+                "type": "object",
+                "properties": {
+                  "project": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+                      },
+                      "semantic_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "purpose": {
+                        "type": "object",
+                        "properties": {
+                          "value": {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "user_declared",
+                              "imported",
+                              "hypothesis",
+                              "measured"
+                            ]
+                          },
+                          "evidence_id": {
+                            "type": "string",
+                            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+                          }
+                        },
+                        "required": [
+                          "value",
+                          "status"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "semantic_name"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "frames": {
+                    "maxItems": 128,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+                        },
+                        "semantic_name": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        },
+                        "purpose": {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "string",
+                              "maxLength": 1000
+                            },
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "user_declared",
+                                "imported",
+                                "hypothesis",
+                                "measured"
+                              ]
+                            },
+                            "evidence_id": {
+                              "type": "string",
+                              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+                            }
+                          },
+                          "required": [
+                            "value",
+                            "status"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "parent": {
+                          "default": "world",
+                          "type": "string",
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+                        },
+                        "translation": {
+                          "type": "array",
+                          "prefixItems": [
+                            {
+                              "type": "string",
+                              "maxLength": 48,
+                              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                            },
+                            {
+                              "type": "string",
+                              "maxLength": 48,
+                              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                            },
+                            {
+                              "type": "string",
+                              "maxLength": 48,
+                              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                            }
+                          ],
+                          "items": false,
+                          "minItems": 3,
+                          "maxItems": 3
+                        },
+                        "axis": {
+                          "type": "array",
+                          "prefixItems": [
+                            {
+                              "type": "string",
+                              "maxLength": 48,
+                              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                            },
+                            {
+                              "type": "string",
+                              "maxLength": 48,
+                              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                            },
+                            {
+                              "type": "string",
+                              "maxLength": 48,
+                              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                            }
+                          ],
+                          "items": false,
+                          "minItems": 3,
+                          "maxItems": 3
+                        },
+                        "angle": {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "string",
+                              "maxLength": 48,
+                              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                            },
+                            "unit": {
+                              "type": "string",
+                              "enum": [
+                                "1",
+                                "m",
+                                "mm",
+                                "um",
+                                "rad",
+                                "deg"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "value",
+                            "unit"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "semantic_name",
+                        "parent",
+                        "translation",
+                        "axis",
+                        "angle"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "assemblies": {
+                    "maxItems": 64,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+                        },
+                        "semantic_name": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        },
+                        "purpose": {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "string",
+                              "maxLength": 1000
+                            },
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "user_declared",
+                                "imported",
+                                "hypothesis",
+                                "measured"
+                              ]
+                            },
+                            "evidence_id": {
+                              "type": "string",
+                              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+                            }
+                          },
+                          "required": [
+                            "value",
+                            "status"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "parent_assembly": {
+                          "type": "string",
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+                        },
+                        "local_frame": {
+                          "default": "world",
+                          "type": "string",
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "semantic_name",
+                        "local_frame"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "parts": {
+                    "maxItems": 128,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+                        },
+                        "semantic_name": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        },
+                        "purpose": {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "string",
+                              "maxLength": 1000
+                            },
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "user_declared",
+                                "imported",
+                                "hypothesis",
+                                "measured"
+                              ]
+                            },
+                            "evidence_id": {
+                              "type": "string",
+                              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+                            }
+                          },
+                          "required": [
+                            "value",
+                            "status"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "assembly": {
+                          "type": "string",
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+                        },
+                        "local_frame": {
+                          "default": "world",
+                          "type": "string",
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+                        },
+                        "authoritative_representation": {
+                          "type": "string",
+                          "enum": [
+                            "brep",
+                            "implicit",
+                            "mesh"
+                          ]
+                        },
+                        "outputs": {
+                          "maxItems": 128,
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "semantic_name",
+                        "local_frame",
+                        "authoritative_representation",
+                        "outputs"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "project",
+                  "frames",
+                  "assemblies",
+                  "parts"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "op",
+              "expected_hash",
+              "structure"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "op": {
+                "type": "string",
+                "const": "set_feature_context"
+              },
+              "feature_id": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+              },
+              "expected_hash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "owner_part": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+              },
+              "local_frame": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+              }
+            },
+            "required": [
+              "op",
+              "feature_id",
+              "expected_hash",
+              "owner_part",
+              "local_frame"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "op": {
+                "type": "string",
                 "const": "set_pattern_occurrence"
               },
               "feature_id": {
@@ -3593,6 +3972,10 @@
                         "const": "protected_region"
                       },
                       "feature_id": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+                      },
+                      "local_frame": {
                         "type": "string",
                         "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
                       },

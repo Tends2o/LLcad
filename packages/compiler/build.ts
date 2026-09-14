@@ -5,6 +5,7 @@ const root = resolve(process.env.MATHFORGE_ROOT ?? process.cwd());
 /** Cache/proof identity includes actual worker source and locked native dependencies. */
 const buildFiles = [
   "workers/cad-occt/geometry.py",
+  "workers/cad-occt/frames.py",
   "workers/cad-occt/advanced.py",
   "workers/cad-occt/analysis.py",
   "workers/cad-occt/solver.py",
@@ -23,6 +24,7 @@ const buildFiles = [
   "packages/compiler/nurbs.ts",
   "packages/compiler/affine.ts",
   "packages/compiler/field-regions.ts",
+  "packages/compiler/structure.ts",
   "packages/compiler/build.ts",
   "packages/semantic-ir/units.ts",
   "packages/semantic-ir/hash.ts",

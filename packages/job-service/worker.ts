@@ -89,28 +89,33 @@ export class Worker {
               { mode: 0o444 },
             );
         }
-        const cached = store.get(
-          "SELECT blob FROM cache WHERE tenant=? AND key=?",
-          tenant,
+        for (const key of new Set<string>([
           f.cache_key,
-        );
-        if (cached)
-          writeFileSync(
-            join(dir, "cache", f.cache_key + ".brep"),
-            store.readBlob(cached.blob),
-            { mode: 0o444 },
+          f.local_cache_key ?? f.cache_key,
+        ])) {
+          const cached = store.get(
+            "SELECT blob FROM cache WHERE tenant=? AND key=?",
+            tenant,
+            key,
           );
-        const topology = store.get(
-          "SELECT blob FROM cache WHERE tenant=? AND key=?",
-          tenant,
-          f.cache_key + ":topology",
-        );
-        if (topology)
-          writeFileSync(
-            join(dir, "cache", f.cache_key + ".topology.json"),
-            store.readBlob(topology.blob),
-            { mode: 0o444 },
+          if (cached)
+            writeFileSync(
+              join(dir, "cache", key + ".brep"),
+              store.readBlob(cached.blob),
+              { mode: 0o444 },
+            );
+          const topology = store.get(
+            "SELECT blob FROM cache WHERE tenant=? AND key=?",
+            tenant,
+            key + ":topology",
           );
+          if (topology)
+            writeFileSync(
+              join(dir, "cache", key + ".topology.json"),
+              store.readBlob(topology.blob),
+              { mode: 0o444 },
+            );
+        }
         if (f.construction.operator === "imported") {
           const a = store.get(
             "SELECT * FROM artifacts WHERE id=? AND tenant=?",
@@ -287,10 +292,14 @@ export class Worker {
       const names = [
         ...(request.action === "solve_constraints" ? [] : request.plan.features)
           .filter((f: any) => f.construction.operator !== "field")
-          .flatMap((f: any) => [
-            f.cache_key + ".brep",
-            f.cache_key + ".topology.json",
-          ]),
+          .flatMap((f: any) =>
+            [
+              ...new Set<string>([
+                f.cache_key,
+                f.local_cache_key ?? f.cache_key,
+              ]),
+            ].flatMap((key) => [key + ".brep", key + ".topology.json"]),
+          ),
         ...result.files,
       ];
       for (const name of new Set<string>(names)) {

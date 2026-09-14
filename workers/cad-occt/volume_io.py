@@ -1,7 +1,8 @@
 """OpenVDB export of bounded, explicitly truncated implicit samples."""
-import sys, math
+import sys, math, json, itertools
 import numpy as np
 from geometry import require
+from frames import arrays,world_bounds
 sys.path.append('/usr/lib/python3/dist-packages')
 import pyopenvdb as vdb
 
@@ -20,13 +21,19 @@ def export_vdb(f,path,sample):
         truncation_error=max(truncation_error,abs(value-clipped));truncated+=int(value!=clipped)
     require(np.isfinite(values).all(),'OpenVDB enthält nichtendliche gespeicherte Werte.','GEOMETRY_INVALID')
     grid=vdb.FloatGrid(background=float(np.float32(band)));grid.name=f['id']
-    grid.transform=vdb.createLinearTransform(voxelSize=step);grid.transform.translate(tuple(lo))
+    rotation,translation=arrays(f.get('placement'))
+    transform=np.eye(4);transform[:3,:3]=step*rotation.T;transform[3,:3]=rotation@lo+translation
+    grid.transform=vdb.createLinearTransform(transform.tolist())
+    probe_indices=[(0,0,0),*map(tuple,np.eye(3)),*itertools.product(*[(0,int(v)-1) for v in n])]
+    expected_transform=[tuple(grid.transform.indexToWorld(index)) for index in probe_indices]
     grid.copyFromArray(values);grid.prune()
     grid['llcad_semantics']='truncated_implicit_samples'
     grid['source_field_semantics']=f['field']['semantics']
     grid['value_unit']=f['field'].get('value_unit','length')
     grid['unit']='mm';grid['coordinate_unit']='mm';grid['domain_min']=tuple(lo);grid['domain_max']=tuple(hi)
     grid['sampled_max']=tuple(lo+step*(n-1))
+    grid['domain_frame']=f.get('local_frame','world')
+    grid['frame_to_world']=json.dumps(f.get('placement') or {'rotation':rotation.tolist(),'translation':translation.tolist()},sort_keys=True)
     grid['band_limit']=float(band);grid['continuous_distance_certificate']='none'
     grid['sample_storage_error_max']=rounding_error;grid['sample_truncation_error_max']=truncation_error
     vdb.write(path,grid)
@@ -34,12 +41,14 @@ def export_vdb(f,path,sample):
     require(len(restored)==1,'Unerwartete Gridanzahl beim OpenVDB-Roundtrip.')
     actual=np.empty_like(values);restored[0].copyToArray(actual)
     require(np.array_equal(actual,values),'OpenVDB-Roundtrip verändert gespeicherte Samples.')
-    require(np.allclose(restored[0].transform.indexToWorld((0,0,0)),lo,rtol=0,atol=1e-12),'OpenVDB-Transformationsfehler.')
+    require([tuple(restored[0].transform.indexToWorld(index)) for index in probe_indices]==expected_transform,'OpenVDB-Transformationsfehler.')
     require(restored[0]['value_unit']==f['field'].get('value_unit','length') and restored[0]['coordinate_unit']=='mm' and restored[0]['source_field_semantics']==f['field']['semantics'],'OpenVDB-Einheiten oder Feldsemantik gingen beim Roundtrip verloren.')
-    for axis in np.eye(3): require(np.allclose(restored[0].transform.indexToWorld(tuple(axis)),lo+step*axis,rtol=0,atol=1e-12),'OpenVDB-Voxelmaßstab ging verloren.')
+    require(restored[0]['domain_frame']==f.get('local_frame','world') and restored[0]['frame_to_world']==grid['frame_to_world'],'OpenVDB-Bezugsrahmen ging verloren.')
     return {'status':'checks_passed_within_profile','method':'OpenVDB_full_voxel_roundtrip','library_version':list(vdb.LIBRARY_VERSION),
             'grid_count':1,'sample_count':int(np.prod(n)),'active_voxels':grid.activeVoxelCount(),
             'sample_roundtrip_error':0,'voxel_size_mm':step,'domain':c['domain'],'sampled_max':list(lo+step*(n-1)),
+            'domain_frame':f.get('local_frame','world'),'world_domain_bounds':world_bounds([*lo,*hi],f.get('placement')),
+            'transform_roundtrip_error':0,'transform_probes':len(probe_indices),
             'sample_storage_error_max':rounding_error,'sample_truncation_error_max':truncation_error,'truncated_samples':truncated,
             'stored_semantics':'truncated_implicit_samples','source_field_semantics':f['field']['semantics'],
             'value_unit':f['field'].get('value_unit','length'),

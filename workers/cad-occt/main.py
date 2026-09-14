@@ -2,13 +2,26 @@
 import json, os, sys, time, resource, traceback, shutil
 from geometry import *
 import topology
+import frames
 
 def run(request):
     if request.get('action')=='solve_constraints':
         from solver import solve
         return dict(status='succeeded',facts={},aggregate=solve(request['solver']),files=[],engine_build=BUILD,metrics={})
-    shapes={}; facts={}; histories={}; face_records={}; samplers={}; hits=0; started=time.monotonic()
+    shapes={}; local_shapes={}; local_histories={}; facts={}; histories={}; face_records={}; samplers={}; hits=0; started=time.monotonic()
     plan=request['plan'];features=plan['features'];field_results={}
+    definitions={f['id']:f for f in features}
+    def cached_shape(key):
+        cache='cache/'+key+'.brep';history_cache='cache/'+key+'.topology.json'
+        if not (os.path.isfile(cache) and os.path.isfile(history_cache)):return None
+        shape=read_brep(cache)
+        with open(history_cache) as h:records=json.load(h)
+        with open(cache,'rb') as h:source_hash=hashlib.sha256(h.read()).hexdigest()
+        trace=topology.restore(shape,records,key,source_hash)
+        shutil.copyfile(cache,'out/'+key+'.brep')
+        return shape,trace,records
+    def history_file(key,records):
+        with open('out/'+key+'.topology.json','w') as h:json.dump(records,h,allow_nan=False)
     for f in features:
         fid=f['id'];op=f['construction']['operator']
         if op=='field':
@@ -20,35 +33,54 @@ def run(request):
             samplers[fid]=Sampler(f['construction']['expression'],plan['registry_hash'],previous)
             field_results[fid]=f
             facts[fid]=field_facts(f,samplers[fid].compiled)
+            facts[fid]['local_bounds']=facts[fid]['bounds']
+            facts[fid]['bounds']=frames.world_bounds(facts[fid]['bounds'],f.get('placement'))
+            facts[fid]['local_frame']=f.get('local_frame','world')
+            facts[fid]['coordinate_frame']='world'
             continue
-        deps=[shapes[d] for d in f['depends_on']]
-        key=f['cache_key'];cache='cache/'+key+'.brep'
-        history_cache='cache/'+key+'.topology.json'
-        if os.path.isfile(cache) and os.path.isfile(history_cache):
-            shape=read_brep(cache)
-            with open(history_cache) as h: records=json.load(h)
-            with open(cache,'rb') as h:source_hash=hashlib.sha256(h.read()).hexdigest()
-            trace=topology.restore(shape,records,key,source_hash);hits+=1
-            shutil.copyfile(cache,'out/'+key+'.brep')
+        converted=[frames.place(local_shapes[d],local_histories[d],definitions[d].get('placement'),f.get('placement')) for d in f['depends_on']]
+        deps=[item[0] for item in converted];dep_histories=[item[1] for item in converted]
+        key=f['cache_key'];local_key=f.get('local_cache_key',key)
+        cached=cached_shape(local_key)
+        if cached:
+            local_shape,local_trace,local_records=cached;hits+=1
         else:
-            shape,trace=topology.evaluate_feature(f,deps,[histories[d] for d in f['depends_on']])
-            shape,trace,records=topology.archive(shape,trace,key,'out/'+key+'.brep')
+            local_shape,local_trace=topology.evaluate_feature(f,deps,dep_histories)
+            local_shape,local_trace,local_records=topology.archive(local_shape,local_trace,local_key,'out/'+local_key+'.brep')
+        local_shapes[fid]=local_shape;local_histories[fid]=local_trace
+        history_file(local_key,local_records)
+        if local_key==key:shape,trace,records=local_shape,local_trace,local_records
+        else:
+            world_cached=cached_shape(key)
+            if world_cached:shape,trace,records=world_cached
+            else:
+                shape,trace=frames.place(local_shape,local_trace,f.get('placement'))
+                shape,trace,records=topology.archive(shape,trace,key,'out/'+key+'.brep')
         histories[fid]=trace;face_records[fid]=records
-        with open('out/'+key+'.topology.json','w') as h:json.dump(records,h,allow_nan=False)
+        history_file(key,records)
         require(not shape.IsNull(),'Leeres Operatorergebnis.')
         props=properties(shape);require(props['valid'],'OCCT meldet eine ungültige Geometrie.')
         if plan['profile']=='precision_cad':
             require(max(props['native_tolerances_mm'].values())<=plan['tolerance'],
                     'Native Randtoleranzen überschreiten die verlangte Modellgenauigkeit.','PRECISION_UNSUPPORTED')
         if f['depends_on']:
-            f=dict(f,base_operator=next(x['construction']['operator'] for x in features if x['id']==f['depends_on'][0]))
-        props['dimensions']=dimensions(f,shape,deps);props['geometry_hash']=records['brep_sha256']
+            base=definitions[f['depends_on'][0]]
+            f=dict(f,base_operator=base['construction']['operator'] if base.get('local_frame','world')==f.get('local_frame','world') else 'transformed_source')
+        props['dimensions']=dimensions(f,local_shape,deps);props['geometry_hash']=records['brep_sha256']
+        props['local_frame']=f.get('local_frame','world');props['local_bounds']=bounds(local_shape)
+        props['coordinate_frame']='world';props['dimension_frame']=f.get('local_frame','world')
         props['engine_build']=BUILD;props['cache_key']=key
         props['topology']={'version':topology.VERSION,'face_count':len(records['faces']),'tracked_faces':sum(bool(x['origins']) for x in records['faces'])}
         shapes[fid]=shape;facts[fid]=props
     output_shapes=[shapes[fid] for fid in plan['outputs'] if fid in shapes]
     root=compound(output_shapes) if len(output_shapes)>1 else output_shapes[0] if output_shapes else None
     aggregate=properties(root) if root is not None else None
+    if any(fid in field_results for fid in plan['outputs']):
+        declared=[facts[fid]['bounds'] for fid in plan['outputs']]
+        aggregate={'valid':all(facts[fid]['valid'] for fid in plan['outputs']),
+                   'bounds':[*(min(b[i] for b in declared) for i in range(3)),*(max(b[i+3] for b in declared) for i in range(3))],
+                   'volume':None,'area':None,'solids':None,'precision_solid_only':False,
+                   'coverage':'declared_world_bounds_without_implicit_volume_certificate'}
     if plan['profile']=='precision_cad' and plan['outputs']:
         require(root is not None and len(output_shapes)==len(plan['outputs']),'CAD-Profil benötigt native Körper.')
         require(all(facts[fid]['precision_solid_only'] and facts[fid]['volume']>0 for fid in plan['outputs']),'Jede Ausgabe des CAD-Profils muss ausschließlich aus Volumenkörpern bestehen.')
@@ -62,7 +94,7 @@ def run(request):
             if fid in shapes:meshes.append(mesh(shapes[fid],request['deflection'],fid,face_records[fid]['faces']))
             elif fid in field_results:
                 from fields import extract
-                meshes.append(extract(field_results[fid],samplers[fid]))
+                meshes.append(frames.world_mesh(extract(field_results[fid],samplers[fid]),field_results[fid].get('placement')))
         with open('out/preview.json','w') as h:json.dump({'meshes':meshes,'unit':'mm','quality':'preview_only'},h,allow_nan=False)
         files.append('preview.json')
     if action=='export' and request['format']=='vdb':
@@ -73,6 +105,7 @@ def run(request):
         files.append('roundtrip.json')
     elif action=='export':
         require(root is not None,'Dieses Format benötigt B-Rep-Geometrie.','OUT_OF_SCOPE')
+        require(len(output_shapes)==len(plan['outputs']),'Dieses native Exportformat darf implizite Ausgaben nicht still weglassen. GLB/IR verwenden oder Ausgaben ausdrücklich auswählen.','OUT_OF_SCOPE')
         fmt=request['format'];name='model.'+fmt
         report=export_shape(root,fmt,'out/'+name,request['deflection']);files.append(name)
         with open('out/roundtrip.json','w') as h:json.dump(report,h,allow_nan=False)

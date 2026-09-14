@@ -10,6 +10,7 @@ Die Eingabeschemas unter `schemas/cad_*.schema.json` werden aus den strikten Zod
 | `cad_list_models` | Eigene Modelle nach Name/Zweck suchen und seitenweise lesen; keine bekannten Modell-IDs oder Viewer-Bedienung nötig |
 | `cad_create_model` | Privates leeres Modell; eigener Idempotenzschlüssel |
 | `cad_get_model` | Revisionsübersicht mit Buildkompatibilität und Seiten von höchstens 64 Features |
+| `cad_structure` | Versionierte Projekt-, Baugruppen-, Teil- und Rahmenpakete mit Suche, Paging, Definitionen, Ausdehnungen und Strukturhash |
 | `cad_find` | Semantische/räumliche Kandidaten und kurzlebige Auswahlhandles |
 | `cad_inspect` | Feature, Konstruktion, Maße, Schutzregeln, native Flächen mit Paging, Auswahlhandle und ausdrückliche Neuzuordnung |
 | `cad_measure` | Vorliegende Messwerte; Abstand zwischen zwei B-Reps als Job |
@@ -40,7 +41,9 @@ Der primäre Bedienweg ist das LLM über MCP. Der Viewer ist optional. Das LLM k
 4. Nur bei `checks_passed_within_profile`: `cad_commit` mit exakt dem zurückgegebenen `validation_digest`.
 5. Die neue maßgebliche Revision für spätere Bearbeitung, Messung oder Export verwenden.
 
-Patchvarianten: `add_feature`, `set_outputs`, `add_constraint`, `set_parameter`, `set_expression`, `solve_volume`, `set_surface_poles`, `set_field`. Es gibt keine beliebigen Payloads oder ausführbaren Programme.
+Patchvarianten: `add_feature`, `set_outputs`, `add_constraint`, `set_parameter`, `set_expression`, `solve_volume`, `set_surface_poles`, `insert_surface_knots`, `set_field`, `set_construction`, `set_pattern_occurrence`, `set_structure`, `set_feature_context`. Es gibt keine beliebigen Payloads oder ausführbaren Programme.
+
+Projekt-, Baugruppen- und Teilnamen werden mit `cad_structure` aufgelöst. `kind` wählt die Ebene, `query` die semantischen Suchwörter; `entity_id` begrenzt optional auf ein bekanntes Element. Für Features innerhalb eines gefundenen Teils dient `cad_find.owner_part`. `set_structure` bindet an den zurückgegebenen `structure_hash`; `set_feature_context` bindet an `cad_inspect.context_hash`. Struktur- und Kontextänderungen können im selben Kandidatenpatch stehen. Definierte Teilausgaben und Modellausgaben müssen zusammenpassen. Details zu Koordinaten und Cachegrenzen stehen in `docs/structure-and-frames.md`.
 
 ## Übergang auf einen neuen Build
 

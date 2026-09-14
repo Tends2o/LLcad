@@ -189,16 +189,23 @@
       "source_end_line": 206,
       "source_sha256": "3a54a80a5ca38c21b4ff15782119717f6a5acbd39b7b4db0cc63b4f11c996c6c",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
-        "Absicht, Konstruktionsgraph, Geometrie und Darstellung unterscheiden.",
-        "Genau eine geometrische Hoheit je Modellteil erzwingen."
+        "Absicht, Konstruktionsgraph, geometrische Hoheit und abgeleitete Darstellung getrennt führen.",
+        "Genau eine geometrische Hoheit je Modellteil erzwingen, einschließlich gemischter Szenen aus unterschiedlichen Teilen."
       ],
       "evidence": [
         "packages/semantic-ir/schema.ts",
-        "packages/compiler/index.ts"
+        "packages/compiler/structure.ts",
+        "packages/model-service/structure.ts",
+        "tests/geometry/structure.test.ts",
+        "docs/structure-and-frames.md"
       ],
-      "notes": "Featureweise Hoheit vorhanden; formale Teilehierarchie und Konsistenz über owner_part müssen noch vollständig geprüft werden."
+      "notes": "Explizite Teile besitzen eine verbindliche Repräsentation und zugehörige Ausgaben. Der Compiler verwirft abweichende Feature-Hoheiten, fremde Ausgaben und widersprüchliche alte owner_part-Gruppen. Gemischte Szenen aus getrennten nativen und impliziten Teilen sind real geprüft; native Exporte dürfen implizite Ausgaben nicht still auslassen. IR-Absicht/Konstruktion, unveränderliche Geometrie und abgeleitete Vorschau bleiben getrennt.",
+      "review": {
+        "scope_match": true,
+        "findings": "Explizite Teile besitzen eine verbindliche Repräsentation und zugehörige Ausgaben. Der Compiler verwirft abweichende Feature-Hoheiten, fremde Ausgaben und widersprüchliche alte owner_part-Gruppen. Gemischte Szenen aus getrennten nativen und impliziten Teilen sind real geprüft; native Exporte dürfen implizite Ausgaben nicht still auslassen. IR-Absicht/Konstruktion, unveränderliche Geometrie und abgeleitete Vorschau bleiben getrennt."
+      }
     },
     {
       "id": "5.2",
@@ -312,11 +319,21 @@
       "source_line": 269,
       "source_end_line": 283,
       "source_sha256": "1594881551198e6b3e55e7817e38089535775fee424352bf367151b135650f1b",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Zahlenwert und Dimension einschließlich ausdrücklicher Winkelkonvention führen.",
+        "Dezimale Nutzermaße bis zur dokumentierten Worker-Konvertierung als Dezimalzeichenfolgen erhalten.",
+        "Lokalen Ursprung und positiven lokalen Maßstab so einsetzen, dass große Weltkoordinaten und kleine Details nicht unkontrolliert dieselbe Rechnung bestimmen."
+      ],
+      "evidence": [
+        "packages/semantic-ir/units.ts",
+        "packages/compiler/structure.ts",
+        "workers/cad-occt/frames.py",
+        "tests/geometry/structure.test.ts",
+        "docs/structure-and-frames.md"
+      ],
+      "notes": "Starre verschachtelte Rahmen und lokale native Auswertung sind umgesetzt; eine 20-µm-Nutänderung bei großen Weltkoordinaten ist real geprüft. Ein adaptiver numerischer Längenmaßstab, allgemeine Konditionierungsprüfung und durchgehende Fehlerfortpflanzung bleiben offen. GPU-Koordinaten sind noch gesondert zu behandeln."
     },
     {
       "id": "6.3",
@@ -886,11 +903,20 @@
       "source_line": 962,
       "source_end_line": 973,
       "source_sha256": "2f1030e044e5c95e97933711d9b0a3b4053a4178b981bf35e85251e7a20f6021",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Projekt, Baugruppe, Teil, Feature und lokale Fläche/Detailregion getrennt und revisionsgebunden adressieren.",
+        "Auf jeder Ebene Zusammenfassung, Einheiten, Ausdehnung, relevante Beziehungen, Herkunft und Qualitätsstatus bereitstellen.",
+        "Erklärbare Absicht, Konstruktion, steuernde Parameter, geschützte Eigenschaften und Unsicherheit gezielt abfragen, ohne das ganze Modell in den LLM-Kontext zu laden."
+      ],
+      "evidence": [
+        "packages/model-service/structure.ts",
+        "packages/model-service/index.ts",
+        "tests/geometry/structure.test.ts",
+        "scripts/llm-eval.ts"
+      ],
+      "notes": "Die fünf Ebenen sind über seitenweise Strukturabfrage, teilgebundene Suche und Feature-/Flächeninspektion erreichbar. Die tatsächliche LLM-Aufgabe löst gleichnamige Gehäuse über die Baugruppe auf und verändert ausschließlich das gewünschte lokale Detail. Vollständige per-Entity-Qualitätsgliederung wird mit 8.2 weiter geprüft."
     },
     {
       "id": "8.2",
@@ -898,11 +924,20 @@
       "source_line": 974,
       "source_end_line": 1010,
       "source_sha256": "ab27298ac799257035c80ecc5d742e67d41864286578f861a36f072d14c99a15",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Stabile ID, Art, semantischer Name, deklarierte Funktion samt Quelle, owner_part, local_frame und geometrische Hoheit führen.",
+        "Typisierte Parameter und Quellen, Konstruktion, Abhängigkeiten, Schutzbeziehungen und Operations-/Revisionsherkunft erhalten.",
+        "Dimensionale, topologische und fertigungsbezogene Qualitätsaussagen getrennt darstellen; Nutzerangaben, Messungen, Dateiübernahmen und LLM-Hypothesen unterscheiden."
+      ],
+      "evidence": [
+        "packages/semantic-ir/schema.ts",
+        "packages/compiler/structure.ts",
+        "packages/model-service/index.ts",
+        "packages/validation/index.ts"
+      ],
+      "notes": "Quellenstatus, Parameterherkunft, stabile Feature- und Teilekontexte sowie versionierte Prüfungen sind vorhanden. Revisionsqualität und einzelne Geometriefakten ersetzen noch keinen vollständigen getrennten dimensionalen/topologischen/Fertigungsstatus je Entität."
     },
     {
       "id": "8.3",
@@ -959,7 +994,7 @@
       "source_end_line": 1061,
       "source_sha256": "41bf349bb6588427d80a718740a3c16e2d86a93aa894ae98f257c4ce4a98f55a",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Projektwissen außerhalb des Chats versioniert im Modellservice speichern.",
         "Zusammenfassungen an konkrete Revisionen binden und abhängige Inhalte nach Änderungen aktualisieren.",
@@ -967,11 +1002,17 @@
       ],
       "evidence": [
         "packages/model-service/index.ts",
+        "packages/model-service/structure.ts",
         "packages/model-service/export-package.ts",
+        "tests/geometry/structure.test.ts",
         "tests/roundtrip/exports.test.ts",
         "docs/export-package.md"
       ],
-      "notes": "Revisionsabfragen und semantische IR-Sidecars vorhanden. Vollständige Projekthierarchie/Zusammenfassungen aus 8.1 noch offen."
+      "notes": "Projekt-/Baugruppen-/Teilestruktur und Featurewissen liegen im unveränderlichen Revisions-IR. Zusammenfassungen werden aus der ausdrücklich abgefragten Revision und deren Geometriefakten gebildet; es gibt keinen unabhängigen veraltbaren Zusammenfassungscache. Strukturänderungen erzeugen neue Revisionen, während alte IR und Geometriefakten erhalten bleiben. Der vollständige hashgeprüfte IR-Sidecar erhält auch Struktur, IDs und Quellen. Integration und Export-Roundtrips sind bestanden.",
+      "review": {
+        "scope_match": true,
+        "findings": "Projekt-/Baugruppen-/Teilestruktur und Featurewissen liegen im unveränderlichen Revisions-IR. Zusammenfassungen werden aus der ausdrücklich abgefragten Revision und deren Geometriefakten gebildet; es gibt keinen unabhängigen veraltbaren Zusammenfassungscache. Strukturänderungen erzeugen neue Revisionen, während alte IR und Geometriefakten erhalten bleiben. Der vollständige hashgeprüfte IR-Sidecar erhält auch Struktur, IDs und Quellen. Integration und Export-Roundtrips sind bestanden."
+      }
     },
     {
       "id": "9",
@@ -991,11 +1032,27 @@
       "source_line": 1064,
       "source_end_line": 1076,
       "source_sha256": "c76fbf51c0b81ba1e068e993f6244b5a93f63c52acf3ba86424fd26ac6af60a5",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "verified",
+      "requirements": [
+        "Eine deklarative typisierte JSON-AST-Sprache ohne direkte Auswertung fremden Quellcodes verwenden.",
+        "Parameter, Rahmen, Features, Constraints, Metadaten und begrenzte Muster mit referenzierten Instanzen führen.",
+        "Typen, Einheiten, Wertebereiche, Tiefe/Größe, Zyklen, Referenzen und konservative Ressourcenbudgets vor der Auswertung prüfen; Großzahlen und tiefe Ausdrücke begrenzen."
+      ],
+      "evidence": [
+        "packages/semantic-ir/schema.ts",
+        "packages/compiler/index.ts",
+        "packages/compiler/structure.ts",
+        "packages/compiler/expressions.ts",
+        "tests/unit/compiler.test.ts",
+        "tests/geometry/structure.test.ts",
+        "tests/geometry/patterns.test.ts"
+      ],
+      "notes": "Strikte AST-Schemata und Vorab-Budgetscan begrenzen Eingaben. Rahmen-/Feature-DAGs, Einheiten, Zahlenbereiche, Ausdrucksanzahl und Tiefe werden geprüft. Verschachtelte Mustervorkommen werden multiplikativ einschließlich abhängiger Zwischengeometrien gezählt und vor dem Worker abgelehnt. Freier Quellcode gehört nicht zur DSL; die optionale Textsyntax ist keine Voraussetzung.",
+      "review": {
+        "scope_match": true,
+        "findings": "Strikte AST-Schemata und Vorab-Budgetscan begrenzen Eingaben. Rahmen-/Feature-DAGs, Einheiten, Zahlenbereiche, Ausdrucksanzahl und Tiefe werden geprüft. Verschachtelte Mustervorkommen werden multiplikativ einschließlich abhängiger Zwischengeometrien gezählt und vor dem Worker abgelehnt. Freier Quellcode gehört nicht zur DSL; die optionale Textsyntax ist keine Voraussetzung."
+      }
     },
     {
       "id": "9.2",
@@ -1640,11 +1697,22 @@
       "source_line": 1650,
       "source_end_line": 1667,
       "source_sha256": "680dde2f86ffde09e7ae58a17035d6906c4e1adabcc61fdab516ef100906c6cd",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Relevante Tiefe/Breite/Krümmung/Abstände und Mindestauflösung vor und nach lokalen Änderungen dokumentieren.",
+        "Nachbarmerkmale, Passflächen, Öffnungen, minimale Wände und unabhängige Teile schützen.",
+        "Unverändertheit durch gebundene Eingangs-/Geometriehashes beziehungsweise tatsächliche geometrische Vergleiche belegen.",
+        "Geforderte Patchlücken, konsistente Normalen und Ableitungs-/Krümmungsstetigkeit mit expliziten Schranken prüfen."
+      ],
+      "evidence": [
+        "packages/validation/index.ts",
+        "packages/compiler/patches.ts",
+        "workers/cad-occt/analysis.py",
+        "tests/geometry/structure.test.ts",
+        "tests/geometry/nurbs.test.ts"
+      ],
+      "notes": "20-µm-Änderungen, geschützte Nachbarteile, native Hashvergleiche, lokale Restwand und rationale Patch-Anschlussbedingungen sind geprüft. Allgemeine Detail-/Mindestauflösungsberichte und beliebige mehrteilige Anschlusskorrespondenzen bleiben offen."
     },
     {
       "id": "17.4",

@@ -31,6 +31,8 @@ import { BUILD_HASH, IMPLEMENTATION_HASH } from "../compiler/build.js";
 import { solverRequest } from "../compiler/constraints.js";
 import { exportPackage } from "./export-package.js";
 import { affineContract } from "../compiler/affine.js";
+import { compileStructure, contextHash } from "../compiler/structure.js";
+import { structurePage } from "./structure.js";
 import {
   faces,
   faceSummary,
@@ -371,6 +373,29 @@ export class ModelService {
             conversion:
               "explicit_reference_length_without_distance_reconstruction",
           },
+          model_hierarchy: {
+            levels: [
+              "project",
+              "assembly",
+              "part",
+              "feature",
+              "native_face_or_detail_region",
+            ],
+            geometry_authority: "one_representation_per_part",
+            frames:
+              "explicit_hierarchical_rigid_placements_in_mm_and_typed_angles",
+            construction_coordinates: "feature_local_frame",
+            public_coordinates: "world_bounds_faces_preview_and_exports",
+            limits: {
+              parts: 128,
+              assemblies: 64,
+              frames: 128,
+              hierarchy_depth: 16,
+            },
+            edits:
+              "set_structure_and_set_feature_context_with_hashes_then_validate_commit",
+            implicit_world_volume_certificate: false,
+          },
           limits: LIMITS,
           protocols: ["2025-03-26", "2025-06-18", "2025-11-25", "2026-07-28"],
           host_test_status: "see_build_bound_reports",
@@ -482,6 +507,16 @@ export class ModelService {
           quality: r.quality,
           build_compatibility: this.buildCompatibility(r),
           feature_count: r.ir.features.length,
+          structure: {
+            hash: hash(r.ir.structure ?? null),
+            stored_explicitly: !!r.ir.structure,
+            ...structurePage(r, {
+              kind: "project",
+              query: "",
+              offset: 0,
+              limit: 1,
+            }).counts,
+          },
           features: r.ir.features
             .slice(a.offset, a.offset + a.limit)
             .map((f: any) => ({
@@ -490,6 +525,8 @@ export class ModelService {
               kind: f.kind,
               operator: f.construction.operator,
               depends_on: f.depends_on,
+              owner_part: f.owner_part,
+              local_frame: f.local_frame,
               representation: f.authoritative_representation,
             })),
           next_offset:
@@ -500,6 +537,10 @@ export class ModelService {
           measurements: r.geometry?.aggregate ?? null,
           assumptions: r.ir.assumptions,
         };
+      }
+      case "cad_structure": {
+        const r = this.store.revision(p, a.model_id, a.revision);
+        return { model_id: a.model_id, ...structurePage(r, a) };
       }
       case "cad_find": {
         const r = this.store.revision(p, a.model_id, a.revision);
@@ -512,6 +553,7 @@ export class ModelService {
                 .includes(t),
             ) &&
             (!a.kind || f.kind === a.kind) &&
+            (!a.owner_part || f.owner_part === a.owner_part) &&
             (!a.point ||
               (() => {
                 const b = r.geometry?.facts?.[f.id]?.bounds;
@@ -583,6 +625,8 @@ export class ModelService {
                 : null,
           },
           role: f.kind,
+          quality: r.quality,
+          profile: r.ir.profile,
           known_facts: r.geometry?.facts?.[f.id] ?? null,
           purpose: f.purpose ?? null,
           parameters: f.parameters,
@@ -590,6 +634,9 @@ export class ModelService {
           parameter_sources: f.parameter_sources,
           construction_summary: f.construction,
           local_frame: f.local_frame,
+          owner_part: f.owner_part,
+          context_hash: contextHash(f),
+          frame_to_world: compileStructure(r.ir).placements[f.local_frame],
           protected_constraints: r.ir.constraints.filter(
             (c: any) => c.feature_id === f.id,
           ),
@@ -603,6 +650,7 @@ export class ModelService {
               ? ["Ursprüngliche Feature-Historie unbekannt."]
               : [],
           available_edit_operations: [
+            { op: "set_feature_context" },
             { op: "set_construction" },
             ...(["pattern", "circular_pattern"].includes(
               f.construction.operator,
@@ -825,6 +873,10 @@ export class ModelService {
           revision: r.id,
           measurements: measured,
           metric: a.metric,
+          measurement_frame:
+            a.metric === "bounds"
+              ? "world"
+              : (facts.dimension_frame ?? "world"),
           unit:
             a.metric === "volume" ? "mm3" : a.metric === "area" ? "mm2" : "mm",
           coverage:
@@ -867,6 +919,8 @@ export class ModelService {
           base_revision: a.base_revision,
           changed_features: plan.changed_features,
           dependent_features: plan.dependent_features,
+          dirty_features: plan.dirty_features,
+          structure_hash: plan.structure_hash,
           estimate: plan.estimate,
           refinement_reports: plan.refinement_reports,
           resolved_parameters: plan.ir.features
@@ -1154,14 +1208,34 @@ export class ModelService {
             );
         }
         const fid = id("import");
+        const importedPart = base.ir.structure ? id("part") : "part-main";
         const ir = parse<ModelIR>(ModelIR, {
           ...base.ir,
+          ...(base.ir.structure
+            ? {
+                structure: {
+                  ...base.ir.structure,
+                  parts: [
+                    ...base.ir.structure.parts,
+                    {
+                      id: importedPart,
+                      semantic_name: "Importiertes Teil",
+                      local_frame: "world",
+                      authoritative_representation:
+                        a.format === "stl" ? "mesh" : "brep",
+                      outputs: [fid],
+                    },
+                  ],
+                },
+              }
+            : {}),
           profile: a.format === "stl" ? "render_surface" : base.ir.profile,
           features: [
             {
               id: fid,
               semantic_name: "Importierte Geometrie",
               kind: "imported",
+              owner_part: importedPart,
               authoritative_representation:
                 a.format === "stl" ? "mesh" : "brep",
               parameters: {},

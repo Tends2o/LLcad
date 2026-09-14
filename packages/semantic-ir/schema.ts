@@ -375,13 +375,51 @@ export const Constraint = z.discriminatedUnion("kind", [
     id: Id,
     kind: z.literal("protected_region"),
     feature_id: Id,
+    local_frame: Id.optional(),
     min: Point,
     max: Point,
   }),
 ]);
+const SemanticEntity = {
+  id: Id,
+  semantic_name: z.string().min(1).max(200),
+  purpose: Source.optional(),
+};
+export const Frame = z.strictObject({
+  ...SemanticEntity,
+  parent: Id.default("world"),
+  translation: Point,
+  axis: Point,
+  angle: Quantity,
+});
+export const ModelStructure = z.strictObject({
+  project: z.strictObject(SemanticEntity),
+  frames: z.array(Frame).max(128),
+  assemblies: z
+    .array(
+      z.strictObject({
+        ...SemanticEntity,
+        parent_assembly: Id.optional(),
+        local_frame: Id.default("world"),
+      }),
+    )
+    .max(64),
+  parts: z
+    .array(
+      z.strictObject({
+        ...SemanticEntity,
+        assembly: Id.optional(),
+        local_frame: Id.default("world"),
+        authoritative_representation: z.enum(["brep", "implicit", "mesh"]),
+        outputs: z.array(Id).max(128),
+      }),
+    )
+    .max(128),
+});
 export const ModelIR = z.strictObject({
   schema_version: z.literal("1"),
   unit: z.literal("mm"),
+  structure: ModelStructure.optional(),
   features: z.array(Feature).max(256),
   outputs: z.array(Id).max(128),
   constraints: z.array(Constraint).max(256).default([]),
@@ -398,6 +436,18 @@ export const SetParameter = z.strictObject({
   value: Quantity,
 });
 export const PatchOperation = z.discriminatedUnion("op", [
+  z.strictObject({
+    op: z.literal("set_structure"),
+    expected_hash: z.string().regex(/^[a-f0-9]{64}$/),
+    structure: ModelStructure,
+  }),
+  z.strictObject({
+    op: z.literal("set_feature_context"),
+    feature_id: Id,
+    expected_hash: z.string().regex(/^[a-f0-9]{64}$/),
+    owner_part: Id,
+    local_frame: Id,
+  }),
   z.strictObject({
     op: z.literal("set_pattern_occurrence"),
     feature_id: Id,
@@ -487,10 +537,19 @@ export const ToolSchemas = {
     offset: z.int().min(0).default(0),
     limit: z.int().min(1).max(64).default(32),
   }),
+  cad_structure: z.strictObject({
+    ...ReadBinding,
+    kind: z.enum(["project", "assembly", "part", "frame"]).default("project"),
+    entity_id: Id.optional(),
+    query: z.string().max(200).default(""),
+    offset: z.int().min(0).default(0),
+    limit: z.int().min(1).max(16).default(8),
+  }),
   cad_find: z.strictObject({
     ...ReadBinding,
     query: z.string().max(200).default(""),
     kind: z.string().max(64).optional(),
+    owner_part: Id.optional(),
     point: Point.optional(),
     limit: z.int().min(1).max(32).default(16),
   }),
@@ -595,6 +654,7 @@ export const READ_TOOLS = new Set<ToolName>([
   "cad_capabilities",
   "cad_list_models",
   "cad_get_model",
+  "cad_structure",
   "cad_find",
   "cad_inspect",
   "cad_measure",

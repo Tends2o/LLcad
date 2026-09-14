@@ -71,7 +71,7 @@ def primitive(shape, fid, operator, roles=None):
     return result
 
 
-def propagate(shape, inputs, prefix, maker=None, owner=None):
+def propagate(shape, inputs, prefix, maker=None, owner=None, preserve_origins=False):
     faces = face_list(shape)
     if not faces: faces = edge_list(shape)
     mapping = TopTools_IndexedMapOfShape()
@@ -92,7 +92,7 @@ def propagate(shape, inputs, prefix, maker=None, owner=None):
                 if not entry['origins']:
                     unknown.add(index)
                 for source in entry['origins']:
-                    item = dict(source, key=digest([prefix, slot, source['key']]))
+                    item = dict(source) if preserve_origins else dict(source, key=digest([prefix, slot, source['key']]))
                     if owner is not None:
                         item['feature_id'] = owner
                     origins[item['key']] = item
