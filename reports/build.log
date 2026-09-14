@@ -3,6 +3,6 @@
 > tsc && esbuild packages/viewer/app.ts --bundle --format=esm --minify --outfile=public/app.js
 
 
-  public/app.js  567.2kb
+  public/app.js  568.1kb
 
-⚡ Done in 63ms
+⚡ Done in 54ms

@@ -6,7 +6,7 @@ Die verpflichtenden Grenzwerte und Operatoren werden aus `packages/compiler/inde
 
 Das IR verwendet Dezimalzeichenfolgen und eine kanonische Geometrieeinheit Millimeter. Zulässig sind `m`, `mm`, `um`, `rad`, `deg`, `1`; Volumenziele tragen separat `mm3`. Die Konvertierung erfolgt kontrolliert mit Decimal.js und anschließend endlichen Worker-Zahlen. Die Modell-Toleranz liegt zwischen 0,00001 und 0,1 mm. Der Standard beträgt 0,001 mm.
 
-Weltkoordinaten sind rechtshändig mit Z nach oben. Das v1-IR akzeptiert nur `world` als lokalen Rahmen; Transformationen sind explizite Feature-Operatoren. GLB wandelt Millimeter ausdrücklich in Meter um, rotiert Z nach Y und misst zusätzlich den Verlust durch Float32-Koordinaten. Vorschauauflösung und Modell-Toleranz sind getrennt. Die Exportkonvention folgt der [glTF-Spezifikation](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#coordinate-system-and-units).
+Weltkoordinaten sind rechtshändig mit Z nach oben. Das v1-IR unterstützt ausdrücklich deklarierte hierarchische starre Bezugsrahmen; native Konstruktionen werden lokal berechnet. Die Vertragsdetails stehen in `structure-and-frames.md`. Allgemeine affine Transformationen bleiben ausdrückliche Feature-Operatoren. Viewer und GLB verwenden lokale Netzursprünge vor der Float32-Konvertierung. GLB wandelt Millimeter in Meter um, rotiert Z nach Y und misst die Verluste nach dem Einlesen der Positionsbytes und Knotentransformationen. Vorschauauflösung und Modell-Toleranz sind getrennt. Die Exportkonvention folgt der [glTF-Spezifikation](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#coordinate-system-and-units).
 
 ## Sichere Formeln
 

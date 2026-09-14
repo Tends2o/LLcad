@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { relativePositions } from "../derived-geometry/coordinates.js";
 const el = <T extends HTMLElement = HTMLElement>(id: string) =>
   document.getElementById(id) as T;
 const text = (id: string, value: string) => {
@@ -268,10 +269,11 @@ function clearGroup(group: THREE.Group) {
 function draw(data: any, group = mainGroup, ghost = false) {
   clearGroup(group);
   for (const m of data.meshes) {
+    const local = relativePositions(m.vertices);
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute(
       "position",
-      new THREE.Float32BufferAttribute(m.vertices.flat(), 3),
+      new THREE.BufferAttribute(local.positions, 3),
     );
     geometry.setIndex(m.triangles.flat());
     geometry.computeVertexNormals();
@@ -286,9 +288,13 @@ function draw(data: any, group = mainGroup, ghost = false) {
       clippingPlanes: section ? [clipping] : [],
     });
     const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.fromArray(local.origin);
+    mesh.userData.origin = local.origin;
+    mesh.userData.coordinate_rounding_mm = local.maxCoordinateError;
     mesh.userData.feature_id = m.feature_id;
     mesh.userData.face_ranges = m.face_ranges;
     group.add(mesh);
+    if (!ghost && exploded) mesh.position.x += (group.children.length - 1) * 10;
   }
   if (!ghost) {
     meshData = data;
@@ -318,7 +324,7 @@ function fit() {
   activeCamera.updateProjectionMatrix();
   orthoCamera.zoom = 50 / radius;
   orthoCamera.updateProjectionMatrix();
-  grid.position.z = box.min.z - 0.1;
+  grid.position.set(center.x, center.y, box.min.z - 0.1);
   controls.update();
 }
 const resize = () => {
@@ -383,7 +389,7 @@ el("explode").onclick = () => {
   exploded = !exploded;
   el("explode").classList.toggle("active", exploded);
   mainGroup.children.forEach((m, i) => {
-    m.position.x = exploded ? i * 10 : 0;
+    m.position.x = m.userData.origin[0] + (exploded ? i * 10 : 0);
   });
   if (mainGroup.children.length < 2)
     toast(

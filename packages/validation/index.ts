@@ -297,8 +297,12 @@ export function validate(
         f.id,
         proven,
         proven,
-        "exact_rational_compact_support_disjoint_from_AABB",
-        "entire_protected_region",
+        f.construction.operator === "field"
+          ? "exact_rational_compact_support_disjoint_from_AABB"
+          : "immutable_geometry_hash",
+        f.construction.operator === "field"
+          ? "entire_protected_region"
+          : "entire_feature_implies_region_unchanged",
         "exact_for_declared_domain",
       );
     }

@@ -406,7 +406,7 @@ try {
         "The user authorizes candidate creation, validation and commit for requested changes. Ask in natural language only if the intended geometry is actually ambiguous. No manual clicks or user-supplied IDs. Use job polling until completion.",
     });
     assert.ok(
-      Object.keys(inventory.tools).length >= 21,
+      Object.keys(inventory.tools).length >= 22,
       JSON.stringify(inventory),
     );
     const thread = await host.request("thread/read", {

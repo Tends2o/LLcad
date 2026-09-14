@@ -1,49 +1,49 @@
 {
   "status": "passed",
-  "created": "2026-09-14T17:43:43.679Z",
-  "registry_hash": "881731cf7bb961bc196f20e10a7ee98c1e62f54e52f5ce9697f0904da5792298",
-  "implementation_hash": "7b4d3cfb29005014aac0bce549d7a96ba2a5db40f1a9ddc6302b8efe8d7ab63d",
+  "created": "2026-09-14T18:08:03.853Z",
+  "registry_hash": "2c5919ecd79be717580ff8beb597454b584fd703537f831ad1216f179c70dd1c",
+  "implementation_hash": "5847e281b77d28d5478326775060837ea14267aeaffda211b5806cf80e072726",
   "checks": [
     {
       "name": "versions",
       "status": "passed",
-      "duration_ms": 275,
+      "duration_ms": 276,
       "exit_code": 0
     },
     {
       "name": "typecheck",
       "status": "passed",
-      "duration_ms": 893,
+      "duration_ms": 919,
       "exit_code": 0
     },
     {
       "name": "tests",
       "status": "passed",
-      "duration_ms": 124309,
+      "duration_ms": 128687,
       "exit_code": 0
     },
     {
       "name": "geometry",
       "status": "passed",
-      "duration_ms": 4064,
+      "duration_ms": 4395,
       "exit_code": 0
     },
     {
       "name": "mcp",
       "status": "passed",
-      "duration_ms": 3184,
+      "duration_ms": 3612,
       "exit_code": 0
     },
     {
       "name": "build",
       "status": "passed",
-      "duration_ms": 832,
+      "duration_ms": 1141,
       "exit_code": 0
     },
     {
       "name": "browser",
       "status": "passed",
-      "duration_ms": 16180,
+      "duration_ms": 30123,
       "exit_code": 0
     }
   ]

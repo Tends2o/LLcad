@@ -1,4 +1,5 @@
 import { requireThat } from "../semantic-ir/errors.js";
+import { relativePositions } from "../derived-geometry/coordinates.js";
 /** glTF stores metre coordinates, explicitly converted from the authoritative millimetres. */
 export function packGLB(preview: any) {
   const chunks: Buffer[] = [],
@@ -16,17 +17,10 @@ export function packGLB(preview: any) {
     offset += aligned.length;
     return index;
   };
-  let maxError = 0;
   for (const m of preview.meshes) {
-    const v = new Float32Array(
-      m.vertices.flatMap((p: number[]) => p.map((x) => x / 1000)),
-    );
+    const local = relativePositions(m.vertices, 1000),
+      v = local.positions;
     const t = new Uint32Array(m.triangles.flat());
-    for (let i = 0; i < v.length; i++)
-      maxError = Math.max(
-        maxError,
-        Math.abs(v[i] * 1000 - m.vertices[Math.floor(i / 3)][i % 3]),
-      );
     const min = [Infinity, Infinity, Infinity],
       max = [-Infinity, -Infinity, -Infinity];
     for (let i = 0; i < v.length; i++) {
@@ -53,9 +47,16 @@ export function packGLB(preview: any) {
       mesh: meshes.length,
       name: m.feature_id,
       rotation: [-Math.SQRT1_2, 0, 0, Math.SQRT1_2],
+      translation: [
+        local.origin[0] / 1000,
+        local.origin[2] / 1000,
+        -local.origin[1] / 1000,
+      ],
       extras: {
         feature_id: m.feature_id,
         source_coordinate_system: "right_handed_z_up",
+        vertex_coordinates: "relative_to_mesh_origin",
+        mesh_origin_mm: local.origin,
       },
     });
     meshes.push({
@@ -96,12 +97,74 @@ export function packGLB(preview: any) {
     "GEOMETRY_INVALID",
     "GLB-Roundtrip ungültig.",
   );
+  // Read back the actual serialized vertex/index bytes and node transforms.
+  // glTF applies the quaternion first, then the Y-up metre translation.
+  const binaryStart = 28 + buffer.readUInt32LE(12);
+  let maxError = 0,
+    verticesChecked = 0,
+    indicesChecked = 0;
+  for (const [i, node] of restored.nodes.entries()) {
+    const source = preview.meshes[i],
+      primitive = restored.meshes[node.mesh].primitives[0];
+    const accessor = restored.accessors[primitive.attributes.POSITION],
+      view = restored.bufferViews[accessor.bufferView];
+    const [qx, qy, qz, qw] = node.rotation;
+    for (let j = 0; j < accessor.count; j++) {
+      const p = [0, 1, 2].map((k) =>
+        buffer.readFloatLE(binaryStart + view.byteOffset + 12 * j + 4 * k),
+      );
+      const [x, y, z] = p;
+      const uv = [qy * z - qz * y, qz * x - qx * z, qx * y - qy * x];
+      const uuv = [
+        qy * uv[2] - qz * uv[1],
+        qz * uv[0] - qx * uv[2],
+        qx * uv[1] - qy * uv[0],
+      ];
+      const world = p.map(
+        (v, k) => v + 2 * (qw * uv[k] + uuv[k]) + node.translation[k],
+      );
+      const restoredMM = [world[0] * 1000, -world[2] * 1000, world[1] * 1000];
+      for (let k = 0; k < 3; k++)
+        maxError = Math.max(
+          maxError,
+          Math.abs(restoredMM[k] - source.vertices[j][k]),
+        );
+      verticesChecked++;
+    }
+    const indices = restored.accessors[primitive.indices],
+      indexView = restored.bufferViews[indices.bufferView];
+    requireThat(
+      indices.count === source.triangles.length * 3 &&
+        accessor.count === source.vertices.length,
+      "INTEGRITY_FAILURE",
+      "GLB-Geometrieanzahl hat sich beim Roundtrip verändert.",
+    );
+    for (let j = 0; j < indices.count; j++) {
+      requireThat(
+        buffer.readUInt32LE(binaryStart + indexView.byteOffset + 4 * j) ===
+          source.triangles[Math.floor(j / 3)][j % 3],
+        "INTEGRITY_FAILURE",
+        "GLB-Dreiecksindex hat sich beim Roundtrip verändert.",
+      );
+      indicesChecked++;
+    }
+  }
+  requireThat(
+    Number.isFinite(maxError),
+    "PRECISION_UNSUPPORTED",
+    "GLB-Roundtrip enthält nichtendliche Koordinaten.",
+  );
   return {
     buffer,
     report: {
       status: "checks_passed_within_profile",
-      method: "GLB_structure_and_float32_roundtrip",
+      method: "GLB_serialized_positions_indices_and_node_transform_roundtrip",
       max_coordinate_error_mm: maxError,
+      coordinate_storage:
+        "per_mesh_local_float32_metres_with_JSON_node_translation",
+      vertices_checked: verticesChecked,
+      indices_checked: indicesChecked,
+      consumer_numeric_precision_certified: false,
       mesh_count: meshes.length,
       certified_surface_bound: null,
     },

@@ -15,7 +15,10 @@
     "protected width",
     "section",
     "wireframe",
-    "STEP export"
+    "STEP export",
+    "native face picking after local GPU coordinate conversion at large world coordinates",
+    "20-micrometre edit with base/candidate overlay at large world coordinates",
+    "preserved object placement after explosion toggle, section and orthographic view"
   ],
   "errors": []
 }

@@ -1,20 +1,21 @@
 {
   "status": "passed",
-  "created": "2026-09-14T17:43:26.636Z",
-  "registry_hash": "881731cf7bb961bc196f20e10a7ee98c1e62f54e52f5ce9697f0904da5792298",
-  "implementation_hash": "7b4d3cfb29005014aac0bce549d7a96ba2a5db40f1a9ddc6302b8efe8d7ab63d",
+  "created": "2026-09-14T18:07:32.552Z",
+  "registry_hash": "2c5919ecd79be717580ff8beb597454b584fd703537f831ad1216f179c70dd1c",
+  "implementation_hash": "5847e281b77d28d5478326775060837ea14267aeaffda211b5806cf80e072726",
   "transport": "MCP Streamable HTTP",
   "client": "official SDK",
   "browser_interactions": 0,
-  "model_id": "model-b4c92d78-5fae-47ac-8f90-661002beec65",
-  "original_revision": "rev-8c4e6e9b-81ea-4b47-8a5f-09643ed14397",
-  "edited_revision": "rev-2ddcbfd1-5059-4a23-be46-dba3ead7dbcc",
+  "model_id": "model-7fae1004-112f-42c5-a47f-a2dde6c0f5cd",
+  "original_revision": "rev-ea096613-23b1-481a-8133-50cded496eb0",
+  "edited_revision": "rev-c2284cde-8d27-4589-b0ba-ac0d8dd68eb4",
   "calls": [
     "cad_capabilities",
     "cad_list_models",
     "cad_create_model",
     "cad_plan_edit",
     "cad_apply_patch",
+    "cad_job_get",
     "cad_job_get",
     "cad_job_get",
     "cad_job_get",
@@ -45,6 +46,7 @@
     "cad_measure",
     "cad_compare",
     "cad_export",
+    "cad_job_get",
     "cad_job_get",
     "cad_job_get",
     "cad_job_get",
@@ -94,7 +96,7 @@
       "coordinate_frame": "world",
       "dimension_frame": "world",
       "engine_build": "OCCT-7.9.3.1.1/mathforge-1",
-      "cache_key": "364025967c94f79c50b85eb8db44a914276e7e2e64b79fd5854d41e32732affc",
+      "cache_key": "3b6c13a0715fae96d31905fb2b90f243eca528f9439014ed32cf069404633d73",
       "topology": {
         "version": 3,
         "face_count": 10,
@@ -107,13 +109,13 @@
     "assumptions": [],
     "artifacts": [],
     "recommended_next_actions": [],
-    "model_id": "model-b4c92d78-5fae-47ac-8f90-661002beec65",
-    "revision": "rev-2ddcbfd1-5059-4a23-be46-dba3ead7dbcc",
+    "model_id": "model-7fae1004-112f-42c5-a47f-a2dde6c0f5cd",
+    "revision": "rev-c2284cde-8d27-4589-b0ba-ac0d8dd68eb4",
     "metric": "all",
     "measurement_frame": "world",
     "unit": "mm",
     "coverage": "registered_geometric_measurement",
-    "trace_id": "trace-16f221c2-4076-40b9-8596-b6d4f333caf3"
+    "trace_id": "trace-605e3c56-ae97-4aa1-80c8-c1542b1b4361"
   },
   "comparison": {
     "status": "ok",
@@ -124,9 +126,9 @@
     "assumptions": [],
     "artifacts": [],
     "recommended_next_actions": [],
-    "model_id": "model-b4c92d78-5fae-47ac-8f90-661002beec65",
-    "from_revision": "rev-8c4e6e9b-81ea-4b47-8a5f-09643ed14397",
-    "to_revision": "rev-2ddcbfd1-5059-4a23-be46-dba3ead7dbcc",
+    "model_id": "model-7fae1004-112f-42c5-a47f-a2dde6c0f5cd",
+    "from_revision": "rev-ea096613-23b1-481a-8133-50cded496eb0",
+    "to_revision": "rev-c2284cde-8d27-4589-b0ba-ac0d8dd68eb4",
     "structure_changed": false,
     "changed_features": [
       "feat-groove-07"
@@ -184,7 +186,7 @@
     ],
     "volume_delta": -1.5079644737234048,
     "coverage": "declared_dimensions_and_per_feature_hashes",
-    "trace_id": "trace-67b53e35-54d8-453d-935f-1f9758b645cf"
+    "trace_id": "trace-2a180894-dd40-4d48-a65e-30e85d57718c"
   },
   "roundtrip": {
     "status": "checks_passed_within_profile",

@@ -337,3 +337,98 @@ test("LLM tools can move, specialize and restore one circular occurrence while p
     await env.close();
   }
 });
+
+test("pattern overrides use the disclosed feature frame and preserve other world occurrences", async () => {
+  const env = setup(),
+    s = env.service;
+  try {
+    const ir = fixture();
+    ir.features.forEach((f) => {
+      f.owner_part = "part-ring";
+      f.local_frame = "frame-ring";
+    });
+    ir.structure = {
+      project: { id: "project-ring", semantic_name: "Ring" },
+      assemblies: [],
+      frames: [
+        {
+          id: "frame-ring",
+          semantic_name: "Gedrehter Ring",
+          parent: "world",
+          translation: ["1000", "2000", "3000"],
+          axis: ["1", "0", "0"],
+          angle: { value: "90", unit: "deg" },
+        },
+      ],
+      parts: [
+        {
+          id: "part-ring",
+          semantic_name: "Kugelanordnung",
+          local_frame: "frame-ring",
+          authoritative_representation: "brep",
+          outputs: ["many"],
+        },
+      ],
+    };
+    const m = await importFixture(s, ir);
+    const read = (revision: string) =>
+      call(s, "cad_inspect", {
+        model_id: m.model_id,
+        revision,
+        feature_id: "many",
+        face_limit: 16,
+      });
+    const before = read(m.revision);
+    assert.equal(before.unit, "mm");
+    assert.equal(before.pattern_contract.coordinate_frame, "frame-ring");
+    assert.match(before.pattern_contract.override_translation, /feature-local/);
+    const draft = call(s, "cad_apply_patch", {
+      model_id: m.model_id,
+      base_revision: m.revision,
+      idempotency_key: id("patch"),
+      operations: [
+        {
+          op: "set_pattern_occurrence",
+          feature_id: "many",
+          expected_hash: before.construction_hash,
+          index: 1,
+          override: { translation: ["0", "0", "2"] },
+        },
+      ],
+    });
+    const result = await finish(s, draft),
+      after = read(result.candidate_revision);
+    for (let index = 0; index < 4; index++) {
+      const face = (x: any) =>
+        x.face_page.faces.find((f: any) =>
+          f.origins.some((o: any) =>
+            o.occurrences?.some(
+              (v: any) => v.feature_id === "many" && v.index === index,
+            ),
+          ),
+        );
+      const a = face(before),
+        b = face(after);
+      for (let axis = 0; axis < 3; axis++)
+        assert.ok(
+          Math.abs(
+            b.center[axis] -
+              a.center[axis] -
+              (index === 1 && axis === 1 ? -2 : 0),
+          ) < 1e-7,
+        );
+    }
+    const validation = await finish(
+      s,
+      call(s, "cad_validate", {
+        model_id: m.model_id,
+        base_revision: m.revision,
+        transaction_id: draft.transaction_id,
+        idempotency_key: id("validate"),
+      }),
+    );
+    assert.equal(validation.status, "checks_passed_within_profile");
+  } finally {
+    await env.close();
+  }
+});

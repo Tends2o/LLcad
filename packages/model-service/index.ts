@@ -601,6 +601,7 @@ export class ModelService {
           model_id: a.model_id,
           revision: r.id,
           selected_entities: [f.id],
+          unit: r.ir.unit,
           selection_handle: selectionHandle(
             this.store,
             p,
@@ -684,7 +685,9 @@ export class ModelService {
                   f.construction.operator === "circular_pattern"
                     ? "rotation(axis, origin, angle * index / count); angular endpoint excluded"
                     : "translation(index * [dx, dy, dz])",
-                override_translation: "world millimetres after base placement",
+                coordinate_frame: f.local_frame,
+                override_translation:
+                  "feature-local millimetres after base placement; use frame_to_world to interpret world directions",
                 default_geometry:
                   "shared source; explicit source override materializes only that occurrence as a variant",
                 composition:

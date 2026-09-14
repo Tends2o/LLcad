@@ -10,11 +10,19 @@
       "source_line": 53,
       "source_end_line": 54,
       "source_sha256": "14c35c9c089efbe8e8adcf4996b4bedce3a7557ed0ceb46117d9b6f8d4453e96",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "informational",
+      "status": "verified",
+      "requirements": [
+        "Kapitelüberschrift unverändert erhalten und Anforderungen in den separat gebundenen Unterabschnitten prüfen."
+      ],
+      "evidence": [
+        "Mathematik_First_3D_MCP_Bauplan.md"
+      ],
+      "notes": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis."
+      }
     },
     {
       "id": "1.1",
@@ -34,7 +42,7 @@
         "scripts/llm-eval.ts",
         "tests/geometry/nurbs.test.ts"
       ],
-      "notes": "Drei technische Sprachaufträge geprüft; unabhängige breite Aufgaben für neue und gemischte Formkombinationen fehlen noch."
+      "notes": "Lokale synthetische LLM-Aufgaben decken technische Parameter, Instanzen, kompakte Felder und Baugruppen-/Rahmenauflösung ab. Eine breite unabhängige Evaluation neuer und gemischter Formkombinationen bleibt offen."
     },
     {
       "id": "1.2",
@@ -79,11 +87,19 @@
       "source_line": 91,
       "source_end_line": 110,
       "source_sha256": "9b06633a587f0c8fc94ec6265e149bd587f83a3d61854b0b99e4676811559682",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Versionierten semantischen Graph, native technische Geometrie, explizite organische Feldsemantik und abgeleitete beziehungsweise ausdrücklich maßgebliche Meshes trennen.",
+        "Kleine typisierte Werkzeugschnittstelle, deklarative Ausführung, Kandidat/Prüfung/Commit, stabile Herkunft und serverseitige Sicherheitsgates verwenden.",
+        "Lokalität, Wiederverwendung und klare Ungewissheit zur Grundlage machen; keine undurchsichtige Text-zu-Mesh- oder execute-Code-Kernschnittstelle."
+      ],
+      "evidence": [
+        "docs/architecture.md",
+        "packages/semantic-ir/schema.ts",
+        "packages/mcp-gateway/tools.ts"
+      ],
+      "notes": "Die Architekturentscheidungen sind weitgehend umgesetzt; vollständige lokale adaptive Verfeinerung, Meshprofile und durchgehende Fehler-/Qualitätsverträge bleiben in den Einzelabschnitten offen."
     },
     {
       "id": "3",
@@ -91,11 +107,19 @@
       "source_line": 111,
       "source_end_line": 112,
       "source_sha256": "15c2084f5645032f59987636f13c65913c268f4ad53daefe4b43b29cc9bc5c31",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "informational",
+      "status": "verified",
+      "requirements": [
+        "Kapitelüberschrift unverändert erhalten und Anforderungen in den separat gebundenen Unterabschnitten prüfen."
+      ],
+      "evidence": [
+        "Mathematik_First_3D_MCP_Bauplan.md"
+      ],
+      "notes": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis."
+      }
     },
     {
       "id": "3.1",
@@ -164,11 +188,27 @@
       "source_line": 148,
       "source_end_line": 193,
       "source_sha256": "78e30eb6e188cd79bed2455ebf6ef31fcf29c98bf04a11ed169a6dd434938476",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "verified",
+      "requirements": [
+        "Gateway, Modellservice/Compiler, Ressourcenplanung, isolierte Worker, unveränderliche Kandidaten, Prüfnachweise, Commit und abgeleitete Artefakte fachlich trennen.",
+        "Geometriekern ohne LLM ausführen und testen; fehlerhafte Pläne oder abstürzende Worker dürfen den Gateway und die aktuelle Revision nicht zerstören.",
+        "Ein modularer Dienst mit getrennten Workerprozessen ist zulässig; Verteilung benötigt tatsächlichen Bedarf."
+      ],
+      "evidence": [
+        "docs/architecture.md",
+        "packages/mcp-gateway/app.ts",
+        "packages/model-service/index.ts",
+        "packages/job-service/index.ts",
+        "packages/job-service/worker.ts",
+        "tests/security/recovery.test.ts",
+        "tests/unit/compiler.test.ts"
+      ],
+      "notes": "Die implementierten Modulgrenzen entsprechen dem Ablauf. Der native Worker hat eigenen isolierten Prozess, begrenzte Datei-/Netz-/Speicherrechte und einen vom Gateway unabhängigen Lebenszyklus. Compiler-, Geometrie-, MCP- und echte Prozessabbruchtests laufen ohne Modellturn; die maßgebliche Revision bleibt bei Fehlern erhalten. Die erlaubte modulare Erstarchitektur benötigt keine zusätzlichen Microservices.",
+      "review": {
+        "scope_match": true,
+        "findings": "Die implementierten Modulgrenzen entsprechen dem Ablauf. Der native Worker hat eigenen isolierten Prozess, begrenzte Datei-/Netz-/Speicherrechte und einen vom Gateway unabhängigen Lebenszyklus. Compiler-, Geometrie-, MCP- und echte Prozessabbruchtests laufen ohne Modellturn; die maßgebliche Revision bleibt bei Fehlern erhalten. Die erlaubte modulare Erstarchitektur benötigt keine zusätzlichen Microservices."
+      }
     },
     {
       "id": "5",
@@ -176,11 +216,19 @@
       "source_line": 194,
       "source_end_line": 195,
       "source_sha256": "fb2b4f51aae9514296f81715a1b2c16bf04b820a77b94f8712f455862b271c96",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "informational",
+      "status": "verified",
+      "requirements": [
+        "Kapitelüberschrift unverändert erhalten und Anforderungen in den separat gebundenen Unterabschnitten prüfen."
+      ],
+      "evidence": [
+        "Mathematik_First_3D_MCP_Bauplan.md"
+      ],
+      "notes": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis."
+      }
     },
     {
       "id": "5.1",
@@ -213,11 +261,18 @@
       "source_line": 207,
       "source_end_line": 210,
       "source_sha256": "bd0bd4d07711e62bce9f6af42b681bbbcca3186e9ca00358b3c66a929aa2a2dc",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Maßkritische technische Features parametrisch mit nativer B-Rep-Auswertung aufbauen.",
+        "Kernel-Toleranzen offen ausweisen; CAD-Gültigkeit nicht als symbolisch exakte Arithmetik ausgeben."
+      ],
+      "evidence": [
+        "workers/cad-occt/geometry.py",
+        "workers/cad-occt/advanced.py",
+        "packages/validation/index.ts"
+      ],
+      "notes": "Native technische Features und Toleranzprüfung sind vorhanden. Vollständige genormte Gewinde-/Schnittstellenverträge und allgemeine Anschluss-/Wandprüfungen bleiben offen."
     },
     {
       "id": "5.3",
@@ -226,17 +281,24 @@
       "source_end_line": 214,
       "source_sha256": "f683bd4c85aa29b61f053062f6e470055dcdffc3972b75b9d05eb45e484f1a70",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
-        "Analytische Felder mit expliziter Wertsemantik für weiche Formen, Porosität und implizite Gitter bereitstellen.",
-        "Sparse Volumendaten als deklarierte Arbeits-/Cache-Repräsentation nutzen."
+        "Analytische Feldgraphen mit ausdrücklicher Bedeutung ihrer Werte für weiche Übergänge, poröse Formen, implizite Gitter und lokale Volumenänderungen bereitstellen.",
+        "Sparse lokale Arbeits- und Cache-Daten mit dokumentierten Grenzen verwenden."
       ],
       "evidence": [
+        "packages/compiler/index.ts",
         "workers/cad-occt/fields.py",
+        "workers/cad-occt/field_cache.py",
         "workers/cad-occt/volume_io.py",
-        "workers/cad-occt/field_cache.py"
+        "tests/unit/field-contracts.test.ts",
+        "tests/geometry/structure.test.ts"
       ],
-      "notes": "Felder, lokale Änderungen und VDB-Export vorhanden; dimensionslose Gitter und VDB-Import fehlen."
+      "notes": "Gyroidwerte sind ausdrücklich dimensionslos; Distanzfelder, allgemeine implizite Werte und explizite Längenkonvertierung bleiben getrennt. Kompakte Korrekturen, glatte Vereinigungen, sparse Octree-Extraktion und private räumliche Sample-Wiederverwendung sind umgesetzt. OpenVDB-Export speichert geprüfte Samples, Domäne und Transform. Ein allgemeiner VDB-Import und globale Subzelltopologienachweise werden dadurch nicht behauptet.",
+      "review": {
+        "scope_match": true,
+        "findings": "Gyroidwerte sind ausdrücklich dimensionslos; Distanzfelder, allgemeine implizite Werte und explizite Längenkonvertierung bleiben getrennt. Kompakte Korrekturen, glatte Vereinigungen, sparse Octree-Extraktion und private räumliche Sample-Wiederverwendung sind umgesetzt. OpenVDB-Export speichert geprüfte Samples, Domäne und Transform. Ein allgemeiner VDB-Import und globale Subzelltopologienachweise werden dadurch nicht behauptet."
+      }
     },
     {
       "id": "5.4",
@@ -281,11 +343,17 @@
       "source_line": 233,
       "source_end_line": 236,
       "source_sha256": "2fc2904a3583e60c7849dcb16b16a2b090cc37c15bce8164804a469da906f843",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Negativ-innen-Konvention für implizite Körper, typisierte Parameter und gültige Wertebereiche durchgängig verwenden.",
+        "Mathematische Voraussetzungen als Operatorverträge behandeln und von numerischen Ausführungsnachweisen unterscheiden."
+      ],
+      "evidence": [
+        "packages/compiler/index.ts",
+        "docs/mathematical-contracts.md"
+      ],
+      "notes": "Vorzeichen-, Einheiten- und Vertragsgrundlagen sind umgesetzt. Die vollständige Abdeckung aller folgenden mathematischen Operatoren und numerischen Voraussetzungen bleibt Gegenstand der Einzelabnahmen."
     },
     {
       "id": "6.1",
@@ -333,7 +401,7 @@
         "tests/geometry/structure.test.ts",
         "docs/structure-and-frames.md"
       ],
-      "notes": "Starre verschachtelte Rahmen und lokale native Auswertung sind umgesetzt; eine 20-µm-Nutänderung bei großen Weltkoordinaten ist real geprüft. Ein adaptiver numerischer Längenmaßstab, allgemeine Konditionierungsprüfung und durchgehende Fehlerfortpflanzung bleiben offen. GPU-Koordinaten sind noch gesondert zu behandeln."
+      "notes": "Starre verschachtelte Rahmen und lokale native Auswertung sind umgesetzt; eine 20-µm-Nutänderung bei großen Weltkoordinaten ist real geprüft. Ein adaptiver numerischer Längenmaßstab, allgemeine Konditionierungsprüfung und durchgehende Fehlerfortpflanzung bleiben offen. GPU-/GLB-Netzpunkte erhalten jetzt lokale Ursprünge; adaptives LOD und allgemeine Präzisionszertifikate bleiben offen."
     },
     {
       "id": "6.3",
@@ -441,11 +509,20 @@
       "source_line": 401,
       "source_end_line": 420,
       "source_sha256": "cc915f453ad590dfeda4366fb71f3e462db468c0cf8c40d9258b3cfadd172204",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Feld-CSG mit min für Vereinigung, max für Schnitt und max(a,-b) für Differenz unter der dokumentierten Randkonvention ausführen.",
+        "Regularisierte Festkörpersemantik ausdrücklich behandeln und niederdimensionale Reste nicht als Volumenkörper freigeben.",
+        "CSG-Werte nicht allgemein als exakte euklidische Distanzen ausgeben."
+      ],
+      "evidence": [
+        "packages/compiler/index.ts",
+        "workers/cad-occt/fields.py",
+        "workers/cad-occt/geometry.py",
+        "tests/unit/field-contracts.test.ts"
+      ],
+      "notes": "CSG-Feldformeln, Semantikabstufung, nativer regularize-Operator und Solid-Gates existieren. Vollständige Regularisierungs-/Nullresultat-/niederdimensionale Grenzfallabnahme steht noch aus."
     },
     {
       "id": "6.8",
@@ -572,11 +649,19 @@
       "source_line": 545,
       "source_end_line": 580,
       "source_sha256": "fd1d992ba68d92bbc31c42b4400661f841155b9ff5da3d69ba9d94f15fa10083",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Extrusion mit gültigem Profil und Deckflächen sowie explizite Achsrotation implementieren.",
+        "Loft-Korrespondenzen kontrollieren und Sweep-Rahmen auch bei verschwindender Krümmung definieren.",
+        "Twist, Profilskalierung, Endkappen und Selbstkontakt als eigene Parameter oder Prüfungen behandeln."
+      ],
+      "evidence": [
+        "workers/cad-occt/advanced.py",
+        "packages/compiler/index.ts",
+        "tests/geometry/test_native.py"
+      ],
+      "notes": "Native Grundoperatoren sind vorhanden. Allgemeine Querschnittskorrespondenz, expliziter Twist-/Skalierungsvertrag und Sweep-Selbstkontaktprüfung bleiben offen."
     },
     {
       "id": "6.14",
@@ -761,11 +846,19 @@
       "source_line": 825,
       "source_end_line": 831,
       "source_sha256": "2a1a9d681a92544d41b71c0220d398e8392c7985a42eaa2fa62415b3d0e73332",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Den verpflichtenden Kern aus Skalaren, Vektoren, Matrizen, Einheiten, affinen Abbildungen, sicheren Funktionen, Primitiven, Profilen, Konstruktionen, CSG, Auswahl und Analyse abdecken.",
+        "NURBS, kompakte Felder, Ableitungen und adaptive Verfeinerung mit ihren deklarierten Grenzen ausbauen; Darstellungs-/Animationsschichten getrennt halten."
+      ],
+      "evidence": [
+        "packages/compiler/index.ts",
+        "packages/compiler/expressions.ts",
+        "packages/semantic-ir/schema.ts",
+        "docs/implementation-status.md"
+      ],
+      "notes": "Die meisten Kernfamilien sind registriert. Vollständiger Matrix-/Analyseumfang, adaptive Verfeinerung und die in 9.2 offenen Operatoren verhindern noch eine Gesamtfreigabe."
     },
     {
       "id": "7",
@@ -773,11 +866,19 @@
       "source_line": 832,
       "source_end_line": 833,
       "source_sha256": "3aaa4f1af90e7cb3e420912eef7c8a7818d0169a1a03d71f373c08439298cbee",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "informational",
+      "status": "verified",
+      "requirements": [
+        "Kapitelüberschrift unverändert erhalten und Anforderungen in den separat gebundenen Unterabschnitten prüfen."
+      ],
+      "evidence": [
+        "Mathematik_First_3D_MCP_Bauplan.md"
+      ],
+      "notes": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis."
+      }
     },
     {
       "id": "7.1",
@@ -785,11 +886,18 @@
       "source_line": 834,
       "source_end_line": 839,
       "source_sha256": "6838d8796e6a8497cdf577bf86586e0b017283f5c933b70ef95e14c1d6923801",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Vorhandene Parameter und geeignete Constraints vor Kurven-/Flächen-, Feld- und Meshänderungen bevorzugen.",
+        "Maßhaltige parametrische Modelle nicht still in global zu bearbeitende Meshes umwandeln."
+      ],
+      "evidence": [
+        "packages/mcp-gateway/tools.ts",
+        "scripts/llm-eval.ts",
+        "docs/structure-and-frames.md"
+      ],
+      "notes": "Tatsächliche LLM-Aufgaben verwenden Parameter, einzelne Vorkommen und lokale Felder. Eine breite Evaluation der Auswahl zwischen allen Repräsentations- und Solverpfaden bleibt offen."
     },
     {
       "id": "7.2",
@@ -821,11 +929,19 @@
       "source_line": 870,
       "source_end_line": 907,
       "source_sha256": "fc6b1860a02297cf7801c810193a0a61291c32427747a16b092a66fd3c926b98",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Lokale räumliche Deformation aus kompakt gestützten Vektorfeldern mit hinreichender globaler Ableitungsschranke kleiner eins konstruieren.",
+        "Den Faktor 135/64 und die Summe über Stützen konservativ zur Injektivitätsprüfung verwenden; Stichproben-Jacobians nicht als Ersatz nehmen.",
+        "Inverse Feldauswertung, Rechenbudget, Auswertungsfehler und geänderte Distanzsemantik explizit führen."
+      ],
+      "evidence": [
+        "packages/compiler/index.ts",
+        "workers/cad-occt/fields.py",
+        "tests/unit/field-contracts.test.ts"
+      ],
+      "notes": "Kompakte Deformation, konservative Vertragsschranke und begrenzte iterative Inversion sind vorhanden. Vollständige analytisch/numerische Fehlerabdeckung und Deformationskorpus bleiben offen."
     },
     {
       "id": "7.4",
@@ -855,11 +971,18 @@
       "source_line": 921,
       "source_end_line": 933,
       "source_sha256": "031430fde3747f15daf23063887ae76e260aa1db1cbb781da3a7f96f6df59d41",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "conditional",
+      "status": "partial",
+      "requirements": [
+        "Lokale formbewahrende Netzdeformation nur für ausdrücklich maßgebliche Meshobjekte verwenden.",
+        "Punkte außerhalb der erlaubten Region fixieren, Zielpunkte binden, Gewichte nichtnegativ und lokale Rotationen in SO(3) halten.",
+        "Kollisionsfreiheit separat prüfen; kleiner Energiewert ist kein Nachweis."
+      ],
+      "evidence": [
+        "packages/semantic-ir/schema.ts",
+        "docs/implementation-status.md"
+      ],
+      "notes": "Die vorgeschlagene ARAP-Energie ist eine mögliche Methode für den Mesh-Ausweichpfad. Eine registrierte lokale Meshdeformation und ihre Kollisions-/Randprüfungen sind noch nicht umgesetzt."
     },
     {
       "id": "7.6",
@@ -867,11 +990,19 @@
       "source_line": 934,
       "source_end_line": 949,
       "source_sha256": "147fd53990d3295e2d76dc9d8f7bbd655e496e50e7af463b5ce59acdeb16d7ca",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Kompatible grobe Form und feinere Detail-Layer mit eigenen IDs, Stützen und Toleranzen führen.",
+        "Erlaubte geometrische Änderungsregion von größerer Berechnungsregion mit Randzone unterscheiden.",
+        "Gekoppelte Solver-Fernwirkungen fixieren oder ausdrücklich als zusätzliche Änderung ausweisen."
+      ],
+      "evidence": [
+        "packages/semantic-ir/schema.ts",
+        "packages/compiler/field-regions.ts",
+        "packages/validation/index.ts"
+      ],
+      "notes": "Kompakte lokale Felder und Schutzregionen existieren. Explizite Mehrskalen-Layer, getrennte Änderungs-/Berechnungsregionen und adaptive lokale Neuvernetzung fehlen."
     },
     {
       "id": "7.7",
@@ -879,11 +1010,19 @@
       "source_line": 950,
       "source_end_line": 959,
       "source_sha256": "55836ef50412fbbe035e1e0769b43559560c0254afed4337638f0c854d2228bc",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Revision und Detail messen; Ziel, Einheiten, Toleranz, Schutz und Änderungsregion bestimmen.",
+        "Betroffene Parameter/Abhängigkeiten planen, Budget einhalten und Kandidat berechnen.",
+        "Maße, Geometriedifferenz und geschützte Regionen vor Commit prüfen; Fehler erhalten die Ausgangsrevision."
+      ],
+      "evidence": [
+        "packages/model-service/index.ts",
+        "packages/validation/index.ts",
+        "scripts/llm-eval.ts"
+      ],
+      "notes": "Der tatsächliche lokale Kandidaten-/Prüf-/Commitpfad ist getestet. Allgemeine explizite Änderungsregionsverträge und flächenweite Geometriedifferenznachweise fehlen noch."
     },
     {
       "id": "8",
@@ -891,11 +1030,19 @@
       "source_line": 960,
       "source_end_line": 961,
       "source_sha256": "45613d2d29d12b9292d940e0dbd3a67c6494cd2188311805493b9a6bffb238a6",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "informational",
+      "status": "verified",
+      "requirements": [
+        "Kapitelüberschrift unverändert erhalten und Anforderungen in den separat gebundenen Unterabschnitten prüfen."
+      ],
+      "evidence": [
+        "Mathematik_First_3D_MCP_Bauplan.md"
+      ],
+      "notes": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis."
+      }
     },
     {
       "id": "8.1",
@@ -945,11 +1092,19 @@
       "source_line": 1011,
       "source_end_line": 1022,
       "source_sha256": "9cbd7799f1c6d7f4d46e299d4acd5011159fb895816531e9cc8983f5725e3bb4",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Feature-Herkunft, semantische Rollen, ursprüngliche Referenzen und native Operationsgeschichte zur Identität verwenden.",
+        "Eindeutige Nachfolge über Änderungen prüfen und Mehrdeutigkeit einschließlich Split/Merge ausdrücken.",
+        "Geometrische Anker nur als zusätzliche Information verwenden; keine stillschweigende ähnlichste Fläche wählen."
+      ],
+      "evidence": [
+        "packages/model-service/selections.ts",
+        "workers/cad-occt/topology.py",
+        "tests/geometry/test_topology.py"
+      ],
+      "notes": "Revisionstreue native Herkunft und eindeutige Rebind-Pfade sind für registrierte Builder implementiert. Allgemeine Import-/OCAF-Herkunft und vollständige Eins-zu-viele-/Viele-zu-eins-Auswahl bleiben offen; nicht bewiesene Fälle werden abgewiesen."
     },
     {
       "id": "8.4",
@@ -957,11 +1112,19 @@
       "source_line": 1023,
       "source_end_line": 1035,
       "source_sha256": "222d46f830543f3e54bfbb0d6dc226f4fcc58eb1443d666fe90ecd72768b514a",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Opaque serverseitige Handles an Nutzer/Policy, Modell, Revision, Herkunft, Auswahlstatus und Ablauf binden; separat autorisieren.",
+        "Neue Revision ausdrücklich neu auflösen oder verwerfen.",
+        "Viewer-Treffer mit nativer Herkunft, Bauteil, baryzentrischem Punkt und lokalem Rahmen statt bloßem Dreiecksindex führen; Richtungsbezüge benennen."
+      ],
+      "evidence": [
+        "packages/model-service/selections.ts",
+        "packages/viewer/app.ts",
+        "tests/security/transactions.test.ts"
+      ],
+      "notes": "Opaque revisionsgebundene Handles und native Flächenherkunft sind vorhanden. Vollständige baryzentrische Treffer-/Kamera-/lokale Rahmenanker werden im Viewer noch nicht als semantische Auswahlbindung gespeichert."
     },
     {
       "id": "8.5",
@@ -969,11 +1132,18 @@
       "source_line": 1036,
       "source_end_line": 1048,
       "source_sha256": "9c2df1514e8b47ab476588f3605a427fa2ab2a0b1389fc97646fceb4bb776727",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Kompaktes Detailpaket aus Rolle, Geometriefakten, Annahmen, Konstruktion, Parametern, Rahmen, Nachbarschaft, Messungen, Schutz, Abhängigkeiten und Unsicherheit liefern.",
+        "Diagnostische Vergrößerung, Schnitt und beschriftete Draufsicht ergänzen; Suchhilfen nie als Maß-/Rechtenachweis verwenden."
+      ],
+      "evidence": [
+        "packages/model-service/index.ts",
+        "packages/model-service/structure.ts",
+        "packages/viewer/app.ts"
+      ],
+      "notes": "Strukturierte Feature-/Flächeninspektion ist umfangreich vorhanden. Vollständige geometrische Adjazenz, diagnostische Schnitt-/Beschriftungsartefakte und per-Entity-Qualitätsgliederung bleiben offen."
     },
     {
       "id": "8.6",
@@ -981,11 +1151,19 @@
       "source_line": 1049,
       "source_end_line": 1056,
       "source_sha256": "284663d17174b04bac3d5bfd6352ee94d4e5713e0af4fe6eea61b17c61c83e78",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Fremdmodelle sicher dekodieren, Einheiten und Komponenten prüfen und primitive/symmetrische Features als Hypothesen anpassen.",
+        "Residualfehler, Achsen/Parameter und Stichprobenabdeckung melden; unbekannte Konstruktionsgeschichte und verdeckte Geometrie nicht erfinden.",
+        "Konfidenzen nur nach Kalibrierung numerisch behaupten, sonst begründet kategorisieren."
+      ],
+      "evidence": [
+        "packages/model-service/index.ts",
+        "workers/cad-occt/geometry.py",
+        "packages/model-service/export-package.ts"
+      ],
+      "notes": "Isolierter Import und sichtbare unbekannte Historie sind vorhanden. Primitive-/Symmetrie-Fitting mit tatsächlichen Residuen und Abdeckungsberichten fehlt."
     },
     {
       "id": "8.7",
@@ -1020,11 +1198,19 @@
       "source_line": 1062,
       "source_end_line": 1063,
       "source_sha256": "18829c754a6cd560aa6cb983e4140df513720c9a1becd3ab74f64be87e2852f5",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "informational",
+      "status": "verified",
+      "requirements": [
+        "Kapitelüberschrift unverändert erhalten und Anforderungen in den separat gebundenen Unterabschnitten prüfen."
+      ],
+      "evidence": [
+        "Mathematik_First_3D_MCP_Bauplan.md"
+      ],
+      "notes": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis."
+      }
     },
     {
       "id": "9.1",
@@ -1077,11 +1263,18 @@
       "source_line": 1093,
       "source_end_line": 1111,
       "source_sha256": "7624f375bd4bb1fa3701e6d4f3a4d98c089848cb480f30e95f32209a86988d26",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Jeden Operator mit Version, Eingangstypen, Semantik, Parametern, Voraussetzungen, Wirkungsregion, Ableitungen, Invalidierung und Pflichtvalidatoren registrieren.",
+        "Ressourcenmodell, Determinismus, Abbruch, Kernelversion, Fehler, Tests und Autorisierung ergänzen; unbelegte Aussagen ausschließen."
+      ],
+      "evidence": [
+        "packages/compiler/index.ts",
+        "packages/mcp-gateway/tools.ts",
+        "docs/mathematical-contracts.md"
+      ],
+      "notes": "Compilerverträge, Limits und viele mathematische Einzelverträge sind vorhanden. Vollständig einheitliche maschinenlesbare Operator-Nachweis-/Ableitungs-/Abbruchmetadaten bleiben offen."
     },
     {
       "id": "9.4",
@@ -1124,11 +1317,19 @@
       "source_line": 1119,
       "source_end_line": 1120,
       "source_sha256": "654477e8b1f7d28daafb6451ee7896c66a215f17cf96cfb6f37635568d13aae9",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "informational",
+      "status": "verified",
+      "requirements": [
+        "Kapitelüberschrift unverändert erhalten und Anforderungen in den separat gebundenen Unterabschnitten prüfen."
+      ],
+      "evidence": [
+        "Mathematik_First_3D_MCP_Bauplan.md"
+      ],
+      "notes": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis."
+      }
     },
     {
       "id": "10.1",
@@ -1136,11 +1337,18 @@
       "source_line": 1121,
       "source_end_line": 1124,
       "source_sha256": "b4b0d661ada62c6b71c487f87f2a707990e4b5d1cfb7e995c9419541f692a90b",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Fachlich erkennbare Werkzeuge statt eines Werkzeugs pro mathematischem Operator bereitstellen.",
+        "Versionierte strikte Ein- und Ausgangsschemata sowie structuredContent und verständliche Textdarstellung verwenden."
+      ],
+      "evidence": [
+        "packages/mcp-gateway/tools.ts",
+        "packages/semantic-ir/schema.ts",
+        "tests/protocol/http.test.ts"
+      ],
+      "notes": "22 fachliche Werkzeuge mit strikten Eingängen und beiden strukturierten Protokolladaptern sind vorhanden. Das gemeinsame Ausgangsschema beschreibt bisher nur Status/Fehler/Trace-ID mit offenen Zusatzfeldern; vollständige werkzeugspezifische Ausgangsverträge bleiben offen."
     },
     {
       "id": "10.2",
@@ -1148,11 +1356,18 @@
       "source_line": 1125,
       "source_end_line": 1149,
       "source_sha256": "ebac2c39b49b460cbece8e6ff7be9550c6f4a3800f17679ecc311e5816cd6df3",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Die aufgeführten fachlichen Werkzeugaufgaben samt ihren tatsächlichen Modell-/Job-/Artefaktwirkungen anbieten.",
+        "Annotationen nach allen dauerhaften Wirkungen vergeben; serverseitige Rechte unabhängig von Hosthinweisen erzwingen."
+      ],
+      "evidence": [
+        "packages/mcp-gateway/tools.ts",
+        "packages/model-service/index.ts",
+        "tests/protocol/http.test.ts"
+      ],
+      "notes": "Alle genannten Werkzeugnamen plus Modellsuche, Struktur, Solver und Rebuild sind vorhanden. cad_render liefert bisher Geometrievorschauen; serverseitig erzeugte Schnitt-/beschriftete Detailbilder bleiben offen. Die Annotationen berücksichtigen auch Jobs und Exportartefakte."
     },
     {
       "id": "10.3",
@@ -1160,11 +1375,19 @@
       "source_line": 1150,
       "source_end_line": 1162,
       "source_sha256": "d3413e123a21bbdd4f75ce34a2e284b3c569d775aca314b084e1ebf98f02cc0a",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Logische revisionsgebundene Modell-/Feature-/Validierungs-/Artefakt-URIs bereitstellen.",
+        "Hostfähige kurzlebige Abrufwege gesondert umsetzen; jeden Abruf autorisieren und opaque IDs nicht als alleinige Berechtigung behandeln."
+      ],
+      "evidence": [
+        "packages/mcp-gateway/tools.ts",
+        "packages/model-service/index.ts",
+        "packages/mcp-gateway/app.ts",
+        "tests/protocol/http.test.ts"
+      ],
+      "notes": "Logische Ressourcen und authentifizierte Artefaktabrufe sind umgesetzt; kurzlebige Abruf-URLs fehlen. Beliebige Binärdarstellung im Host wird nicht vorausgesetzt."
     },
     {
       "id": "10.4",
@@ -1172,11 +1395,18 @@
       "source_line": 1163,
       "source_end_line": 1167,
       "source_sha256": "5584549a08f6259eda6f8bf377b7390cdfe00fdb8e3b9e0831cdeee7398e5652",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Kompakte strukturierte Ergebnisse und Artefaktverweise statt vollständiger Geometrie in Toolantworten liefern.",
+        "Antwortgröße begrenzen und Paging, Feature-Filter sowie räumliche Eingrenzung anbieten."
+      ],
+      "evidence": [
+        "packages/model-service/index.ts",
+        "packages/model-service/structure.ts",
+        "packages/mcp-gateway/app.ts"
+      ],
+      "notes": "Antwortlimit, Feature-/Modell-/Strukturseiten und AABB-Suche sind umgesetzt. Maximale Struktur-/Detailpakete können noch am Antwortlimit scheitern; vollständige feldweise Projektion und räumliche Ausschnittartefakte bleiben zu prüfen."
     },
     {
       "id": "11",
@@ -1184,11 +1414,19 @@
       "source_line": 1168,
       "source_end_line": 1169,
       "source_sha256": "d18a0ef9756b36feeb59f3beea855130eab20eb42d11e9afff4361338192175c",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "informational",
+      "status": "verified",
+      "requirements": [
+        "Kapitelüberschrift unverändert erhalten und Anforderungen in den separat gebundenen Unterabschnitten prüfen."
+      ],
+      "evidence": [
+        "Mathematik_First_3D_MCP_Bauplan.md"
+      ],
+      "notes": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis."
+      }
     },
     {
       "id": "11.1",
@@ -1196,11 +1434,25 @@
       "source_line": 1170,
       "source_end_line": 1175,
       "source_sha256": "3fd79a18925ff999d44543d8556f23f9ea4004a81ff8668a97d8e3f203e058b3",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "verified",
+      "requirements": [
+        "Schreibende Operationen auf vorhandene Modelle an Modell, Basisrevision, Idempotenz und geprüften Nutzer-/Mandantenkontext binden.",
+        "Dezimalstrings bis zur kontrollierten Konvertierung erhalten und ungültige Einheiten, nichtendliche Zahlen sowie AST-Ergebnisse ablehnen."
+      ],
+      "evidence": [
+        "packages/semantic-ir/schema.ts",
+        "packages/semantic-ir/units.ts",
+        "packages/mcp-gateway/auth.ts",
+        "packages/model-service/index.ts",
+        "tests/unit/compiler.test.ts",
+        "tests/security/transactions.test.ts"
+      ],
+      "notes": "Strikte Argumente akzeptieren keine frei behaupteten Nutzer-/Mandantenfelder. Authentifizierung liefert den Principal, Modelloperationen prüfen Eigentum, Basis und Deduplizierung. Dezimalstrings und typisierte Einheiten werden vor der begrenzten Zahlenkonvertierung geprüft; manipulierte Payloads, Zahlen und Wiederholungen sind negativ getestet.",
+      "review": {
+        "scope_match": true,
+        "findings": "Strikte Argumente akzeptieren keine frei behaupteten Nutzer-/Mandantenfelder. Authentifizierung liefert den Principal, Modelloperationen prüfen Eigentum, Basis und Deduplizierung. Dezimalstrings und typisierte Einheiten werden vor der begrenzten Zahlenkonvertierung geprüft; manipulierte Payloads, Zahlen und Wiederholungen sind negativ getestet."
+      }
     },
     {
       "id": "11.2",
@@ -1208,11 +1460,24 @@
       "source_line": 1176,
       "source_end_line": 1229,
       "source_sha256": "54ecfe0be08d0eb78bb029dd6252393bc088f2fd29cccb53aead2c39a8c46048",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "verified",
+      "requirements": [
+        "Strikten set_parameter-Eingang mit begrenzten IDs, Operationsliste, Parameternamen, expected/value und typisierten Dezimalgrößen umsetzen.",
+        "Neue Patchvarianten ebenso strikt halten; Parameterexistenz/-typ, Einheitendimension, Wertebereich, Rechte und expected zusätzlich semantisch prüfen."
+      ],
+      "evidence": [
+        "packages/semantic-ir/schema.ts",
+        "packages/compiler/index.ts",
+        "packages/semantic-ir/units.ts",
+        "tests/unit/compiler.test.ts",
+        "tests/security/transactions.test.ts"
+      ],
+      "notes": "Diskriminierte strikte Patchvarianten ersetzen untypisierte Payloads. Schema und Semantik prüfen die geforderten Bindungen getrennt. Die vorhandenen Tests verwerfen gefälschte Validierungen, ausführbare Zusatzfelder, unbekannte Parameter, Einheitenfehler und veraltete Basiszustände.",
+      "review": {
+        "scope_match": true,
+        "findings": "Diskriminierte strikte Patchvarianten ersetzen untypisierte Payloads. Schema und Semantik prüfen die geforderten Bindungen getrennt. Die vorhandenen Tests verwerfen gefälschte Validierungen, ausführbare Zusatzfelder, unbekannte Parameter, Einheitenfehler und veraltete Basiszustände."
+      }
     },
     {
       "id": "11.3",
@@ -1220,11 +1485,23 @@
       "source_line": 1230,
       "source_end_line": 1269,
       "source_sha256": "4f1da058d08e0f4c342107a6e864d538ef683622ba47a3227a4cbce51a454afe",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "verified",
+      "requirements": [
+        "Die exemplarische Änderung einer Nuttiefe von 0,80 auf 0,82 mm als isolierten Kandidaten ausführen.",
+        "Commit ausschließlich mit dem an denselben Kandidaten gebundenen serverseitigen Prüfnachweis erlauben; ein behauptetes validated-Flag nicht akzeptieren."
+      ],
+      "evidence": [
+        "scripts/llm-eval.ts",
+        "tests/unit/compiler.test.ts",
+        "tests/security/transactions.test.ts",
+        "reports/llm-eval-structure.json"
+      ],
+      "notes": "Der gespeicherte tatsächliche LLM-Lauf führt die Nutänderung samt gemessener Tiefe, Schutzbedingungen und STEP-Roundtrip aus. Negative Schema-/Transaktionstests verhindern frei behauptete Validierung und Commit mit falschem oder veraltetem Digest. Der Originaltext bleibt als Beispiel gekennzeichnet.",
+      "review": {
+        "scope_match": true,
+        "findings": "Der gespeicherte tatsächliche LLM-Lauf führt die Nutänderung samt gemessener Tiefe, Schutzbedingungen und STEP-Roundtrip aus. Negative Schema-/Transaktionstests verhindern frei behauptete Validierung und Commit mit falschem oder veraltetem Digest. Der Originaltext bleibt als Beispiel gekennzeichnet."
+      }
     },
     {
       "id": "11.4",
@@ -1232,11 +1509,19 @@
       "source_line": 1270,
       "source_end_line": 1283,
       "source_sha256": "1a762367f8361df002338519b147113585c4593ab1cede27b52c80b5e6e06728",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Einheitliche Ergebnisdaten mit Status, Modell-/Revisions-/Jobbindung, Messungen, Nachweisen, Warnungen, Fehlern, Annahmen und Artefakt-/Folgeaktionsangaben definieren.",
+        "Fachliche Fehlercodes von adaptergerechten Protokollfehlern trennen und keine internen Pfade, Tokens oder Stacktraces ausgeben."
+      ],
+      "evidence": [
+        "packages/mcp-gateway/tools.ts",
+        "packages/semantic-ir/errors.ts",
+        "packages/model-service/index.ts",
+        "tests/protocol/http.test.ts"
+      ],
+      "notes": "Status, Fehler und Trace-ID sowie sichere Fehlerbehandlung sind vorhanden. Vollständige werkzeugspezifische Ergebnisschemata und vereinheitlichte Folgeaktions-/Nullfelder bleiben mit 10.1 offen."
     },
     {
       "id": "12",
@@ -1244,11 +1529,19 @@
       "source_line": 1284,
       "source_end_line": 1285,
       "source_sha256": "2525ea833a32e031d0de7899ce2a7258c1ca13ad98cf97f773632ce943c6ff21",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "informational",
+      "status": "verified",
+      "requirements": [
+        "Kapitelüberschrift unverändert erhalten und Anforderungen in den separat gebundenen Unterabschnitten prüfen."
+      ],
+      "evidence": [
+        "Mathematik_First_3D_MCP_Bauplan.md"
+      ],
+      "notes": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis."
+      }
     },
     {
       "id": "12.1",
@@ -1256,11 +1549,19 @@
       "source_line": 1286,
       "source_end_line": 1291,
       "source_sha256": "04b0fe7763dd10e6afa8ad4c1d927028e90921f26ef992eea65c14abbf01cd8d",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Sicherheitsrelevante Server-Hooks unabhängig von optionalen Host-Hooks synchron, begrenzt und blockierend ausführen.",
+        "Pflicht-Auditfehler vor Veröffentlichung blockieren; nachgelagerte Telemetriefehler dürfen einen vollzogenen Commit nicht zurücknehmen."
+      ],
+      "evidence": [
+        "hooks/server-registry/index.ts",
+        "packages/model-service/index.ts",
+        "packages/job-service/index.ts",
+        "tests/security/transactions.test.ts"
+      ],
+      "notes": "Statisches Pflichtregister, synchrone Prüfungen, Audit und Commit-Outbox sind vorhanden. Vollständige Abdeckung aller Ereignisse und Zeitbudget-/Auditfehler wird mit der Hook-Matrix getrennt geprüft."
     },
     {
       "id": "12.2",
@@ -1268,11 +1569,19 @@
       "source_line": 1292,
       "source_end_line": 1312,
       "source_sha256": "3e9f6088c44b07bd3815f66fab98196c61ebbd5403c9301b635e0ff1baacc679",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Jede Zeile der Hook-Matrix mit Zeitpunkt, verpflichtender Prüfung und blockierender beziehungsweise nachgelagerter Fehlerbehandlung abdecken.",
+        "Insbesondere Publish-Grenze, Fehler- und Abbruchpfad, Ressourcenfreigabe und Erhalt der Ausgangsrevision nachweisen."
+      ],
+      "evidence": [
+        "hooks/server-registry/index.ts",
+        "packages/model-service/index.ts",
+        "packages/job-service/index.ts",
+        "tests/security/recovery.test.ts"
+      ],
+      "notes": "Die Kernereignisse vor/nach Request, Import, Kompilierung, Auswahl, Worker, Validierung, Commit und Export sind registriert. on_failure/on_cancel sind Implementierungspfade, aber noch keine vollständigen Registerereignisse; before_publish fehlt bei weiterhin deaktivierter Veröffentlichung. Eine zeilenweise Pflichtprüfungsabnahme bleibt offen."
     },
     {
       "id": "12.3",
@@ -1280,11 +1589,18 @@
       "source_line": 1313,
       "source_end_line": 1323,
       "source_sha256": "6ba178d01d799ed3112057e5e18e073ccf7c8e12790479f9d9bf64c23cc7051e",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Hooks ausschließlich aus einem freigegebenen versionierten Register laden, mit unveränderlichem minimalem Kontext und gebundenen Kandidaten-/Policyhashes.",
+        "Nur allow/deny beziehungsweise vertrauenswürdig gebundene Freigabe liefern; Reparaturen als sichtbare neue Patches behandeln."
+      ],
+      "evidence": [
+        "hooks/server-registry/index.ts",
+        "packages/policy/index.ts",
+        "packages/model-service/index.ts"
+      ],
+      "notes": "Dynamisches Laden aus Modellen ist ausgeschlossen. Vollständig typisierte unveränderliche Hook-Kontexte und ein tatsächlich implementierter aktionsgebundener Freigabevertrag fehlen noch."
     },
     {
       "id": "12.4",
@@ -1292,11 +1608,18 @@
       "source_line": 1324,
       "source_end_line": 1348,
       "source_sha256": "2f3f52fac5eb18ed6cf4869b9cd23aa3716b58a135e22a77facc058a31995237",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Die beispielhaften Defaultverbote und Pflichtgates mit tatsächlicher Policy abgleichen.",
+        "Reparaturversuche begrenzen, Maße erhalten und neue Kandidatenhashes verlangen; YAML nicht als MCP-Standard ausgeben."
+      ],
+      "evidence": [
+        "hooks/server-registry/index.ts",
+        "packages/policy/index.ts",
+        "docs/architecture.md"
+      ],
+      "notes": "Die Datei bleibt als eigener Konfigurationsentwurf erkennbar. Pflichtgates und Verbote existieren im Code; ein vollständiger begrenzter Reparatur- und Freigabevertrag ist noch offen."
     },
     {
       "id": "12.5",
@@ -1304,11 +1627,17 @@
       "source_line": 1349,
       "source_end_line": 1355,
       "source_sha256": "1a78440018274d1d0f5dcc29f371870abf93757f0396a5b648b1f788e9353289",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Automatische Reparaturen auf zuvor erlaubte unveränderte Ausgangsgeometrie beziehungsweise explizit freigegebene Änderungen begrenzen.",
+        "Jeden Versuch mit Ursache, Patch, Revision, Kosten und Absichtsvergleich speichern und nach begrenzten Versuchen stoppen."
+      ],
+      "evidence": [
+        "packages/model-service/index.ts",
+        "packages/job-service/index.ts"
+      ],
+      "notes": "Der Dienst verändert keine Maßtoleranzen oder Schutzbedingungen automatisch; Revert und neue Kandidaten werden erneut geprüft. Ein ausdrücklicher Reparaturversuchsvertrag mit Kosten-/Ursachenhistorie und Retry-Budget bleibt offen."
     },
     {
       "id": "13",
@@ -1316,11 +1645,18 @@
       "source_line": 1356,
       "source_end_line": 1399,
       "source_sha256": "af0a7dfd2c0906423b0977d24ec94b63d6f7c96c1706cde2437480e12af55452",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "conditional",
+      "status": "partial",
+      "requirements": [
+        "Optionale Host-Hooks nur bei nachgewiesener Hostunterstützung und vertrauenswürdiger schreibgeschützter Installation aktivieren.",
+        "Keine Geheimnisse, Netzanforderungen, Änderungen der Nutzerabsicht oder dynamischen Skripte aus Modelldaten erlauben.",
+        "Sicherheit bei fehlenden Host-Hooks erhalten; keine Webchat-Automatik oder internen Modellgedanken voraussetzen."
+      ],
+      "evidence": [
+        "scripts/llm-eval.ts",
+        "docs/compatibility-matrix.md"
+      ],
+      "notes": "Die Servergates funktionieren ohne Host-Hooks; tatsächliche LLM-Tests deaktivieren sie ausdrücklich. Beispiele sind keine aktivierte Webchat-Integration. Eine konkrete zusätzliche Hookinstallation benötigt ihre eigene Host-/Berechtigungsabnahme."
     },
     {
       "id": "14",
@@ -1328,11 +1664,19 @@
       "source_line": 1400,
       "source_end_line": 1401,
       "source_sha256": "a2701b6e2d1fc3236e8d1e1f4faa1bdfec80c860605a4a55222e2519d0defa0d",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "informational",
+      "status": "verified",
+      "requirements": [
+        "Kapitelüberschrift unverändert erhalten und Anforderungen in den separat gebundenen Unterabschnitten prüfen."
+      ],
+      "evidence": [
+        "Mathematik_First_3D_MCP_Bauplan.md"
+      ],
+      "notes": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis."
+      }
     },
     {
       "id": "14.1",
@@ -1340,11 +1684,18 @@
       "source_line": 1402,
       "source_end_line": 1413,
       "source_sha256": "637fa859f991604202232f5b889c195c526ac372a61f5adc876f315c61db6888",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Kandidaten-, Prüf-, Commit- und alternative Endzustände explizit führen.",
+        "Kandidat nie automatisch zum Modellkopf machen; Commitfähigkeit an gebundenen Prüfnachweis und tatsächliche Autorisierung binden."
+      ],
+      "evidence": [
+        "packages/model-service/index.ts",
+        "packages/job-service/index.ts",
+        "tests/security/transactions.test.ts"
+      ],
+      "notes": "Kandidaten, Prüfung, Commit, Stale-/Fehler-/Abbruch-/Discardzustände sind vorhanden. Der allgemeine aktionsgebundene needs_approval-Pfad bleibt mit Projektfreigaben offen."
     },
     {
       "id": "14.2",
@@ -1416,11 +1767,20 @@
       "source_line": 1432,
       "source_end_line": 1439,
       "source_sha256": "5039ff61b80219061ef81c9c82e0cbb224cc23a4cd47ba44b394371d1163951c",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Dauerhafte Besitzer-, Status-, Fortschritts-, Budget-, Heartbeat- und Ergebnisdaten unabhängig vom ursprünglichen Request halten.",
+        "Jobstatus/-abbruch revisions- und autorisierungsgebunden bis zum Worker ausführen; Transportende nicht als fachlichen Abbruch deuten.",
+        "Fertige Jobs weder automatisch extern versenden noch als fertigungstauglich ausgeben."
+      ],
+      "evidence": [
+        "packages/job-service/index.ts",
+        "packages/job-service/worker.ts",
+        "tests/security/scheduler.test.ts",
+        "tests/security/recovery.test.ts"
+      ],
+      "notes": "Dauerhafte Jobs, Leases/Fencing, Wiederaufnahme und tatsächlicher Workerabbruch sind getestet. Vollständige phasenbezogene Fortschritts-/Budgetmetadaten und realer Remote-Transportabbruch bleiben zu prüfen."
     },
     {
       "id": "14.5",
@@ -1428,11 +1788,20 @@
       "source_line": 1440,
       "source_end_line": 1474,
       "source_sha256": "f715337e10f8517ca98f4045125a3f7f43771d4e816a7aca0d183e4fd3567b99",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Autorisierung, Normalisierung, Deduplizierung, exakte Basis, Kompilierung, Gates und Ressourcenreservierung vor dauerhaftem Dispatch ausführen.",
+        "Worker mit Lease/Fencing isoliert auswerten, Kandidat unveränderlich speichern und nur geprüften gebundenen Kandidaten atomar übernehmen.",
+        "Konkurrierende Wiederholungen, Outbox, Abbruch und Fehlerbereinigung integrieren."
+      ],
+      "evidence": [
+        "packages/model-service/index.ts",
+        "packages/job-service/index.ts",
+        "tests/security/transactions.test.ts",
+        "tests/security/scheduler.test.ts"
+      ],
+      "notes": "Die Kernpipeline wird tatsächlich ausgeführt und getestet. Vollständiger Matrixabgleich aller Gate-/Freigabeverträge bleibt mit Kapitel 12 offen."
     },
     {
       "id": "14.6",
@@ -1440,11 +1809,19 @@
       "source_line": 1475,
       "source_end_line": 1479,
       "source_sha256": "1e8fe1ba587c736d53e9619ff61942c64baee7c14e3ade4e8af71e09734cafd7",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Revert als neue nachvollziehbare und erneut geprüfte Revision führen; zwischenzeitliche Änderungen nicht blind überschreiben.",
+        "Entwürfe verwerfen können und übernommene Historie im Aufbewahrungsrahmen erhalten.",
+        "Backup-Restore tatsächlich ausführen und überprüfen."
+      ],
+      "evidence": [
+        "packages/model-service/index.ts",
+        "packages/model-service/store.ts",
+        "tests/security/recovery.test.ts"
+      ],
+      "notes": "Revert-Kandidaten mit aktuellen Schutzbedingungen und tatsächlicher Restore sind vorhanden. Allgemeine Wiederherstellung über künftige Rollen-/Schema-/Archivgrenzen bleibt gesondert zu prüfen."
     },
     {
       "id": "15",
@@ -1452,11 +1829,19 @@
       "source_line": 1480,
       "source_end_line": 1481,
       "source_sha256": "fd2059d097765b1e898c0b9f87fcfbf2dfb385fecc6feb56f1773d8ba2f3ffe9",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "informational",
+      "status": "verified",
+      "requirements": [
+        "Kapitelüberschrift unverändert erhalten und Anforderungen in den separat gebundenen Unterabschnitten prüfen."
+      ],
+      "evidence": [
+        "Mathematik_First_3D_MCP_Bauplan.md"
+      ],
+      "notes": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis."
+      }
     },
     {
       "id": "15.1",
@@ -1464,11 +1849,19 @@
       "source_line": 1482,
       "source_end_line": 1494,
       "source_sha256": "4893a494780c7516c32969c6214ed50723be8f0e46c0279d553e6ad7bfb4b61d",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Dirty Features und transitive Abhängigkeiten bestimmen, unveränderte Teilgraphen wiederverwenden und lokale Änderungen lokal auswerten.",
+        "Nur tatsächlich betroffene Geometrie statt voller Szene neu berechnen; räumliche und algebraische Abhängigkeiten beachten."
+      ],
+      "evidence": [
+        "packages/compiler/index.ts",
+        "packages/job-service/index.ts",
+        "workers/cad-occt/field_cache.py",
+        "tests/geometry/structure.test.ts"
+      ],
+      "notes": "Feature-/Rahmeninvalidierung, native Caches und private Feld-Samples sind umgesetzt. Subfeature-Neuberechnung und lokale adaptive Tessellation/Remeshing bleiben offen."
     },
     {
       "id": "15.2",
@@ -1476,11 +1869,19 @@
       "source_line": 1495,
       "source_end_line": 1507,
       "source_sha256": "d65a67693f29a8ebd83de25c4eb674199fbc560a3f46fcb294c154538c28bf2c",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Inhaltsadressierte unveränderliche Cacheeinträge an Operation, Argumente, Eingänge, Registry, Toleranz, Einheiten, Numerik und gültige Herkunft binden.",
+        "Mandantenisolation und autorisierte Zugriffe auch bei identischen Hashes erhalten; Referenzen und Aufbewahrungsfrist bei GC beachten."
+      ],
+      "evidence": [
+        "packages/compiler/index.ts",
+        "packages/model-service/store.ts",
+        "packages/job-service/index.ts",
+        "workers/cad-occt/topology.py"
+      ],
+      "notes": "Native Archive prüfen exakte Dateibytes/Topologiefingerprints; Feldcache ist privat und versionsgebunden. Vollständige Referenz-/Fristpolitik über Vorschauen, alte Cachegenerationen und externe Backups bleibt offen."
     },
     {
       "id": "15.3",
@@ -1488,11 +1889,18 @@
       "source_line": 1508,
       "source_end_line": 1517,
       "source_sha256": "b55a9dd2599e75c011c434c7027ddf92c372b5a6a4705f836f0e91b5bbd34303",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Vorschau, validierte Modellrevision und Export mit eigenen Qualitätsaussagen trennen.",
+        "Vorschauvereinfachung kennzeichnen, erforderliche Modell-/Exportprüfungen beibehalten und frühen Bildern keinen validierten Status geben."
+      ],
+      "evidence": [
+        "packages/validation/index.ts",
+        "packages/model-service/export-package.ts",
+        "packages/viewer/app.ts"
+      ],
+      "notes": "Getrennte Qualitätszustände und Pflichtgates sind vorhanden. Zusätzliche Netz-/Fertigungsprofile und vollständige je-Profil-Exportprüfung bleiben offen."
     },
     {
       "id": "15.4",
@@ -1500,11 +1908,18 @@
       "source_line": 1518,
       "source_end_line": 1535,
       "source_sha256": "065e7725599810d220fe64727d7ab7c8635832e7bdf149a319b1fcb45a18bb97",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Dichte Rasterkosten V/h³ und schmales Band kA/h² nur unter ihren Voraussetzungen als Größenordnungsmodelle verwenden.",
+        "Mit h schrumpfende Bandbreite von fester physischer Bandbreite unterscheiden; sparse Speicherung nicht als Topologie-/Genauigkeitsgarantie ausgeben."
+      ],
+      "evidence": [
+        "workers/cad-occt/fields.py",
+        "workers/cad-occt/volume_io.py",
+        "benchmarks/run.ts"
+      ],
+      "notes": "Sparse Extraktion und VDB-Bandmetadaten sind vorhanden. Eigene Skalierungsregressionen über physische versus zellbezogene Bandbreite fehlen; kein pauschales Sparsity-Leistungsversprechen."
     },
     {
       "id": "15.5",
@@ -1536,11 +1951,18 @@
       "source_line": 1544,
       "source_end_line": 1558,
       "source_sha256": "2c1a7cc31bae9cf4c22f17225ddb8b57a45d5ddb74fdc89ee5cf1876bebfcb88",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Backend-, Kandidaten-, Vorschau-, Validierungs- und Exportlatenzen mit Hardware/Build/Netzweg und definierten Fixtures getrennt messen.",
+        "p50/p95, Stichproben, Fehlerquote, kalte/warme Läufe und tatsächlichen Scope dokumentieren; Zielwerte erst nach Abnahme versprechen."
+      ],
+      "evidence": [
+        "benchmarks/run.ts",
+        "reports/benchmark.json",
+        "scripts/llm-eval.ts"
+      ],
+      "notes": "Lokale Benchmarks mit Buildhash und Stichproben sowie separate LLM-Latenzen sind vorhanden. Große Export-/Validierungsprofile, klar getrennte Kaltläufe und breite Produktionsfixtures bleiben offen."
     },
     {
       "id": "15.7",
@@ -1548,11 +1970,19 @@
       "source_line": 1559,
       "source_end_line": 1565,
       "source_sha256": "eda7b0b38aa6d253142db60c7eb6dbac18867e21b1e6379b13974dde30975720",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "AST, Instanzen, Zellen, Dreiecke, Kontrollpunkte, Paarprüfungen, Solver, Zeit, RAM und Ausgabegröße begrenzen.",
+        "Schätzungen mit Reserven durch harte Grenzen ergänzen und begründete Alternativen bei Überschreitung liefern.",
+        "Vorschauqualität nur ausdrücklich reduzieren; Maßtoleranzen nicht still erhöhen."
+      ],
+      "evidence": [
+        "packages/compiler/index.ts",
+        "packages/job-service/worker.ts",
+        "workers/cad-occt/main.py"
+      ],
+      "notes": "Vorabschätzungen und harte native Budgets sind umgesetzt. Vollständige Alternative-/Region-/Budgetvorschläge und alle zukünftigen Mesh-/GPU-/Paarprüfungsgrenzen fehlen noch."
     },
     {
       "id": "16",
@@ -1560,11 +1990,19 @@
       "source_line": 1566,
       "source_end_line": 1567,
       "source_sha256": "e106022645868e87e0440243e173b3c6ab650acc7c791c5d8f9b3bee92b140b5",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "informational",
+      "status": "verified",
+      "requirements": [
+        "Kapitelüberschrift unverändert erhalten und Anforderungen in den separat gebundenen Unterabschnitten prüfen."
+      ],
+      "evidence": [
+        "Mathematik_First_3D_MCP_Bauplan.md"
+      ],
+      "notes": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis."
+      }
     },
     {
       "id": "16.1",
@@ -1572,11 +2010,19 @@
       "source_line": 1568,
       "source_end_line": 1573,
       "source_sha256": "0d2163b9e72ca398085b2ccd33d2b3faa786e94aa1b7772afdac7ab5e6cd9852",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Design-, Mess-, Kernel-, Approximations-, Tessellations-, Export-, Anschluss- und Winkeltoleranzen getrennt mit Einheiten/Regionen führen.",
+        "Globale Szenengröße darf kleine Details nicht verschlucken; unnötige Präzision darf keine unkontrollierte Vollberechnung erzwingen."
+      ],
+      "evidence": [
+        "packages/semantic-ir/schema.ts",
+        "packages/validation/index.ts",
+        "packages/model-service/export-package.ts",
+        "docs/preview-coordinates.md"
+      ],
+      "notes": "Mehrere Toleranzarten sind getrennt vorhanden, native Randtoleranzen werden geprüft und lokale Rahmen/Netzursprünge sind umgesetzt. Vollständig regionale Toleranz- und Unsicherheitsbudgets bleiben offen."
     },
     {
       "id": "16.2",
@@ -1608,11 +2054,17 @@
       "source_line": 1587,
       "source_end_line": 1599,
       "source_sha256": "bb0006dc76ece2982a701a6986195ae01f8ad795a2219f5931d2583994a36b26",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Feldfehler nur unter nachgewiesener regulärer Schlauchumgebung, eindeutigen Normalfasern, positiver Ableitungsschranke, Stetigkeit, Vorzeichenklammerung und Ausschluss weiterer Nullflächen in einen globalen Oberflächenfehler δ/m umrechnen."
+      ],
+      "evidence": [
+        "packages/compiler/index.ts",
+        "workers/cad-occt/fields.py",
+        "docs/mathematical-contracts.md"
+      ],
+      "notes": "Es wird keine solche globale Zertifizierung behauptet. Eine registrierte Implementierung mit nachgewiesenen Voraussetzungen und Gegenbeispielen fehlt noch."
     },
     {
       "id": "16.4",
@@ -1620,11 +2072,18 @@
       "source_line": 1600,
       "source_end_line": 1615,
       "source_sha256": "21670a48c211f7be6ddd7e4396b35834a93cdd007b6c29a4a9791a738e81419c",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Orientierungs- und Schnittentscheidungen mit gefilterten/exakten Prädikaten behandeln statt frei gewählter Epsilons.",
+        "Prädikate von exakten Konstruktionen unterscheiden und exportierte gerundete Geometrie erneut auf gültige Einbettung prüfen."
+      ],
+      "evidence": [
+        "workers/cad-occt/geometry.py",
+        "packages/model-service/glb.ts",
+        "tests/roundtrip/exports.test.ts"
+      ],
+      "notes": "Native Kerneloperationen und Export-Roundtrips sind vorhanden. Explizite exakte Mesh-Prädikate/-Konstruktionen und zertifizierte Selbstschnittprüfung fehlen."
     },
     {
       "id": "16.5",
@@ -1632,11 +2091,18 @@
       "source_line": 1616,
       "source_end_line": 1622,
       "source_sha256": "40beb2a3a2880adf665a24978277308ce400775a56e6c83277efd3e5ec9f84ae",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Keine heimliche Toleranzerhöhung, unkontrolliertes Verschweißen, ungemeldete Detailentfernung oder Ersetzung genauer Maße durch Vorschaurundung erlauben.",
+        "Alternative Konstruktion oder Reapproximation nur mit passender mathematischer Begründung und Nachweis; geänderte Genauigkeit als neue ausdrückliche Anforderung führen."
+      ],
+      "evidence": [
+        "packages/compiler/index.ts",
+        "packages/validation/index.ts",
+        "workers/cad-occt/main.py"
+      ],
+      "notes": "Toleranzänderungen und unbekannte/ungültige Konstruktionen werden kontrolliert abgelehnt. Vollständige Reparatur-/Reapproximations- und Anforderungsänderungsverträge bleiben offen."
     },
     {
       "id": "17",
@@ -1644,11 +2110,19 @@
       "source_line": 1623,
       "source_end_line": 1624,
       "source_sha256": "79b7559307e7e27e2a5559f85819bef027a13b1ed164b716c484fa0b214a39ba",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "informational",
+      "status": "verified",
+      "requirements": [
+        "Kapitelüberschrift unverändert erhalten und Anforderungen in den separat gebundenen Unterabschnitten prüfen."
+      ],
+      "evidence": [
+        "Mathematik_First_3D_MCP_Bauplan.md"
+      ],
+      "notes": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis."
+      }
     },
     {
       "id": "17.1",
@@ -1737,11 +2211,18 @@
       "source_line": 1674,
       "source_end_line": 1693,
       "source_sha256": "7c5907ac50d42031b02af3383cd10a54d24e09f2727c170bc26e10816912c105",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Prüfergebnisse an Kandidat, Ziel, Methode, Garantie, Anforderungen, Messung, Fehlergrenze, Abdeckung, Status, Engine und Quellgeometrie binden.",
+        "Null als unbekannte Grenze behandeln; nur registrierte serverseitige Validatoren erzeugen Nachweise."
+      ],
+      "evidence": [
+        "packages/validation/index.ts",
+        "packages/model-service/index.ts",
+        "tests/security/transactions.test.ts"
+      ],
+      "notes": "Serverseitige Berichte binden Kandidat, IR, Geometriefakten, Registry, Policy und Engine; manipulierte Commitdigests werden abgewiesen. Vollständige je-Check-Metadaten und ein striktes eigenes Nachweisschema bleiben offen."
     },
     {
       "id": "17.6",
@@ -1749,11 +2230,17 @@
       "source_line": 1694,
       "source_end_line": 1698,
       "source_sha256": "832899649662f3d0d66a27490652c5dac6440deb1342e15f7433ed17b22bea86",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Nur dem tatsächlichen Nachweisumfang entsprechende Ergebnisbezeichnungen verwenden; keine pauschale Perfektions-, Exaktheits- oder Fertigungssicherheitsbehauptung."
+      ],
+      "evidence": [
+        "packages/validation/index.ts",
+        "packages/model-service/index.ts",
+        "docs/implementation-status.md"
+      ],
+      "notes": "Registrierte Profile verwenden begrenzte Qualitätsstatus und unbekannte Fehlergrenzen. Vollständige Statusabdeckung aller künftigen Validatoren und werkzeugspezifischen Ausgabeschemata bleibt offen."
     },
     {
       "id": "18",
@@ -1761,11 +2248,19 @@
       "source_line": 1699,
       "source_end_line": 1700,
       "source_sha256": "0c68e8703f3d4fede4eb4ca6842d616e5754ec61f291da527fb88e496d3367e9",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "informational",
+      "status": "verified",
+      "requirements": [
+        "Kapitelüberschrift unverändert erhalten und Anforderungen in den separat gebundenen Unterabschnitten prüfen."
+      ],
+      "evidence": [
+        "Mathematik_First_3D_MCP_Bauplan.md"
+      ],
+      "notes": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis."
+      }
     },
     {
       "id": "18.1",
@@ -1773,11 +2268,18 @@
       "source_line": 1701,
       "source_end_line": 1706,
       "source_sha256": "7193f8f6c30447841f74139fca0c1c40cedcf99f64480a066d2acd4c6260b5cb",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Private Geometrie, Nutzer-/Mandantengrenzen, Ausführung, Ressourcen, Integrität und Veröffentlichungsziele im Bedrohungsmodell behandeln.",
+        "Auch normale CAD-Dateien und Metadaten als potenziell manipulierte Eingaben betrachten."
+      ],
+      "evidence": [
+        "docs/threat-model.md",
+        "docs/operating-runbook.md",
+        "tests/security/transactions.test.ts"
+      ],
+      "notes": "Das lokale Bedrohungsmodell und Negativtests sind vorhanden. Die vollständige Schutzregelabnahme, Projektrollen und reale externe Hostumgebung bleiben gesondert offen."
     },
     {
       "id": "18.2",
@@ -1785,11 +2287,19 @@
       "source_line": 1707,
       "source_end_line": 1722,
       "source_sha256": "f05d99a681e1f9d0eabc32238b29c033f0ce4fd697eb4562c8c96f7d16722725",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Alle Risiken der Schutzregeltabelle mit konkreter Durchsetzung und Negativtests abdecken, einschließlich Metadateninjektion, AST-Ausführung, Parser, Pfade/Archive, SSRF, ACL, Geheimnisse, Budgets, Historie, Publikation und Hooks."
+      ],
+      "evidence": [
+        "docs/threat-model.md",
+        "packages/policy/index.ts",
+        "packages/job-service/worker.ts",
+        "tests/security/transactions.test.ts",
+        "tests/security/recovery.test.ts"
+      ],
+      "notes": "Strikte ASTs, private Artefakte, isolierte Parser, Blockierung externer Referenzen, Rechte-, Budget- und Wiederherstellungstests sind vorhanden. Breiter nativer Angriffs-/Importkorpus, projektbezogene Freigaben und aktionsgebundene Veröffentlichung fehlen."
     },
     {
       "id": "18.3",
@@ -1797,11 +2307,19 @@
       "source_line": 1723,
       "source_end_line": 1730,
       "source_sha256": "aa45949bebe0e0764255e26769ca87ee586e29a2b42ce26960ef3bcdc263286f",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Scopes mit objektbezogenen Rollen und Projektgrenzen verbinden; Scopes allein erteilen keinen Modellzugriff.",
+        "Budgetierte Projektfreigaben und neue Zustimmung bei Scope-/Schutz-/Kosten-/Empfängeränderung über einen vertrauenswürdigen Policy-Pfad steuern.",
+        "Bestätigungen an Nutzer, Modell, Basis, Kandidatenhash, Aktion, Ziel, Budget, Ablauf und einmalige Kennung binden."
+      ],
+      "evidence": [
+        "packages/policy/index.ts",
+        "packages/model-service/store.ts",
+        "tests/security/transactions.test.ts"
+      ],
+      "notes": "Die aktuelle Grenze ist Mandant plus Eigentümer mit separaten Modell-Scopes. Projektmitgliedschaften, Rollen, Freigabe-/Widerrufsverwaltung und einmalige aktionsgebundene Zustimmungstokens fehlen. Reale Freigaben an Dritte wurden nicht ausgeführt."
     },
     {
       "id": "18.4",
@@ -1809,11 +2327,18 @@
       "source_line": 1731,
       "source_end_line": 1736,
       "source_sha256": "2a4e8b21bee9469ffd6751fbf7636842653d62a9f18923bd36a37e91dfc3c72d",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Native Worker unprivilegiert mit schreibgeschützter Umgebung, privatem temporärem Bereich, ohne Host-Credentials/-Sockets und ohne allgemeinen Netzausgang ausführen.",
+        "Harte CPU-, RAM-, Dateigrößen- und Abbruchgrenzen setzen; stärkere Isolation bei entsprechender Bedrohungslage und getrennte GPU-Isolation vorsehen."
+      ],
+      "evidence": [
+        "packages/job-service/worker.ts",
+        "workers/cad-occt/main.py",
+        "tests/security/recovery.test.ts"
+      ],
+      "notes": "Bubblewrap, unprivilegierte UID, Seccomp und Ressourcengrenzen sind umgesetzt; native Prozessabbruchtests laufen. Die Bewertung stärkerer VM-Isolation bei fremden Parserdateien und ein eventuelles GPU-/Warm-Worker-Profil bleiben offen."
     },
     {
       "id": "18.5",
@@ -1821,11 +2346,18 @@
       "source_line": 1737,
       "source_end_line": 1742,
       "source_sha256": "69991bded475bfa241aabee0c24635e6cb70468de3695021cac9cb680516eb81",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Vertrauliche Geometrie nicht ungefragt an zusätzliche Anbieter senden; Aufbewahrung, Region, Verschlüsselung, Löschung und Backups ausdrücklich konfigurieren.",
+        "Artefaktgebundene kurzlebige Downloadlinks und vollständige Löschung abgeleiteter Daten sowie fristgerechte Backuplöschung vorsehen."
+      ],
+      "evidence": [
+        "docs/operating-runbook.md",
+        "packages/model-service/store.ts",
+        "tests/security/retention.test.ts"
+      ],
+      "notes": "Lokale private Speicherung, authentifizierte Downloads und Mandantenlöschung im aktiven Speicher sind umgesetzt. Kurzlebige Links, konkrete Betreiberregeln für Verschlüsselung/Region und Löschung externer Backups bleiben offen."
     },
     {
       "id": "18.6",
@@ -1833,11 +2365,22 @@
       "source_line": 1743,
       "source_end_line": 1747,
       "source_sha256": "dff593ca5dd5ba69631eae210fe9b65b59936905509a7f4ee383d77fd25258fd",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "verified",
+      "requirements": [
+        "Den Umfang auf Modell- und Exportartefakte begrenzen; keine automatische CNC-, Roboter- oder Druckersteuerung implementieren.",
+        "Spätere Maschinenanbindung nur mit eigener Prozessprüfung, Freigabekette und Rechten behandeln."
+      ],
+      "evidence": [
+        "packages/mcp-gateway/tools.ts",
+        "packages/policy/index.ts",
+        "docs/implementation-status.md"
+      ],
+      "notes": "Der Werkzeugkatalog endet bei privaten Modell-, Job- und Exportartefakten. Es gibt keine registrierte Maschinenaktion, kein Geräte-/Druckerziel und keine automatische Übergabe. Spätere Maschinenanbindung bleibt ausdrücklich außerhalb des aktuellen Umfangs.",
+      "review": {
+        "scope_match": true,
+        "findings": "Der Werkzeugkatalog endet bei privaten Modell-, Job- und Exportartefakten. Es gibt keine registrierte Maschinenaktion, kein Geräte-/Druckerziel und keine automatische Übergabe. Spätere Maschinenanbindung bleibt ausdrücklich außerhalb des aktuellen Umfangs."
+      }
     },
     {
       "id": "19",
@@ -1845,11 +2388,19 @@
       "source_line": 1748,
       "source_end_line": 1749,
       "source_sha256": "7c93d4d851c62a51397b91a515333da25d66afa1cb00ae00924e48e871967621",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "informational",
+      "status": "verified",
+      "requirements": [
+        "Kapitelüberschrift unverändert erhalten und Anforderungen in den separat gebundenen Unterabschnitten prüfen."
+      ],
+      "evidence": [
+        "Mathematik_First_3D_MCP_Bauplan.md"
+      ],
+      "notes": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis."
+      }
     },
     {
       "id": "19.1",
@@ -1857,11 +2408,19 @@
       "source_line": 1750,
       "source_end_line": 1755,
       "source_sha256": "63ad3b2e5e76b6e035b8abb1f3393bdd7c52fcf9aa8ea818db102641f5a1b5b1",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Gesamtbaugruppe und lokale Detailansicht über abgeleitete Darstellung zugänglich machen.",
+        "Viewer-Änderungen denselben Werkzeugen, Rechten, Kandidaten- und Commit-Gates unterwerfen.",
+        "Eine eingebettete Host-UI als optionale Integration behandeln."
+      ],
+      "evidence": [
+        "packages/viewer/app.ts",
+        "scripts/browser-test.ts",
+        "docs/preview-coordinates.md"
+      ],
+      "notes": "Standalone-Viewer, Feature-Isolation, native Auswahl und derselbe Prüf-/Commitpfad sind vorhanden. Lokale GPU-Netzursprünge vermeiden vermeidbare Float32-Weltkoordinatenverluste. Allgemeines mikroskopisches LOD und vollständige Darstellungsdiagnostik bleiben offen; eingebettete Host-UI ist optional."
     },
     {
       "id": "19.2",
@@ -1869,11 +2428,19 @@
       "source_line": 1756,
       "source_end_line": 1761,
       "source_sha256": "a56ffe59642d37f07709dc2e0f367f87862344d5b3f2c43284f73abb3bdb14e5",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Revision, Qualität, Teile-/Featurebaum, sichere Auswahl, typisierte Parameter, Messung, Schnitte, Isolation, Explosion, Überlagerung und Detailvergrößerung darstellen.",
+        "Geschützte und erlaubte Änderungsregionen sichtbar machen.",
+        "Referenzmaßstab, absolute Auflösung und optionale Normalen-/Krümmungs-/Nachweisdiagnostik anbieten; Zoom nicht als Geometriebeweis ausgeben."
+      ],
+      "evidence": [
+        "packages/viewer/app.ts",
+        "scripts/browser-test.ts",
+        "docs/preview-coordinates.md"
+      ],
+      "notes": "Grundlegender Feature-Viewer mit Auswahl, Schnitten, Isolation und Überlagerung ist geprüft. Vollständiger Teile-/Baugruppenbaum, räumliche Schutz-/Änderungsregionen, Maßstabsanzeige und Normalen-/Krümmungs-/Nachweisoverlays fehlen noch."
     },
     {
       "id": "19.3",
@@ -1881,11 +2448,17 @@
       "source_line": 1762,
       "source_end_line": 1767,
       "source_sha256": "f0fc615f29f104263d1d7ba2ca1683f0b4c4c32fd251c2b4082a25de67c5b396",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Geometrische Diagnoseansicht mit unbeleuchteten Konturen, Drahtgitter, Schnitten und Messmarkierungen von visueller Material-/Lichtdarstellung unterscheiden.",
+        "Texturen und Normalmaps niemals als tatsächliche geometrische Details oder Maße behandeln."
+      ],
+      "evidence": [
+        "packages/viewer/app.ts",
+        "scripts/browser-test.ts"
+      ],
+      "notes": "Beleuchtete Geometrie, Drahtgitter, Schnitt und Vorschauabstand sind vorhanden. Ein vollständiger unbeleuchteter Diagnosekanal samt Messmarkierungen fehlt; Textur-/Normalmapdetails werden derzeit nicht als Geometrie angeboten."
     },
     {
       "id": "19.4",
@@ -1893,11 +2466,22 @@
       "source_line": 1768,
       "source_end_line": 1781,
       "source_sha256": "c266f82093340e72c26384dc6e1ffc7450019153a7d5723a571bf96e72023a1e",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Projektion und Pixelgröße bei der Wahl lokaler Detailansichten und LOD berücksichtigen.",
+        "Darstellungsauflösung von maßgeblichen Parametern und Geometrie trennen; subpixelkleine Merkmale nicht visuell bestätigen.",
+        "Lokale Ursprünge gegen unnötigen Präzisionsverlust großer Weltkoordinaten verwenden."
+      ],
+      "evidence": [
+        "packages/viewer/app.ts",
+        "packages/derived-geometry/coordinates.ts",
+        "packages/model-service/glb.ts",
+        "tests/unit/mesh-coordinates.test.ts",
+        "scripts/browser-test.ts",
+        "docs/preview-coordinates.md"
+      ],
+      "notes": "Lokale Netzursprünge und separierte Objektplatzierung erhalten das geprüfte 20-µm-Detail bei großen Weltkoordinaten, auch im GLB-Roundtrip. Vorschau bleibt ohne globalen Flächennachweis. Pixelabhängiges LOD und gezielte Unterteilung innerhalb sehr großer einzelner Netze bleiben offen."
     },
     {
       "id": "19.5",
@@ -1905,11 +2489,21 @@
       "source_line": 1782,
       "source_end_line": 1788,
       "source_sha256": "b61edad6e5724c5fce35ed51efa3b62c13d8a35792efc856bf6febab82b9abba",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Three.js und glTF ausschließlich als abgeleitete Darstellung verwenden.",
+        "CSP, Ressourcenursprünge und Host-UI-Verträge explizit halten; keine Geheimnisse ins Frontendbundle einbauen.",
+        "Viewer-Namen serverseitig neu auflösen und stale Browserdaten am Überschreiben neuer Revisionen hindern."
+      ],
+      "evidence": [
+        "packages/viewer/app.ts",
+        "packages/mcp-gateway/app.ts",
+        "packages/model-service/glb.ts",
+        "scripts/browser-test.ts",
+        "tests/security/transactions.test.ts"
+      ],
+      "notes": "Standalone-CSP, authentifizierte Requests, native Auswahl und stale-Revision-Gates sind vorhanden. Eine zusätzliche eingebettete Host-UI benötigt ihre eigene Abnahme."
     },
     {
       "id": "20",
@@ -1917,11 +2511,19 @@
       "source_line": 1789,
       "source_end_line": 1790,
       "source_sha256": "db969131a1f62ae2010d091335221a4afae779fa00f8a81713ce7e77f431ef63",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "informational",
+      "status": "verified",
+      "requirements": [
+        "Kapitelüberschrift unverändert erhalten und Anforderungen in den separat gebundenen Unterabschnitten prüfen."
+      ],
+      "evidence": [
+        "Mathematik_First_3D_MCP_Bauplan.md"
+      ],
+      "notes": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis."
+      }
     },
     {
       "id": "20.1",
@@ -1929,11 +2531,18 @@
       "source_line": 1791,
       "source_end_line": 1804,
       "source_sha256": "6bd14430efe399a3e05f70e2397a801abaa0d6c3f6bda74c291a301ed509088a",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Unterstützte IR-, B-Rep-, STEP-, GLB-, STL- und VDB-Adapter samt Einheiten, Grenzen und tatsächlich vorhandenen Richtungen melden; 3MF bleibt optional."
+      ],
+      "evidence": [
+        "packages/model-service/index.ts",
+        "packages/model-service/export-package.ts",
+        "workers/cad-occt/volume_io.py",
+        "tests/roundtrip/exports.test.ts"
+      ],
+      "notes": "Tatsächlich registrierte Formate und deren Grenzen sind in Capabilities und Exportmanifesten enthalten. VDB-Import, vollständige STEP-Baugruppenstruktur und weitere Konvertierungsadapter bleiben offen; 3MF ist optional."
     },
     {
       "id": "20.2",
@@ -1941,11 +2550,20 @@
       "source_line": 1805,
       "source_end_line": 1810,
       "source_sha256": "5fecd9c214e3b440d13312eae2147e939476d4e723fa8c560d9590b540b04322",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Größe, tatsächlichen Dateityp, externe Referenzen, isolierte Dekodierung, Einheiten und Komponenten prüfen; offene Fragen deklarieren.",
+        "Keine Einheit bei maßkritischem Import erraten; Reparaturen als getrennte Kandidaten mit Verlustbericht behandeln und Originale erhalten.",
+        "Offene Meshes nicht still als wasserdichte Körper ausgeben."
+      ],
+      "evidence": [
+        "packages/model-service/index.ts",
+        "workers/cad-occt/geometry.py",
+        "packages/model-service/export-package.ts",
+        "tests/roundtrip/exports.test.ts"
+      ],
+      "notes": "Native Importe benötigen explizite Einheiten, private Originalartefakte und isolierte Decoder. Komponentenbezogene Analyse, vollständige Reparaturberichte und offene/geschlossene Netzprofile bleiben offen."
     },
     {
       "id": "20.3",
@@ -1975,11 +2593,22 @@
       "source_line": 1817,
       "source_end_line": 1824,
       "source_sha256": "34a33996fdcf8fc8616ea7ea5c3d722f14627f8ab5863c506f124186a7a00398",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "conditional",
+      "status": "verified",
+      "requirements": [
+        "Material-, Animations- und Simulationsebenen als spätere optionale Erweiterungen behandeln.",
+        "Bei späterer Umsetzung stabile Teile/Features, Zeit, Gelenke, Bewegungsgrenzen und dynamische Kollisionen sowie Material-/Rand-/Diskretisierungsdaten gesondert modellieren.",
+        "Aus statischer Geometrie oder Renderqualität keine Bewegungs-/Simulationsgültigkeit ableiten."
+      ],
+      "evidence": [
+        "docs/implementation-status.md",
+        "packages/model-service/index.ts"
+      ],
+      "notes": "Materialsimulation und Animation werden nicht als registrierte Fähigkeiten beworben. Diese Ebene ist laut Original ausdrücklich später; ihre zusätzliche Abnahme wird erforderlich, wenn entsprechende Adapter hinzukommen.",
+      "review": {
+        "scope_match": true,
+        "findings": "Materialsimulation und Animation werden nicht als registrierte Fähigkeiten beworben. Diese Ebene ist laut Original ausdrücklich später; ihre zusätzliche Abnahme wird erforderlich, wenn entsprechende Adapter hinzukommen."
+      }
     },
     {
       "id": "21",
@@ -1987,11 +2616,19 @@
       "source_line": 1825,
       "source_end_line": 1826,
       "source_sha256": "24d80f2ee26f95377cc78cda7e222306c2819f05554492a4f1d713a7b5fb554b",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "informational",
+      "status": "verified",
+      "requirements": [
+        "Kapitelüberschrift unverändert erhalten und Anforderungen in den separat gebundenen Unterabschnitten prüfen."
+      ],
+      "evidence": [
+        "Mathematik_First_3D_MCP_Bauplan.md"
+      ],
+      "notes": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis."
+      }
     },
     {
       "id": "21.1",
@@ -1999,11 +2636,19 @@
       "source_line": 1827,
       "source_end_line": 1844,
       "source_sha256": "059c37300b20f5f0125066bca4a6e4037a65a0df9a36532de286c30d070a9a8c",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Die empfohlenen Verantwortlichkeiten für Gateway, IR/Policy, native CAD-Historie, Meshanalyse, Felder, geeignete Solver, Viewer, Persistenz, Jobs und Beobachtbarkeit erfüllen.",
+        "Native Bibliotheken und Bindings versionskompatibel einsetzen; Alternativen nach tatsächlichem Problem und Prüfnachweis wählen."
+      ],
+      "evidence": [
+        "docs/architecture.md",
+        "versions.lock",
+        "packages/compiler/build.ts",
+        "docs/implementation-status.md"
+      ],
+      "notes": "Der modulare native Python-/OCCT-Adapter und SciPy-SLSQP sind dokumentierte passende Alternativen. CGAL-Netzprüfung, umfassende native Herkunft und vollständige Beobachtbarkeit bleiben offen."
     },
     {
       "id": "21.2",
@@ -2011,11 +2656,23 @@
       "source_line": 1845,
       "source_end_line": 1850,
       "source_sha256": "a5a0dd6cc41195ca6cf7f6c2b50e52238066639ce7159e09484f186d74d9f575",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "verified",
+      "requirements": [
+        "Keine eigene allgemeine Boolean-Engine, keinen OAuth-Server, kein Foundation-Model-Training und keinen vollständigen Physiksimulator als ersten Kern entwickeln.",
+        "Kernlogik unabhängig von einer Desktopanwendung, einem aktiven UI-Dokument und Mauspositionen halten."
+      ],
+      "evidence": [
+        "docs/architecture.md",
+        "packages/mcp-gateway/tools.ts",
+        "scripts/llm-eval.ts",
+        "workers/cad-occt/geometry.py"
+      ],
+      "notes": "Registrierte native Geometrie verwendet OCCT; Identität ist an einen externen IdP beziehungsweise lokalen Host gebunden. Der headless Modell-/Workerpfad und tatsächliche LLM-Aufgaben benötigen weder Desktop-CAD noch Mausautomation. Die ausdrücklich späteren DCC-/Generierungsadapter sind nicht Voraussetzung.",
+      "review": {
+        "scope_match": true,
+        "findings": "Registrierte native Geometrie verwendet OCCT; Identität ist an einen externen IdP beziehungsweise lokalen Host gebunden. Der headless Modell-/Workerpfad und tatsächliche LLM-Aufgaben benötigen weder Desktop-CAD noch Mausautomation. Die ausdrücklich späteren DCC-/Generierungsadapter sind nicht Voraussetzung."
+      }
     },
     {
       "id": "21.3",
@@ -2043,11 +2700,18 @@
       "source_line": 1858,
       "source_end_line": 1915,
       "source_sha256": "329265272885db268a6b8f63f55b47fe568aa5c2a003c23b5c52eda66c5c363b",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Verantwortlichkeiten für Dokumentation, Schemas, Compiler/Policy, Modell-/Jobservice, Validatoren, Viewer, isolierte native Worker, Hooks, Fixtures, Tests, Benchmarks und Deployment im Repository trennen.",
+        "Native Worker über einheitliche Manifest-/Fehler-/Qualitätsverträge anbinden; den Beispielbaum nicht als bereits fertige Implementierung ausgeben."
+      ],
+      "evidence": [
+        "docs/architecture.md",
+        "packages/job-service/worker.ts",
+        "docs/implementation-status.md"
+      ],
+      "notes": "Die modulare Repositorystruktur ist vorhanden. Zusätzliche Mesh-/Feldimport-/Renderadapter und deren gemeinsame vollständige Manifeste fehlen noch."
     },
     {
       "id": "23",
@@ -2055,11 +2719,19 @@
       "source_line": 1916,
       "source_end_line": 1917,
       "source_sha256": "d22a2f45586870b5aa44a8cd643e7f52ad8cef3dff29b94bcda50f89f8d06436",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "informational",
+      "status": "verified",
+      "requirements": [
+        "Kapitelüberschrift unverändert erhalten und Anforderungen in den separat gebundenen Unterabschnitten prüfen."
+      ],
+      "evidence": [
+        "Mathematik_First_3D_MCP_Bauplan.md"
+      ],
+      "notes": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis."
+      }
     },
     {
       "id": "phase-0",
@@ -2067,11 +2739,19 @@
       "source_line": 1918,
       "source_end_line": 1923,
       "source_sha256": "f3900af9384605b6b069859d1ae42a58cbd8d335104ece5efb687f3365ad95eb",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Objekttypen, Einheiten, Qualitätsprofile, Scope/Rollen, IR, Fehler und Host-/Protokollfassungen festlegen.",
+        "Referenzaufträge mit erwarteter Geometrie, erlaubten Änderungen, Toleranzen und Negativfällen vor weiteren Operatoren definieren; Sicherheit serverseitig erzwingen."
+      ],
+      "evidence": [
+        "docs/implementation-status.md",
+        "docs/architecture.md",
+        "scripts/verify.ts",
+        "scripts/release.ts"
+      ],
+      "notes": "Fixtures und Kernverträge existieren. Rollen-/Projektfreigaben, zusätzliche Qualitätsprofile und reales Zielkonto bleiben offen."
     },
     {
       "id": "phase-1",
@@ -2079,11 +2759,19 @@
       "source_line": 1924,
       "source_end_line": 1929,
       "source_sha256": "284527afdc9cd7d885b88c73d31022673a1b9d02cfa66108e73a3bffa80c02f1",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Typisierte Parameter und Koordinaten, Primitive/Profile, Extrusion/Rotation, CSG, Messung, Revisionen und einfachen Export ohne LLM reproduzierbar ausführen.",
+        "Ungültige Einheiten, Degeneration und Budgetüberschreitungen mit definierten Fehlern behandeln."
+      ],
+      "evidence": [
+        "docs/implementation-status.md",
+        "docs/architecture.md",
+        "scripts/verify.ts",
+        "scripts/release.ts"
+      ],
+      "notes": "Direkte mathematische und native Regressionen sind vorhanden. Die vollständige Modellklasse und ihre Grenzfallabnahme bleiben anhand der Einzelverträge offen."
     },
     {
       "id": "phase-2",
@@ -2091,11 +2779,19 @@
       "source_line": 1930,
       "source_end_line": 1935,
       "source_sha256": "0b529d6f4a401027caf2906f3a57823d060db8c10ddeb98b51e2585366859b5d",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Authentifizierung, Objekt-/Scopeautorisierung, strikte Werkzeugschemas, Deduplizierung, Jobs, Gates, Vergleich und Commit vollständig verbinden.",
+        "Echte Zielhoständerung prüfen; fehlende Rechte, stale Basis und fehlende Pflichtvalidierung müssen Commit verhindern; Wiederholung erzeugt keine Doppelwirkung."
+      ],
+      "evidence": [
+        "docs/implementation-status.md",
+        "docs/architecture.md",
+        "scripts/verify.ts",
+        "scripts/release.ts"
+      ],
+      "notes": "Lokaler Codex und vollständiger Transaktionspfad sind geprüft. Werkzeugspezifische Ausgabeschemata und reale Remote-OAuth-Zielhostabnahme fehlen."
     },
     {
       "id": "phase-3",
@@ -2103,11 +2799,19 @@
       "source_line": 1936,
       "source_end_line": 1941,
       "source_sha256": "2e901106d502febfba73c8d3641ef094bcd691c7d51a5c81034801a806c6370e",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Stabile Feature-/Flächenherkunft, lokale Detailpakete/Messungen, semantische Auswahl und Schutzregionen umsetzen.",
+        "Mehrere kleine Änderungen korrekt zuordnen; bei Split entweder eindeutigen Nachfolger beweisen oder begründet abbrechen."
+      ],
+      "evidence": [
+        "docs/implementation-status.md",
+        "docs/architecture.md",
+        "scripts/verify.ts",
+        "scripts/release.ts"
+      ],
+      "notes": "Registrierte Herkunft, eindeutige Rebind-Pfade, lokale Rahmen und tatsächliche semantische LLM-Aufgaben sind geprüft. Allgemeine Importherkunft und breiter Topologie-/Detailkorpus bleiben offen."
     },
     {
       "id": "phase-4",
@@ -2115,11 +2819,19 @@
       "source_line": 1942,
       "source_end_line": 1947,
       "source_sha256": "e89ca0f7ffa291bf7c7fda006ce892ba6bc07fd5a33a1755268e4f774534ca8f",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "NURBS, Sweep/Loft, technische Features und Constraint-Solver mit abhängigen unveränderten Cacheteilen verbinden.",
+        "Maßkritische Fixtures durch Dimension, Topologie und Dateiroundtrip prüfen; unlösbare/unsupported Fälle ehrlich diagnostizieren."
+      ],
+      "evidence": [
+        "docs/implementation-status.md",
+        "docs/architecture.md",
+        "scripts/verify.ts",
+        "scripts/release.ts"
+      ],
+      "notes": "Großer nativer Teilumfang und Solver sind vorhanden. Allgemeine Sweep-/Trim-/Anschlussverträge, normgerechte Spezialfeatures und umfassende Topologieprofile bleiben offen."
     },
     {
       "id": "phase-5",
@@ -2127,11 +2839,19 @@
       "source_line": 1948,
       "source_end_line": 1953,
       "source_sha256": "7a05992e664d83d2cc02b70300b593a7d9d1badedcab71d55624d9c977705d12",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Feld-AST, SDF-Metadaten, kompakte Stützen, sparse Auswertung, lokale Deformation, adaptive Extraktion und Patchanschlüsse anbieten.",
+        "Geschützte Fernregion bei feiner Änderung beweisen und Distanz-/Feldwerte in Tool, Validator und Viewer unterscheidbar halten."
+      ],
+      "evidence": [
+        "docs/implementation-status.md",
+        "docs/architecture.md",
+        "scripts/verify.ts",
+        "scripts/release.ts"
+      ],
+      "notes": "Lokale Feld-/Patchnachweise, sparse Vorschauen und VDB-Export sind vorhanden. Vollständige adaptive Mehrskalenverfeinerung und globale numerische Zertifizierung bleiben offen."
     },
     {
       "id": "phase-6",
@@ -2139,11 +2859,19 @@
       "source_line": 1954,
       "source_end_line": 1959,
       "source_sha256": "2e69adf4ea5bdf77eb079763ba5ab52078fb4f4909a1833794ea92f344379b8b",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Instanzen, Dirty-Graph, Worker-Pools, GPU-/LOD-Pfade, Paging und Fairness an gemessenen Engpässen ausbauen.",
+        "p50/p95 und Fehlerquoten reproduzierbar mit Kaltläufen, Worst-Case-Fixtures und Budgetabbrüchen dokumentieren."
+      ],
+      "evidence": [
+        "docs/implementation-status.md",
+        "docs/architecture.md",
+        "scripts/verify.ts",
+        "scripts/release.ts"
+      ],
+      "notes": "Lokale Benchmark- und Fairnessnachweise sind vorhanden. Sichere Warm-Worker, adaptive LOD/GPU, große Produktionsfixtures und umfassende Kalt-/Worst-Case-Profile bleiben offen."
     },
     {
       "id": "phase-7",
@@ -2151,11 +2879,19 @@
       "source_line": 1960,
       "source_end_line": 1966,
       "source_sha256": "06c978664d16e518f76fb9b4cc9bd95ad238e9d98af4bdafbb685c16c1bf1170",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Isolation, tatsächlichen Restore, Schwachstellen, Protokoll/Host, Export und Löschung prüfen und im Runbook betrieblich absichern.",
+        "Vor Produktionsfreigabe alle Kriterien aus Kapitel 28 erfüllen; Demonstrationen ersetzen keine Abnahme."
+      ],
+      "evidence": [
+        "docs/implementation-status.md",
+        "docs/architecture.md",
+        "scripts/verify.ts",
+        "scripts/release.ts"
+      ],
+      "notes": "Lokale Härtung, Restore, Migration und Runbook sind vorhanden. Vollständiger Plan, Remoteziel, Lieferkette und Betreiber-/Datenschutzfreigabe bleiben offen."
     },
     {
       "id": "24",
@@ -2163,11 +2899,19 @@
       "source_line": 1967,
       "source_end_line": 1968,
       "source_sha256": "3942989ff144a10d4739f2a3f5f3af89024d7285f0092520fd89200e649b9726",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "informational",
+      "status": "verified",
+      "requirements": [
+        "Kapitelüberschrift unverändert erhalten und Anforderungen in den separat gebundenen Unterabschnitten prüfen."
+      ],
+      "evidence": [
+        "Mathematik_First_3D_MCP_Bauplan.md"
+      ],
+      "notes": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis."
+      }
     },
     {
       "id": "24.1",
@@ -2175,11 +2919,19 @@
       "source_line": 1969,
       "source_end_line": 1982,
       "source_sha256": "dfa9636e07df2d5c0b1759b4d7749ac7d89ad11c277150861d7f512910f9ea62",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Primitive, Transformationsinversen/Normalen, B-Spline-Partitionssumme, formtreue Knoteneinfügung, CSG-Vorzeichen, skalierte Feldsemantik, kompakte Stützen und Ableitungen direkt und als Eigenschaften testen.",
+        "CSG-Mengenidentitäten nur im passenden regulären Profil verlangen und nicht auf weiche Vereinigungen oder algebraische Feldwerte übertragen."
+      ],
+      "evidence": [
+        "tests/unit/field-contracts.test.ts",
+        "tests/geometry/test_native.py",
+        "tests/geometry/test_affine.py",
+        "tests/geometry/nurbs.test.ts"
+      ],
+      "notes": "Viele direkte, native und randomisierte Eigenschaften sind getestet. Eine vollständige Zuordnung jeder mathematischen Voraussetzung und CSG-Identität zum Prüfkorpus bleibt offen."
     },
     {
       "id": "24.2",
@@ -2187,11 +2939,19 @@
       "source_line": 1983,
       "source_end_line": 1988,
       "source_sha256": "b2b4963f55e9c7b093af41c99112145992e8e905fa6a364794480771dee3ed04",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Geometrische Grenzklassen einschließlich tangentialer/koplanarer Schnitte, kurzer Kanten, dünner Wände, kleiner Löcher, enger Verrundungen, großer Koordinaten, Hohlräume, offener Flächen, Komponenten, Spiegelung und Instanzen abdecken.",
+        "Neue Fehler minimieren und dauerhaft regressieren; Nutzergeometrie nur mit Zustimmung/anonymisiert in übergreifende Korpora übernehmen."
+      ],
+      "evidence": [
+        "tests/geometry/structure.test.ts",
+        "tests/geometry/patterns.test.ts",
+        "tests/unit/mesh-coordinates.test.ts",
+        "tests/geometry/test_native.py"
+      ],
+      "notes": "Große Koordinaten, kleine Details, Spiegelungen, freie Rahmen und Instanzen sind im lokalen synthetischen Korpus geprüft. Weitere Hohlraum-/Tangential-/Kurz-Kanten-Grenzfälle und systematische Minimierung bleiben offen; keine Nutzerdatei wurde extern übernommen."
     },
     {
       "id": "24.3",
@@ -2218,11 +2978,20 @@
       "source_line": 1995,
       "source_end_line": 2000,
       "source_sha256": "f9a3649db9cb844ed131862c19c279a747864c0ab522173fe1c0375884750434",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Alle aufgeführten Angriffe und Fehlerfälle gezielt testen, insbesondere Metadateninjektion, fremde IDs, abgelaufene/recycelte Bindungen, Wiederholungen, gefälschte Validierung, Archive/Referenzen, AST-/Instanzbudgets, Kernel/Queue/Abbruch und Pflichtgates.",
+        "Sicherheit ohne sämtliche optionalen Host-Hooks tatsächlich nachweisen."
+      ],
+      "evidence": [
+        "tests/security/transactions.test.ts",
+        "tests/security/recovery.test.ts",
+        "tests/security/scheduler.test.ts",
+        "tests/protocol/http.test.ts",
+        "scripts/llm-eval.ts"
+      ],
+      "notes": "Umfangreiche lokale Negativ- und tatsächliche Abbruchtests sowie LLM-Tests ohne Host-Hooks sind vorhanden. Freigabetoken-Replay, breiter adversarialer Importkorpus und reale externe Hosts bleiben offen."
     },
     {
       "id": "24.5",
@@ -2230,11 +2999,19 @@
       "source_line": 2001,
       "source_end_line": 2006,
       "source_sha256": "ef35c4f228c1709459242627ae2b12830fe80ee7e30add25d1c1a51f47a84efa",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Jeden Protokolladapter mit korrektem Handshake/Discovery, Schema, strukturierten Ergebnissen, Metadaten, Ressourcen, Autorisierung und Fehlern testen.",
+        "Den tatsächlich verwendeten Zielhost prüfen und alte/neue MCP-Generationen sowie optionale Erweiterungen trennen."
+      ],
+      "evidence": [
+        "tests/protocol/http.test.ts",
+        "tests/protocol/stdio.test.ts",
+        "scripts/codex-host.ts",
+        "docs/compatibility-matrix.md"
+      ],
+      "notes": "Lokale Protokolle und installierter Codex sind geprüft. Eine tatsächliche externe ChatGPT-/HTTPS-/OAuth-Zielhostabnahme fehlt."
     },
     {
       "id": "24.6",
@@ -2262,11 +3039,19 @@
       "source_line": 2013,
       "source_end_line": 2019,
       "source_sha256": "1cecacb8997c01723fa63e981f744051b3d3cb5214cd753fd916807b40d9c014",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Backend-/LLM-Latenz, Tokens pro Erfolg, Dirty-Anteil, Cache, RAM, Zellen, Dreiecke, Wiederholungen, ungültige Kandidaten, blockierte Commits, Auswahlmehrdeutigkeit und Exportverluste erfassen.",
+        "Fehlerquoten neben Geschwindigkeitsmessungen sichtbar halten."
+      ],
+      "evidence": [
+        "benchmarks/run.ts",
+        "scripts/llm-eval.ts",
+        "packages/job-service/index.ts",
+        "packages/model-service/glb.ts"
+      ],
+      "notes": "Viele Latenz-, Ressourcen-, Token-, Cache- und Exportdaten existieren. Einheitliche dauerhafte Metriken/Trace-Zuordnung und vollständige getrennte Fehlerquoten über alle Fälle bleiben offen."
     },
     {
       "id": "25",
@@ -2274,11 +3059,19 @@
       "source_line": 2020,
       "source_end_line": 2021,
       "source_sha256": "4ba32c9a9eaf45309fa47b756bfb4e70bc8c5d299cb14dd5f3ffec1a72a39ec8",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "informational",
+      "status": "verified",
+      "requirements": [
+        "Kapitelüberschrift unverändert erhalten und Anforderungen in den separat gebundenen Unterabschnitten prüfen."
+      ],
+      "evidence": [
+        "Mathematik_First_3D_MCP_Bauplan.md"
+      ],
+      "notes": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis."
+      }
     },
     {
       "id": "25.1",
@@ -2286,11 +3079,18 @@
       "source_line": 2022,
       "source_end_line": 2027,
       "source_sha256": "88b90021e40c895e25ca422641ca8f5d76cc4edbe2c884ac0ef5153322e6b824",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Den Beispielauftrag mit 0,02-mm-Nutvertiefung, unveränderter Breite/Umriss/Bohrungen, deklarierter Toleranz und lokaler 3-mm-Materialzone als begrenzte Referenzaufgabe führen.",
+        "Nominalannahmen und tatsächliche Produktmessungen unterscheiden; gekrümmte Bereiche gesondert prüfen."
+      ],
+      "evidence": [
+        "scripts/fixtures.ts",
+        "scripts/llm-eval.ts",
+        "tests/geometry/structure.test.ts"
+      ],
+      "notes": "Die lokale Referenznut und tatsächliche LLM-/Native-Messung existieren. Die vollständige um eine abhängige Verrundung und Detailauflösung ergänzte Beispielabnahme bleibt mit 25.3 offen."
     },
     {
       "id": "25.2",
@@ -2298,11 +3098,18 @@
       "source_line": 2028,
       "source_end_line": 2043,
       "source_sha256": "6b8b1b9d707e9654dfccfda033c7248380ae18fb422e451582d618ed78a99442",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Nominaltiefe 0,80+0,02=0,82 mm und vereinfachte lokale Restwand 3,00−0,82=2,18 mm größer 2,00 mm korrekt bestimmen.",
+        "Die Nominalrechnung nicht als globalen Wandstärkennachweis ausgeben."
+      ],
+      "evidence": [
+        "scripts/fixtures.ts",
+        "packages/validation/index.ts",
+        "tests/geometry/structure.test.ts"
+      ],
+      "notes": "Die Werte werden in realen lokalen Geometrieprüfungen bestätigt und die Restwandabdeckung als ebene Zone benannt. Die vollständige Abnahme des Beispiels bleibt mit den weiteren Schutz-/Anschlussbedingungen offen."
     },
     {
       "id": "25.3",
@@ -2310,11 +3117,20 @@
       "source_line": 2044,
       "source_end_line": 2055,
       "source_sha256": "b81d9562899581b6949fef31ae0d5edbf3b0017698e5b3fe9eee26a353e5c1b7",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Nut revisionsgebunden auflösen, Abhängigkeiten/Schutz und erlaubte Materialzone planen, nur betroffenen Teilgraphen berechnen.",
+        "Tiefe, Breite, Restwand, CAD-Gültigkeit, Anschlüsse, Schutz und Repräsentationsfehler tatsächlich prüfen; Detailansicht geometrisch ausreichend auflösen.",
+        "Gebundenen geprüften Kandidaten atomar übernehmen; bei konkurrierender Änderung neuen Kandidaten/Prüfung verlangen."
+      ],
+      "evidence": [
+        "scripts/llm-eval.ts",
+        "tests/geometry/structure.test.ts",
+        "packages/compiler/index.ts",
+        "packages/validation/index.ts"
+      ],
+      "notes": "Der reale LLM-Pfad prüft Nutparameter, lokale Wand, Nachbarteile und Revisionen. Eine abhängige Nutverrundung mit Anschlussnachweis und garantierter geometrischer Detailansichtsauflösung fehlen im vollständigen Beispiel."
     },
     {
       "id": "25.4",
@@ -2322,11 +3138,18 @@
       "source_line": 2056,
       "source_end_line": 2069,
       "source_sha256": "6a9c05bbe1d1f174e20563bdadaff297e42d142f3e95121e547f9280b1d4f757",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Nutzerbericht auf tatsächliche Änderung, Ziel-/Messwert, konkrete Schutz-/Nachweisabdeckung, offene Grenzen, Revision und Artefakte stützen.",
+        "Alles-andere-unverändert nur bei entsprechend weitreichendem Vergleich behaupten."
+      ],
+      "evidence": [
+        "scripts/llm-eval.ts",
+        "reports/llm-eval-structure.json",
+        "docs/implementation-status.md"
+      ],
+      "notes": "Numerische Grader prüfen aktuelle Geometrie und zulässigen Änderungsumfang. Eine breite strukturierte Bewertung der tatsächlichen Schlussberichte und ihrer Nachweisformulierungen bleibt offen."
     },
     {
       "id": "25.5",
@@ -2334,11 +3157,18 @@
       "source_line": 2070,
       "source_end_line": 2078,
       "source_sha256": "f4cafd7e0c04c0fb99981baa34ece8c1e6dd017593a75e0358f8db58bcc91212",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Lokale organische Delle mit gespeicherter Stütze und Detailhistorie ändern, angrenzende harte Kante und Fernregion fixieren.",
+        "Tiefe, Krümmung und Kante vor/nach lokaler Lösung vergleichen; keine globale Glättung einsetzen."
+      ],
+      "evidence": [
+        "workers/cad-occt/fields.py",
+        "packages/compiler/field-regions.ts",
+        "scripts/llm-eval.ts"
+      ],
+      "notes": "Eine vorhandene kompakte lokale Feldkorrektur wird im tatsächlichen LLM-Test gezielt geändert. Vollständige Zielflächen-/Krümmungs-/Harte-Kanten-Abnahme dieses Gegenbeispiels fehlt."
     },
     {
       "id": "26",
@@ -2346,11 +3176,20 @@
       "source_line": 2079,
       "source_end_line": 2112,
       "source_sha256": "4706905168fd3bb59ee6dc3fe0b5f241fe575c36217a1791954b14f57299146f",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Das LLM zu revisionsgebundener Detailinspektion, Parametern/Constraints, Einheiten, lokalen Richtungen, Schutz und begrenzten Kandidaten anleiten.",
+        "Feldsemantik, Vorschau/Prüfung/Export, echte Mehrdeutigkeit, Limits und serverseitige Nachweise korrekt behandeln; keine Toleranzen oder fremde Anweisungen übernehmen.",
+        "Nur geprüfte gebundene Kandidaten und autorisierte Weitergaben ausführen; Spezialbibliotheken mit Version, Quelle, Gültigkeit und Tests führen."
+      ],
+      "evidence": [
+        "AGENTS.md",
+        "skills/modeling-workflow.md",
+        "packages/mcp-gateway/tools.ts",
+        "scripts/llm-eval.ts"
+      ],
+      "notes": "Arbeitsanweisung und reale LLM-Modellieraufgaben sind vorhanden. Breite Evaluation, begrenzter Reparaturdialog und vollständige versionierte Spezialwissensbausteine bleiben offen."
     },
     {
       "id": "27",
@@ -2358,11 +3197,19 @@
       "source_line": 2113,
       "source_end_line": 2114,
       "source_sha256": "ae2eee6aea61f26529efdc58d2327f6a718a7abd5ae61128e2ac49b3299fa60b",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "informational",
+      "status": "verified",
+      "requirements": [
+        "Kapitelüberschrift unverändert erhalten und Anforderungen in den separat gebundenen Unterabschnitten prüfen."
+      ],
+      "evidence": [
+        "Mathematik_First_3D_MCP_Bauplan.md"
+      ],
+      "notes": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis."
+      }
     },
     {
       "id": "27.1",
@@ -2370,11 +3217,18 @@
       "source_line": 2115,
       "source_end_line": 2120,
       "source_sha256": "add07af8d57f52a0120863f649ef52777c6e93daa4364079a6bce578cbaf6edf",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Stufenweise lokale Tests, isolierte Entwicklung, Protokollprüfung, realen Host, begrenzte Nutzung und Belastungs-/Fehlerabnahme vor Produktion durchführen.",
+        "Reale Versionen, Auth-Metadaten, Callback-Adressen, Scopes und optionale UI-/Hookfähigkeiten konfigurieren; keine Demo-Zugänge als Produktion übernehmen."
+      ],
+      "evidence": [
+        "docs/operating-runbook.md",
+        "docs/compatibility-matrix.md",
+        "scripts/release.ts"
+      ],
+      "notes": "Lokale Entwicklung und installierter Host sind geprüft. Reale Remote-Host-/IdP-Parameter und Produktionsabnahme fehlen."
     },
     {
       "id": "27.2",
@@ -2382,11 +3236,16 @@
       "source_line": 2121,
       "source_end_line": 2138,
       "source_sha256": "7673c4d44655ea168511876092bbfd85c7aeb580e2a8b84fccaff5e3cb85809e",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Betriebsmanifest mit App-/IR-Version, Protokoll-/Hostnachweisen, Registry-/Policyhash, Workerimagedigests, Lockhash, Profilen, Benchmark-, Sicherheits- und Restoreberichten erzeugen."
+      ],
+      "evidence": [
+        "scripts/release.ts",
+        "reports/release-manifest.json"
+      ],
+      "notes": "Build- und Nachweismanifest ist vorhanden und blockiert Gesamtfreigabe bei offenen Anforderungen. Eigene Workerimagedigests und realer Zielhostbericht fehlen."
     },
     {
       "id": "27.3",
@@ -2394,11 +3253,19 @@
       "source_line": 2139,
       "source_end_line": 2145,
       "source_sha256": "1007565737abb7c3201b49d3b137be29c540aca3c34a31d6dc927525fcd7f20e",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Kernelabsturz, verdächtigen Zugriff und Regression mit isoliertem Neustart, sicherer Diagnose, Job-/Token-Sperre und buildgebundener Historie handhaben.",
+        "Alte Revisionen nach Migration reproduzierbar erhalten oder eine klare Migrationsgrenze deklarieren; keine stille Geometrieänderung."
+      ],
+      "evidence": [
+        "docs/operating-runbook.md",
+        "packages/model-service/store.ts",
+        "tests/security/recovery.test.ts",
+        "tests/security/build-binding.test.ts"
+      ],
+      "notes": "Lokaler Wiederanlauf, Backup/Restore, unveränderte Altrevisionen und ausdrücklich geprüfter Rebuild sind vorhanden. Rollen-/Tokenwiderruf über IdP und produktive Betriebsübungen bleiben offen."
     },
     {
       "id": "28",
@@ -2406,11 +3273,19 @@
       "source_line": 2146,
       "source_end_line": 2147,
       "source_sha256": "ff9a384ffe1b3dbfe5eae1019c9b5d0a19abf82083f03c97150b1cdc6e22d692",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "informational",
+      "status": "verified",
+      "requirements": [
+        "Kapitelüberschrift unverändert erhalten und Anforderungen in den separat gebundenen Unterabschnitten prüfen."
+      ],
+      "evidence": [
+        "Mathematik_First_3D_MCP_Bauplan.md"
+      ],
+      "notes": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Dieser Originalabschnitt enthält ausschließlich die Kapitelüberschrift. Er ist als Gliederung vollständig erhalten; die fachlichen Anforderungen und deren weiterhin offene Abnahme stehen einzeln in den Unterabschnitten. Dieser Eintrag zählt keinen zusätzlichen Funktionsnachweis."
+      }
     },
     {
       "id": "28.1",
@@ -2418,11 +3293,17 @@
       "source_line": 2148,
       "source_end_line": 2161,
       "source_sha256": "637f94e8e9d2dc59635471f1eaaa8669e839b4b9b3e05b08f1e7efc7a0d906da",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Für jede Risikotabelle konkrete Gegenmaßnahmen und Abnahmen zu Absicht, Topologieidentität, lokalen Nebenwirkungen, Genauigkeit, Feldsemantik, Viewerdiagnostik, Gates, Protokolländerungen und Hookvertrauen führen."
+      ],
+      "evidence": [
+        "docs/plan-audit.json",
+        "docs/threat-model.md",
+        "docs/implementation-status.md"
+      ],
+      "notes": "Die Maßnahmen sind in Einzelabschnitten gebunden; vollständige Diagnose-, Fehlerbudget-, Host- und Rollenabnahme bleibt offen."
     },
     {
       "id": "28.2",
@@ -2430,11 +3311,17 @@
       "source_line": 2162,
       "source_end_line": 2173,
       "source_sha256": "553b22a8f2f95bbbec82d012ce1b17b8fc1cfa55066306ea78f43d6a611eec6d",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "P0-Sicherheits-/Einheiten-/IR-/Revisions-/Mess-/Validierungsfundament vor erweiterten Details und Leistung absichern.",
+        "P1-Detailkontrolle, P2-Mehrskalierung/Instanzen/Solver/GPU und spätere P3-Spezial-/DCC-/Animationsverträge nach ihren Prüfungen ausbauen."
+      ],
+      "evidence": [
+        "docs/completion-work.md",
+        "docs/implementation-status.md"
+      ],
+      "notes": "Der lokale P0-Pfad ist durch Tests abgesichert und P1/P2 werden erweitert. Vollständige P0-Rollen-/Zielhostabnahme und verbleibende P1/P2-Funktionen bleiben offen; ausdrücklich spätere P3-Adapter sind getrennt zu bewerten."
     },
     {
       "id": "28.3",
@@ -2442,11 +3329,22 @@
       "source_line": 2174,
       "source_end_line": 2187,
       "source_sha256": "46bdaad84f85c1cbbbc824f2f585333941ebd1383bf43a947e6df1e449f982f5",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Reproduzierbaren Kern ohne LLM und tatsächliche Zielhostbearbeitung nachweisen.",
+        "Lokale richtige Änderung, Schutz, nachvollziehbare Revision und blockierende Schema-/Einheiten-/Auswahl-/Rechte-/Stale-/Prüfgates belegen.",
+        "Kosten/Genauigkeit/Qualität sichtbar halten und ehrliche Budget-/Präzisionsfehler liefern.",
+        "Wiederholung, Workerabsturz und fehlende Host-Hooks ohne Doppelwirkung oder Revisionsverlust prüfen.",
+        "Exportdateien erneut prüfen und Quellen, Builds, Benchmarks sowie tatsächlichen Restore dokumentieren."
+      ],
+      "evidence": [
+        "docs/implementation-status.md",
+        "scripts/release.ts",
+        "scripts/verify.ts",
+        "scripts/llm-eval.ts"
+      ],
+      "notes": "Lokale Teilnachweise sind vorhanden. Der vollständige Plan einschließlich realer Remotezielabnahme, Qualitätsprofile, Rollen, numerischer/operativer Grenzen und unabhängiger LLM-Evaluation bleibt unvollständig; keine Produktionsfreigabe."
     },
     {
       "id": "29",
@@ -2454,11 +3352,20 @@
       "source_line": 2188,
       "source_end_line": 2250,
       "source_sha256": "54e1d2be50b82cc11ab84566e47635f84cead14061c5382d00f26ff9b4a6cd93",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Originalquellen, Recherchedatum und eigene Entwurfsentscheidungen unterscheidbar erhalten.",
+        "Dokumentations-/Spezifikationsversion nicht als Unterstützung des tatsächlich eingesetzten Hosts oder SDKs ausgeben; Primärquellen bei einschlägigen Änderungen prüfen.",
+        "Mathematische Voraussetzungen und tatsächliche numerische Implementierungs-/Kompatibilitätstests zusätzlich dokumentieren."
+      ],
+      "evidence": [
+        "Mathematik_First_3D_MCP_Bauplan.md",
+        "docs/compatibility-matrix.md",
+        "docs/mathematical-contracts.md",
+        "docs/preview-coordinates.md"
+      ],
+      "notes": "Originalquelle bleibt hashgleich erhalten. Einschlägige native, Protokoll- und glTF-Quellen sind dokumentiert; vollständige fortlaufende Quellen-/Lizenz-/Zielhostprüfung bleibt Teil der Freigabe."
     }
   ]
 }

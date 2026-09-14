@@ -132,7 +132,7 @@ def pattern_placements(f):
     """Compact source references and rigid placements; never copy source geometry.
 
     Circular samples include zero and exclude the end of the angular span.
-    Overrides translate in world millimetres after the base placement.
+    Overrides translate in feature-local millimetres after the base placement.
     """
     p,c=f['values'],f['construction'];count=int(p['count'])
     require(1 <= count <= 10000 and count == p['count'], 'Ungültige Musteranzahl.', 'BUDGET_EXCEEDED')
