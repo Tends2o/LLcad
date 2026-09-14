@@ -112,7 +112,18 @@ export function solverRequest(
     if (e.constant) return { constant: quantity(e.constant) };
     if (e.parameter) return { parameter: e.parameter };
     requireThat(
-      ["+", "-", "*", "/", "sqrt", "sin", "cos"].includes(e.fn),
+      [
+        "+",
+        "-",
+        "*",
+        "/",
+        "sqrt",
+        "sin",
+        "cos",
+        "vec3",
+        "dot",
+        "norm",
+      ].includes(e.fn),
       "OUT_OF_SCOPE",
       "Der SQP-Vertrag unterstützt glatte Ausdrücke; stückweise Funktionen benötigen eine andere Problemformulierung.",
     );

@@ -307,6 +307,20 @@ export class ModelService {
             result: "checked_proposal_with_persistent_equations",
             global_optimum_claimed: false,
           },
+          typed_expressions: {
+            vector_constructor: "vec3",
+            vector_functions: ["dot", "norm"],
+            vector_arithmetic: [
+              "addition",
+              "subtraction",
+              "scalar_multiplication",
+              "division_by_scalar",
+            ],
+            vector_dimension: 3,
+            parameter_and_equation_result: "scalar_with_checked_dimensions",
+            solver_vector_derivatives: "analytic_forward_chain_rule",
+            solver_zero_norm: "rejected_outside_smooth_profile",
+          },
           volumetric_export: {
             format: "OpenVDB_10",
             storage: "float32_truncated_implicit_samples",

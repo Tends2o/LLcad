@@ -254,7 +254,10 @@
                 "min",
                 "max",
                 "abs",
-                "clamp"
+                "clamp",
+                "vec3",
+                "dot",
+                "norm"
               ]
             },
             "args": {

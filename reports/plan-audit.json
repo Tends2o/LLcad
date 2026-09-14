@@ -1,10 +1,10 @@
 {
   "status": "incomplete",
   "source_sha256": "39eb5f37ffcb1a0b3aa790d5e6db49e109a390ca57d1dcf47c23be231bce8ff0",
-  "audit_sha256": "14efcbc54d69c22955b2d299418b6b3c46089fa5680f128c59b0c8b8f9e27eab",
+  "audit_sha256": "51b3ad5be92456bf34f63791daffa0c571a213c95192740f8ab21c106a3cd858",
   "sections": 162,
-  "verified": 6,
-  "remaining": 156,
+  "verified": 7,
+  "remaining": 155,
   "issues": [
     "1: 1. Ziel, Grenzen und Erfolgskriterien – Anforderungen noch nicht vollständig abgeleitet.",
     "1.1: 1.1 Was das System leisten soll – unvollständig oder nicht ausreichend geprüft.",
@@ -62,7 +62,6 @@
     "9.1: 9.1 Format – Anforderungen noch nicht vollständig abgeleitet.",
     "9.2: 9.2 Operatorfamilien – unvollständig oder nicht ausreichend geprüft.",
     "9.3: 9.3 Vertrag pro Operator – Anforderungen noch nicht vollständig abgeleitet.",
-    "9.4: 9.4 Formelauswertung – Anforderungen noch nicht vollständig abgeleitet.",
     "10: 10. MCP-Werkzeugkatalog – Anforderungen noch nicht vollständig abgeleitet.",
     "10.1: 10.1 Entwurfsprinzip – Anforderungen noch nicht vollständig abgeleitet.",
     "10.2: 10.2 Vorgesehene Werkzeuge – Anforderungen noch nicht vollständig abgeleitet.",

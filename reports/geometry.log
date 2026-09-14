@@ -46,16 +46,18 @@ test_step_brep_stl_roundtrip (test_native.NativeGeometryTests.test_step_brep_stl
 ******        Transfer Mode = 0  I.E.  As Is       ******[0m
 [32;1m******        Transferring Shape, ShapeType = 2                      ******[0m
 [32;1m** WorkSession : Sending all data[0m
-[32;1m Step File Name : /tmp/tmpp5ba9_ir/shape.step(32 ents)  Write  Done[0m
+[32;1m Step File Name : /tmp/tmpbmt6ls1o/shape.step(32 ents)  Write  Done[0m
 ok
 test_transform_inverse_and_instance_volume (test_native.NativeGeometryTests.test_transform_inverse_and_instance_volume) ... ok
 test_explicit_rational_quarter_circle_uses_weights_and_clamped_basis (test_nurbs.NurbsTests.test_explicit_rational_quarter_circle_uses_weights_and_clamped_basis) ... ok
 test_surface_control_point_support_is_local_in_the_parameter_domain (test_nurbs.NurbsTests.test_surface_control_point_support_is_local_in_the_parameter_domain) ... ok
+test_actual_optimizer_callbacks_have_correct_vector_chain_rule (test_solver_vectors.SolverVectorTests.test_actual_optimizer_callbacks_have_correct_vector_chain_rule) ... ok
+test_zero_norm_is_not_given_an_invented_smooth_derivative (test_solver_vectors.SolverVectorTests.test_zero_norm_is_not_given_an_invented_smooth_derivative) ... ok
 test_cache_checks_each_face_and_patterns_keep_separate_occurrences (test_topology.TopologyTests.test_cache_checks_each_face_and_patterns_keep_separate_occurrences) ... ok
 test_registered_history_preserves_the_existing_geometry_contract (test_topology.TopologyTests.test_registered_history_preserves_the_existing_geometry_contract) ... ok
 test_unknown_history_is_never_replaced_with_a_geometric_guess (test_topology.TopologyTests.test_unknown_history_is_never_replaced_with_a_geometric_guess) ... ok
 
 ----------------------------------------------------------------------
-Ran 43 tests in 2.752s
+Ran 45 tests in 2.696s
 
 OK

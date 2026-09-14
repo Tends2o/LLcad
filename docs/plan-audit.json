@@ -946,11 +946,34 @@
       "source_line": 1112,
       "source_end_line": 1118,
       "source_sha256": "9f551cd45cced3fe9ec1e590b2ca9a1dce476660efc4837149c1e5f31074b865",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "verified",
+      "requirements": [
+        "Nur registrierte arithmetische, trigonometrische und begrenzende Funktionen einschließlich Skalarprodukt und Norm auswerten.",
+        "Definitionsbereiche, Werttypen und Dimensionen prüfen; ungültige reelle Wurzeln, Divisionen durch null und nicht normalisierte Größen abweisen.",
+        "Keine Ausführung, Dateien, Netzwerk, Imports, dynamisches Nachladen oder reflektive Objekteigenschaften über Ausdrucksknoten erlauben.",
+        "Benutzerdefinierte Kombinationen auf begrenzte AST-Untergraphen mit denselben Regeln beschränken."
+      ],
+      "evidence": [
+        "packages/semantic-ir/schema.ts",
+        "packages/compiler/expressions.ts",
+        "packages/compiler/constraints.ts",
+        "workers/cad-occt/solver.py",
+        "tests/geometry/vector-expressions.test.ts",
+        "tests/geometry/test_solver_vectors.py",
+        "tests/property/math.test.ts",
+        "tests/geometry/constraints.test.ts",
+        "tests/protocol/http.test.ts",
+        "docs/vector-expressions.md",
+        "reports/verification.json",
+        "reports/tests.log",
+        "reports/geometry.log"
+      ],
+      "notes": "Skalare Modellparameter und dimensionslos normalisierte Solvergleichungen; Vektoren sind typisierte Zwischenwerte. Der glatte Solververtrag lehnt Normen am Nullvektor ab. Kein universeller numerischer Fehler- oder Globaloptimalitätsnachweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Strikte AST-Schemata und feste Interpreterzweige erlauben ausschließlich registrierte Funktionen. 150 zufällige Vektorkombinationen und Einheiten-/Typfehler sind geprüft; eine gespeicherte Norm steuert unabhängig vermessene native Geometrie. Ein tatsächlicher Vierparameter-SLSQP-Lauf mit Norm, Skalarprodukt und variabler Skalierung durchläuft Kandidat, Validierung und Commit; eine spätere Verletzung der gespeicherten Gleichungen scheitert. Die an den Optimierer übergebenen analytischen Ableitungen sind an je 13 Punkten für drei Gleichungen gegen zentrale Differenzen geprüft. Unbekannte und geerbte Parameternamen sind gesperrt."
+      }
     },
     {
       "id": "10",

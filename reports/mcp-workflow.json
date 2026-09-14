@@ -1,14 +1,14 @@
 {
   "status": "passed",
-  "created": "2026-09-14T13:16:59.279Z",
-  "registry_hash": "c06ba78af8863c6cdc8d07a330843aca7b8c58948c19c0f0921e2e2a616ee82f",
-  "implementation_hash": "1fbbd7557bac7068bb4b8a435d9a1ae2355406ff79e2976197d1f7e74e1022f2",
+  "created": "2026-09-14T13:35:26.629Z",
+  "registry_hash": "6e55ff16b3b201fe89f97ca904eb8ec81c2be68404efd4b6a68d83b3c252b9bf",
+  "implementation_hash": "49f91059fd9e90bc470bb5140bffabcd2aa2471f6ee98ae52e83bd983c4ec917",
   "transport": "MCP Streamable HTTP",
   "client": "official SDK",
   "browser_interactions": 0,
-  "model_id": "model-7f327fda-f9d8-42d8-bc43-38c25d3011c9",
-  "original_revision": "rev-5ee8072c-16b7-4545-ae14-f0cb47b1ffe0",
-  "edited_revision": "rev-4e5bc8ab-663a-4e4c-aca7-ba7d35f8336c",
+  "model_id": "model-7d0c1bb3-745a-4fd0-8a3c-412d0bbe41cc",
+  "original_revision": "rev-8b4081e1-6bca-4c9d-a089-8852e5bde28a",
+  "edited_revision": "rev-5d3b2d2a-feac-4918-b7dd-2e6848c4bec2",
   "calls": [
     "cad_capabilities",
     "cad_list_models",
@@ -82,7 +82,7 @@
       },
       "geometry_hash": "3f9b19f96034a98b59cc1715bda9b32ee9d077c4ec93a1747b02c217a3ff21dd",
       "engine_build": "OCCT-7.9.3.1.1/mathforge-1",
-      "cache_key": "e6f5e80c0e1716dae611a3687be234c04cec664756a29b7d0b61b21491ae83b5",
+      "cache_key": "fedf835bf86e6df6590723bb0bff2c922e565c3781bf96176a3fe350c2038770",
       "topology": {
         "version": 2,
         "face_count": 10,
@@ -95,12 +95,12 @@
     "assumptions": [],
     "artifacts": [],
     "recommended_next_actions": [],
-    "model_id": "model-7f327fda-f9d8-42d8-bc43-38c25d3011c9",
-    "revision": "rev-4e5bc8ab-663a-4e4c-aca7-ba7d35f8336c",
+    "model_id": "model-7d0c1bb3-745a-4fd0-8a3c-412d0bbe41cc",
+    "revision": "rev-5d3b2d2a-feac-4918-b7dd-2e6848c4bec2",
     "metric": "all",
     "unit": "mm",
     "coverage": "registered_geometric_measurement",
-    "trace_id": "trace-bef518d0-dfa3-424e-b2b6-65c5f4071095"
+    "trace_id": "trace-03484675-9615-47a8-8230-5ea153c0ed93"
   },
   "comparison": {
     "status": "ok",
@@ -111,9 +111,9 @@
     "assumptions": [],
     "artifacts": [],
     "recommended_next_actions": [],
-    "model_id": "model-7f327fda-f9d8-42d8-bc43-38c25d3011c9",
-    "from_revision": "rev-5ee8072c-16b7-4545-ae14-f0cb47b1ffe0",
-    "to_revision": "rev-4e5bc8ab-663a-4e4c-aca7-ba7d35f8336c",
+    "model_id": "model-7d0c1bb3-745a-4fd0-8a3c-412d0bbe41cc",
+    "from_revision": "rev-8b4081e1-6bca-4c9d-a089-8852e5bde28a",
+    "to_revision": "rev-5d3b2d2a-feac-4918-b7dd-2e6848c4bec2",
     "changed_features": [
       "feat-groove-07"
     ],
@@ -170,7 +170,7 @@
     ],
     "volume_delta": -1.5079644737234048,
     "coverage": "declared_dimensions_and_per_feature_hashes",
-    "trace_id": "trace-0ed50eec-24c2-448f-ab81-822f99e81503"
+    "trace_id": "trace-2af4c12b-3ce6-40f4-905f-e50a9734568a"
   },
   "roundtrip": {
     "status": "checks_passed_within_profile",

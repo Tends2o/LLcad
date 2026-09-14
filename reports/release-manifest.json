@@ -1,11 +1,11 @@
 {
   "application_version": "0.1.0",
   "ir_schema_version": "1",
-  "created": "2026-09-14T13:21:21.438Z",
+  "created": "2026-09-14T13:37:53.847Z",
   "status": "not_released",
-  "operator_registry_hash": "c06ba78af8863c6cdc8d07a330843aca7b8c58948c19c0f0921e2e2a616ee82f",
-  "worker_source_digest": "b2c6445d83451753c6a8acba2ee5ac2026d0f3b8d5da05568cf626cce66d3446",
-  "implementation_digest": "1fbbd7557bac7068bb4b8a435d9a1ae2355406ff79e2976197d1f7e74e1022f2",
+  "operator_registry_hash": "6e55ff16b3b201fe89f97ca904eb8ec81c2be68404efd4b6a68d83b3c252b9bf",
+  "worker_source_digest": "4f46a1a18b3a91aa4ea303e7f4ac9490ee34e10dda7f64edce9aaaa5499fba76",
+  "implementation_digest": "49f91059fd9e90bc470bb5140bffabcd2aa2471f6ee98ae52e83bd983c4ec917",
   "worker_image_digests": null,
   "policy_bundle_hash": "694ac9f2925064cfac0733ec26b0a019c8ddd5b8f66df96ac7b71c942f4a0171",
   "dependency_lock_hashes": {
@@ -24,11 +24,11 @@
     "report": "reports/llm-eval.json",
     "status": "missing_failed_or_stale",
     "model_turns": 0,
-    "scope": "durable_storage_build_not_yet_evaluated_with_a_model_turn"
+    "scope": "current_vector_expression_build_not_yet_evaluated_with_a_model_turn"
   },
   "local_codex_transport_tests": {
     "report": "reports/codex-host.json",
-    "status": "passed",
+    "status": "missing_or_stale",
     "model_turns": 0
   },
   "benchmark_report": "reports/benchmark.json",
@@ -42,10 +42,10 @@
   "completion_audit": {
     "status": "incomplete",
     "source_sha256": "39eb5f37ffcb1a0b3aa790d5e6db49e109a390ca57d1dcf47c23be231bce8ff0",
-    "audit_sha256": "14efcbc54d69c22955b2d299418b6b3c46089fa5680f128c59b0c8b8f9e27eab",
+    "audit_sha256": "51b3ad5be92456bf34f63791daffa0c571a213c95192740f8ab21c106a3cd858",
     "sections": 162,
-    "verified": 6,
-    "remaining": 156,
+    "verified": 7,
+    "remaining": 155,
     "issues": [
       "1: 1. Ziel, Grenzen und Erfolgskriterien – Anforderungen noch nicht vollständig abgeleitet.",
       "1.1: 1.1 Was das System leisten soll – unvollständig oder nicht ausreichend geprüft.",
@@ -103,7 +103,6 @@
       "9.1: 9.1 Format – Anforderungen noch nicht vollständig abgeleitet.",
       "9.2: 9.2 Operatorfamilien – unvollständig oder nicht ausreichend geprüft.",
       "9.3: 9.3 Vertrag pro Operator – Anforderungen noch nicht vollständig abgeleitet.",
-      "9.4: 9.4 Formelauswertung – Anforderungen noch nicht vollständig abgeleitet.",
       "10: 10. MCP-Werkzeugkatalog – Anforderungen noch nicht vollständig abgeleitet.",
       "10.1: 10.1 Entwurfsprinzip – Anforderungen noch nicht vollständig abgeleitet.",
       "10.2: 10.2 Vorgesehene Werkzeuge – Anforderungen noch nicht vollständig abgeleitet.",
