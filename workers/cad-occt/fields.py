@@ -1,13 +1,45 @@
 """Analytic implicit fields with conservative Lipschitz pruning and sparse surface cells."""
 import math
+from functools import lru_cache
+from fractions import Fraction
 import numpy as np
 from geometry import require
 
 def wendland(q):
     return max(0.,1.-q)**4*(4.*q+1.) if q>=0 else 0.
 
+@lru_cache(maxsize=128)
+def affine_constants(matrix):
+    a=[[Fraction(x) for x in row] for row in matrix]
+    def cross(v,w):return [v[(i+1)%3]*w[(i+2)%3]-v[(i+2)%3]*w[(i+1)%3] for i in range(3)]
+    rows=[cross(a[1],a[2]),cross(a[2],a[0]),cross(a[0],a[1])]
+    det=sum(a[0][i]*rows[0][i] for i in range(3));require(det!=0,'Singuläre Feldtransformation.')
+    inverse=[[rows[j][i]/det for j in range(3)] for i in range(3)]
+    norm=sum(abs(x) for row in inverse for x in row)
+    # Round the positive distance multiplier down, never claim an exact SDF.
+    scale=math.nextafter(float(1/norm),0.)
+    return np.array([[float(x) for x in row] for row in inverse]),scale
+
+@lru_cache(maxsize=128)
+def rotation_matrix(axis,value,unit):
+    u=np.asarray(axis,float);u=u/np.linalg.norm(u)
+    angle=float(value)*(math.pi/180 if unit=='deg' else 1)
+    cross=np.array([[0,-u[2],u[1]],[u[2],0,-u[0]],[-u[1],u[0],0]])
+    return np.eye(3)*math.cos(angle)+(1-math.cos(angle))*np.outer(u,u)+math.sin(angle)*cross
+
+def rotated_local(node,point):
+    origin=np.asarray(node['origin'],float);angle=node['angle']
+    rotation=rotation_matrix(tuple(node['axis']),angle['value'],angle['unit'])
+    return origin+rotation.T@(np.asarray(point,float)-origin)
+
 def evaluate(node, point):
     p=np.asarray(point,dtype=float);op=node['op']
+    if op=='gyroid':
+        x,y,z=2*math.pi*(p-np.asarray(node['origin'],float))/float(node['period'])
+        return math.sin(x)*math.cos(y)+math.sin(y)*math.cos(z)+math.sin(z)*math.cos(x)-float(node['threshold'])
+    if op=='convert_field_unit':
+        q=node['reference_length'];reference=float(q['value'])*{'mm':1,'m':1000,'um':.001}[q['unit']]
+        return evaluate(node['source'],p)*(reference if node['to']=='length' else 1/reference)
     if op in ('sphere','box','torus','cylinder'):p=p-np.asarray(node['center'],dtype=float)
     if op=='sphere':return float(np.linalg.norm(p)-float(node['radius']))
     if op=='box':
@@ -32,6 +64,10 @@ def evaluate(node, point):
     if op=='transform':
         scale=np.asarray(node['scale'],dtype=float)
         return float(min(scale))*evaluate(node['source'],(p-np.asarray(node['translation'],dtype=float))/scale)
+    if op=='affine_transform':
+        inverse,scale=affine_constants(tuple(tuple(row) for row in node['matrix']))
+        return scale*evaluate(node['source'],inverse@(p-np.asarray(node['translation'],float)))
+    if op=='rotate':return evaluate(node['source'],rotated_local(node,p))
     if op=='local_deform':
         center=np.asarray(node['center'],float);displacement=np.asarray(node['displacement'],float);radius=float(node['radius']);q=p.copy()
         for _ in range(128):
@@ -58,7 +94,7 @@ def field_facts(f):
     c=f['construction'];lo=np.array(c['domain']['min'],dtype=float);hi=np.array(c['domain']['max'],dtype=float)
     vals=[evaluate(c['expression'],p) for p in [lo,hi,(lo+hi)/2]]
     require(all(math.isfinite(v) for v in vals),'Nichtendliches Feld.')
-    return dict(valid=True,bounds=[*lo,*hi],field_semantics=f['field']['semantics'],lipschitz_bound=f['field']['lipschitz'],
+    return dict(valid=True,bounds=[*lo,*hi],field_semantics=f['field']['semantics'],value_unit=f['field'].get('value_unit','length'),lipschitz_bound=f['field']['lipschitz'],
                 dimensions={},geometry_hash=f['cache_key'],engine_build='mathforge-field-1',
                 volume=None,area=None,solids=None,coverage='analytic_contract_and_sampled_finiteness',manufacturing_status='not_certified')
 
@@ -108,6 +144,6 @@ def extract(f,sampler=None):
                 triangle([q[0],q[1],q[2]]);triangle([q[0],q[2],q[3]])
     recurse(np.zeros(3,dtype=int),n)
     require(triangles,'Keine Oberfläche in der Domäne gefunden.')
-    return dict(vertices=vertices,triangles=triangles,feature_id=f['id'],quality='preview_only',field_semantics=f['field']['semantics'],
+    return dict(vertices=vertices,triangles=triangles,feature_id=f['id'],quality='preview_only',field_semantics=f['field']['semantics'],value_unit=f['field'].get('value_unit','length'),
                 deflection=float(np.linalg.norm(spacing)),certified_bound=None,active_cells=cells,pruned_cells=pruned,
                 note='Sparse Lipschitz octree with marching tetrahedra; subcell topology is not certified.')

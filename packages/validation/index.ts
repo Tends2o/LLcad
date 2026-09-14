@@ -59,6 +59,24 @@ export function validate(
   );
   for (const f of ir.features) {
     const fact = result.facts[f.id];
+    if (ir.profile === "precision_cad" && fact?.native_tolerances_mm) {
+      const native = Object.values<number>(fact.native_tolerances_mm);
+      add(
+        "native-tolerance-" + f.id,
+        f.id,
+        native.every(
+          (value) =>
+            Number.isFinite(value) &&
+            value >= 0 &&
+            value <= quantity(ir.tolerance, "length"),
+        ),
+        fact.native_tolerances_mm,
+        "OCCT_BRep_Tool_Tolerance",
+        "native_boundary_tolerance_metadata",
+        "reported_kernel_tolerances_not_a_global_surface_error_certificate",
+        ir.tolerance,
+      );
+    }
     add(
       "geometry-" + f.id,
       f.id,

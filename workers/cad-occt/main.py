@@ -35,6 +35,9 @@ def run(request):
         with open('out/'+key+'.topology.json','w') as h:json.dump(records,h,allow_nan=False)
         require(not shape.IsNull(),'Leeres Operatorergebnis.')
         props=properties(shape);require(props['valid'],'OCCT meldet eine ungültige Geometrie.')
+        if plan['profile']=='precision_cad':
+            require(max(props['native_tolerances_mm'].values())<=plan['tolerance'],
+                    'Native Randtoleranzen überschreiten die verlangte Modellgenauigkeit.','PRECISION_UNSUPPORTED')
         if f['depends_on']:
             f=dict(f,base_operator=next(x['construction']['operator'] for x in features if x['id']==f['depends_on'][0]))
         props['dimensions']=dimensions(f,shape,deps);props['geometry_hash']=shape_hash(shape)

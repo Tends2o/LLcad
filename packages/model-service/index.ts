@@ -30,6 +30,7 @@ import { compare } from "../validation/index.js";
 import { BUILD_HASH, IMPLEMENTATION_HASH } from "../compiler/build.js";
 import { solverRequest } from "../compiler/constraints.js";
 import { exportPackage } from "./export-package.js";
+import { affineContract } from "../compiler/affine.js";
 import {
   faces,
   faceSummary,
@@ -278,6 +279,8 @@ export class ModelService {
             clearance: "two_static_feature_geometries_no_motion_certificate",
           },
           field_operators: [
+            "gyroid",
+            "convert_field_unit",
             "sphere",
             "box",
             "plane",
@@ -291,6 +294,8 @@ export class ModelService {
             "offset",
             "shell",
             "transform",
+            "rotate",
+            "affine_transform",
             "local_field_delta",
             "local_deform",
           ],
@@ -332,6 +337,26 @@ export class ModelService {
             refinement: "insert_surface_knots_with_exact_IR_rounding_bound",
             legacy_bspline_points: "OCCT_approximating_curve_fit",
           },
+          transformations: {
+            brep: [
+              "axis_angle_about_declared_origin",
+              "invertible_affine_3x3_plus_translation",
+            ],
+            normals: "inverse_transpose_then_normalize",
+            orientation_reversal: "native_OCCT_topology_and_triangle_winding",
+            affine_field_values:
+              "source_value_scaled_by_reciprocal_entrywise_inverse_norm",
+            affine_field_semantics:
+              "bounded_distance_estimator_or_general_implicit",
+            native_error_certificate: null,
+          },
+          field_values: {
+            units: ["length", "dimensionless"],
+            gyroid:
+              "dimensionless_implicit_field_threshold_is_not_wall_thickness",
+            conversion:
+              "explicit_reference_length_without_distance_reconstruction",
+          },
           limits: LIMITS,
           protocols: ["2025-03-26", "2025-06-18", "2025-11-25", "2026-07-28"],
           host_test_status: "see_build_bound_reports",
@@ -354,6 +379,8 @@ export class ModelService {
               "pocket",
               "instance",
               "transform",
+              "rotate",
+              "affine_transform",
               "mirror",
               "pattern",
               "assembly",
@@ -561,6 +588,7 @@ export class ModelService {
               ? ["Ursprüngliche Feature-Historie unbekannt."]
               : [],
           available_edit_operations: [
+            { op: "set_construction" },
             ...Object.keys(f.parameters).map((parameter) => ({
               op: Object.hasOwn(f.expressions, parameter)
                 ? "set_expression"
@@ -572,6 +600,13 @@ export class ModelService {
               : []),
           ],
           construction_hash: hash(f.construction),
+          transformation_contract:
+            f.construction.operator === "affine_transform"
+              ? affineContract(
+                  f.construction.matrix,
+                  f.construction.translation,
+                )
+              : null,
           surface_poles_hash:
             f.construction.operator === "nurbs_surface"
               ? hash(f.construction.poles)

@@ -63,7 +63,13 @@ def properties(shape):
         TopExp.MapShapes_s(shape,kind,all_shapes)
         for solid in solids:TopExp.MapShapes_s(solid,kind,solid_shapes)
         solid_only=solid_only and all_shapes.Extent()==solid_shapes.Extent()
+    tolerances={}
+    for name,kind,cast in [('vertex',TopAbs_VERTEX,TopoDS.Vertex_s),('edge',TopAbs_EDGE,TopoDS.Edge_s),('face',TopAbs_FACE,TopoDS.Face_s)]:
+        values=[BRep_Tool.Tolerance_s(cast(item)) for item in explore(shape,kind)]
+        require(all(math.isfinite(x) and x>=0 for x in values),'Ungültige native Toleranz.')
+        tolerances[name]=max(values,default=0.)
     result = dict(volume=v.Mass() if solid_only else None, area=a.Mass(), bounds=b, volume_integration_relative_error_estimate=volume_error if solid_only else None,
+                  native_tolerances_mm=tolerances,
                   solids=len(solids), precision_solid_only=solid_only,
                   faces=sum(1 for _ in explore(shape, TopAbs_FACE)),
                   valid=BRepCheck_Analyzer(shape, True).IsValid())

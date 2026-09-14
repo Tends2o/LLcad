@@ -7,12 +7,17 @@ test_custom_helical_thread_is_a_real_valid_solid (test_advanced.AdvancedTests.te
 test_fillet_generated_faces_have_stable_native_origins (test_advanced.AdvancedTests.test_fillet_generated_faces_have_stable_native_origins) ... ok
 test_profile_history_survives_cache_and_drives_loft_faces (test_advanced.AdvancedTests.test_profile_history_survives_cache_and_drives_loft_faces) ... ok
 test_trim_and_sew_native_surfaces (test_advanced.AdvancedTests.test_trim_and_sew_native_surfaces) ... ok
+test_affine_field_is_conservative_and_cache_support_uses_inverse_coordinates (test_affine.AffineTests.test_affine_field_is_conservative_and_cache_support_uses_inverse_coordinates) ... ok
+test_axis_angle_roundtrip_and_oriented_plane (test_affine.AffineTests.test_axis_angle_roundtrip_and_oriented_plane) ... ok
+test_native_shear_reflection_normals_winding_and_inverse (test_affine.AffineTests.test_native_shear_reflection_normals_winding_and_inverse) ... ok
 test_piecewise_curve_does_not_report_a_one_sided_derivative_as_global (test_analysis.AnalysisTests.test_piecewise_curve_does_not_report_a_one_sided_derivative_as_global) ... ok
 test_cross_resolution_and_compact_support_and_registry_binding (test_field_cache.FieldCacheTests.test_cross_resolution_and_compact_support_and_registry_binding) ... ok
 test_vdb_grid_budget_rejects_before_allocation (test_field_cache.FieldCacheTests.test_vdb_grid_budget_rejects_before_allocation) ... ok
 test_capsule_endpoints_and_degenerate_segment (test_field_primitives.FieldPrimitiveTests.test_capsule_endpoints_and_degenerate_segment) ... ok
 test_constant_and_compact_variable_shell (test_field_primitives.FieldPrimitiveTests.test_constant_and_compact_variable_shell) ... ok
 test_normalized_plane_and_capped_cylinder (test_field_primitives.FieldPrimitiveTests.test_normalized_plane_and_capped_cylinder) ... ok
+test_periodicity_reference_values_analytic_gradient_and_value_conversion (test_gyroid.GyroidTests.test_periodicity_reference_values_analytic_gradient_and_value_conversion) ... ok
+test_vdb_checks_finite_storage_and_reports_actual_sampling_losses (test_gyroid.GyroidTests.test_vdb_checks_finite_storage_and_reports_actual_sampling_losses) ... ok
 test_compact_support_far_region_unchanged (test_native.FieldTests.test_compact_support_far_region_unchanged) ... ok
 test_csg_sign_and_anisotropic_field (test_native.FieldTests.test_csg_sign_and_anisotropic_field) ... ok
 test_local_deformation_inverse_moves_only_the_support (test_native.FieldTests.test_local_deformation_inverse_moves_only_the_support) ... ok
@@ -35,7 +40,7 @@ test_step_brep_stl_roundtrip (test_native.NativeGeometryTests.test_step_brep_stl
 ******        Transfer Mode = 0  I.E.  As Is       ******[0m
 [32;1m******        Transferring Shape, ShapeType = 2                      ******[0m
 [32;1m** WorkSession : Sending all data[0m
-[32;1m Step File Name : /tmp/tmpmrmml0r9/shape.step(32 ents)  Write  Done[0m
+[32;1m Step File Name : /tmp/tmpugm6y65m/shape.step(32 ents)  Write  Done[0m
 ok
 test_transform_inverse_and_instance_volume (test_native.NativeGeometryTests.test_transform_inverse_and_instance_volume) ... ok
 test_explicit_rational_quarter_circle_uses_weights_and_clamped_basis (test_nurbs.NurbsTests.test_explicit_rational_quarter_circle_uses_weights_and_clamped_basis) ... ok
@@ -45,6 +50,6 @@ test_registered_history_preserves_the_existing_geometry_contract (test_topology.
 test_unknown_history_is_never_replaced_with_a_geometric_guess (test_topology.TopologyTests.test_unknown_history_is_never_replaced_with_a_geometric_guess) ... ok
 
 ----------------------------------------------------------------------
-Ran 32 tests in 2.433s
+Ran 37 tests in 2.616s
 
 OK

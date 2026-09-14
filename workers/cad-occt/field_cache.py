@@ -1,7 +1,7 @@
 """Private bounded samples reusable across resolutions and compact local edits."""
 import hashlib, json, math
 import numpy as np
-from fields import evaluate
+from fields import evaluate,affine_constants,rotated_local
 from geometry import require
 
 MAX_SAMPLES=160000
@@ -15,6 +15,11 @@ def relevant(node,point):
     if op=='transform':
         local=(np.asarray(point)-np.asarray(node['translation'],float))/np.asarray(node['scale'],float)
         return dict(node,source=relevant(node['source'],local))
+    if op=='affine_transform':
+        inverse,_=affine_constants(tuple(tuple(row) for row in node['matrix']))
+        local=inverse@(np.asarray(point)-np.asarray(node['translation'],float))
+        return dict(node,source=relevant(node['source'],local))
+    if op=='rotate':return dict(node,source=relevant(node['source'],rotated_local(node,point)))
     if 'source' in node: return dict(node,source=relevant(node['source'],point))
     if 'a' in node: return dict(node,a=relevant(node['a'],point),b=relevant(node['b'],point))
     return node

@@ -21,6 +21,7 @@ const buildFiles = [
   "packages/compiler/bernstein.ts",
   "packages/compiler/math.ts",
   "packages/compiler/nurbs.ts",
+  "packages/compiler/affine.ts",
   "packages/compiler/build.ts",
   "packages/semantic-ir/units.ts",
   "packages/semantic-ir/hash.ts",

@@ -1,23 +1,45 @@
 """Bounded native constructors and their actual OCCT builder histories."""
 from geometry import *
 from OCP.gp import gp_Pln, gp_Ax3, gp_Pnt2d, gp_Dir2d, gp_Lin2d
+from OCP.gp import gp_GTrsf, gp_Mat, gp_XYZ
 from OCP.GC import GC_MakeArcOfCircle
 from OCP.Geom import Geom_CylindricalSurface
 from OCP.Geom2d import Geom2d_Line
 from OCP.BRepBuilderAPI import BRepBuilderAPI_MakeVertex, BRepBuilderAPI_Sewing, BRepBuilderAPI_MakeSolid
+from OCP.BRepBuilderAPI import BRepBuilderAPI_GTransform, BRepBuilderAPI_Copy
 from OCP.BRepOffsetAPI import BRepOffsetAPI_MakePipeShell
 from OCP.BRepLib import BRepLib
 from OCP.TopAbs import TopAbs_SHELL
 from OCP.ShapeUpgrade import ShapeUpgrade_UnifySameDomain
 
 TRACKED = {'point', 'line', 'arc', 'plane', 'trim_surface', 'cap', 'sew', 'regularize', 'thread',
-           'extrude', 'revolve', 'loft', 'sweep', 'fillet', 'chamfer', 'shell'}
+           'extrude', 'revolve', 'loft', 'sweep', 'fillet', 'chamfer', 'shell', 'affine_transform', 'rotate'}
+
+class CopiedTransform:
+    """Compose native copy and transform histories; never match by coordinates."""
+    def __init__(self,source,transform):
+        self.copy=BRepBuilderAPI_Copy(source,False,False)
+        clean=self.copy.Shape();BRepTools.Clean_s(clean)
+        self.transform=BRepBuilderAPI_GTransform(clean,transform,True)
+    def Shape(self):return self.transform.Shape()
+    def IsDone(self):return self.copy.IsDone() and self.transform.IsDone()
+    def Modified(self,source):return self.transform.Modified(self.copy.ModifiedShape(source))
+    def Generated(self,source):return self.transform.Generated(self.copy.ModifiedShape(source))
 
 def build(f, deps):
     p, c = f['values'], f['construction']; op = c['operator']
     named = {}; maker = None
     origin = gp_Pnt(*(p.get(k, 0) for k in ('x', 'y', 'z')))
-    if op == 'point':
+    if op == 'affine_transform':
+        # OCCT 7.9.3 can leave invalid triangulation links when GTransform is
+        # applied after meshing. Transform a native topology copy without its
+        # derived mesh, retaining both histories and the original input hash.
+        transform=gp_GTrsf(gp_Mat(*[float(x) for row in c['matrix'] for x in row]),gp_XYZ(*map(float,c['translation'])))
+        maker=CopiedTransform(deps[0],transform)
+    elif op == 'rotate':
+        transform=gp_Trsf();transform.SetRotation(gp_Ax1(gp_Pnt(*map(float,c['origin'])),gp_Dir(*map(float,c['axis']))),p['angle'])
+        maker=BRepBuilderAPI_Transform(deps[0],transform,False)
+    elif op == 'point':
         maker = BRepBuilderAPI_MakeVertex(origin)
     elif op == 'line':
         maker = BRepBuilderAPI_MakeWire(BRepBuilderAPI_MakeEdge(gp_Pnt(*map(float,c['start'])), gp_Pnt(*map(float,c['end']))).Edge())

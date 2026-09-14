@@ -1,14 +1,14 @@
 {
   "status": "passed",
-  "created": "2026-09-14T11:54:02.451Z",
-  "registry_hash": "af800c792598352567cef23f2924cda0c177e89035e1337d7ae6cb7a4f596101",
-  "implementation_hash": "4dbe7cb598fa7281dc44566476f0c3f4f8319508cb0bff8ad1018e3d8e49c9d1",
+  "created": "2026-09-14T12:31:25.930Z",
+  "registry_hash": "965f19721ddde2a71937947c574f0209f490a0e97f33bbfabc0bf29540b83e4b",
+  "implementation_hash": "cf6158e6db9702e9d99c08b66a498a06204c244184dcbb81ab7db4783caed4fb",
   "transport": "MCP Streamable HTTP",
   "client": "official SDK",
   "browser_interactions": 0,
-  "model_id": "model-15eb7a58-5ce3-402d-8ae8-dcc7bbf30cc7",
-  "original_revision": "rev-f8f1ec56-c2e6-4b1e-85fa-8ab9cb38e72c",
-  "edited_revision": "rev-e191b05c-1c62-438c-abff-1cd85e04d442",
+  "model_id": "model-b2a91c61-5201-4ca3-a113-f8c5c547a748",
+  "original_revision": "rev-68ebf997-1925-4264-8ea2-663034bf5160",
+  "edited_revision": "rev-ac02d9a8-f7fa-46ec-a55a-0c49fc9096aa",
   "calls": [
     "cad_capabilities",
     "cad_list_models",
@@ -68,6 +68,11 @@
         3
       ],
       "volume_integration_relative_error_estimate": 9.34924652315925e-16,
+      "native_tolerances_mm": {
+        "vertex": 1.000000025962512e-7,
+        "edge": 1e-7,
+        "face": 1e-7
+      },
       "solids": 1,
       "precision_solid_only": true,
       "faces": 10,
@@ -79,7 +84,7 @@
       },
       "geometry_hash": "3f9b19f96034a98b59cc1715bda9b32ee9d077c4ec93a1747b02c217a3ff21dd",
       "engine_build": "OCCT-7.9.3.1.1/mathforge-1",
-      "cache_key": "3165cd7b45ac219220e45538505f0fa0dab7bc7f52dea3e8d4309e251d0ae1f3",
+      "cache_key": "a85d8ca8ed2385af138c9c18cd35f4ac31aae464d78d00caaade710e42a1cea3",
       "topology": {
         "version": 2,
         "face_count": 10,
@@ -92,12 +97,12 @@
     "assumptions": [],
     "artifacts": [],
     "recommended_next_actions": [],
-    "model_id": "model-15eb7a58-5ce3-402d-8ae8-dcc7bbf30cc7",
-    "revision": "rev-e191b05c-1c62-438c-abff-1cd85e04d442",
+    "model_id": "model-b2a91c61-5201-4ca3-a113-f8c5c547a748",
+    "revision": "rev-ac02d9a8-f7fa-46ec-a55a-0c49fc9096aa",
     "metric": "all",
     "unit": "mm",
     "coverage": "registered_geometric_measurement",
-    "trace_id": "trace-75647351-4aaa-4f7a-bc3a-a5aba6d874bf"
+    "trace_id": "trace-2640ab7a-0cd5-4f6d-b7e7-229a575d3d21"
   },
   "comparison": {
     "status": "ok",
@@ -108,9 +113,9 @@
     "assumptions": [],
     "artifacts": [],
     "recommended_next_actions": [],
-    "model_id": "model-15eb7a58-5ce3-402d-8ae8-dcc7bbf30cc7",
-    "from_revision": "rev-f8f1ec56-c2e6-4b1e-85fa-8ab9cb38e72c",
-    "to_revision": "rev-e191b05c-1c62-438c-abff-1cd85e04d442",
+    "model_id": "model-b2a91c61-5201-4ca3-a113-f8c5c547a748",
+    "from_revision": "rev-68ebf997-1925-4264-8ea2-663034bf5160",
+    "to_revision": "rev-ac02d9a8-f7fa-46ec-a55a-0c49fc9096aa",
     "changed_features": [
       "feat-groove-07"
     ],
@@ -167,7 +172,7 @@
     ],
     "volume_delta": -1.5079644737234048,
     "coverage": "declared_dimensions_and_per_feature_hashes",
-    "trace_id": "trace-cc8de9dc-cc51-430d-97e1-582d32cdff50"
+    "trace_id": "trace-04699ef1-c1d2-42fe-9ce5-6fabd6742b4e"
   },
   "roundtrip": {
     "status": "checks_passed_within_profile",
@@ -184,6 +189,11 @@
         3
       ],
       "volume_integration_relative_error_estimate": 1.2048932050195552e-15,
+      "native_tolerances_mm": {
+        "vertex": 1.00000002596251e-7,
+        "edge": 1e-7,
+        "face": 1e-7
+      },
       "solids": 1,
       "precision_solid_only": true,
       "faces": 11,
@@ -201,6 +211,11 @@
         3
       ],
       "volume_integration_relative_error_estimate": 1.2048932050195552e-15,
+      "native_tolerances_mm": {
+        "vertex": 1e-7,
+        "edge": 1e-7,
+        "face": 1e-7
+      },
       "solids": 1,
       "precision_solid_only": true,
       "faces": 11,

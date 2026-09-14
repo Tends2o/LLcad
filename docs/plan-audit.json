@@ -310,11 +310,29 @@
       "source_line": 284,
       "source_end_line": 312,
       "source_sha256": "1cba3d250e5787970c1ae93dc7850cf6dbed7d2fd83b663a3307e24bb078827a",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "verified",
+      "requirements": [
+        "Allgemeine invertierbare affine Abbildungen mit expliziter Matrix und Translation unterstützen.",
+        "Normalen invers transponiert transformieren und negative Determinanten in Flächen-/Dreiecksorientierung berücksichtigen.",
+        "Singuläre und unzulässig konditionierte Transformationen ablehnen.",
+        "Achsenrotation um einen angegebenen Ursprung mit Orthogonalitäts-/Determinantenprüfung unterstützen."
+      ],
+      "evidence": [
+        "packages/compiler/affine.ts",
+        "workers/cad-occt/advanced.py",
+        "tests/geometry/affine.test.ts",
+        "tests/geometry/test_affine.py",
+        "docs/transforms-and-fields.md",
+        "reports/verification.json",
+        "reports/tests.log",
+        "reports/geometry.log"
+      ],
+      "notes": "Aktueller vollständiger Entwicklungsprüflauf bestanden; Bereitstellung ist separat in Abschnitt 27 zu prüfen.",
+      "review": {
+        "scope_match": true,
+        "findings": "Allgemeine native affine Transformation, freie Achsendrehung, exakte Prüfung von Determinante/Inverse/Konditionierung, inverse-transponierte Normalen und nach außen gerichtete gespiegelte Dreiecke durch native Tests belegt. Die native Kopier-/Transformationshistorie erhält alle sechs Testflächen, die ursprüngliche Geometrie bleibt unverändert. Vollständiger Lauf mit 70 TS- und 37 Python-Tests bestanden."
+      }
     },
     {
       "id": "6.4",
@@ -322,11 +340,19 @@
       "source_line": 313,
       "source_end_line": 337,
       "source_sha256": "7a6bd4c4a8800042f9b89ddbddf92a1067ea808047d9610ddb4d03d9143afa98",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Distanzwerte von allgemeinen impliziten Werten unterscheiden.",
+        "Werteinheit, Lipschitz-Bound, Gültigkeitsgebiet und Fehlerstatus mitführen.",
+        "Keinen Abstandsnachweis allein aus numerischer Eikonal-Nähe ableiten."
+      ],
+      "evidence": [
+        "packages/compiler/index.ts",
+        "workers/cad-occt/fields.py",
+        "tests/geometry/gyroid.test.ts"
+      ],
+      "notes": "Explizite Längen-/dimensionslose Feldwerte und geprüfte Einheitenkonvertierung ergänzt. Allgemeiner numerischer Feld-/Oberflächenfehler bleibt nicht zertifiziert und muss weiter im vollständigen Genauigkeitsvertrag behandelt werden."
     },
     {
       "id": "6.5",
@@ -394,15 +420,28 @@
       "source_end_line": 463,
       "source_sha256": "8074aba198beb8d7d9017416a7b073cd691781f538fb67b31005766e7837884b",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
-        "Feldsemantik und Lipschitzgrenzen bei gleichmäßiger und ungleichmäßiger Transformation korrekt führen."
+        "Starre Drehung/Translation und gleichmäßige Skalierung mit korrekter Feldsemantik auswerten.",
+        "Allgemeine invertierbare affine Abbildungen der Nullmenge unterstützen.",
+        "Konservative Lipschitz- und Distanzuntergrenzen deklarieren, ohne Pseudo-SDFs zu exakten Distanzen aufzuwerten."
       ],
       "evidence": [
+        "packages/compiler/affine.ts",
         "packages/compiler/index.ts",
-        "tests/unit/field-contracts.test.ts"
+        "workers/cad-occt/fields.py",
+        "workers/cad-occt/field_cache.py",
+        "tests/geometry/affine.test.ts",
+        "tests/geometry/test_affine.py",
+        "reports/verification.json",
+        "reports/tests.log",
+        "reports/geometry.log"
       ],
-      "notes": "Fehlerhafte Hochstufung allgemeiner Felder zum Distanzschätzer korrigiert. Weitere affine Transformationen fehlen."
+      "notes": "Aktueller vollständiger Entwicklungsprüflauf bestanden; Bereitstellung ist separat in Abschnitt 27 zu prüfen.",
+      "review": {
+        "scope_match": true,
+        "findings": "Starre Felddrehung und vorhandene gleichmäßige Skalen erhalten die deklarierte Semantik. Allgemeiner affiner Transport erhält die Nullmenge und benutzt eine nachgewiesen konservative Matrixnormschranke. Allgemeine implizite Felder werden nicht zu Distanzfeldern aufgewertet. Transformationen von lokalen Stützen werden im privaten Samplecache berücksichtigt und gegen Neuauswertung getestet. Native Rundungsfehler werden nicht als global zertifiziert ausgegeben."
+      }
     },
     {
       "id": "6.10",
@@ -482,11 +521,21 @@
       "source_line": 581,
       "source_end_line": 613,
       "source_sha256": "8386caac5843154d6016863a0643a80fd84ca5270d5c811df122e57eed6352e7",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Helix-/Gewindekonstruktion mit explizitem Profil, Steigung, Freigängen und Normstatus unterstützen.",
+        "Lineare und zyklische Muster als Instanzen verwalten.",
+        "Periodische Gyroid-Gitter als dimensionslose implizite Felder auswerten; Schwellwert nicht als Wandstärke ausgeben."
+      ],
+      "evidence": [
+        "workers/cad-occt/advanced.py",
+        "workers/cad-occt/fields.py",
+        "tests/geometry/test_advanced.py",
+        "tests/geometry/gyroid.test.ts",
+        "tests/geometry/test_gyroid.py"
+      ],
+      "notes": "Custom-Gewinde, lineare Instanzen und Gyroid-Felder vorhanden. Zyklischer Musteroperator und genaue Gewinde-Paarungs-/Freigangsauswertung bleiben offen."
     },
     {
       "id": "6.15",
@@ -1291,11 +1340,23 @@
       "source_line": 1574,
       "source_end_line": 1586,
       "source_sha256": "f12c56d41369a09d25c4aa7f9a9abb699a85e3a93a4108bbafdfb53c7d8351ae",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Nur kompatible geometrische Fehlerschranken derselben Objekte und Metrik addieren; Feldresiduen und andere Einheiten nicht vermischen.",
+        "Numerik- und Exportanteile mit Reserven innerhalb der verlangten Toleranz planen.",
+        "Nicht unterstützte lokale Präzision mit PRECISION_UNSUPPORTED abweisen."
+      ],
+      "evidence": [
+        "packages/model-service/export-package.ts",
+        "packages/compiler/nurbs.ts",
+        "workers/cad-occt/geometry.py",
+        "workers/cad-occt/main.py",
+        "packages/validation/index.ts",
+        "tests/geometry/affine.test.ts",
+        "reports/verification.json"
+      ],
+      "notes": "Native Vertex-/Kanten-/Flächentoleranzen werden tatsächlich gemessen und gegenüber der Modelltoleranz geprüft; extreme affine Skalierung wird nachweislich abgewiesen. Rationale NURBS-Verfeinerung hat eine eigene globale Schranke. Export-Stufen bleiben ausdrücklich unbekannt, soweit unbelegt. Eine allgemeine kompatible Fehlerbudgetfortpflanzung und Reservenplanung über sämtliche Operatoren ist noch offen."
     },
     {
       "id": "16.3",

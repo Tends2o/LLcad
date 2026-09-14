@@ -8,6 +8,7 @@ import { patchContinuity } from "./patches.js";
 import { equationValues, checkEquation } from "./constraints.js";
 import { validateBasis, validateSurface, refineSurface } from "./nurbs.js";
 import * as Rational from "./bernstein.js";
+import { affineContract } from "./affine.js";
 type Param = {
   dimension: "length" | "angle" | "scalar";
   min?: number;
@@ -123,6 +124,8 @@ export const OPERATORS = {
     },
     [1, 1],
   ),
+  affine_transform: one({}, [1, 1]),
+  rotate: one({ angle }, [1, 1]),
   instance: one({ ...position, angle: { ...angle, optional: true } }, [1, 1]),
   mirror: one({}, [1, 1]),
   pattern: one(
@@ -158,6 +161,46 @@ export const LIMITS = {
   field_cached_samples: 160000,
 };
 export const REGISTRY_HASH = hash({ operators: OPERATORS, build: BUILD_HASH });
+export function fieldValueUnit(
+  node: any,
+  depth = 0,
+): "length" | "dimensionless" {
+  requireThat(
+    depth <= LIMITS.ast_depth,
+    "BUDGET_EXCEEDED",
+    "Feld-Einheitenbaum ist zu tief.",
+  );
+  if (node.op === "gyroid") return "dimensionless";
+  if (node.a) {
+    const a = fieldValueUnit(node.a, depth + 1),
+      b = fieldValueUnit(node.b, depth + 1);
+    requireThat(
+      a === b,
+      "UNIT_MISMATCH",
+      "CSG-Feldwerte benötigen gleiche Einheiten; zuerst ausdrücklich convert_field_unit verwenden.",
+    );
+    return a;
+  }
+  if (node.source) {
+    const unit = fieldValueUnit(node.source, depth + 1);
+    if (["shell", "offset", "local_field_delta"].includes(node.op))
+      requireThat(
+        unit === "length",
+        "UNIT_MISMATCH",
+        "Schalen, Offsets und lokale Feldamplituden benötigen längenwertige Felder.",
+      );
+    if (node.op === "convert_field_unit") {
+      requireThat(
+        node.to !== unit,
+        "UNIT_MISMATCH",
+        "Feld-Einheitenkonvertierung benötigt eine andere Zieleinheit.",
+      );
+      return node.to;
+    }
+    return unit;
+  }
+  return "length";
+}
 export function checkDepth(input: unknown) {
   let count = 0;
   const stack: [unknown, number][] = [[input, 0]];
@@ -177,6 +220,22 @@ export function fieldContract(
   depth = 0,
   state = { nodes: 0 },
 ): { semantics: string; lipschitz: number } {
+  const result = fieldContractNode(node, depth, state);
+  requireThat(
+    Number.isFinite(result.lipschitz) &&
+      result.lipschitz >= 1e-12 &&
+      result.lipschitz <= 1e12,
+    "BUDGET_EXCEEDED",
+    "Feldkomposition überschreitet den numerischen Lipschitz-Bereich [1e-12,1e12].",
+  );
+  return result;
+}
+function fieldContractNode(
+  node: any,
+  depth = 0,
+  state = { nodes: 0 },
+): { semantics: string; lipschitz: number } {
+  if (depth === 0) fieldValueUnit(node);
   requireThat(
     depth <= LIMITS.ast_depth && ++state.nodes <= LIMITS.ast_nodes,
     "BUDGET_EXCEEDED",
@@ -201,6 +260,11 @@ export function fieldContract(
     return n;
   };
   if (node.center) node.center.forEach(num);
+  if (node.op === "gyroid") {
+    node.origin.forEach(num);
+    num(node.threshold);
+    return { semantics: "general_implicit", lipschitz: 22 / pos(node.period) };
+  }
   if (node.op === "sphere") {
     pos(node.radius);
     return { semantics: "exact_sdf", lipschitz: 1 };
@@ -247,6 +311,39 @@ export function fieldContract(
     };
   }
   const a = fieldContract(node.source, depth + 1, state);
+  if (node.op === "convert_field_unit") {
+    const reference = quantity(node.reference_length, "length");
+    requireThat(
+      reference >= 1e-5 && reference <= 1e6,
+      "GEOMETRY_INVALID",
+      "Referenzlänge für Feldwerte muss positiv und im unterstützten Bereich liegen.",
+    );
+    return {
+      semantics: "general_implicit",
+      lipschitz:
+        a.lipschitz * (node.to === "length" ? reference : 1 / reference),
+    };
+  }
+  if (node.op === "rotate") {
+    node.origin.forEach(num);
+    requireThat(
+      Math.hypot(...node.axis.map(num)) >= 1e-12 &&
+        Math.abs(quantity(node.angle, "angle")) <= 2 * Math.PI,
+      "GEOMETRY_INVALID",
+      "Felddrehung benötigt eine gültige Achse und einen Winkel zwischen -360 und 360 Grad.",
+    );
+    return a;
+  }
+  if (node.op === "affine_transform") {
+    affineContract(node.matrix, node.translation);
+    return {
+      semantics:
+        a.semantics === "general_implicit"
+          ? "general_implicit"
+          : "bounded_distance_estimator",
+      lipschitz: a.lipschitz,
+    };
+  }
   if (node.op === "transform") {
     node.translation.forEach(num);
     const s = node.scale.map(pos);
@@ -436,6 +533,17 @@ export function compile(input: unknown) {
         "Linie benötigt verschiedene, endliche Endpunkte im Koordinatenbereich.",
       );
     }
+    if (f.construction.operator === "affine_transform")
+      affineContract(f.construction.matrix, f.construction.translation);
+    if (f.construction.operator === "rotate") {
+      const c = f.construction;
+      requireThat(
+        [...c.axis, ...c.origin].every((x) => Math.abs(Number(x)) <= 1e6) &&
+          Math.hypot(...c.axis.map(Number)) >= 1e-12,
+        "GEOMETRY_INVALID",
+        "Drehung benötigt eine von null verschiedene Achse und endliche Ursprungskoordinaten.",
+      );
+    }
     if (f.construction.operator === "trim_surface")
       requireThat(
         map.get(f.depends_on[0])!.construction.operator === "nurbs_surface" &&
@@ -481,7 +589,11 @@ export function compile(input: unknown) {
         "BUDGET_EXCEEDED",
         "Die lokale Feldauflösung überschreitet das Budget.",
       );
-      field = { ...field, cell_size: cell };
+      field = {
+        ...field,
+        cell_size: cell,
+        value_unit: fieldValueUnit(f.construction.expression),
+      };
     }
     if ("points" in f.construction)
       for (const p of f.construction.points)
@@ -648,7 +760,14 @@ export function applyPatch(base: ModelIR, patch: Patch) {
     }
     const f = ir.features.find((f) => f.id === op.feature_id);
     requireThat(f, "AMBIGUOUS_SELECTION", "Feature nicht eindeutig auflösbar.");
-    if (op.op === "insert_surface_knots") {
+    if (op.op === "set_construction") {
+      requireThat(
+        hash(f.construction) === op.expected_hash,
+        "STALE_REVISION",
+        "Die Konstruktion wurde bereits geändert.",
+      );
+      f.construction = op.construction;
+    } else if (op.op === "insert_surface_knots") {
       requireThat(
         f.construction.operator === "nurbs_surface",
         "OUT_OF_SCOPE",

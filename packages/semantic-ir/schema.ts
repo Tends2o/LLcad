@@ -11,6 +11,7 @@ export const Quantity = z.strictObject({
 export type Quantity = z.infer<typeof Quantity>;
 export const Vec3 = z.tuple([Quantity, Quantity, Quantity]);
 export const Point = z.tuple([DecimalString, DecimalString, DecimalString]);
+export const Matrix3 = z.tuple([Point, Point, Point]);
 /** Explicit nonperiodic, clamped basis on the normalized parameter domain. */
 export const SplineBasis = z.strictObject({
   degree: z.number().int().min(1).max(15),
@@ -47,6 +48,18 @@ export const ExpressionSchema: z.ZodType<any> = z.lazy(() =>
 );
 export const FieldNode: z.ZodType<any> = z.lazy(() =>
   z.discriminatedUnion("op", [
+    z.strictObject({
+      op: z.literal("gyroid"),
+      period: DecimalString,
+      origin: Point,
+      threshold: DecimalString,
+    }),
+    z.strictObject({
+      op: z.literal("convert_field_unit"),
+      source: FieldNode,
+      to: z.enum(["length", "dimensionless"]),
+      reference_length: Quantity,
+    }),
     z.strictObject({
       op: z.literal("sphere"),
       center: Point,
@@ -112,6 +125,19 @@ export const FieldNode: z.ZodType<any> = z.lazy(() =>
       source: FieldNode,
       translation: Point,
       scale: Point,
+    }),
+    z.strictObject({
+      op: z.literal("affine_transform"),
+      source: FieldNode,
+      matrix: Matrix3,
+      translation: Point,
+    }),
+    z.strictObject({
+      op: z.literal("rotate"),
+      source: FieldNode,
+      axis: Point,
+      origin: Point,
+      angle: Quantity,
     }),
     z.strictObject({
       op: z.literal("local_field_delta"),
@@ -181,6 +207,12 @@ export const Construction = z.discriminatedUnion("operator", [
   z.strictObject({
     operator: z.enum(["transform", "instance", "mirror", "pattern"]),
   }),
+  z.strictObject({
+    operator: z.literal("affine_transform"),
+    matrix: Matrix3,
+    translation: Point,
+  }),
+  z.strictObject({ operator: z.literal("rotate"), axis: Point, origin: Point }),
   z.strictObject({
     operator: z.literal("nurbs_surface"),
     poles: z.array(z.array(Point).min(2).max(16)).min(2).max(16),
@@ -340,6 +372,12 @@ export const SetParameter = z.strictObject({
   value: Quantity,
 });
 export const PatchOperation = z.discriminatedUnion("op", [
+  z.strictObject({
+    op: z.literal("set_construction"),
+    feature_id: Id,
+    expected_hash: z.string().regex(/^[a-f0-9]{64}$/),
+    construction: Construction,
+  }),
   z.strictObject({
     op: z.literal("insert_surface_knots"),
     feature_id: Id,

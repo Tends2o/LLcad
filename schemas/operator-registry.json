@@ -1,5 +1,5 @@
 {
-  "hash": "af800c792598352567cef23f2924cda0c177e89035e1337d7ae6cb7a4f596101",
+  "hash": "965f19721ddde2a71937947c574f0209f490a0e97f33bbfabc0bf29540b83e4b",
   "operators": {
     "point": {
       "version": 1,
@@ -963,6 +963,44 @@
           "min": 0.000001,
           "max": 10000,
           "optional": true
+        }
+      },
+      "refs": [
+        1,
+        1
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "affine_transform": {
+      "version": 1,
+      "params": {},
+      "refs": [
+        1,
+        1
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "rotate": {
+      "version": 1,
+      "params": {
+        "angle": {
+          "dimension": "angle",
+          "min": -6.283185307179586,
+          "max": 6.283185307179586
         }
       },
       "refs": [
