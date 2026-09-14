@@ -19,6 +19,7 @@ Diese Zuordnung verhindert, dass die lauffähige lokale Version mit einer vollst
 
 ## Nachweise
 
+- `reports/deployment-project-access.json` belegt die private Sicherung, Speicherstandmigration 4 → 5, unveränderte Historie und erfolgreiche Übernahme in den lokalen Dienst. `reports/project-access-live-heads.json` prüft alle aktuellen Modellköpfe über den tatsächlich installierten Host.
 - `reports/verification.json` und die zugehörigen Logs dokumentieren den tatsächlich ausgeführten Testlauf.
 - `reports/benchmark.json` enthält Laufzeiten, Rechnerdaten, Buildhash, Stichprobenzahlen und Messgrenzen.
 - `reports/browser.json`, `viewer.png` und `viewer-candidate.png` stammen aus einem ausgeführten Chromium-Ablauf.

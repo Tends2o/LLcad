@@ -1,0 +1,30 @@
+{
+  "status": "passed",
+  "created": "2026-09-14T20:07:33.776230+00:00",
+  "source_commit": "183dbd3461adf8fe21cb3af13bd0ab76bddddc44",
+  "registry_hash": "6825d4227063f970fcbf1304148eed6a2184369e847dfdc23c96dd63157396ad",
+  "implementation_hash": "1d54ed0a5e9aa31f21d8b7bfcf13f88c3a89e86a81f66d7cf598bc3157cfec58",
+  "private_backup": "/root/projekte/LLcad-backups/before-project-access-20260914T200610Z",
+  "old_revision_rows_unchanged": 200,
+  "old_validation_rows_unchanged": 93,
+  "old_job_results_unchanged": 200,
+  "old_blob_files_unchanged": 283,
+  "rebuilt_models": 13,
+  "construction_ir_unchanged": true,
+  "host_transport_status": "passed",
+  "host_transport_model_turns": 0,
+  "llm_status": "passed",
+  "llm_model_turns": 9,
+  "llm_cad_calls": 150,
+  "current_heads_checked": 15,
+  "model_count": 15,
+  "revision_count": 231,
+  "active_jobs": 0,
+  "store_migration": {
+    "from": 4,
+    "to": 5
+  },
+  "real_grants_created": 0,
+  "private_policy_key_mode": "0600",
+  "production_release": "not_released"
+}
