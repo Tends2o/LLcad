@@ -159,7 +159,7 @@ def evaluate_feature(f, deps, traces):
         if op in ('line','arc'):
             return shape,[{'shape':edge,'origins':[origin(fid,op,'curve')]} for edge in edge_list(shape)]
         return shape,builder_trace(shape,deps,traces,prefix,fid,op,maker,named)
-    if op in ('profile','circle','bezier','bspline'):
+    if op in ('profile','circle','bezier','bspline','nurbs_curve'):
         shape=make_feature(f,deps)
         # Profile segment ordinals belong to the explicit ordered construction,
         # and are persisted with native fingerprints before any kernel edit.
@@ -236,6 +236,7 @@ def serialize(trace, key):
                         'fingerprint': shape_hash(face), 'origins': sources,
                         'area': props.Mass(), 'center': [center.X(), center.Y(), center.Z()],
                         'bounds': bounds(face), 'surface': BRepAdaptor_Surface(TopoDS.Face_s(face)).GetType().name})
+        records[-1]['uv_bounds']=list(BRepTools.UVBounds_s(TopoDS.Face_s(face)))
     edges=[{'fingerprint':shape_hash(entry['shape']),'origins':entry['origins']} for entry in trace if entry['shape'].ShapeType()==TopAbs_EDGE]
     return {'version': VERSION, 'cache_key': key, 'faces': records, 'edges': edges}
 

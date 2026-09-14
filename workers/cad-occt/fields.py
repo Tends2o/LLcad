@@ -8,12 +8,21 @@ def wendland(q):
 
 def evaluate(node, point):
     p=np.asarray(point,dtype=float);op=node['op']
-    if op in ('sphere','box','torus'):p=p-np.asarray(node['center'],dtype=float)
+    if op in ('sphere','box','torus','cylinder'):p=p-np.asarray(node['center'],dtype=float)
     if op=='sphere':return float(np.linalg.norm(p)-float(node['radius']))
     if op=='box':
         q=np.abs(p)-np.asarray(node['half_size'],dtype=float)
         return float(np.linalg.norm(np.maximum(q,0))+min(max(q),0))
     if op=='torus':return math.hypot(math.hypot(p[0],p[1])-float(node['major']),p[2])-float(node['minor'])
+    if op=='plane':
+        normal=np.asarray(node['normal'],float);return float(np.dot(normal/np.linalg.norm(normal),p)-float(node['offset']))
+    if op=='cylinder':
+        q=np.array([math.hypot(p[0],p[1])-float(node['radius']),abs(p[2])-float(node['half_height'])])
+        return float(np.linalg.norm(np.maximum(q,0))+min(max(q),0))
+    if op=='capsule':
+        a=np.asarray(node['start'],float);b=np.asarray(node['end'],float);axis=b-a;length2=float(np.dot(axis,axis))
+        t=max(0.,min(1.,float(np.dot(p-a,axis))/length2)) if length2>0 else 0.
+        return float(np.linalg.norm(p-a-t*axis)-float(node['radius']))
     if op in ('union','intersection','difference','smooth_union'):
         a,b=evaluate(node['a'],p),evaluate(node['b'],p)
         if op=='union':return min(a,b)
@@ -32,6 +41,10 @@ def evaluate(node, point):
         require(False,'Inverse lokale Deformation konvergiert nicht.','CONSTRAINT_CONFLICT')
     base=evaluate(node['source'],p)
     if op=='offset':return base-float(node['distance'])
+    if op=='shell':
+        thickness=float(node['thickness'])
+        for term in node.get('variations',[]):thickness+=float(term['amplitude'])*wendland(float(np.linalg.norm(p-np.asarray(term['center'],float)))/float(term['radius']))
+        return abs(base)-thickness/2
     if op=='local_field_delta':
         q=float(np.linalg.norm(p-np.asarray(node['center'],dtype=float)))/float(node['radius'])
         return base+float(node['amplitude'])*wendland(q)

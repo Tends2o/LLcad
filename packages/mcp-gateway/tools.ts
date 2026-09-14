@@ -17,7 +17,7 @@ export const descriptions: Record<ToolName, string> = {
   cad_inspect:
     "Inspect a feature and paged native faces. face_limit is 1..16 (default 8); use face_offset for more. Supply feature_id, face_id and an explicit revision to select a face's proven source feature. selection_handle plus rebind:true and an explicit descendant revision creates a new binding only when every intermediate revision has a unique successor. Splits, merges and unknown provenance require a new selection.",
   cad_measure:
-    "Read registered geometric measurements. Distance creates a durable analysis job and requires two feature IDs and an idempotency key.",
+    "Read registered measurements. distance, clearance, angle and curvature create durable jobs and require feature_id and idempotency_key; all except curvature also require other_feature_id. Curvature measures native curves or surfaces at one point; angle compares their oriented tangents/normals. Multi-face features require face_id from cad_inspect and an explicit revision. uv uses native UV bounds; curve_parameter is normalized [0,1], default 0.5. clearance measures whole static features against optional minimum_clearance; it does not certify motion or global wall thickness.",
   cad_plan_edit:
     "Compile a bounded edit and inspect dependencies and resource estimates.",
   cad_solve_constraints:

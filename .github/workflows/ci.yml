@@ -6,7 +6,7 @@ jobs:
   verify:
     runs-on: ubuntu-24.04
     container:
-      image: debian:13-slim
+      image: debian:13-slim@sha256:d7e12182ce18b85b93007c1dedf31f2d29e01ccf3182cc4017c709b6259bc132
       options: --security-opt seccomp=unconfined --security-opt apparmor=unconfined
     steps:
       - run: apt-get update && apt-get install -y git ca-certificates curl python3-venv bubblewrap libgl1 util-linux python3-openvdb=10.0.1-2.3+b1

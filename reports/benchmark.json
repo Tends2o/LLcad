@@ -1,6 +1,6 @@
 {
   "status": "measured",
-  "created": "2026-09-14T10:33:55.685Z",
+  "created": "2026-09-14T11:55:14.475Z",
   "environment": {
     "platform": "linux",
     "release": "6.12.101+deb13-amd64",
@@ -10,48 +10,48 @@
     "memory_bytes": 4042137600,
     "worker_processes": 1
   },
-  "registry_hash": "d358f9c706afe6d16b93ebf3449f06ba6d697d6464af5854620e89fd5ec65bfc",
-  "implementation_hash": "dfc2ab9e3a4c126c24a17cf4272b3c3f1344f52584c26ccc285759dbbc936bf4",
-  "cold_fixture_pipeline_ms": 796.155754,
+  "registry_hash": "af800c792598352567cef23f2924cda0c177e89035e1337d7ae6cb7a4f596101",
+  "implementation_hash": "4dbe7cb598fa7281dc44566476f0c3f4f8319508cb0bff8ad1018e3d8e49c9d1",
+  "cold_fixture_pipeline_ms": 888.9945960000001,
   "read": {
     "samples": 100,
-    "p50_ms": 0.4177940000000717,
-    "p95_ms": 0.7654199999999491,
-    "min_ms": 0.20849600000008195,
-    "max_ms": 1.384050000000002
+    "p50_ms": 0.5200429999999869,
+    "p95_ms": 0.9477499999998145,
+    "min_ms": 0.34477300000003197,
+    "max_ms": 1.5810489999998936
   },
   "patch_acceptance": {
     "samples": 12,
-    "p50_ms": 1.3674780000001192,
-    "p95_ms": 3.149532000000022,
-    "min_ms": 1.1041359999999258,
-    "max_ms": 3.149532000000022
+    "p50_ms": 1.4486269999997603,
+    "p95_ms": 3.507141000000047,
+    "min_ms": 1.194627999999284,
+    "max_ms": 3.507141000000047
   },
   "candidate": {
     "samples": 12,
-    "p50_ms": 761.0584600000002,
-    "p95_ms": 821.3351439999988,
-    "min_ms": 700.409462,
-    "max_ms": 821.3351439999988
+    "p50_ms": 817.6851809999989,
+    "p95_ms": 880.4914229999995,
+    "min_ms": 731.5453989999999,
+    "max_ms": 880.4914229999995
   },
   "validation": {
     "samples": 12,
-    "p50_ms": 30.692121000000043,
-    "p95_ms": 31.800273000000743,
-    "min_ms": 30.308415000001332,
-    "max_ms": 31.800273000000743
+    "p50_ms": 30.967703999998776,
+    "p95_ms": 31.974505000000136,
+    "min_ms": 30.461790000000292,
+    "max_ms": 31.974505000000136
   },
   "preview": {
     "samples": 5,
-    "p50_ms": 760.4609849999997,
-    "p95_ms": 822.7404730000007,
-    "min_ms": 730.8696439999999,
-    "max_ms": 822.7404730000007
+    "p50_ms": 729.3538840000001,
+    "p95_ms": 761.2312849999998,
+    "min_ms": 699.3801050000002,
+    "max_ms": 761.2312849999998
   },
-  "assembly_100_instances_full_pipeline_ms": 1035.7940120000003,
+  "assembly_100_instances_full_pipeline_ms": 1065.079321000001,
   "stress_at_instance_limit": {
     "instances": 10000,
-    "duration_ms": 5326.9244180000005,
+    "duration_ms": 5553.636402,
     "status": "failed",
     "metrics": null,
     "error": {
@@ -62,89 +62,89 @@
     "authoritative_revision_retained": true,
     "note": "Cold candidate at configured instance limit; no automatic commit or relaxed budget."
   },
-  "organic_full_pipeline_with_preview_ms": 2427.811818000002,
+  "organic_full_pipeline_with_preview_ms": 2456.2815630000005,
   "budget_rejection_verified": true,
   "worker_metrics": [
     {
-      "seconds": 0.04691505595110357,
-      "peak_rss_kib": 314220,
+      "seconds": 0.04749452602118254,
+      "peak_rss_kib": 316144,
       "cache_hits": 1,
       "total_features": 3,
       "field_samples": {}
     },
     {
-      "seconds": 0.04921518312767148,
-      "peak_rss_kib": 314120,
+      "seconds": 0.05389983206987381,
+      "peak_rss_kib": 315860,
       "cache_hits": 1,
       "total_features": 3,
       "field_samples": {}
     },
     {
-      "seconds": 0.0487055629491806,
-      "peak_rss_kib": 314320,
+      "seconds": 0.04834248893894255,
+      "peak_rss_kib": 315752,
       "cache_hits": 1,
       "total_features": 3,
       "field_samples": {}
     },
     {
-      "seconds": 0.048223400954157114,
-      "peak_rss_kib": 314352,
+      "seconds": 0.0496026671025902,
+      "peak_rss_kib": 316028,
       "cache_hits": 1,
       "total_features": 3,
       "field_samples": {}
     },
     {
-      "seconds": 0.04825724777765572,
-      "peak_rss_kib": 314356,
+      "seconds": 0.04935210384428501,
+      "peak_rss_kib": 315632,
       "cache_hits": 1,
       "total_features": 3,
       "field_samples": {}
     },
     {
-      "seconds": 0.051599765196442604,
-      "peak_rss_kib": 314372,
+      "seconds": 0.049029460875317454,
+      "peak_rss_kib": 315764,
       "cache_hits": 1,
       "total_features": 3,
       "field_samples": {}
     },
     {
-      "seconds": 0.04972827713936567,
-      "peak_rss_kib": 314480,
+      "seconds": 0.0480447590816766,
+      "peak_rss_kib": 315664,
       "cache_hits": 1,
       "total_features": 3,
       "field_samples": {}
     },
     {
-      "seconds": 0.049728927901014686,
-      "peak_rss_kib": 314100,
+      "seconds": 0.06975003588013351,
+      "peak_rss_kib": 316024,
       "cache_hits": 1,
       "total_features": 3,
       "field_samples": {}
     },
     {
-      "seconds": 0.048311682883650064,
-      "peak_rss_kib": 314140,
+      "seconds": 0.049932979978621006,
+      "peak_rss_kib": 315960,
       "cache_hits": 1,
       "total_features": 3,
       "field_samples": {}
     },
     {
-      "seconds": 0.05038243508897722,
-      "peak_rss_kib": 314180,
+      "seconds": 0.050018558045849204,
+      "peak_rss_kib": 315944,
       "cache_hits": 1,
       "total_features": 3,
       "field_samples": {}
     },
     {
-      "seconds": 0.04839237290434539,
-      "peak_rss_kib": 314260,
+      "seconds": 0.05678985686972737,
+      "peak_rss_kib": 316060,
       "cache_hits": 1,
       "total_features": 3,
       "field_samples": {}
     },
     {
-      "seconds": 0.05186583008617163,
-      "peak_rss_kib": 314476,
+      "seconds": 0.053605278953909874,
+      "peak_rss_kib": 315720,
       "cache_hits": 1,
       "total_features": 3,
       "field_samples": {}

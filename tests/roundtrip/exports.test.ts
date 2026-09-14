@@ -23,6 +23,46 @@ test("IR, STEP, STL, B-Rep and GLB exports have actual roundtrip reports and pri
       );
       assert.ok(artifact.manifest.roundtrip);
       assert.ok(s.store.readBlob(artifact.hash).length > 20);
+      const manifestArtifact = s.store.getArtifact(
+        principal,
+        result.package_manifest.artifact_id,
+      );
+      const manifest = JSON.parse(
+        s.store.readBlob(manifestArtifact.hash).toString(),
+      );
+      assert.equal(manifest.revision, m.revision);
+      assert.equal(
+        manifest.exported_geometry_unit,
+        format === "glb" ? "m" : "mm",
+      );
+      assert.equal(manifest.precision.certified_surface_error_bound_mm, null);
+      const component = (filename: string) =>
+        manifest.components.find((a: any) => a.filename === filename);
+      for (const entry of manifest.components) {
+        const stored = s.store.getArtifact(principal, entry.artifact_id);
+        assert.equal(stored.hash, entry.sha256);
+        assert.equal(s.store.readBlob(stored.hash).length, entry.byte_length);
+      }
+      const ir = JSON.parse(
+        s.store.readBlob(component("model.ir.json").sha256).toString(),
+      );
+      assert.equal(
+        hash(ir),
+        s.store.revision(principal, m.model_id, m.revision).ir_hash,
+      );
+      const proof = JSON.parse(
+        s.store.readBlob(component("validation.json").sha256).toString(),
+      );
+      const { digest, ...proofBody } = proof.validation;
+      assert.equal(digest, hash(proofBody));
+      assert.equal(manifest.validation_digest, digest);
+      assert.equal(proof.validation.ir_hash, hash(ir));
+      assert.throws(() =>
+        s.store.getArtifact(
+          { ...principal, user: "other-user" },
+          manifestArtifact.id,
+        ),
+      );
       if (format === "glb") {
         const data = s.store.readBlob(artifact.hash);
         assert.equal(data.toString("ascii", 0, 4), "glTF");
@@ -62,6 +102,82 @@ test("organic preview is extracted from the field AST with honest preview status
     assert.equal(mesh.quality, "preview_only");
     assert.ok(mesh.triangles.length > 1000);
     assert.ok(mesh.pruned_cells > 0);
+  } finally {
+    await env.close();
+  }
+});
+
+test("imported originals remain hash-bound in private export packages and mismatched proof blocks export", async () => {
+  const env = setup(),
+    s = env.service;
+  try {
+    const sourceModel = await importFixture(s, sphere);
+    const step = await finish(
+      s,
+      call(s, "cad_export", {
+        model_id: sourceModel.model_id,
+        revision: sourceModel.revision,
+        format: "step",
+        idempotency_key: id("step"),
+      }),
+    );
+    const original = step.artifacts.find(
+      (a: any) => a.manifest.filename === "model.step",
+    );
+    const importedIR = {
+      schema_version: "1",
+      unit: "mm",
+      features: [
+        {
+          id: "imported-part",
+          semantic_name: "Fremdteil",
+          kind: "imported",
+          parameters: {},
+          construction: {
+            operator: "imported",
+            artifact_id: original.artifact_id,
+            format: "step",
+            source_unit: "mm",
+          },
+        },
+      ],
+      outputs: ["imported-part"],
+    };
+    const model = await importFixture(s, importedIR);
+    const exported = call(s, "cad_export", {
+      model_id: model.model_id,
+      revision: model.revision,
+      format: "ir",
+      idempotency_key: id("ir"),
+    });
+    const manifest = JSON.parse(
+      s.store.readBlob(exported.package_manifest.hash).toString(),
+    );
+    assert.equal(manifest.source_assets.length, 1);
+    assert.equal(manifest.source_assets[0].sha256, original.hash);
+    assert.equal(
+      manifest.semantic_sidecar.imported_source_assets_required,
+      true,
+    );
+    const stored = s.store.get(
+      "SELECT id,validation FROM transactions WHERE committed_revision=?",
+      model.revision,
+    );
+    const proof = JSON.parse(stored.validation);
+    proof.ir_hash = "0".repeat(64);
+    s.store.run(
+      "UPDATE transactions SET validation=? WHERE id=?",
+      JSON.stringify(proof),
+      stored.id,
+    );
+    const denied = s.call(principal, "cad_export", {
+      model_id: model.model_id,
+      revision: model.revision,
+      format: "ir",
+      idempotency_key: id("invalid-proof"),
+    });
+    assert.equal(denied.status, "failed");
+    assert.equal(denied.errors[0].code, "INTEGRITY_FAILURE");
   } finally {
     await env.close();
   }

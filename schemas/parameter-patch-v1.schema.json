@@ -26,6 +26,75 @@
             "properties": {
               "op": {
                 "type": "string",
+                "const": "insert_surface_knots"
+              },
+              "feature_id": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+              },
+              "expected_hash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "direction": {
+                "type": "string",
+                "enum": [
+                  "u",
+                  "v"
+                ]
+              },
+              "knots": {
+                "minItems": 1,
+                "maxItems": 14,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 48,
+                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                }
+              },
+              "maximum_deviation": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "string",
+                    "maxLength": 48,
+                    "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                  },
+                  "unit": {
+                    "type": "string",
+                    "enum": [
+                      "1",
+                      "m",
+                      "mm",
+                      "um",
+                      "rad",
+                      "deg"
+                    ]
+                  }
+                },
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "op",
+              "feature_id",
+              "expected_hash",
+              "direction",
+              "knots",
+              "maximum_deviation"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "op": {
+                "type": "string",
                 "const": "set_surface_poles"
               },
               "feature_id": {
@@ -835,6 +904,96 @@
                         "properties": {
                           "operator": {
                             "type": "string",
+                            "const": "nurbs_curve"
+                          },
+                          "poles": {
+                            "minItems": 2,
+                            "maxItems": 256,
+                            "type": "array",
+                            "items": {
+                              "type": "array",
+                              "prefixItems": [
+                                {
+                                  "type": "string",
+                                  "maxLength": 48,
+                                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                                },
+                                {
+                                  "type": "string",
+                                  "maxLength": 48,
+                                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                                },
+                                {
+                                  "type": "string",
+                                  "maxLength": 48,
+                                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                                }
+                              ],
+                              "items": false,
+                              "minItems": 3,
+                              "maxItems": 3
+                            }
+                          },
+                          "weights": {
+                            "minItems": 2,
+                            "maxItems": 256,
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "maxLength": 48,
+                              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                            }
+                          },
+                          "basis": {
+                            "type": "object",
+                            "properties": {
+                              "degree": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 15
+                              },
+                              "knots": {
+                                "minItems": 2,
+                                "maxItems": 256,
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "maxLength": 48,
+                                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                                }
+                              },
+                              "multiplicities": {
+                                "minItems": 2,
+                                "maxItems": 256,
+                                "type": "array",
+                                "items": {
+                                  "type": "integer",
+                                  "minimum": 1,
+                                  "maximum": 16
+                                }
+                              }
+                            },
+                            "required": [
+                              "degree",
+                              "knots",
+                              "multiplicities"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "operator",
+                          "poles",
+                          "weights",
+                          "basis"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "operator": {
+                            "type": "string",
                             "enum": [
                               "extrude",
                               "revolve",
@@ -983,6 +1142,78 @@
                                 "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
                               }
                             }
+                          },
+                          "u_basis": {
+                            "type": "object",
+                            "properties": {
+                              "degree": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 15
+                              },
+                              "knots": {
+                                "minItems": 2,
+                                "maxItems": 256,
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "maxLength": 48,
+                                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                                }
+                              },
+                              "multiplicities": {
+                                "minItems": 2,
+                                "maxItems": 256,
+                                "type": "array",
+                                "items": {
+                                  "type": "integer",
+                                  "minimum": 1,
+                                  "maximum": 16
+                                }
+                              }
+                            },
+                            "required": [
+                              "degree",
+                              "knots",
+                              "multiplicities"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "v_basis": {
+                            "type": "object",
+                            "properties": {
+                              "degree": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 15
+                              },
+                              "knots": {
+                                "minItems": 2,
+                                "maxItems": 256,
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "maxLength": 48,
+                                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                                }
+                              },
+                              "multiplicities": {
+                                "minItems": 2,
+                                "maxItems": 256,
+                                "type": "array",
+                                "items": {
+                                  "type": "integer",
+                                  "minimum": 1,
+                                  "maximum": 16
+                                }
+                              }
+                            },
+                            "required": [
+                              "degree",
+                              "knots",
+                              "multiplicities"
+                            ],
+                            "additionalProperties": false
                           }
                         },
                         "required": [
@@ -2058,6 +2289,165 @@
           "properties": {
             "op": {
               "type": "string",
+              "const": "plane"
+            },
+            "normal": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "string",
+                  "maxLength": 48,
+                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                },
+                {
+                  "type": "string",
+                  "maxLength": 48,
+                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                },
+                {
+                  "type": "string",
+                  "maxLength": 48,
+                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "offset": {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            }
+          },
+          "required": [
+            "op",
+            "normal",
+            "offset"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "type": "string",
+              "const": "cylinder"
+            },
+            "center": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "string",
+                  "maxLength": 48,
+                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                },
+                {
+                  "type": "string",
+                  "maxLength": 48,
+                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                },
+                {
+                  "type": "string",
+                  "maxLength": 48,
+                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "radius": {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            },
+            "half_height": {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            }
+          },
+          "required": [
+            "op",
+            "center",
+            "radius",
+            "half_height"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "type": "string",
+              "const": "capsule"
+            },
+            "start": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "string",
+                  "maxLength": 48,
+                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                },
+                {
+                  "type": "string",
+                  "maxLength": 48,
+                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                },
+                {
+                  "type": "string",
+                  "maxLength": 48,
+                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "end": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "string",
+                  "maxLength": 48,
+                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                },
+                {
+                  "type": "string",
+                  "maxLength": 48,
+                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                },
+                {
+                  "type": "string",
+                  "maxLength": 48,
+                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "radius": {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            }
+          },
+          "required": [
+            "op",
+            "start",
+            "end",
+            "radius"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "type": "string",
               "const": "torus"
             },
             "center": {
@@ -2174,6 +2564,79 @@
             "op",
             "source",
             "distance"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "type": "string",
+              "const": "shell"
+            },
+            "source": {
+              "$ref": "#/$defs/__schema1"
+            },
+            "thickness": {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            },
+            "variations": {
+              "default": [],
+              "maxItems": 32,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "center": {
+                    "type": "array",
+                    "prefixItems": [
+                      {
+                        "type": "string",
+                        "maxLength": 48,
+                        "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                      },
+                      {
+                        "type": "string",
+                        "maxLength": 48,
+                        "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                      },
+                      {
+                        "type": "string",
+                        "maxLength": 48,
+                        "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                      }
+                    ],
+                    "items": false,
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "radius": {
+                    "type": "string",
+                    "maxLength": 48,
+                    "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                  },
+                  "amplitude": {
+                    "type": "string",
+                    "maxLength": 48,
+                    "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                  }
+                },
+                "required": [
+                  "center",
+                  "radius",
+                  "amplitude"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "op",
+            "source",
+            "thickness",
+            "variations"
           ],
           "additionalProperties": false
         },

@@ -21,7 +21,7 @@ from OCP.TopLoc import TopLoc_Location
 from OCP.BRepOffsetAPI import BRepOffsetAPI_ThruSections, BRepOffsetAPI_MakePipe, BRepOffsetAPI_MakeThickSolid
 from OCP.BRepFilletAPI import BRepFilletAPI_MakeFillet, BRepFilletAPI_MakeChamfer
 from OCP.BRepExtrema import BRepExtrema_DistShapeShape
-from OCP.Geom import Geom_BezierCurve, Geom_BSplineSurface
+from OCP.Geom import Geom_BezierCurve, Geom_BSplineCurve, Geom_BSplineSurface
 from OCP.GeomAPI import GeomAPI_PointsToBSpline
 from OCP.TColgp import TColgp_Array1OfPnt, TColgp_Array2OfPnt
 from OCP.TColStd import TColStd_Array1OfReal, TColStd_Array1OfInteger, TColStd_Array2OfReal
@@ -108,6 +108,13 @@ def as_wire(shape):
 def as_face(shape):
     return BRepBuilderAPI_MakeFace(as_wire(shape)).Face()
 
+def spline_basis(definition,count):
+    b=definition or {'degree':count-1,'knots':['0','1'],'multiplicities':[count,count]}
+    k=TColStd_Array1OfReal(1,len(b['knots']));m=TColStd_Array1OfInteger(1,len(b['knots']))
+    for i,(knot,multiplicity) in enumerate(zip(b['knots'],b['multiplicities']),1):
+        k.SetValue(i,float(knot));m.SetValue(i,multiplicity)
+    return k,m,b['degree']
+
 def make_feature(f, deps):
     p, c = f['values'], f['construction']; op=c['operator']
     from advanced import TRACKED, build
@@ -128,6 +135,13 @@ def make_feature(f, deps):
         pts=TColgp_Array1OfPnt(1,len(c['points']))
         for i,point in enumerate(c['points'],1):pts.SetValue(i,gp_Pnt(*map(float,point)))
         curve=Geom_BezierCurve(pts) if op=='bezier' else GeomAPI_PointsToBSpline(pts).Curve()
+        return BRepBuilderAPI_MakeWire(BRepBuilderAPI_MakeEdge(curve).Edge()).Wire()
+    if op=='nurbs_curve':
+        pts=TColgp_Array1OfPnt(1,len(c['poles']));weights=TColStd_Array1OfReal(1,len(c['poles']))
+        for i,(point,weight) in enumerate(zip(c['poles'],c['weights']),1):
+            pts.SetValue(i,gp_Pnt(*map(float,point)));weights.SetValue(i,float(weight))
+        knots,mults,degree=spline_basis(c['basis'],len(c['poles']))
+        curve=Geom_BSplineCurve(pts,weights,knots,mults,degree,False)
         return BRepBuilderAPI_MakeWire(BRepBuilderAPI_MakeEdge(curve).Edge()).Wire()
     if op in ('hole','groove','pocket'):
         depth=p['depth']; ax=gp_Ax2(gp_Pnt(x,y,z-depth),gp_Dir(0,0,1))
@@ -150,11 +164,8 @@ def make_feature(f, deps):
         nu,nv=len(c['poles']),len(c['poles'][0]);pts=TColgp_Array2OfPnt(1,nu,1,nv);weights=TColStd_Array2OfReal(1,nu,1,nv)
         for i in range(nu):
             for j in range(nv):pts.SetValue(i+1,j+1,gp_Pnt(*map(float,c['poles'][i][j])));weights.SetValue(i+1,j+1,float(c['weights'][i][j]))
-        def knots(n):
-            k=TColStd_Array1OfReal(1,2);k.SetValue(1,0);k.SetValue(2,1)
-            m=TColStd_Array1OfInteger(1,2);m.SetValue(1,n);m.SetValue(2,n);return k,m
-        uk,um=knots(nu);vk,vm=knots(nv)
-        surf=Geom_BSplineSurface(pts,weights,uk,vk,um,vm,nu-1,nv-1,False,False)
+        uk,um,ud=spline_basis(c.get('u_basis'),nu);vk,vm,vd=spline_basis(c.get('v_basis'),nv)
+        surf=Geom_BSplineSurface(pts,weights,uk,vk,um,vm,ud,vd,False,False)
         return BRepBuilderAPI_MakeFace(surf,1e-7).Shape()
     if op=='imported':
         path='input-'+c['artifact_id']+'.'+c['format']
@@ -227,4 +238,4 @@ def export_shape(shape,fmt,path,deflection):
     error=max(abs(a-b) for a,b in zip(before['bounds'],after['bounds']))
     require(error<=max(1e-6,deflection*2 if fmt=='stl' else 1e-5),'Roundtrip-Maße überschreiten den Exportvertrag.')
     require(after['valid'],'Roundtrip-Geometrie ungültig.')
-    return dict(status='checks_passed_within_profile',method='roundtrip_bounds_and_occt_validity',before=before,after=after,measured_bounds_error=error,certified_surface_bound=None,unit='mm',lost_semantics=['feature_history'] if fmt!='brep' else [])
+    return dict(status='checks_passed_within_profile',method='roundtrip_bounds_and_occt_validity',before=before,after=after,measured_bounds_error=error,certified_surface_bound=None,unit='mm',lost_semantics=['feature_history'])

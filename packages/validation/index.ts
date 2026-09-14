@@ -128,11 +128,13 @@ export function validate(
       const pass =
         new Decimal(report.position_bound_mm).lte(tolerance) &&
         (c.continuity === "C0" ||
-          new Decimal(report.derivative_bound_mm_per_parameter).lte(
-            tolerance,
-          )) &&
+          (report.first_derivatives_defined_at_interior_knots &&
+            new Decimal(report.derivative_bound_mm_per_parameter).lte(
+              tolerance,
+            ))) &&
         (c.continuity !== "C2" ||
           (report.regularity_proved &&
+            report.second_derivatives_defined_at_interior_knots &&
             new Decimal(report.second_derivative_bound_mm_per_parameter2).lte(
               tolerance,
             )));

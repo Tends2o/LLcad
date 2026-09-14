@@ -6,6 +6,8 @@ import { BUILD_HASH } from "./build.js";
 import { evaluate } from "./expressions.js";
 import { patchContinuity } from "./patches.js";
 import { equationValues, checkEquation } from "./constraints.js";
+import { validateBasis, validateSurface, refineSurface } from "./nurbs.js";
+import * as Rational from "./bernstein.js";
 type Param = {
   dimension: "length" | "angle" | "scalar";
   min?: number;
@@ -92,6 +94,7 @@ export const OPERATORS = {
   circle: one({ radius: length, ...position }, [0, 0]),
   bezier: one({}, [0, 0]),
   bspline: one({}, [0, 0]),
+  nurbs_curve: one({}, [0, 0]),
   nurbs_surface: one({}, [0, 0]),
   extrude: one({ height: length }, [1, 1]),
   revolve: one({ angle }, [1, 1]),
@@ -206,6 +209,26 @@ export function fieldContract(
     node.half_size.forEach(pos);
     return { semantics: "exact_sdf", lipschitz: 1 };
   }
+  if (node.op === "plane") {
+    requireThat(
+      Math.hypot(...node.normal.map(num)) >= 1e-12,
+      "GEOMETRY_INVALID",
+      "Ebenennormale darf nicht null sein.",
+    );
+    num(node.offset);
+    return { semantics: "exact_sdf", lipschitz: 1 };
+  }
+  if (node.op === "cylinder") {
+    pos(node.radius);
+    pos(node.half_height);
+    return { semantics: "exact_sdf", lipschitz: 1 };
+  }
+  if (node.op === "capsule") {
+    node.start.forEach(num);
+    node.end.forEach(num);
+    pos(node.radius);
+    return { semantics: "exact_sdf", lipschitz: 1 };
+  }
   if (node.op === "torus") {
     requireThat(
       pos(node.major) > pos(node.minor),
@@ -230,8 +253,31 @@ export function fieldContract(
     return {
       semantics: s.every((x: number) => x === s[0])
         ? a.semantics
-        : "bounded_distance_estimator",
+        : a.semantics === "general_implicit"
+          ? "general_implicit"
+          : "bounded_distance_estimator",
       lipschitz: a.lipschitz,
+    };
+  }
+  if (node.op === "shell") {
+    const thickness = pos(node.thickness);
+    let minimum = thickness,
+      derivative = 0;
+    for (const term of node.variations ?? []) {
+      term.center.forEach(num);
+      const amplitude = num(term.amplitude),
+        radius = pos(term.radius);
+      minimum += Math.min(amplitude, 0);
+      derivative += (Math.abs(amplitude) * 2.109375) / radius;
+    }
+    requireThat(
+      minimum >= 1e-5,
+      "GEOMETRY_INVALID",
+      "Variable Schalendicke muss im gesamten Definitionsgebiet positiv bleiben.",
+    );
+    return {
+      semantics: "general_implicit",
+      lipschitz: a.lipschitz + derivative / 2,
     };
   }
   if (node.op === "local_field_delta")
@@ -444,24 +490,19 @@ export function compile(input: unknown) {
           "GEOMETRY_INVALID",
           "Profilpunkt außerhalb des Bereichs.",
         );
-    if (f.construction.operator === "nurbs_surface") {
-      const c = f.construction,
-        w = c.poles[0].length;
+    if (f.construction.operator === "nurbs_curve") {
+      const c = f.construction;
+      validateBasis(c.basis, c.poles.length);
       requireThat(
-        c.poles.every((r) => r.length === w) &&
-          c.poles
-            .flat()
-            .every((p) => p.every((v) => Math.abs(Number(v)) <= 1e6)) &&
+        c.poles.every((p) => p.every((v) => Math.abs(Number(v)) <= 1e6)) &&
           c.weights.length === c.poles.length &&
-          c.weights.every(
-            (r) =>
-              r.length === w &&
-              r.every((x) => Number(x) > 0 && Number(x) <= 1e6),
-          ),
+          c.weights.every((w) => Number(w) >= 1e-12 && Number(w) <= 1e6),
         "INVALID_SCHEMA",
-        "NURBS-Kontrollnetz und Gewichte passen nicht zusammen.",
+        "NURBS-Kurvenpole und Gewichte passen nicht zusammen.",
       );
     }
+    if (f.construction.operator === "nurbs_surface")
+      validateSurface(f.construction);
     hashes[f.id] = hash({
       registry: REGISTRY_HASH,
       feature: f,
@@ -576,6 +617,10 @@ export function compile(input: unknown) {
 export function applyPatch(base: ModelIR, patch: Patch) {
   const ir = structuredClone(base);
   const changed = new Set<string>();
+  const refinementReports: {
+    feature_id: string;
+    report: ReturnType<typeof refineSurface>["report"];
+  }[] = [];
   for (const op of patch.operations) {
     if (op.op === "add_feature") {
       requireThat(
@@ -603,7 +648,45 @@ export function applyPatch(base: ModelIR, patch: Patch) {
     }
     const f = ir.features.find((f) => f.id === op.feature_id);
     requireThat(f, "AMBIGUOUS_SELECTION", "Feature nicht eindeutig auflösbar.");
-    if (op.op === "set_surface_poles") {
+    if (op.op === "insert_surface_knots") {
+      requireThat(
+        f.construction.operator === "nurbs_surface",
+        "OUT_OF_SCOPE",
+        "Knotenverfeinerung benötigt eine NURBS-Fläche.",
+      );
+      requireThat(
+        hash(f.construction) === op.expected_hash,
+        "STALE_REVISION",
+        "Die NURBS-Konstruktion wurde geändert.",
+      );
+      const tolerance = quantity(op.maximum_deviation, "length");
+      requireThat(
+        tolerance > 0 && tolerance <= quantity(base.tolerance, "length"),
+        "PRECISION_UNSUPPORTED",
+        "Verfeinerung muss innerhalb der Modellgenauigkeit liegen.",
+      );
+      const refined = refineSurface(f.construction, op.direction, op.knots);
+      const toleranceMM = Rational.mul(
+        Rational.decimal(op.maximum_deviation.value),
+        Rational.decimal(
+          op.maximum_deviation.unit === "m"
+            ? "1000"
+            : op.maximum_deviation.unit === "um"
+              ? "0.001"
+              : "1",
+        ),
+      );
+      requireThat(
+        Rational.cmp(
+          Rational.decimal(refined.report.geometric_error_bound_mm),
+          toleranceMM,
+        ) <= 0,
+        "PRECISION_UNSUPPORTED",
+        "Dezimalrundung überschreitet die erlaubte Formabweichung.",
+      );
+      f.construction = refined.construction;
+      refinementReports.push({ feature_id: f.id, report: refined.report });
+    } else if (op.op === "set_surface_poles") {
       requireThat(
         f.construction.operator === "nurbs_surface",
         "OUT_OF_SCOPE",
@@ -744,5 +827,6 @@ export function applyPatch(base: ModelIR, patch: Patch) {
     changed_features: [...changed],
     dependent_features: [...dirty].filter((x) => !changed.has(x)),
     dirty_features: [...dirty],
+    refinement_reports: refinementReports,
   };
 }

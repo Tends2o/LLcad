@@ -6,6 +6,7 @@ mkdirSync("reports", { recursive: true });
 const checks = [];
 let failed = false;
 for (const [name, args] of [
+  ["versions", ["run", "versions:check"]],
   ["typecheck", ["run", "typecheck"]],
   ["tests", ["test"]],
   ["geometry", ["run", "test:geometry"]],

@@ -11,6 +11,17 @@
     "three": "0.186.0",
     "zod": "4.6.4"
   },
+  "npm_dev_dependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/express": "5.0.6",
+    "@types/node": "26.5.1",
+    "@types/three": "0.186.0",
+    "esbuild": "0.28.2",
+    "fast-check": "4.10.0",
+    "prettier": "3.9.6",
+    "tsx": "4.23.13",
+    "typescript": "7.0.2"
+  },
   "native_requirements": [
     "cadquery-ocp==7.9.3.1.1",
     "cadquery-ocp-proxy==7.9.3.1.1",
@@ -25,10 +36,17 @@
     "pyparsing==3.3.2",
     "python-dateutil==2.9.0.post0",
     "six==1.17.0",
+    "scipy==1.18.1",
     "vtk==9.6.2"
   ],
+  "distribution_packages": {
+    "python3-openvdb": "10.0.1-2.3+b1",
+    "libopenvdb10.0t64": "10.0.1-2.3+b1"
+  },
+  "ci_container": "debian:13-slim@sha256:d7e12182ce18b85b93007c1dedf31f2d29e01ccf3182cc4017c709b6259bc132",
   "locks": {
     "package-lock.json": "42ac7c8e0c28094040be14bd3a1fad16da311191e7ec38af972126751dde5fe1",
-    "requirements.lock": "c20b39880f1fbd58c9c2165797ec29e26d6c0b9472942afc919a0ab1e8e64cb2"
+    "requirements.lock": "196c2b596526a78afbfd0159d1763b48c51294cb8a5ef3e32cf1cad6095b05a4",
+    "deployment/native-packages.json": "c480656e4e1f90b482106cf0e6ea2b60eac6582c6ee6f5e0f2596ca62220a967"
   }
 }

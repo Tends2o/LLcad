@@ -3,6 +3,7 @@ import { REGISTRY_HASH } from "../packages/compiler/index.js";
 import { BUILD_HASH, IMPLEMENTATION_HASH } from "../packages/compiler/build.js";
 import { POLICY_HASH } from "../packages/policy/index.js";
 import { bytesHash } from "../packages/semantic-ir/hash.js";
+import { auditPlan } from "./plan-audit.js";
 const read = (path: string) =>
   existsSync(path) ? JSON.parse(readFileSync(path, "utf8")) : null;
 const verification = read("reports/verification.json"),
@@ -13,6 +14,11 @@ const verification = read("reports/verification.json"),
   audit = read("reports/npm-audit.json"),
   pythonAudit = read("reports/python-audit.json");
 const blockers = [];
+const completionAudit = auditPlan();
+if (completionAudit.status !== "verified")
+  blockers.push(
+    "Vollständiger Anforderungsabgleich zum Originalplan enthält offene oder unzureichend belegte Punkte.",
+  );
 if (
   verification?.status !== "passed" ||
   verification.registry_hash !== REGISTRY_HASH ||
@@ -86,6 +92,7 @@ const manifest = {
   security_test_report: "reports/tests.log",
   restore_test_report: "reports/tests.log",
   blockers,
+  completion_audit: completionAudit,
 };
 writeFileSync(
   "reports/release-manifest.json",

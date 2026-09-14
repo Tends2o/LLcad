@@ -75,6 +75,9 @@ def run(request):
     if action=='distance':
         evaluator=BRepExtrema_DistShapeShape(shapes[request['feature_id']],shapes[request['other_feature_id']]);evaluator.Perform()
         require(evaluator.IsDone(),'Abstandsauswertung fehlgeschlagen.');aggregate={'distance':evaluator.Value()}
+    if action=='analysis':
+        from analysis import measure
+        aggregate=measure(request,shapes)
     for fid,sampler in samplers.items():
         if sampler.used:
             key=field_results[fid]['cache_key'];name=key+'.field.json'

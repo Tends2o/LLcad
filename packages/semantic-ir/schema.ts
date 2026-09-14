@@ -11,6 +11,12 @@ export const Quantity = z.strictObject({
 export type Quantity = z.infer<typeof Quantity>;
 export const Vec3 = z.tuple([Quantity, Quantity, Quantity]);
 export const Point = z.tuple([DecimalString, DecimalString, DecimalString]);
+/** Explicit nonperiodic, clamped basis on the normalized parameter domain. */
+export const SplineBasis = z.strictObject({
+  degree: z.number().int().min(1).max(15),
+  knots: z.array(DecimalString).min(2).max(256),
+  multiplicities: z.array(z.number().int().min(1).max(16)).min(2).max(256),
+});
 const Source = z.strictObject({
   value: z.string().max(1000),
   status: z.enum(["user_declared", "imported", "hypothesis", "measured"]),
@@ -48,6 +54,23 @@ export const FieldNode: z.ZodType<any> = z.lazy(() =>
     }),
     z.strictObject({ op: z.literal("box"), center: Point, half_size: Point }),
     z.strictObject({
+      op: z.literal("plane"),
+      normal: Point,
+      offset: DecimalString,
+    }),
+    z.strictObject({
+      op: z.literal("cylinder"),
+      center: Point,
+      radius: DecimalString,
+      half_height: DecimalString,
+    }),
+    z.strictObject({
+      op: z.literal("capsule"),
+      start: Point,
+      end: Point,
+      radius: DecimalString,
+    }),
+    z.strictObject({
       op: z.literal("torus"),
       center: Point,
       major: DecimalString,
@@ -68,6 +91,21 @@ export const FieldNode: z.ZodType<any> = z.lazy(() =>
       op: z.literal("offset"),
       source: FieldNode,
       distance: DecimalString,
+    }),
+    z.strictObject({
+      op: z.literal("shell"),
+      source: FieldNode,
+      thickness: DecimalString,
+      variations: z
+        .array(
+          z.strictObject({
+            center: Point,
+            radius: DecimalString,
+            amplitude: DecimalString,
+          }),
+        )
+        .max(32)
+        .default([]),
     }),
     z.strictObject({
       op: z.literal("transform"),
@@ -124,6 +162,12 @@ export const Construction = z.discriminatedUnion("operator", [
     operator: z.enum(["bezier", "bspline"]),
     points: z.array(Point).min(2).max(256),
   }),
+  z.strictObject({
+    operator: z.literal("nurbs_curve"),
+    poles: z.array(Point).min(2).max(256),
+    weights: z.array(DecimalString).min(2).max(256),
+    basis: SplineBasis,
+  }),
   z.strictObject({ operator: z.enum(["extrude", "revolve", "loft", "sweep"]) }),
   z.strictObject({ operator: z.enum(["hole", "pocket", "groove"]) }),
   z.strictObject({
@@ -141,6 +185,8 @@ export const Construction = z.discriminatedUnion("operator", [
     operator: z.literal("nurbs_surface"),
     poles: z.array(z.array(Point).min(2).max(16)).min(2).max(16),
     weights: z.array(z.array(DecimalString).min(2).max(16)).min(2).max(16),
+    u_basis: SplineBasis.optional(),
+    v_basis: SplineBasis.optional(),
   }),
   z.strictObject({
     operator: z.literal("field"),
@@ -295,6 +341,14 @@ export const SetParameter = z.strictObject({
 });
 export const PatchOperation = z.discriminatedUnion("op", [
   z.strictObject({
+    op: z.literal("insert_surface_knots"),
+    feature_id: Id,
+    expected_hash: z.string().regex(/^[a-f0-9]{64}$/),
+    direction: z.enum(["u", "v"]),
+    knots: z.array(DecimalString).min(1).max(14),
+    maximum_deviation: Quantity,
+  }),
+  z.strictObject({
     op: z.literal("set_surface_poles"),
     feature_id: Id,
     expected_hash: z.string().regex(/^[a-f0-9]{64}$/),
@@ -395,9 +449,25 @@ export const ToolSchemas = {
         "width",
         "remaining_wall",
         "distance",
+        "angle",
+        "curvature",
+        "clearance",
       ])
       .default("all"),
     other_feature_id: Id.optional(),
+    face_id: z
+      .string()
+      .regex(/^face_[a-f0-9]{32}$/)
+      .optional(),
+    other_face_id: z
+      .string()
+      .regex(/^face_[a-f0-9]{32}$/)
+      .optional(),
+    uv: z.tuple([DecimalString, DecimalString]).optional(),
+    other_uv: z.tuple([DecimalString, DecimalString]).optional(),
+    curve_parameter: DecimalString.optional(),
+    other_curve_parameter: DecimalString.optional(),
+    minimum_clearance: Quantity.optional(),
     idempotency_key: z.string().min(16).max(128).optional(),
   }),
   cad_plan_edit: Patch,

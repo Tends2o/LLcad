@@ -1,5 +1,5 @@
 {
-  "hash": "d358f9c706afe6d16b93ebf3449f06ba6d697d6464af5854620e89fd5ec65bfc",
+  "hash": "af800c792598352567cef23f2924cda0c177e89035e1337d7ae6cb7a4f596101",
   "operators": {
     "point": {
       "version": 1,
@@ -549,6 +549,22 @@
       "engine": "OCCT-7.9.3.1.1"
     },
     "bspline": {
+      "version": 1,
+      "params": {},
+      "refs": [
+        0,
+        0
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "nurbs_curve": {
       "version": 1,
       "params": {},
       "refs": [

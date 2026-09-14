@@ -6,6 +6,7 @@ const root = resolve(process.env.MATHFORGE_ROOT ?? process.cwd());
 const buildFiles = [
   "workers/cad-occt/geometry.py",
   "workers/cad-occt/advanced.py",
+  "workers/cad-occt/analysis.py",
   "workers/cad-occt/solver.py",
   "workers/cad-occt/main.py",
   "workers/cad-occt/fields.py",
@@ -19,6 +20,7 @@ const buildFiles = [
   "packages/compiler/patches.ts",
   "packages/compiler/bernstein.ts",
   "packages/compiler/math.ts",
+  "packages/compiler/nurbs.ts",
   "packages/compiler/build.ts",
   "packages/semantic-ir/units.ts",
   "packages/semantic-ir/hash.ts",
@@ -60,6 +62,7 @@ export const IMPLEMENTATION_HASH = hash(
     "package.json",
     "package-lock.json",
     "requirements.lock",
+    "versions.lock",
     "tsconfig.json",
     "public/index.html",
     "public/style.css",

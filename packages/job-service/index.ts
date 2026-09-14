@@ -7,6 +7,7 @@ import { safeError, requireThat } from "../semantic-ir/errors.js";
 import { LIMITS, REGISTRY_HASH } from "../compiler/index.js";
 import { validate } from "../validation/index.js";
 import { packGLB } from "../model-service/glb.js";
+import { exportPackage } from "../model-service/export-package.js";
 import { claimQueuedJob } from "./scheduler.js";
 import { checkEquation } from "../compiler/constraints.js";
 import { BUILD_HASH, currentBuildHash } from "../compiler/build.js";
@@ -337,6 +338,15 @@ export class Jobs {
               "cad_commit",
             ],
           };
+        } else if (job.kind === "analysis") {
+          result = {
+            status: "succeeded",
+            model_id: job.model,
+            revision: request.revision,
+            metric: request.metric,
+            metrics: result.metrics,
+            ...result.aggregate,
+          };
         } else if (job.kind === "measure") {
           result = {
             status: "succeeded",
@@ -355,6 +365,7 @@ export class Jobs {
             );
             const glb = packGLB(preview);
             const manifest = {
+              filename: "model.glb",
               model_id: job.model,
               revision: request.revision,
               unit: "m",
@@ -362,6 +373,7 @@ export class Jobs {
               quality: "preview_only",
               lost_semantics: ["parametric_history"],
               certified_surface_bound: null,
+              requested_deflection: request.deflection,
               roundtrip: glb.report,
             };
             artifacts.push(
@@ -419,12 +431,26 @@ export class Jobs {
                 ),
               );
             }
+          const exported =
+            job.kind === "export"
+              ? exportPackage(
+                  this.store,
+                  p,
+                  this.store.revision(p, job.model, request.revision),
+                  artifacts,
+                  request.format,
+                )
+              : { artifacts };
           if (job.kind === "export")
             this.gates.run("after_export", {
               job_id: job.id,
-              artifact_count: artifacts.length,
+              artifact_count: exported.artifacts.length,
             });
-          result = { status: "succeeded", artifacts, metrics: result.metrics };
+          result = {
+            status: "succeeded",
+            ...exported,
+            metrics: result.metrics,
+          };
         }
         this.store.run(
           "UPDATE jobs SET state='succeeded',result=?,lease=NULL,lease_until=NULL WHERE id=? AND lease=?",

@@ -29,6 +29,7 @@ import {
 import { compare } from "../validation/index.js";
 import { BUILD_HASH, IMPLEMENTATION_HASH } from "../compiler/build.js";
 import { solverRequest } from "../compiler/constraints.js";
+import { exportPackage } from "./export-package.js";
 import {
   faces,
   faceSummary,
@@ -259,6 +260,40 @@ export class ModelService {
             export: ["ir", "step", "stl", "brep", "glb", "vdb"],
           },
           quality_profiles: ["precision_cad", "render_surface"],
+          analysis: {
+            metrics: [
+              "distance",
+              "angle",
+              "curvature",
+              "clearance",
+              "radius",
+              "area",
+              "volume",
+            ],
+            differential_targets:
+              "native_single_edge_curves_or_revision_bound_faces",
+            curve_parameter: "normalized_0_to_1",
+            surface_parameters: "native_uv_from_cad_inspect",
+            angle: "oriented_tangent_or_normal_at_selected_points",
+            clearance: "two_static_feature_geometries_no_motion_certificate",
+          },
+          field_operators: [
+            "sphere",
+            "box",
+            "plane",
+            "cylinder",
+            "capsule",
+            "torus",
+            "union",
+            "intersection",
+            "difference",
+            "smooth_union",
+            "offset",
+            "shell",
+            "transform",
+            "local_field_delta",
+            "local_deform",
+          ],
           constraint_solver: {
             engine: "SciPy_SLSQP",
             variables: 12,
@@ -286,6 +321,16 @@ export class ModelService {
             weights: "arbitrary_positive_rational_weights",
             coverage: "entire_rational_IR_seam_with_exact_fraction_bounds",
             c2_requires: "proved_nonzero_surface_jacobian_along_seam",
+          },
+          nurbs: {
+            basis: "explicit_nonperiodic_clamped_on_unit_parameter_domain",
+            degree: [1, 15],
+            minimum_knot_separation: 1e-9,
+            weight_range: [1e-12, 1e6],
+            curve_control_points: 256,
+            surface_control_points_per_direction: 16,
+            refinement: "insert_surface_knots_with_exact_IR_rounding_bound",
+            legacy_bspline_points: "OCCT_approximating_curve_fit",
           },
           limits: LIMITS,
           protocols: ["2025-03-26", "2025-06-18", "2025-11-25", "2026-07-28"],
@@ -515,14 +560,22 @@ export class ModelService {
             f.construction.operator === "imported"
               ? ["Ursprüngliche Feature-Historie unbekannt."]
               : [],
-          available_edit_operations: Object.keys(f.parameters).map(
-            (parameter) => ({
+          available_edit_operations: [
+            ...Object.keys(f.parameters).map((parameter) => ({
               op: Object.hasOwn(f.expressions, parameter)
                 ? "set_expression"
                 : "set_parameter",
               parameter,
-            }),
-          ),
+            })),
+            ...(f.construction.operator === "nurbs_surface"
+              ? [{ op: "set_surface_poles" }, { op: "insert_surface_knots" }]
+              : []),
+          ],
+          construction_hash: hash(f.construction),
+          surface_poles_hash:
+            f.construction.operator === "nurbs_surface"
+              ? hash(f.construction.poles)
+              : null,
           field_expression_hash:
             f.construction.operator === "field"
               ? hash(f.construction.expression)
@@ -531,6 +584,127 @@ export class ModelService {
       }
       case "cad_measure": {
         const r = this.store.revision(p, a.model_id, a.revision);
+        if (["angle", "curvature", "clearance"].includes(a.metric)) {
+          requireThat(
+            a.feature_id && a.idempotency_key,
+            "INVALID_SCHEMA",
+            "Analyse benötigt ein Feature und einen Idempotenzschlüssel.",
+          );
+          requireThat(
+            a.metric === "curvature" || a.other_feature_id,
+            "INVALID_SCHEMA",
+            "Diese Analyse benötigt ein zweites Feature.",
+          );
+          requireThat(
+            a.metric !== "curvature" ||
+              (!a.other_feature_id &&
+                !a.other_face_id &&
+                !a.other_uv &&
+                !a.other_curve_parameter),
+            "INVALID_SCHEMA",
+            "Krümmung wird für genau ein ausgewähltes Ziel gemessen.",
+          );
+          requireThat(
+            !(a.face_id || a.other_face_id) || a.revision,
+            "INVALID_SCHEMA",
+            "Flächenanalysen benötigen eine ausdrückliche Revision.",
+          );
+          const select = (
+            fid: string,
+            faceID?: string,
+            uv?: string[],
+            parameter?: string,
+          ) => {
+            const f = r.ir.features.find((f: any) => f.id === fid);
+            requireThat(
+              f && f.construction.operator !== "field",
+              "OUT_OF_SCOPE",
+              "Analyse benötigt native B-Rep-Geometrie.",
+            );
+            const records = faces(this.store, r, fid);
+            let index: number | undefined;
+            if (faceID) {
+              index = records.findIndex((f) => f.face_id === faceID);
+              requireThat(
+                index >= 0,
+                "STALE_REVISION",
+                "Fläche gehört nicht zu diesem Feature und dieser Revision.",
+              );
+            } else if (records.length === 1) index = 0;
+            if (a.metric !== "clearance")
+              requireThat(
+                !records.length || index !== undefined,
+                "AMBIGUOUS_SELECTION",
+                "Feature hat mehrere Flächen; mit cad_inspect eine revisionsgebundene Fläche wählen.",
+              );
+            requireThat(
+              !records.length || parameter === undefined,
+              "INVALID_SCHEMA",
+              "Kurvenparameter sind für Flächen nicht zulässig.",
+            );
+            return { face_index: index, uv, curve_parameter: parameter };
+          };
+          const selection = select(
+            a.feature_id,
+            a.face_id,
+            a.uv,
+            a.curve_parameter,
+          );
+          const other_selection = a.other_feature_id
+            ? select(
+                a.other_feature_id,
+                a.other_face_id,
+                a.other_uv,
+                a.other_curve_parameter,
+              )
+            : undefined;
+          if (a.metric === "clearance")
+            requireThat(
+              !a.face_id &&
+                !a.other_face_id &&
+                !a.uv &&
+                !a.other_uv &&
+                !a.curve_parameter &&
+                !a.other_curve_parameter,
+              "INVALID_SCHEMA",
+              "Freigang wird zwischen vollständigen Featuregeometrien gemessen.",
+            );
+          const minimum = a.minimum_clearance
+            ? quantity(a.minimum_clearance, "length")
+            : 0;
+          requireThat(
+            minimum >= 0 && minimum <= 1e6,
+            "INVALID_SCHEMA",
+            "Ungültiger Mindestfreigang.",
+          );
+          requireThat(
+            a.metric === "clearance" || !a.minimum_clearance,
+            "INVALID_SCHEMA",
+            "Mindestfreigang gilt nur für die Freiganganalyse.",
+          );
+          return this.jobs.enqueue(p, a.model_id, "analysis", {
+            plan: this.revisionPlan(r),
+            action: "analysis",
+            metric: a.metric,
+            revision: r.id,
+            feature_id: a.feature_id,
+            other_feature_id: a.other_feature_id,
+            selection,
+            other_selection,
+            minimum_clearance: minimum,
+          });
+        }
+        requireThat(
+          !a.face_id &&
+            !a.other_face_id &&
+            !a.uv &&
+            !a.other_uv &&
+            !a.curve_parameter &&
+            !a.other_curve_parameter &&
+            !a.minimum_clearance,
+          "INVALID_SCHEMA",
+          "Lokale Analyseparameter sind für diese Messung nicht registriert.",
+        );
         if (a.metric === "distance") {
           requireThat(
             a.feature_id && a.other_feature_id && a.idempotency_key,
@@ -616,6 +790,7 @@ export class ModelService {
           changed_features: plan.changed_features,
           dependent_features: plan.dependent_features,
           estimate: plan.estimate,
+          refinement_reports: plan.refinement_reports,
           resolved_parameters: plan.ir.features
             .filter((f) => plan.changed_features.includes(f.id))
             .map((f) => ({
@@ -956,6 +1131,7 @@ export class ModelService {
             r.id,
             {
               format: "ir",
+              filename: "model.json",
               unit: "mm",
               ir_hash: hash(r.ir),
               quality: r.quality,
@@ -963,8 +1139,12 @@ export class ModelService {
               lost_semantics: [],
             },
           );
-          this.gates.run("after_export", { artifact_id: artifact.artifact_id });
-          return { status: "succeeded", artifacts: [artifact] };
+          const exported = exportPackage(this.store, p, r, [artifact], "ir");
+          this.gates.run("after_export", {
+            artifact_id: artifact.artifact_id,
+            artifact_count: exported.artifacts.length,
+          });
+          return { status: "succeeded", ...exported };
         }
         const deflection = quantity(a.deflection, "length");
         requireThat(
