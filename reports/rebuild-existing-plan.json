@@ -1,12 +1,113 @@
 {
-  "created": "2026-09-14T12:38:37.030Z",
+  "created": "2026-09-14T13:05:29.995Z",
   "mode": "plan",
   "status": "passed",
   "models": [
     {
+      "model_id": "model-d0fcbd06-668c-4f03-9292-7559adcc0f25",
+      "name": "Codex-Hostprüfung · Dichtungsgehäuse",
+      "old_revision": "rev-e3142711-2783-428e-ad01-1b4283448efd",
+      "plan": {
+        "status": "planned",
+        "measurements": null,
+        "checks": [],
+        "warnings": [],
+        "errors": [],
+        "assumptions": [],
+        "artifacts": [],
+        "recommended_next_actions": [
+          "cad_rebuild(mode:candidate)",
+          "cad_validate",
+          "cad_commit"
+        ],
+        "model_id": "model-d0fcbd06-668c-4f03-9292-7559adcc0f25",
+        "base_revision": "rev-e3142711-2783-428e-ad01-1b4283448efd",
+        "target_registry_hash": "c06ba78af8863c6cdc8d07a330843aca7b8c58948c19c0f0921e2e2a616ee82f",
+        "source_ir_hash": "b442e4cd03f5e218c0b4d1301e699db45677960b4ed92d5d1e07340f719b97c3",
+        "candidate_ir_hash": "b442e4cd03f5e218c0b4d1301e699db45677960b4ed92d5d1e07340f719b97c3",
+        "feature_count": 3,
+        "protected_constraints": [
+          {
+            "id": "constraint-width",
+            "kind": "protected_parameter",
+            "feature_id": "feat-groove-07",
+            "parameter": "width"
+          },
+          {
+            "id": "constraint-hole-radius",
+            "kind": "protected_parameter",
+            "feature_id": "feat-hole-01",
+            "parameter": "radius"
+          },
+          {
+            "id": "constraint-hole-x",
+            "kind": "protected_parameter",
+            "feature_id": "feat-hole-01",
+            "parameter": "x"
+          },
+          {
+            "id": "constraint-hole-y",
+            "kind": "protected_parameter",
+            "feature_id": "feat-hole-01",
+            "parameter": "y"
+          },
+          {
+            "id": "constraint-outer",
+            "kind": "protected_bounds",
+            "feature_id": "feat-hole-01",
+            "tolerance": {
+              "value": "0.00001",
+              "unit": "mm"
+            }
+          },
+          {
+            "id": "constraint-wall",
+            "kind": "minimum",
+            "feature_id": "feat-groove-07",
+            "metric": "remaining_wall",
+            "target": {
+              "value": "2.00",
+              "unit": "mm"
+            }
+          }
+        ],
+        "estimate": {
+          "features": 3,
+          "instances": 0,
+          "maximum_seconds": 45
+        },
+        "geometry_may_change": true,
+        "committed": false,
+        "trace_id": "trace-2cb09e4b-df13-41d9-8a15-b142fb407c1d"
+      },
+      "before": {
+        "volume": 4716.967706165622,
+        "area": 3797.1814059788985,
+        "bounds": [
+          -20,
+          -20,
+          0,
+          20,
+          20,
+          3
+        ],
+        "volume_integration_relative_error_estimate": 1.2048932050195552e-15,
+        "native_tolerances_mm": {
+          "vertex": 1.000000025962512e-7,
+          "edge": 1e-7,
+          "face": 1e-7
+        },
+        "solids": 1,
+        "precision_solid_only": true,
+        "faces": 11,
+        "valid": true
+      },
+      "status": "planned"
+    },
+    {
       "model_id": "model-0b538567-5bad-4e35-9bec-7b6d9e04772d",
       "name": "Codex-Hostprüfung · Dichtungsgehäuse",
-      "old_revision": "rev-266c5e18-3e9d-491b-98b0-2414f8113dae",
+      "old_revision": "rev-5b731428-0283-4c39-b329-d3c0df4cd11a",
       "plan": {
         "status": "planned",
         "measurements": null,
@@ -21,8 +122,8 @@
           "cad_commit"
         ],
         "model_id": "model-0b538567-5bad-4e35-9bec-7b6d9e04772d",
-        "base_revision": "rev-266c5e18-3e9d-491b-98b0-2414f8113dae",
-        "target_registry_hash": "965f19721ddde2a71937947c574f0209f490a0e97f33bbfabc0bf29540b83e4b",
+        "base_revision": "rev-5b731428-0283-4c39-b329-d3c0df4cd11a",
+        "target_registry_hash": "c06ba78af8863c6cdc8d07a330843aca7b8c58948c19c0f0921e2e2a616ee82f",
         "source_ir_hash": "9550a622eb09a9b194936ed137c02c8126a9a3c8090759cad3a605ae7f9d7803",
         "candidate_ir_hash": "9550a622eb09a9b194936ed137c02c8126a9a3c8090759cad3a605ae7f9d7803",
         "feature_count": 3,
@@ -78,7 +179,7 @@
         },
         "geometry_may_change": true,
         "committed": false,
-        "trace_id": "trace-363138b4-cd46-4ac1-8ff9-189bd466e1cb"
+        "trace_id": "trace-d8b46177-e999-4181-b793-bf85f52e5f6f"
       },
       "before": {
         "volume": 4716.967706165622,
@@ -92,6 +193,11 @@
           3
         ],
         "volume_integration_relative_error_estimate": 1.2048932050195552e-15,
+        "native_tolerances_mm": {
+          "vertex": 1.000000025962512e-7,
+          "edge": 1e-7,
+          "face": 1e-7
+        },
         "solids": 1,
         "precision_solid_only": true,
         "faces": 11,
@@ -102,7 +208,7 @@
     {
       "model_id": "model-1674b741-c8ca-415e-98e6-87e0e09a3d4a",
       "name": "Codex-Hostprüfung · Dichtungsgehäuse",
-      "old_revision": "rev-c1e101e8-e655-44e9-b872-d90fc0b94233",
+      "old_revision": "rev-f65d53d0-8415-46c0-aad6-0da74a054863",
       "plan": {
         "status": "planned",
         "measurements": null,
@@ -117,8 +223,8 @@
           "cad_commit"
         ],
         "model_id": "model-1674b741-c8ca-415e-98e6-87e0e09a3d4a",
-        "base_revision": "rev-c1e101e8-e655-44e9-b872-d90fc0b94233",
-        "target_registry_hash": "965f19721ddde2a71937947c574f0209f490a0e97f33bbfabc0bf29540b83e4b",
+        "base_revision": "rev-f65d53d0-8415-46c0-aad6-0da74a054863",
+        "target_registry_hash": "c06ba78af8863c6cdc8d07a330843aca7b8c58948c19c0f0921e2e2a616ee82f",
         "source_ir_hash": "8ecc9de3fd5ee0ac14f3af9f5fc428b3bc314aee1ac8e2ff6b1eb5e5f55cc49e",
         "candidate_ir_hash": "8ecc9de3fd5ee0ac14f3af9f5fc428b3bc314aee1ac8e2ff6b1eb5e5f55cc49e",
         "feature_count": 3,
@@ -174,7 +280,7 @@
         },
         "geometry_may_change": true,
         "committed": false,
-        "trace_id": "trace-2769337f-503f-4b0f-b5dd-6fbb628f0f60"
+        "trace_id": "trace-c7cbc71c-1235-4961-9022-fa2c9302ade7"
       },
       "before": {
         "volume": 4716.967706165622,
@@ -188,6 +294,11 @@
           3
         ],
         "volume_integration_relative_error_estimate": 1.2048932050195552e-15,
+        "native_tolerances_mm": {
+          "vertex": 1.000000025962512e-7,
+          "edge": 1e-7,
+          "face": 1e-7
+        },
         "solids": 1,
         "precision_solid_only": true,
         "faces": 11,
@@ -198,7 +309,7 @@
     {
       "model_id": "model-1cb461b0-f616-4031-86c7-c43b81a0c8a6",
       "name": "Codex-Hostprüfung · Dichtungsgehäuse",
-      "old_revision": "rev-5093489b-989d-4143-9f93-31c79918c0ae",
+      "old_revision": "rev-4acea291-97ad-4a18-bf74-d9dd30dd5536",
       "plan": {
         "status": "planned",
         "measurements": null,
@@ -213,8 +324,8 @@
           "cad_commit"
         ],
         "model_id": "model-1cb461b0-f616-4031-86c7-c43b81a0c8a6",
-        "base_revision": "rev-5093489b-989d-4143-9f93-31c79918c0ae",
-        "target_registry_hash": "965f19721ddde2a71937947c574f0209f490a0e97f33bbfabc0bf29540b83e4b",
+        "base_revision": "rev-4acea291-97ad-4a18-bf74-d9dd30dd5536",
+        "target_registry_hash": "c06ba78af8863c6cdc8d07a330843aca7b8c58948c19c0f0921e2e2a616ee82f",
         "source_ir_hash": "8800eef6ed7af8d7dde9988f813593db3598dc30aa573c88b7ad932040c87972",
         "candidate_ir_hash": "8800eef6ed7af8d7dde9988f813593db3598dc30aa573c88b7ad932040c87972",
         "feature_count": 3,
@@ -270,7 +381,7 @@
         },
         "geometry_may_change": true,
         "committed": false,
-        "trace_id": "trace-ee472ae6-8caa-4769-993d-2b34c257a838"
+        "trace_id": "trace-3de3a971-ba27-4ae6-8048-11166b860c9c"
       },
       "before": {
         "volume": 4716.967706165622,
@@ -284,6 +395,11 @@
           3
         ],
         "volume_integration_relative_error_estimate": 1.2048932050195552e-15,
+        "native_tolerances_mm": {
+          "vertex": 1.000000025962512e-7,
+          "edge": 1e-7,
+          "face": 1e-7
+        },
         "solids": 1,
         "precision_solid_only": true,
         "faces": 11,
@@ -294,7 +410,7 @@
     {
       "model_id": "model-21eadd21-b298-4656-9eab-007ea2ab9caf",
       "name": "Codex-Hostprüfung · Dichtungsgehäuse",
-      "old_revision": "rev-00123075-cd38-4748-ba67-86e7d445a6d0",
+      "old_revision": "rev-1b19db89-0f2f-4216-b766-ff9c6ea2f4df",
       "plan": {
         "status": "planned",
         "measurements": null,
@@ -309,8 +425,8 @@
           "cad_commit"
         ],
         "model_id": "model-21eadd21-b298-4656-9eab-007ea2ab9caf",
-        "base_revision": "rev-00123075-cd38-4748-ba67-86e7d445a6d0",
-        "target_registry_hash": "965f19721ddde2a71937947c574f0209f490a0e97f33bbfabc0bf29540b83e4b",
+        "base_revision": "rev-1b19db89-0f2f-4216-b766-ff9c6ea2f4df",
+        "target_registry_hash": "c06ba78af8863c6cdc8d07a330843aca7b8c58948c19c0f0921e2e2a616ee82f",
         "source_ir_hash": "7922d2e206345ed54577ac9611ad0d6d9f9cdaad005bb78b80ed00428230cc64",
         "candidate_ir_hash": "7922d2e206345ed54577ac9611ad0d6d9f9cdaad005bb78b80ed00428230cc64",
         "feature_count": 3,
@@ -366,7 +482,7 @@
         },
         "geometry_may_change": true,
         "committed": false,
-        "trace_id": "trace-b2beaace-1227-490e-b3e2-dbcdb88ad976"
+        "trace_id": "trace-44994003-0c9f-4615-b480-751f75e57884"
       },
       "before": {
         "volume": 4716.967706165622,
@@ -380,6 +496,11 @@
           3
         ],
         "volume_integration_relative_error_estimate": 1.2048932050195552e-15,
+        "native_tolerances_mm": {
+          "vertex": 1.000000025962512e-7,
+          "edge": 1e-7,
+          "face": 1e-7
+        },
         "solids": 1,
         "precision_solid_only": true,
         "faces": 11,
@@ -390,7 +511,7 @@
     {
       "model_id": "model-0f684dc5-9e5a-4350-bdc0-01ee71726cc7",
       "name": "Dichtungsgehäuse · 20-µm-Korrektur",
-      "old_revision": "rev-e752f545-7311-436c-b566-966c3e53dd85",
+      "old_revision": "rev-1d6c8044-90ef-463d-ad31-0915b3f70d74",
       "plan": {
         "status": "planned",
         "measurements": null,
@@ -405,8 +526,8 @@
           "cad_commit"
         ],
         "model_id": "model-0f684dc5-9e5a-4350-bdc0-01ee71726cc7",
-        "base_revision": "rev-e752f545-7311-436c-b566-966c3e53dd85",
-        "target_registry_hash": "965f19721ddde2a71937947c574f0209f490a0e97f33bbfabc0bf29540b83e4b",
+        "base_revision": "rev-1d6c8044-90ef-463d-ad31-0915b3f70d74",
+        "target_registry_hash": "c06ba78af8863c6cdc8d07a330843aca7b8c58948c19c0f0921e2e2a616ee82f",
         "source_ir_hash": "54335c6d9b55206f4c03af73d31e56da1d990feafafada2839a088ad164e217e",
         "candidate_ir_hash": "54335c6d9b55206f4c03af73d31e56da1d990feafafada2839a088ad164e217e",
         "feature_count": 3,
@@ -462,7 +583,7 @@
         },
         "geometry_may_change": true,
         "committed": false,
-        "trace_id": "trace-89d9f945-f3fe-439f-9891-392526fc1d68"
+        "trace_id": "trace-f3289f48-764c-4897-bc35-2e2e4a5f4778"
       },
       "before": {
         "volume": 4716.967706165622,
@@ -476,6 +597,11 @@
           3
         ],
         "volume_integration_relative_error_estimate": 1.2048932050195552e-15,
+        "native_tolerances_mm": {
+          "vertex": 1.000000025962512e-7,
+          "edge": 1e-7,
+          "face": 1e-7
+        },
         "solids": 1,
         "precision_solid_only": true,
         "faces": 11,
@@ -486,7 +612,7 @@
     {
       "model_id": "model-26fd907b-004c-4ad2-8170-cc36e5e8ecce",
       "name": "Dichtungsgehäuse · 20-µm-Korrektur",
-      "old_revision": "rev-9abfc963-4125-43bc-b478-c2834a46e2f4",
+      "old_revision": "rev-9606c89b-dca9-43e9-af5a-0f1a377a33a7",
       "plan": {
         "status": "planned",
         "measurements": null,
@@ -501,8 +627,8 @@
           "cad_commit"
         ],
         "model_id": "model-26fd907b-004c-4ad2-8170-cc36e5e8ecce",
-        "base_revision": "rev-9abfc963-4125-43bc-b478-c2834a46e2f4",
-        "target_registry_hash": "965f19721ddde2a71937947c574f0209f490a0e97f33bbfabc0bf29540b83e4b",
+        "base_revision": "rev-9606c89b-dca9-43e9-af5a-0f1a377a33a7",
+        "target_registry_hash": "c06ba78af8863c6cdc8d07a330843aca7b8c58948c19c0f0921e2e2a616ee82f",
         "source_ir_hash": "54335c6d9b55206f4c03af73d31e56da1d990feafafada2839a088ad164e217e",
         "candidate_ir_hash": "54335c6d9b55206f4c03af73d31e56da1d990feafafada2839a088ad164e217e",
         "feature_count": 3,
@@ -558,7 +684,7 @@
         },
         "geometry_may_change": true,
         "committed": false,
-        "trace_id": "trace-77cbc483-75a6-41c5-993e-2f708a87bc73"
+        "trace_id": "trace-28ce6070-3c0a-4ec5-a004-c297551376c9"
       },
       "before": {
         "volume": 4716.967706165622,
@@ -572,6 +698,11 @@
           3
         ],
         "volume_integration_relative_error_estimate": 1.2048932050195552e-15,
+        "native_tolerances_mm": {
+          "vertex": 1.00000002596251e-7,
+          "edge": 1e-7,
+          "face": 1e-7
+        },
         "solids": 1,
         "precision_solid_only": true,
         "faces": 11,
@@ -580,6 +711,6 @@
       "status": "planned"
     }
   ],
-  "registry_hash": "965f19721ddde2a71937947c574f0209f490a0e97f33bbfabc0bf29540b83e4b",
-  "implementation_hash": "cf6158e6db9702e9d99c08b66a498a06204c244184dcbb81ab7db4783caed4fb"
+  "registry_hash": "c06ba78af8863c6cdc8d07a330843aca7b8c58948c19c0f0921e2e2a616ee82f",
+  "implementation_hash": "50ac7d356ff9e00847c701c03f0e116a1e0f269c565e6a4749a33cf2649431a1"
 }
