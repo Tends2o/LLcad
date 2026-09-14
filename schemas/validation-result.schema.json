@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "candidate_revision": {
+      "type": "string"
+    },
+    "ir_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "geometry_digest": {
+      "type": "string"
+    },
+    "registry_hash": {
+      "type": "string"
+    },
+    "policy_hash": {
+      "type": "string"
+    },
+    "engine_build": {
+      "type": "string"
+    },
+    "profile": {
+      "type": "string",
+      "enum": [
+        "precision_cad",
+        "render_surface"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "failed",
+        "checks_passed_within_profile"
+      ]
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "check_id": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          },
+          "guarantee": {
+            "type": "string",
+            "enum": [
+              "sampled",
+              "bounded",
+              "exact_for_declared_domain"
+            ]
+          },
+          "coverage": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "passed",
+              "failed"
+            ]
+          },
+          "measured": {},
+          "error_bound": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "check_id",
+          "target",
+          "method",
+          "guarantee",
+          "coverage",
+          "status",
+          "measured",
+          "error_bound"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "candidate_revision",
+    "ir_hash",
+    "geometry_digest",
+    "registry_hash",
+    "policy_hash",
+    "engine_build",
+    "profile",
+    "status",
+    "digest",
+    "checks"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,10 @@
+{$MATHFORGE_DOMAIN} {
+    encode zstd gzip
+    request_body {
+        max_size 34MB
+    }
+    reverse_proxy 127.0.0.1:4310 {
+        header_up Host {$MATHFORGE_DOMAIN}
+    }
+    header Strict-Transport-Security "max-age=31536000"
+}

@@ -1,0 +1,8 @@
+
+> mathforge-3d@0.1.0 build
+> tsc && esbuild packages/viewer/app.ts --bundle --format=esm --minify --outfile=public/app.js
+
+
+  public/app.js  567.2kb
+
+⚡ Done in 70ms

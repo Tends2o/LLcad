@@ -1,0 +1,44 @@
+
+> mathforge-3d@0.1.0 test:geometry
+> .venv/bin/python -m unittest discover -s tests/geometry -v
+
+test_curves_and_planar_caps (test_advanced.AdvancedTests.test_curves_and_planar_caps) ... ok
+test_custom_helical_thread_is_a_real_valid_solid (test_advanced.AdvancedTests.test_custom_helical_thread_is_a_real_valid_solid) ... ok
+test_fillet_generated_faces_have_stable_native_origins (test_advanced.AdvancedTests.test_fillet_generated_faces_have_stable_native_origins) ... ok
+test_profile_history_survives_cache_and_drives_loft_faces (test_advanced.AdvancedTests.test_profile_history_survives_cache_and_drives_loft_faces) ... ok
+test_trim_and_sew_native_surfaces (test_advanced.AdvancedTests.test_trim_and_sew_native_surfaces) ... ok
+test_cross_resolution_and_compact_support_and_registry_binding (test_field_cache.FieldCacheTests.test_cross_resolution_and_compact_support_and_registry_binding) ... ok
+test_vdb_grid_budget_rejects_before_allocation (test_field_cache.FieldCacheTests.test_vdb_grid_budget_rejects_before_allocation) ... ok
+test_compact_support_far_region_unchanged (test_native.FieldTests.test_compact_support_far_region_unchanged) ... ok
+test_csg_sign_and_anisotropic_field (test_native.FieldTests.test_csg_sign_and_anisotropic_field) ... ok
+test_local_deformation_inverse_moves_only_the_support (test_native.FieldTests.test_local_deformation_inverse_moves_only_the_support) ... ok
+test_sdf_reference_points_and_gradient (test_native.FieldTests.test_sdf_reference_points_and_gradient) ... ok
+test_sparse_extraction_and_vertex_error (test_native.FieldTests.test_sparse_extraction_and_vertex_error) ... ok
+test_analytic_primitives (test_native.NativeGeometryTests.test_analytic_primitives) ... ok
+test_boolean_identities (test_native.NativeGeometryTests.test_boolean_identities) ... ok
+test_fillet_chamfer_shell (test_native.NativeGeometryTests.test_fillet_chamfer_shell) ... ok
+test_hash_determinism_and_meshing (test_native.NativeGeometryTests.test_hash_determinism_and_meshing) ... ok
+test_invalid_native_operation_diagnoses (test_native.NativeGeometryTests.test_invalid_native_operation_diagnoses) ... ok
+test_open_surface_never_claims_a_volume (test_native.NativeGeometryTests.test_open_surface_never_claims_a_volume) ... ok
+test_precise_groove_and_local_rest_wall (test_native.NativeGeometryTests.test_precise_groove_and_local_rest_wall) ... ok
+test_profiles_extrusion_revolution_loft_sweep (test_native.NativeGeometryTests.test_profiles_extrusion_revolution_loft_sweep) ... ok
+test_rational_surface_and_knot_insertion (test_native.NativeGeometryTests.test_rational_surface_and_knot_insertion) ... ok
+test_step_brep_stl_roundtrip (test_native.NativeGeometryTests.test_step_brep_stl_roundtrip) ... [32;1m
+*******************************************************************
+******        Statistics on Transfer (Write)                 ******[0m
+[32;1m
+*******************************************************************
+******        Transfer Mode = 0  I.E.  As Is       ******[0m
+[32;1m******        Transferring Shape, ShapeType = 2                      ******[0m
+[32;1m** WorkSession : Sending all data[0m
+[32;1m Step File Name : /tmp/tmpbth8j65o/shape.step(32 ents)  Write  Done[0m
+ok
+test_transform_inverse_and_instance_volume (test_native.NativeGeometryTests.test_transform_inverse_and_instance_volume) ... ok
+test_cache_checks_each_face_and_patterns_keep_separate_occurrences (test_topology.TopologyTests.test_cache_checks_each_face_and_patterns_keep_separate_occurrences) ... ok
+test_registered_history_preserves_the_existing_geometry_contract (test_topology.TopologyTests.test_registered_history_preserves_the_existing_geometry_contract) ... ok
+test_unknown_history_is_never_replaced_with_a_geometric_guess (test_topology.TopologyTests.test_unknown_history_is_never_replaced_with_a_geometric_guess) ... ok
+
+----------------------------------------------------------------------
+Ran 26 tests in 2.549s
+
+OK

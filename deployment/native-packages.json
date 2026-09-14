@@ -1,0 +1,8 @@
+{
+  "distribution": "Debian 13 (trixie), amd64",
+  "python3-openvdb": "10.0.1-2.3+b1",
+  "libopenvdb10.0t64": "10.0.1-2.3+b1",
+  "python_module": "pyopenvdb",
+  "module_path": "/usr/lib/python3/dist-packages",
+  "library_version": "10.0.1"
+}

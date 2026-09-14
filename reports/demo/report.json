@@ -1,0 +1,372 @@
+{
+  "status": "passed",
+  "model_id": "model-0f684dc5-9e5a-4350-bdc0-01ee71726cc7",
+  "before_revision": "rev-c8c775f0-f48d-47ab-afae-efcc76071134",
+  "after_revision": "rev-e40a2bf9-236a-45e0-9dc8-2191f6664a3e",
+  "measurements": {
+    "depth": 0.8199999999999998,
+    "width": 1.1999999999999993,
+    "remaining_wall": 2.18
+  },
+  "validation": {
+    "candidate_revision": "candidate-bd03a67e-46f4-4c2e-9496-9024678385ab",
+    "ir_hash": "54335c6d9b55206f4c03af73d31e56da1d990feafafada2839a088ad164e217e",
+    "geometry_digest": "1bbea22e3999319d071e337a8a6ba2e899233276668b0697d9f1bc43bb483779",
+    "registry_hash": "60c6ccb90241e55c13a34c5176890ab6dfbbde33e7b853fbb8641d930b33f866",
+    "policy_hash": "694ac9f2925064cfac0733ec26b0a019c8ddd5b8f66df96ac7b71c942f4a0171",
+    "engine_build": "OCCT-7.9.3.1.1/mathforge-1",
+    "profile": "precision_cad",
+    "status": "checks_passed_within_profile",
+    "checks": [
+      {
+        "check_id": "structure",
+        "target": "model",
+        "status": "passed",
+        "measured": "1",
+        "method": "strict_ir_compiler",
+        "coverage": "all_features",
+        "guarantee": "exact_for_declared_domain",
+        "error_bound": null
+      },
+      {
+        "check_id": "geometry-feat-base",
+        "target": "feat-base",
+        "status": "passed",
+        "measured": true,
+        "method": "OCCT_BRepCheck_Analyzer",
+        "coverage": "operator_output",
+        "guarantee": "sampled",
+        "error_bound": null
+      },
+      {
+        "check_id": "dimension-feat-base-width",
+        "target": "feat-base",
+        "status": "passed",
+        "measured": 40,
+        "requested": 40,
+        "method": "OCCT_constructed_boundary_dimension",
+        "coverage": "feature_construction_stage",
+        "guarantee": "sampled",
+        "error_bound": null
+      },
+      {
+        "check_id": "dimension-feat-base-depth",
+        "target": "feat-base",
+        "status": "passed",
+        "measured": 40,
+        "requested": 40,
+        "method": "OCCT_constructed_boundary_dimension",
+        "coverage": "feature_construction_stage",
+        "guarantee": "sampled",
+        "error_bound": null
+      },
+      {
+        "check_id": "dimension-feat-base-height",
+        "target": "feat-base",
+        "status": "passed",
+        "measured": 3,
+        "requested": 3,
+        "method": "OCCT_constructed_boundary_dimension",
+        "coverage": "feature_construction_stage",
+        "guarantee": "sampled",
+        "error_bound": null
+      },
+      {
+        "check_id": "geometry-feat-groove-07",
+        "target": "feat-groove-07",
+        "status": "passed",
+        "measured": true,
+        "method": "OCCT_BRepCheck_Analyzer",
+        "coverage": "operator_output",
+        "guarantee": "sampled",
+        "error_bound": null
+      },
+      {
+        "check_id": "dimension-feat-groove-07-depth",
+        "target": "feat-groove-07",
+        "status": "passed",
+        "measured": 0.8199999999999998,
+        "requested": 0.82,
+        "method": "OCCT_constructed_boundary_dimension",
+        "coverage": "feature_construction_stage",
+        "guarantee": "sampled",
+        "error_bound": null
+      },
+      {
+        "check_id": "dimension-feat-groove-07-width",
+        "target": "feat-groove-07",
+        "status": "passed",
+        "measured": 1.1999999999999993,
+        "requested": 1.2,
+        "method": "OCCT_constructed_boundary_dimension",
+        "coverage": "feature_construction_stage",
+        "guarantee": "sampled",
+        "error_bound": null
+      },
+      {
+        "check_id": "geometry-feat-hole-01",
+        "target": "feat-hole-01",
+        "status": "passed",
+        "measured": true,
+        "method": "OCCT_BRepCheck_Analyzer",
+        "coverage": "operator_output",
+        "guarantee": "sampled",
+        "error_bound": null
+      },
+      {
+        "check_id": "dimension-feat-hole-01-radius",
+        "target": "feat-hole-01",
+        "status": "passed",
+        "measured": 1.5,
+        "requested": 1.5,
+        "method": "OCCT_constructed_boundary_dimension",
+        "coverage": "feature_construction_stage",
+        "guarantee": "sampled",
+        "error_bound": null
+      },
+      {
+        "check_id": "dimension-feat-hole-01-depth",
+        "target": "feat-hole-01",
+        "status": "passed",
+        "measured": 3,
+        "requested": 3,
+        "method": "OCCT_constructed_boundary_dimension",
+        "coverage": "feature_construction_stage",
+        "guarantee": "sampled",
+        "error_bound": null
+      },
+      {
+        "check_id": "solid",
+        "target": "model",
+        "status": "passed",
+        "measured": 4716.967706165622,
+        "method": "OCCT_volume_and_solid_count",
+        "coverage": "declared_outputs",
+        "guarantee": "sampled",
+        "error_bound": null
+      },
+      {
+        "check_id": "constraint-width",
+        "target": "feat-groove-07",
+        "status": "passed",
+        "measured": {
+          "value": "1.20",
+          "unit": "mm"
+        },
+        "requested": {
+          "value": "1.20",
+          "unit": "mm"
+        },
+        "method": "decimal_parameter_equality",
+        "coverage": "parameter_only",
+        "guarantee": "exact_for_declared_domain",
+        "error_bound": null
+      },
+      {
+        "check_id": "constraint-hole-radius",
+        "target": "feat-hole-01",
+        "status": "passed",
+        "measured": {
+          "value": "1.5",
+          "unit": "mm"
+        },
+        "requested": {
+          "value": "1.5",
+          "unit": "mm"
+        },
+        "method": "decimal_parameter_equality",
+        "coverage": "parameter_only",
+        "guarantee": "exact_for_declared_domain",
+        "error_bound": null
+      },
+      {
+        "check_id": "constraint-hole-x",
+        "target": "feat-hole-01",
+        "status": "passed",
+        "measured": {
+          "value": "15",
+          "unit": "mm"
+        },
+        "requested": {
+          "value": "15",
+          "unit": "mm"
+        },
+        "method": "decimal_parameter_equality",
+        "coverage": "parameter_only",
+        "guarantee": "exact_for_declared_domain",
+        "error_bound": null
+      },
+      {
+        "check_id": "constraint-hole-y",
+        "target": "feat-hole-01",
+        "status": "passed",
+        "measured": {
+          "value": "15",
+          "unit": "mm"
+        },
+        "requested": {
+          "value": "15",
+          "unit": "mm"
+        },
+        "method": "decimal_parameter_equality",
+        "coverage": "parameter_only",
+        "guarantee": "exact_for_declared_domain",
+        "error_bound": null
+      },
+      {
+        "check_id": "constraint-outer",
+        "target": "feat-hole-01",
+        "status": "passed",
+        "measured": 0,
+        "method": "OCCT_bounding_box_comparison",
+        "coverage": "axis_aligned_extents_only",
+        "guarantee": "sampled",
+        "error_bound": null
+      },
+      {
+        "check_id": "constraint-wall",
+        "target": "feat-groove-07",
+        "status": "passed",
+        "measured": 2.18,
+        "requested": 2,
+        "method": "OCCT_boundary_dimension",
+        "coverage": "planar_box_zone_only",
+        "guarantee": "sampled",
+        "error_bound": null
+      }
+    ],
+    "warnings": [
+      "Keine globale Fertigungs- oder Statikzertifizierung."
+    ],
+    "created_at": "2026-09-13T21:32:34.678Z",
+    "digest": "95e5343317f1751362202811d693475bb943a71f9e1468d7605fb9b773b8ed49"
+  },
+  "artifacts": [
+    {
+      "artifact_id": "art-1995da02-bdcb-4b1f-8c93-eb19e42e1d80",
+      "uri": "cad://artifacts/art-1995da02-bdcb-4b1f-8c93-eb19e42e1d80/manifest",
+      "download": "/api/artifacts/art-1995da02-bdcb-4b1f-8c93-eb19e42e1d80",
+      "hash": "e15572d34d511022e54121f18843f986ff0ae04f48ffbb1a9be0f7cb1db85f70",
+      "mime": "model/step",
+      "size": 26871,
+      "manifest": {
+        "model_id": "model-0f684dc5-9e5a-4350-bdc0-01ee71726cc7",
+        "revision": "rev-e40a2bf9-236a-45e0-9dc8-2191f6664a3e",
+        "source_geometry_hash": "573ad647d3862f08dd89511f669f78029879ce311b93a0f36bca9787af83ac88",
+        "engine_build": "OCCT-7.9.3.1.1/mathforge-1",
+        "unit": "mm",
+        "quality": "checks_passed_within_profile",
+        "requested_deflection": 0.01,
+        "certified_surface_bound": null,
+        "roundtrip": {
+          "status": "checks_passed_within_profile",
+          "method": "roundtrip_bounds_and_occt_validity",
+          "before": {
+            "volume": 4716.967706165622,
+            "area": 3797.1814059788976,
+            "bounds": [
+              -20,
+              -20,
+              0,
+              20,
+              20,
+              3
+            ],
+            "volume_integration_relative_error_estimate": 1.2048932050195552e-15,
+            "solids": 1,
+            "precision_solid_only": true,
+            "faces": 11,
+            "valid": true
+          },
+          "after": {
+            "volume": 4716.967706165622,
+            "area": 3797.1814059789076,
+            "bounds": [
+              -20,
+              -20,
+              0,
+              20,
+              20,
+              3
+            ],
+            "volume_integration_relative_error_estimate": 1.2048932050195552e-15,
+            "solids": 1,
+            "precision_solid_only": true,
+            "faces": 11,
+            "valid": true
+          },
+          "measured_bounds_error": 0,
+          "certified_surface_bound": null,
+          "unit": "mm",
+          "lost_semantics": [
+            "feature_history"
+          ]
+        },
+        "filename": "model.step"
+      }
+    },
+    {
+      "artifact_id": "art-d8809d88-dc3b-476b-9481-1e0ed069ae1d",
+      "uri": "cad://artifacts/art-d8809d88-dc3b-476b-9481-1e0ed069ae1d/manifest",
+      "download": "/api/artifacts/art-d8809d88-dc3b-476b-9481-1e0ed069ae1d",
+      "hash": "1d921571f9ae732ea7d93224ab4d44ea6f38136c6341307c284b47691242029a",
+      "mime": "application/json",
+      "size": 721,
+      "manifest": {
+        "model_id": "model-0f684dc5-9e5a-4350-bdc0-01ee71726cc7",
+        "revision": "rev-e40a2bf9-236a-45e0-9dc8-2191f6664a3e",
+        "source_geometry_hash": "573ad647d3862f08dd89511f669f78029879ce311b93a0f36bca9787af83ac88",
+        "engine_build": "OCCT-7.9.3.1.1/mathforge-1",
+        "unit": "mm",
+        "quality": "checks_passed_within_profile",
+        "requested_deflection": 0.01,
+        "certified_surface_bound": null,
+        "roundtrip": {
+          "status": "checks_passed_within_profile",
+          "method": "roundtrip_bounds_and_occt_validity",
+          "before": {
+            "volume": 4716.967706165622,
+            "area": 3797.1814059788976,
+            "bounds": [
+              -20,
+              -20,
+              0,
+              20,
+              20,
+              3
+            ],
+            "volume_integration_relative_error_estimate": 1.2048932050195552e-15,
+            "solids": 1,
+            "precision_solid_only": true,
+            "faces": 11,
+            "valid": true
+          },
+          "after": {
+            "volume": 4716.967706165622,
+            "area": 3797.1814059789076,
+            "bounds": [
+              -20,
+              -20,
+              0,
+              20,
+              20,
+              3
+            ],
+            "volume_integration_relative_error_estimate": 1.2048932050195552e-15,
+            "solids": 1,
+            "precision_solid_only": true,
+            "faces": 11,
+            "valid": true
+          },
+          "measured_bounds_error": 0,
+          "certified_surface_bound": null,
+          "unit": "mm",
+          "lost_semantics": [
+            "feature_history"
+          ]
+        },
+        "filename": "roundtrip.json"
+      }
+    }
+  ]
+}

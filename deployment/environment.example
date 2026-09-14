@@ -1,0 +1,10 @@
+HOST=127.0.0.1
+PORT=4310
+MATHFORGE_ROOT=/opt/mathforge
+MATHFORGE_DATA=/var/lib/mathforge
+MATHFORGE_AUTH=oauth
+# Replace these values with your actual HTTPS resource and identity provider.
+MATHFORGE_PUBLIC_URL=https://cad.example.invalid
+MATHFORGE_AUDIENCE=https://cad.example.invalid/mcp
+MATHFORGE_ISSUER=https://identity.example.invalid
+MATHFORGE_JWKS_URL=https://identity.example.invalid/.well-known/jwks.json

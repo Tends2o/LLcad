@@ -1,0 +1,30 @@
+[Unit]
+Description=MathForge 3D authenticated model service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=mathforge
+Group=mathforge
+WorkingDirectory=/opt/mathforge
+EnvironmentFile=/etc/mathforge/environment
+ExecStart=/usr/bin/node /opt/mathforge/dist/packages/mcp-gateway/main.js
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=55
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/mathforge
+# RestrictSUIDSGID's syscall filter blocks this Bubblewrap's mount setup.
+# NoNewPrivileges remains enabled; workers drop all capabilities and UID/GID.
+LockPersonality=true
+LimitNOFILE=4096
+MemoryMax=2G
+TasksMax=128
+
+[Install]
+WantedBy=multi-user.target

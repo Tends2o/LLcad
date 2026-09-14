@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "model_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+    },
+    "base_revision": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 128
+    },
+    "artifact_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "ir",
+        "step",
+        "stl"
+      ]
+    },
+    "source_unit": {
+      "type": "string",
+      "enum": [
+        "mm",
+        "m",
+        "um"
+      ]
+    }
+  },
+  "required": [
+    "model_id",
+    "base_revision",
+    "idempotency_key",
+    "artifact_id",
+    "format",
+    "source_unit"
+  ],
+  "additionalProperties": false
+}

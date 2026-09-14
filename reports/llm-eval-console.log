@@ -1,0 +1,7 @@
+
+> mathforge-3d@0.1.0 test:llm
+> tsx scripts/llm-eval.ts
+
+{"task":"groove","status":"passed","checks":{"turn_completed":true,"only_cad_actions":true,"discovered":true,"committed":true,"measurement":true,"old_revision_unchanged":true,"constraints_retained":true,"only_requested_parameter_changed":true,"required_tools":true,"step_roundtrip":true},"tool_calls":17}
+{"task":"diameter","status":"passed","checks":{"turn_completed":true,"only_cad_actions":true,"discovered":true,"committed":true,"measurement":true,"old_revision_unchanged":true,"constraints_retained":true,"only_requested_parameter_changed":true,"required_tools":true},"tool_calls":14}
+{"task":"ambiguity","status":"passed","checks":{"turn_completed":true,"only_cad_actions":true,"discovered":true,"unchanged":true,"no_patch":true,"clarification":true},"tool_calls":5}

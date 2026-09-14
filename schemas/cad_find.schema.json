@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "model_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+    },
+    "revision": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+    },
+    "query": {
+      "default": "",
+      "type": "string",
+      "maxLength": 200
+    },
+    "kind": {
+      "type": "string",
+      "maxLength": 64
+    },
+    "point": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "string",
+          "maxLength": 48,
+          "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+        },
+        {
+          "type": "string",
+          "maxLength": 48,
+          "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+        },
+        {
+          "type": "string",
+          "maxLength": 48,
+          "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+        }
+      ],
+      "items": false,
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "limit": {
+      "default": 16,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 32
+    }
+  },
+  "required": [
+    "model_id",
+    "query",
+    "limit"
+  ],
+  "additionalProperties": false
+}

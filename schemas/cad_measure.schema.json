@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "model_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+    },
+    "revision": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+    },
+    "feature_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+    },
+    "metric": {
+      "default": "all",
+      "type": "string",
+      "enum": [
+        "all",
+        "volume",
+        "area",
+        "bounds",
+        "radius",
+        "depth",
+        "width",
+        "remaining_wall",
+        "distance"
+      ]
+    },
+    "other_feature_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 128
+    }
+  },
+  "required": [
+    "model_id",
+    "metric"
+  ],
+  "additionalProperties": false
+}

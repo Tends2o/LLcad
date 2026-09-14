@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "model_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+    },
+    "revision": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+    },
+    "feature_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+    },
+    "selection_handle": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+    },
+    "face_id": {
+      "type": "string",
+      "pattern": "^face_[a-f0-9]{32}$"
+    },
+    "rebind": {
+      "default": false,
+      "type": "boolean"
+    },
+    "face_offset": {
+      "default": 0,
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "face_limit": {
+      "default": 8,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 16
+    }
+  },
+  "required": [
+    "model_id",
+    "rebind",
+    "face_offset",
+    "face_limit"
+  ],
+  "additionalProperties": false
+}

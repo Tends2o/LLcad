@@ -1,0 +1,68 @@
+
+> mathforge-3d@0.1.0 test
+> tsx --test --test-concurrency=1 tests/**/*.test.ts
+
+✔ coupled nonlinear constraints produce a checked proposal and persistent relationships (3698.339498ms)
+✔ solver rejects infeasible systems, wrong dimensions and foreign or protected parameters (2715.252588ms)
+✔ inverse construction solves a target volume and verifies the generated B-Rep volume (1470.135925ms)
+✔ distance analysis measures actual separated B-Rep features (1406.911439ms)
+✔ local pole edits retain a complete C1 seam and protected neighbor; broken seams cannot commit (2229.543226ms)
+✔ rational patch bounds detect derivative-only kinks with nonconstant positive weights (6.844535ms)
+✔ exact rational C2 bounds preserve nonconstant weights and detect curvature-only changes (4.321242ms)
+✔ rational bounds cover independent native OCCT derivatives for unequal degrees (700.176945ms)
+✔ a rendered groove face selects its actual source, survives cache/restart and explicitly rebinds after a 20 µm edit (3265.989113ms)
+✔ split faces and a later merge never silently resurrect a selection (2537.427047ms)
+✔ face bindings enforce ownership, expiry, exact revisions and operation scope (1536.811053ms)
+✔ 0.80 → 0.82 mm groove correction, mandatory validation, measured width/wall, immutable revision and STEP roundtrip (2492.202629ms)
+✔ isolated OpenVDB roundtrip and private spatial reuse survive restart and a compact edit (10957.773688ms)
+✔ unit equivalence over 300 random decimal scales (4.621944ms)
+✔ canonical digest ignores object key order and distinguishes values (4.205293ms)
+✔ affine inverse and inverse-transpose normals preserve orthogonality (3.879796ms)
+✔ B-spline partition of unity and Bézier endpoint invariants (2.203715ms)
+✔ stored expression drives geometry and rejects dimensional mistakes or cycles (4.538508ms)
+✔ local deformation rejects folding and provides a conservative inverse Lipschitz bound (0.287275ms)
+✔ 2026 discovery, tools, metadata, header mismatch, unknown version and unknown method (89.44376ms)
+✔ official legacy SDK initialization, tool schemas and structured result (79.333704ms)
+✔ HTTP negotiates supported Codex versions and offers a tested fallback (57.825963ms)
+✔ HTTP authentication, DNS rebinding, origin validation, cookie CSRF and schema injection (21.459085ms)
+✔ local MCP starts without an HTTP service, browser login or token prompt and keeps models after reconnect (609.90676ms)
+✔ IR, STEP, STL, B-Rep and GLB exports have actual roundtrip reports and private artifacts (6871.919194ms)
+✔ organic preview is extracted from the field AST with honest preview status (2658.676965ms)
+✔ old build geometry is readable but cannot silently be recalculated or exported (810.006178ms)
+✔ explicit rebuild binds the target build, preserves old revisions and requires validation (2601.934009ms)
+✔ rebuild retains protected bounds and cannot commit changed geometry outside tolerance (1712.721881ms)
+✔ MCP model discovery is private, paged and does not need remembered IDs or viewer access (14.275364ms)
+✔ OAuth verifies issuer, audience, signature, expiry and signed tenant claims (75.723838ms)
+✔ real backup restore preserves committed revisions and verifies every blob (874.102621ms)
+✔ expired worker lease is recovered with fencing and does not duplicate a candidate (738.723861ms)
+✔ kernel process crash produces failure without losing the authoritative revision (822.869167ms)
+✔ crashes at different sandbox startup stages cannot leave the job waiting for inherited stderr (921.200353ms)
+✔ garbage collection retains referenced artifacts and deletes only aged orphans (5.120428ms)
+✔ audit chain detects any mutation and after-commit retries never roll back a commit (769.46916ms)
+✔ tenant erasure removes derived data while retaining shared bytes and another tenant's model (2427.095131ms)
+✔ store lock excludes a second gateway or offline maintainer and is released on close (10.340382ms)
+✔ unknown database versions fail without rewriting schema or leaving the store locked (8.792679ms)
+✔ scheduler interleaves principals, keeps FIFO and retains fairness after reopening (10.488986ms)
+✔ model, job, selection, resource and artifact ACLs reject foreign principals (1577.967932ms)
+✔ concurrent duplicates execute once; changed payload conflicts; stale candidate cannot commit (2721.613008ms)
+✔ missing hook, missing commit scope and mismatched proof all fail closed (1619.573373ms)
+✔ expired or foreign selection handles never rebind silently (798.266788ms)
+✔ cancellation and discard fence late worker results (1599.763377ms)
+✔ local field edit proves entire protected remote region, overlap blocks validation (2686.696981ms)
+✔ imported IR cannot smuggle another user’s native artifact (6.918216ms)
+✔ requested dimensions are checked even without user-authored constraints (1495.867556ms)
+✔ decimal units preserve 20 µm and reject length/angle mixing (1.386844ms)
+✔ strict patch rejects forged validation and executable payloads (1.538742ms)
+✔ DAG compilation rejects cycles, absent refs, wrong dimensions and degenerate primitives (0.978383ms)
+✔ dirty subgraph is local and protected widths reject changes (2.592388ms)
+✔ field semantics degrade under anisotropic scaling and local deltas (0.304739ms)
+✔ safe mathematical expressions validate dimensions, domains and depth (0.504442ms)
+✔ bounded inverse solver computes an analytic dimension and diagnoses infeasibility (0.171486ms)
+ℹ tests 56
+ℹ suites 0
+ℹ pass 56
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 71282.938338

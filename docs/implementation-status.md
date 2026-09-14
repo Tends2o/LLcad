@@ -1,0 +1,32 @@
+# Umsetzung und offene Abnahme
+
+Diese Zuordnung verhindert, dass die lauffähige lokale Version mit einer vollständigen Freigabe aller Ziele des ursprünglichen Bauplans verwechselt wird.
+
+| Phase | Tatsächlich umgesetzt und geprüft | Noch offen |
+|---|---|---|
+| 0 – Verträge und Referenzen | Striktes IR, Einheiten, Fehlercodes, Rollen-/Scopegrenze, Capability-Verträge, technische/organische/Instanz-Fixtures | Zielkonto und reale Host-/OAuth-Parameter |
+| 1 – Mathematischer Kern | Native OCCT-Körper, Profile, Konstruktionen, CSG, sichere gespeicherte Ausdrücke, Messungen, isolierte Worker, Revisionen und Exporte | Nicht registrierte Spezialoperatoren aus dem Gesamtkatalog |
+| 2 – MCP und Transaktionen | 21 Werkzeuge einschließlich privater Modellsuche, zwei HTTP-Protokolladapter, lokaler stdio-Einstieg, dauerhafter lokaler Codex-Dienst mit zwei gleichzeitig geprüften Verbindungen, ausdrückliche Build-Neuberechnung mit unveränderten alten Revisionen, vollständig über MCP geprüfter Modellierablauf und drei echte LLM-Sprachaufträge ohne Browserinteraktion, Deduplizierung, Jobs, Gates, Digest/CAS, OAuth-Tokenprüfung, private Ressourcen | Reale Remote-OAuth-Verknüpfung und breiter unabhängiger LLM-Testsatz |
+| 3 – Verständnis und Details | Semantische IDs, gespeicherte native Flächenherkunft für registrierte Operatoren einschließlich Extrusion/Rotation/Loft/Sweep/Fillet/Chamfer/Shell, revisionsgebundene Flächenauswahl und ausdrückliche eindeutige Neuzuordnung über alle Zwischenrevisionen, Detailpakete, Schutzbedingungen und Dirty-Graph | Allgemeine OCAF-Historie, Herkunft für nicht registrierte Builder (Importgeometrie und zusammengesetztes Helixgewinde), Split-/Merge-Fälle werden absichtlich abgewiesen; das LLM muss semantisch eingrenzen oder im Gespräch klären |
+| 4 – CAD und inverse Konstruktion | Rationale Patches, B-Splines, Sweep/Loft, Bohrung/Nut/Tasche, Verrundung/Fase/Schale; analytische inverse Volumenlösung, begrenzter gekoppelter SLSQP-Solver mit gespeicherten Gleichungen, UV-Trimmung, Vernähen, Custom-Helixgewinde; echte Roundtrips | Globale Lösbarkeits-/Optimalitätsbeweise, freie Trimmschleifen über Mehrflächen-NURBS und genormte Gewindebibliotheken |
+| 5 – Organische Details | Feld-AST, Distanzsemantik, kompakte Stützen, lokale inverse Deformation, sparse Octree-Extraktion, bewiesene Fernregions-Lokalität; lokale Patchänderung mit exakten rationalen C0-/C1-/C2-Bounds und Regularität im registrierten Patchprofil; OpenVDB-Export mit vollständigem Rasterroundtrip und privater räumlicher Wiederverwendung | OpenVDB-Import, allgemeine Flächennetze und globale Krümmungs-/Subzelltopologiezertifizierung |
+| 6 – Leistung | Begrenzte Instanzen, Contentcache, inkrementelle Invalidierung, Jobstatus, Paging, dauerhafte faire Jobverteilung, lokale Benchmarks einschließlich 100 Instanzen und Feldvorschau | Große Produktionsdatensätze, Wiederverwendbare native Prozesse (der aktuelle Dienst bevorzugt frische isolierte Prozesse), GPU-Profil, breite unabhängige LLM-Evaluation und Nutzung mit Produktionsdaten |
+| 7 – Härtung | Isolation, Rechte-/Fehlertests, JWT-Tests, echter Restore, tatsächlicher Workerabbruch, exklusive Betriebssperre, getestete Mandantenlöschung im aktiven Datenspeicher, Paketprüfungen, SBOM, Runbook, Deploymentvorlagen, an den Implementierungsstand gebundenes Release-Manifest | Produktiver Endpunkt/IdP, Freigabe von Projektteilen an andere Nutzer und Rollenverwaltung, Löschung externer Backups, externe Hostabnahme, Lizenz-/Distributionsprüfung und gegebenenfalls stärkere Parser-VM-Isolation |
+
+## Nachweise
+
+- `reports/verification.json` und die zugehörigen Logs dokumentieren den tatsächlich ausgeführten Testlauf.
+- `reports/benchmark.json` enthält Laufzeiten, Rechnerdaten, Buildhash, Stichprobenzahlen und Messgrenzen.
+- `reports/browser.json`, `viewer.png` und `viewer-candidate.png` stammen aus einem ausgeführten Chromium-Ablauf.
+- `reports/mcp-workflow.json` und `mcp-model.step` belegen den vollständigen Werkzeugablauf mit null Browserinteraktionen. Dies ist kein erfundener LLM-/Zielhosttest.
+- `reports/llm-eval.json` belegt drei tatsächliche Modellturns im installierten Codex-Host. Der Grader prüft die gespeicherte Geometrie und Werkzeugaufrufe; Modellbehauptungen allein zählen nicht als Erfolg. Die früheren Konfigurationsfehler sind in `reports/llm-eval-initial.json` als fehlgeschlagener Versuch dokumentiert.
+- `reports/codex-host.json` und `codex-host-model.step` belegen den ausgeführten Modellierablauf im tatsächlich installierten Codex-App-Server. Der Test startet keinen Modellturn und ersetzt keine LLM-Reasoning-Abnahme.
+- `reports/rebuild-existing-plan.json` und `rebuild-existing-applied.json` dokumentieren vier tatsächlich neu berechnete Beispielmodelle, die unveränderten Konstruktionen, den Messvergleich, Prüfdigests und den Erhalt ihrer alten Revisionen.
+- `reports/demo/report.json` und `reports/demo/model.step` stammen aus der ausgeführten 20-µm-Detailkorrektur.
+- `reports/npm-audit.json`, `python-audit.json`, `license-inventory.json` und die SBOM-Dateien einschließlich nativer OpenVDB-Abhängigkeiten dokumentieren die geprüften Abhängigkeiten.
+
+## Definition of Done
+
+Das LLM steuert die Werkzeuge; der lokale CAD-Dienst berechnet ihre mathematischen Baupläne deterministisch, erhält unveränderliche Revisionen und erzwingt ihre registrierten Prüfgates. **Die vollständige Definition of Done aus Abschnitt 28 des Bauplans ist noch nicht erreicht.** Die lokale Codex-Anbindung und drei tatsächliche LLM-Sprachaufträge sind geprüft. Das ersetzt keine breite allgemeine LLM- oder Remote-OAuth-Abnahme; darüber hinaus bleiben die oben genannten Erweiterungen des Gesamtkatalogs offen. `release:check` darf deshalb keine Produktionsfreigabe melden.
+
+Es wurde keine öffentliche Veröffentlichung, kein externer Modellversand und keine Maschinenanbindung ausgeführt.

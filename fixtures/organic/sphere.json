@@ -1,0 +1,72 @@
+{
+  "schema_version": "1",
+  "unit": "mm",
+  "features": [
+    {
+      "id": "organic",
+      "semantic_name": "Organischer Grundkörper",
+      "kind": "field",
+      "owner_part": "part-main",
+      "local_frame": "world",
+      "authoritative_representation": "implicit",
+      "parameters": {},
+      "parameter_sources": {},
+      "construction": {
+        "operator": "field",
+        "expression": {
+          "op": "sphere",
+          "center": [
+            "0",
+            "0",
+            "0"
+          ],
+          "radius": "5"
+        },
+        "domain": {
+          "min": [
+            "-7",
+            "-7",
+            "-7"
+          ],
+          "max": [
+            "7",
+            "7",
+            "7"
+          ]
+        },
+        "cell_size": {
+          "value": "0.75",
+          "unit": "mm"
+        }
+      },
+      "depends_on": [],
+      "protected_relations": []
+    }
+  ],
+  "outputs": [
+    "organic"
+  ],
+  "constraints": [
+    {
+      "id": "remote-protected",
+      "kind": "protected_region",
+      "feature_id": "organic",
+      "min": [
+        "-7",
+        "-7",
+        "-7"
+      ],
+      "max": [
+        "-2",
+        "7",
+        "7"
+      ]
+    }
+  ],
+  "assumptions": [],
+  "tolerance": {
+    "value": "0.001",
+    "unit": "mm"
+  },
+  "profile": "render_surface"
+}

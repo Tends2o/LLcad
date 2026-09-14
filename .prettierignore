@@ -1,0 +1,10 @@
+Mathematik_First_3D_MCP_Bauplan.md
+package-lock.json
+node_modules
+.venv
+dist
+data
+reports
+schemas
+fixtures
+public/app.js

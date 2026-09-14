@@ -1,0 +1,1112 @@
+{
+  "hash": "d358f9c706afe6d16b93ebf3449f06ba6d697d6464af5854620e89fd5ec65bfc",
+  "operators": {
+    "point": {
+      "version": 1,
+      "params": {
+        "x": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "y": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "z": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        }
+      },
+      "refs": [
+        0,
+        0
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "line": {
+      "version": 1,
+      "params": {},
+      "refs": [
+        0,
+        0
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "arc": {
+      "version": 1,
+      "params": {},
+      "refs": [
+        0,
+        0
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "plane": {
+      "version": 1,
+      "params": {
+        "width": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "height": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "x": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "y": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "z": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        }
+      },
+      "refs": [
+        0,
+        0
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "trim_surface": {
+      "version": 1,
+      "params": {
+        "u_min": {
+          "dimension": "scalar",
+          "min": 0,
+          "max": 1
+        },
+        "u_max": {
+          "dimension": "scalar",
+          "min": 0,
+          "max": 1
+        },
+        "v_min": {
+          "dimension": "scalar",
+          "min": 0,
+          "max": 1
+        },
+        "v_max": {
+          "dimension": "scalar",
+          "min": 0,
+          "max": 1
+        }
+      },
+      "refs": [
+        1,
+        1
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "cap": {
+      "version": 1,
+      "params": {},
+      "refs": [
+        1,
+        16
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "sew": {
+      "version": 1,
+      "params": {
+        "tolerance": {
+          "dimension": "length",
+          "min": 1e-7,
+          "max": 0.001
+        }
+      },
+      "refs": [
+        2,
+        128
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "regularize": {
+      "version": 1,
+      "params": {},
+      "refs": [
+        1,
+        1
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "thread": {
+      "version": 1,
+      "params": {
+        "root_radius": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "pitch": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "height": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "tooth_depth": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "tooth_width": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        }
+      },
+      "refs": [
+        0,
+        1
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "box": {
+      "version": 1,
+      "params": {
+        "width": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "depth": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "height": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "x": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "y": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "z": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        }
+      },
+      "refs": [
+        0,
+        0
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "sphere": {
+      "version": 1,
+      "params": {
+        "radius": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "x": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "y": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "z": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        }
+      },
+      "refs": [
+        0,
+        0
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "cylinder": {
+      "version": 1,
+      "params": {
+        "radius": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "height": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "x": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "y": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "z": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        }
+      },
+      "refs": [
+        0,
+        0
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "cone": {
+      "version": 1,
+      "params": {
+        "radius": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "top_radius": {
+          "dimension": "length",
+          "min": 0,
+          "max": 100000
+        },
+        "height": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "x": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "y": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "z": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        }
+      },
+      "refs": [
+        0,
+        0
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "torus": {
+      "version": 1,
+      "params": {
+        "major_radius": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "minor_radius": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "x": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "y": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "z": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        }
+      },
+      "refs": [
+        0,
+        0
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "profile": {
+      "version": 1,
+      "params": {},
+      "refs": [
+        0,
+        0
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "circle": {
+      "version": 1,
+      "params": {
+        "radius": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "x": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "y": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "z": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        }
+      },
+      "refs": [
+        0,
+        0
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "bezier": {
+      "version": 1,
+      "params": {},
+      "refs": [
+        0,
+        0
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "bspline": {
+      "version": 1,
+      "params": {},
+      "refs": [
+        0,
+        0
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "nurbs_surface": {
+      "version": 1,
+      "params": {},
+      "refs": [
+        0,
+        0
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "extrude": {
+      "version": 1,
+      "params": {
+        "height": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        }
+      },
+      "refs": [
+        1,
+        1
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "revolve": {
+      "version": 1,
+      "params": {
+        "angle": {
+          "dimension": "angle",
+          "min": -6.283185307179586,
+          "max": 6.283185307179586
+        }
+      },
+      "refs": [
+        1,
+        1
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "loft": {
+      "version": 1,
+      "params": {},
+      "refs": [
+        2,
+        16
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "sweep": {
+      "version": 1,
+      "params": {},
+      "refs": [
+        2,
+        2
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "union": {
+      "version": 1,
+      "params": {},
+      "refs": [
+        2,
+        16
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "intersection": {
+      "version": 1,
+      "params": {},
+      "refs": [
+        2,
+        16
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "difference": {
+      "version": 1,
+      "params": {},
+      "refs": [
+        2,
+        16
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "hole": {
+      "version": 1,
+      "params": {
+        "radius": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "depth": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "x": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "y": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "z": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        }
+      },
+      "refs": [
+        1,
+        1
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "pocket": {
+      "version": 1,
+      "params": {
+        "width": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "length": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "depth": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "x": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "y": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "z": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        }
+      },
+      "refs": [
+        1,
+        1
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "groove": {
+      "version": 1,
+      "params": {
+        "radius": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "width": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "depth": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "x": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "y": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "z": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        }
+      },
+      "refs": [
+        1,
+        1
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "fillet": {
+      "version": 1,
+      "params": {
+        "radius": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        }
+      },
+      "refs": [
+        1,
+        1
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "chamfer": {
+      "version": 1,
+      "params": {
+        "distance": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        }
+      },
+      "refs": [
+        1,
+        1
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "shell": {
+      "version": 1,
+      "params": {
+        "thickness": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        }
+      },
+      "refs": [
+        1,
+        1
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "transform": {
+      "version": 1,
+      "params": {
+        "x": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "y": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "z": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "angle": {
+          "dimension": "angle",
+          "min": -6.283185307179586,
+          "max": 6.283185307179586,
+          "optional": true
+        },
+        "scale": {
+          "dimension": "scalar",
+          "min": 0.000001,
+          "max": 10000,
+          "optional": true
+        }
+      },
+      "refs": [
+        1,
+        1
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "instance": {
+      "version": 1,
+      "params": {
+        "x": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "y": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "z": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "angle": {
+          "dimension": "angle",
+          "min": -6.283185307179586,
+          "max": 6.283185307179586,
+          "optional": true
+        }
+      },
+      "refs": [
+        1,
+        1
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "mirror": {
+      "version": 1,
+      "params": {},
+      "refs": [
+        1,
+        1
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "pattern": {
+      "version": 1,
+      "params": {
+        "count": {
+          "dimension": "scalar",
+          "min": 1,
+          "max": 10000,
+          "integer": true
+        },
+        "dx": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "dy": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "dz": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        }
+      },
+      "refs": [
+        1,
+        1
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "assembly": {
+      "version": 1,
+      "params": {},
+      "refs": [
+        1,
+        128
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "field": {
+      "version": 1,
+      "params": {},
+      "refs": [
+        0,
+        0
+      ],
+      "output": "implicit",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "imported": {
+      "version": 1,
+      "params": {},
+      "refs": [
+        0,
+        0
+      ],
+      "output": "source",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    }
+  }
+}

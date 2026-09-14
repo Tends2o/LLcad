@@ -1,0 +1,230 @@
+{
+  "status": "passed",
+  "created": "2026-09-14T10:31:23.554Z",
+  "registry_hash": "d358f9c706afe6d16b93ebf3449f06ba6d697d6464af5854620e89fd5ec65bfc",
+  "implementation_hash": "dfc2ab9e3a4c126c24a17cf4272b3c3f1344f52584c26ccc285759dbbc936bf4",
+  "scope": "Installed Codex app-server MCP transport and deterministic CAD workflow; no model turn or LLM reasoning evaluation.",
+  "model_turns": 0,
+  "browser_interactions": 0,
+  "calls": [
+    "cad_capabilities",
+    "cad_create_model",
+    "cad_plan_edit",
+    "cad_apply_patch",
+    "cad_job_get",
+    "cad_job_get",
+    "cad_job_get",
+    "cad_job_get",
+    "cad_job_get",
+    "cad_validate",
+    "cad_job_get",
+    "cad_commit",
+    "cad_find",
+    "cad_inspect",
+    "cad_plan_edit",
+    "cad_apply_patch",
+    "cad_apply_patch",
+    "cad_job_get",
+    "cad_job_get",
+    "cad_job_get",
+    "cad_job_get",
+    "cad_validate",
+    "cad_job_get",
+    "cad_commit",
+    "cad_measure",
+    "cad_compare",
+    "cad_export",
+    "cad_job_get",
+    "cad_job_get",
+    "cad_job_get",
+    "cad_job_get"
+  ],
+  "host": "llcad-host-check/0.154.0 (Debian 13.0.0; x86_64) dumb (llcad-host-check; 1)",
+  "tools": [
+    "cad_apply_patch",
+    "cad_capabilities",
+    "cad_commit",
+    "cad_compare",
+    "cad_create_model",
+    "cad_discard",
+    "cad_export",
+    "cad_find",
+    "cad_get_model",
+    "cad_import",
+    "cad_inspect",
+    "cad_job_cancel",
+    "cad_job_get",
+    "cad_list_models",
+    "cad_measure",
+    "cad_plan_edit",
+    "cad_rebuild",
+    "cad_render",
+    "cad_revert",
+    "cad_solve_constraints",
+    "cad_validate"
+  ],
+  "simultaneous_connections": 2,
+  "model_id": "model-1674b741-c8ca-415e-98e6-87e0e09a3d4a",
+  "original_revision": "rev-e469d2e6-455c-4368-8775-cddf4f7db8a4",
+  "edited_revision": "rev-acecd9eb-a46e-4b09-bc31-0c72d70146cf",
+  "measurements": {
+    "status": "ok",
+    "measurements": {
+      "volume": 4738.173456577353,
+      "area": 3783.044239037745,
+      "bounds": [
+        -20,
+        -20,
+        0,
+        20,
+        20,
+        3
+      ],
+      "volume_integration_relative_error_estimate": 9.34924652315925e-16,
+      "solids": 1,
+      "precision_solid_only": true,
+      "faces": 10,
+      "valid": true,
+      "dimensions": {
+        "depth": 0.8199999999999998,
+        "width": 1.1999999999999993,
+        "remaining_wall": 2.18
+      },
+      "geometry_hash": "3f9b19f96034a98b59cc1715bda9b32ee9d077c4ec93a1747b02c217a3ff21dd",
+      "engine_build": "OCCT-7.9.3.1.1/mathforge-1",
+      "cache_key": "6723a1a7840d7d729d9aabfea002e06cba4b741f0e020cc17a2b3ba62bbfba39",
+      "topology": {
+        "version": 2,
+        "face_count": 10,
+        "tracked_faces": 10
+      }
+    },
+    "checks": [],
+    "warnings": [],
+    "errors": [],
+    "assumptions": [],
+    "artifacts": [],
+    "recommended_next_actions": [],
+    "model_id": "model-1674b741-c8ca-415e-98e6-87e0e09a3d4a",
+    "revision": "rev-acecd9eb-a46e-4b09-bc31-0c72d70146cf",
+    "metric": "all",
+    "unit": "mm",
+    "coverage": "registered_geometric_measurement",
+    "trace_id": "trace-0cf17e6d-4917-4bc7-afd3-532805e4cafc"
+  },
+  "comparison": {
+    "status": "ok",
+    "measurements": null,
+    "checks": [],
+    "warnings": [],
+    "errors": [],
+    "assumptions": [],
+    "artifacts": [],
+    "recommended_next_actions": [],
+    "model_id": "model-1674b741-c8ca-415e-98e6-87e0e09a3d4a",
+    "from_revision": "rev-e469d2e6-455c-4368-8775-cddf4f7db8a4",
+    "to_revision": "rev-acecd9eb-a46e-4b09-bc31-0c72d70146cf",
+    "changed_features": [
+      "feat-groove-07"
+    ],
+    "removed_features": [],
+    "dimensions": [
+      {
+        "feature_id": "feat-base",
+        "metric": "width",
+        "before": 40,
+        "after": 40
+      },
+      {
+        "feature_id": "feat-base",
+        "metric": "depth",
+        "before": 40,
+        "after": 40
+      },
+      {
+        "feature_id": "feat-base",
+        "metric": "height",
+        "before": 3,
+        "after": 3
+      },
+      {
+        "feature_id": "feat-groove-07",
+        "metric": "depth",
+        "before": 0.7999999999999998,
+        "after": 0.8199999999999998
+      },
+      {
+        "feature_id": "feat-groove-07",
+        "metric": "width",
+        "before": 1.1999999999999993,
+        "after": 1.1999999999999993
+      },
+      {
+        "feature_id": "feat-groove-07",
+        "metric": "remaining_wall",
+        "before": 2.2,
+        "after": 2.18
+      },
+      {
+        "feature_id": "feat-hole-01",
+        "metric": "depth",
+        "before": 3,
+        "after": 3
+      },
+      {
+        "feature_id": "feat-hole-01",
+        "metric": "radius",
+        "before": 1.5,
+        "after": 1.5
+      }
+    ],
+    "volume_delta": -1.5079644737234048,
+    "coverage": "declared_dimensions_and_per_feature_hashes",
+    "trace_id": "trace-d48b3b78-f727-48e4-b850-141dc13835e4"
+  },
+  "roundtrip": {
+    "status": "checks_passed_within_profile",
+    "method": "roundtrip_bounds_and_occt_validity",
+    "before": {
+      "volume": 4716.967706165622,
+      "area": 3797.1814059788976,
+      "bounds": [
+        -20,
+        -20,
+        0,
+        20,
+        20,
+        3
+      ],
+      "volume_integration_relative_error_estimate": 1.2048932050195552e-15,
+      "solids": 1,
+      "precision_solid_only": true,
+      "faces": 11,
+      "valid": true
+    },
+    "after": {
+      "volume": 4716.967706165622,
+      "area": 3797.1814059789076,
+      "bounds": [
+        -20,
+        -20,
+        0,
+        20,
+        20,
+        3
+      ],
+      "volume_integration_relative_error_estimate": 1.2048932050195552e-15,
+      "solids": 1,
+      "precision_solid_only": true,
+      "faces": 11,
+      "valid": true
+    },
+    "measured_bounds_error": 0,
+    "certified_surface_bound": null,
+    "unit": "mm",
+    "lost_semantics": [
+      "feature_history"
+    ]
+  },
+  "shared_revision_visible": true
+}

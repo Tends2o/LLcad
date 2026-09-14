@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "purpose": {
+      "default": "",
+      "type": "string",
+      "maxLength": 1000
+    },
+    "unit": {
+      "default": "mm",
+      "type": "string",
+      "const": "mm"
+    },
+    "profile": {
+      "default": "precision_cad",
+      "type": "string",
+      "enum": [
+        "precision_cad",
+        "render_surface"
+      ]
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 128
+    }
+  },
+  "required": [
+    "name",
+    "purpose",
+    "unit",
+    "profile",
+    "idempotency_key"
+  ],
+  "additionalProperties": false
+}

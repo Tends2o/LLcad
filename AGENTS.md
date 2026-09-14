@@ -1,0 +1,11 @@
+# LLcad
+
+- Die Modellierung soll vollständig über das LLM erfolgen. Nutzer beschreiben ihre Absicht im Gespräch; keine manuellen CAD-/Viewer-Klicks, Suche nach IDs oder Ausführung von Befehlen voraussetzen. Der Viewer ist optional.
+- Vorhandene Modelle über `cad_list_models` entdecken, Merkmale mit `cad_find` und `cad_inspect` eingrenzen. Reale Mehrdeutigkeit durch Werkzeugabfragen oder eine kurze inhaltliche Rückfrage klären.
+- Änderungen bleiben im Ablauf Plan → Kandidat → Prüfung → Commit. Nur echte Messwerte und serverseitige Prüfdigests verwenden. Keine Schutzbedingungen oder Toleranzen still abschwächen.
+- Native Flächenhandles sind revisionsgebunden. Nur mit ausdrücklicher Zielrevision neu binden; Split-/Merge-Fehler nicht durch eine geometrisch ähnliche Fläche umgehen.
+- Vor paralleler Umsetzung prüfen, ob ein anderer Prozess tatsächlich an LLcad arbeitet. Einen nachweislich aktiven Bearbeiter fertigarbeiten lassen; ein lediglich vorhandener oder wartender Prozess ist kein solcher Nachweis.
+- Hier läuft `llcad.service` auf Loopback; der lokale Codex-Eintrag `llcad` nutzt diesen gemeinsamen HTTP-Dienst mit automatischem Header-Helper. `deployment/start-mcp.sh` bleibt der alternative stdio-Einstieg für ein separates oder freies Datenverzeichnis. Für ein Datenverzeichnis darf genau ein Dienst laufen; vorhandene Betriebssperren respektieren. Eine globale Hostkonfiguration nicht durch Beispielwerte ersetzen.
+- Bei `build_compatibility.status=rebuild_required` zuerst `cad_rebuild` im Planmodus mit dem aktuellen Registry-Hash lesen. Eine ausdrückliche Kandidatenberechnung muss wieder geprüft und übernommen werden; alte Revisionen nicht überschreiben und Schutzbedingungen nicht lockern.
+- Nach Quellcodeänderungen `npm run verify` ausführen. Bei Änderungen an Geometrie, Cache oder Ressourcenverhalten auch `npm run benchmark`. Berichte in `reports/` müssen zum aktuellen Implementierungsstand gehören.
+- `npm run test:host` prüft den tatsächlich installierten Codex-App-Server ohne Modellturn. Vorher den Dienst auf den geprüften Build neu starten. Der Bericht `reports/codex-host.json` ist ein Host-Transportnachweis, kein LLM-Reasoning-Test. Offene LLM-/Remote-OAuth-Abnahme und die Grenzen in `docs/implementation-status.md` ausdrücklich erhalten.

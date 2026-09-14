@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "browser": "Chromium",
+  "viewport": [
+    1512,
+    982
+  ],
+  "checks": [
+    "login",
+    "fixture construction",
+    "native face picking resolves the source feature",
+    "groove edit",
+    "validation",
+    "commit",
+    "protected width",
+    "section",
+    "wireframe",
+    "STEP export"
+  ],
+  "errors": []
+}
