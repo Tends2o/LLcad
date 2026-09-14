@@ -135,7 +135,14 @@ export const OPERATORS = {
       dy: coord,
       dz: coord,
     },
-    [1, 1],
+    [1, 129],
+  ),
+  circular_pattern: one(
+    {
+      count: { dimension: "scalar", min: 1, max: 10000, integer: true },
+      angle,
+    },
+    [1, 129],
   ),
   assembly: one({}, [1, 128]),
   field: one({}, [0, 0], "implicit"),
@@ -402,6 +409,7 @@ export function compile(input: unknown) {
   const ir = parse<ModelIR>(ModelIR, input);
   const map = new Map<string, Feature>();
   let instances = 0;
+  const expanded = new Map<string, number>();
   const compiled: any[] = [];
   const hashes: Record<string, string> = {};
   for (const f of ir.features) {
@@ -523,7 +531,52 @@ export function compile(input: unknown) {
         "GEOMETRY_INVALID",
         "Nutbreite überschreitet den Innenradius.",
       );
-    if (name === "pattern") instances += values.count;
+    let occurrences = Math.max(
+      1,
+      f.depends_on.reduce((sum, dep) => sum + expanded.get(dep)!, 0),
+    );
+    if (
+      f.construction.operator === "pattern" ||
+      f.construction.operator === "circular_pattern"
+    ) {
+      const overrides = f.construction.overrides ?? [];
+      requireThat(
+        new Set(overrides.map((o) => o.index)).size === overrides.length &&
+          overrides.every(
+            (o) => o.index < values.count && (o.source || o.translation),
+          ),
+        "INVALID_SCHEMA",
+        "Mustervarianten benötigen eindeutige gültige Indizes und eine ausdrückliche Änderung.",
+      );
+      const sources = new Set([
+        f.depends_on[0],
+        ...overrides.flatMap((o) => (o.source ? [o.source] : [])),
+      ]);
+      requireThat(
+        sources.size === f.depends_on.length &&
+          f.depends_on.every((dep) => sources.has(dep)),
+        "INVALID_SCHEMA",
+        "Mustereingänge müssen Grundform und ausdrücklich referenzierten Varianten entsprechen.",
+      );
+      requireThat(
+        overrides.every(
+          (o) =>
+            !o.translation ||
+            o.translation.every((x) => Math.abs(Number(x)) <= 1e6),
+        ),
+        "GEOMETRY_INVALID",
+        "Variantenverschiebung überschreitet den Koordinatenbereich.",
+      );
+      occurrences = values.count * expanded.get(f.depends_on[0])!;
+      for (const o of overrides)
+        if (o.source)
+          occurrences +=
+            expanded.get(o.source)! - expanded.get(f.depends_on[0])!;
+    }
+    expanded.set(f.id, occurrences);
+    // Bound nested multiplicative expansion before native construction. Count
+    // every dependent result retained by the job, including intermediate ones.
+    if (f.depends_on.length) instances += occurrences;
     if (f.construction.operator === "line") {
       const c = f.construction;
       requireThat(
@@ -535,7 +588,10 @@ export function compile(input: unknown) {
     }
     if (f.construction.operator === "affine_transform")
       affineContract(f.construction.matrix, f.construction.translation);
-    if (f.construction.operator === "rotate") {
+    if (
+      f.construction.operator === "rotate" ||
+      f.construction.operator === "circular_pattern"
+    ) {
       const c = f.construction;
       requireThat(
         [...c.axis, ...c.origin].every((x) => Math.abs(Number(x)) <= 1e6) &&
@@ -543,6 +599,12 @@ export function compile(input: unknown) {
         "GEOMETRY_INVALID",
         "Drehung benötigt eine von null verschiedene Achse und endliche Ursprungskoordinaten.",
       );
+      if (f.construction.operator === "circular_pattern")
+        requireThat(
+          values.count === 1 || Math.abs(values.angle) >= 1e-12,
+          "GEOMETRY_INVALID",
+          "Ein Kreismuster mit mehreren Vorkommen benötigt einen von null verschiedenen Winkelbereich.",
+        );
     }
     if (f.construction.operator === "trim_surface")
       requireThat(
@@ -760,7 +822,37 @@ export function applyPatch(base: ModelIR, patch: Patch) {
     }
     const f = ir.features.find((f) => f.id === op.feature_id);
     requireThat(f, "AMBIGUOUS_SELECTION", "Feature nicht eindeutig auflösbar.");
-    if (op.op === "set_construction") {
+    if (op.op === "set_pattern_occurrence") {
+      requireThat(
+        f.construction.operator === "pattern" ||
+          f.construction.operator === "circular_pattern",
+        "OUT_OF_SCOPE",
+        "Einzelvorkommen benötigt ein lineares oder zyklisches Muster.",
+      );
+      requireThat(
+        hash(f.construction) === op.expected_hash,
+        "STALE_REVISION",
+        "Das Muster wurde bereits geändert.",
+      );
+      requireThat(
+        op.index < quantity(f.parameters.count, "scalar"),
+        "INVALID_SCHEMA",
+        "Vorkommen liegt außerhalb des Musters.",
+      );
+      const overrides = (f.construction.overrides ?? []).filter(
+        (o) => o.index !== op.index,
+      );
+      if (op.override) overrides.push({ index: op.index, ...op.override });
+      overrides.sort((a, b) => a.index - b.index);
+      if (overrides.length) f.construction.overrides = overrides;
+      else delete f.construction.overrides;
+      f.depends_on = [
+        ...new Set([
+          f.depends_on[0],
+          ...overrides.flatMap((o) => (o.source ? [o.source] : [])),
+        ]),
+      ];
+    } else if (op.op === "set_construction") {
       requireThat(
         hash(f.construction) === op.expected_hash,
         "STALE_REVISION",

@@ -1,5 +1,5 @@
 {
-  "hash": "6e55ff16b3b201fe89f97ca904eb8ec81c2be68404efd4b6a68d83b3c252b9bf",
+  "hash": "5517f762953c935dc2c25494e21aaff6ada4edf373c98a6de758588514cfa0f3",
   "operators": {
     "point": {
       "version": 1,
@@ -1103,7 +1103,35 @@
       },
       "refs": [
         1,
-        1
+        129
+      ],
+      "output": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1"
+    },
+    "circular_pattern": {
+      "version": 1,
+      "params": {
+        "count": {
+          "dimension": "scalar",
+          "min": 1,
+          "max": 10000,
+          "integer": true
+        },
+        "angle": {
+          "dimension": "angle",
+          "min": -6.283185307179586,
+          "max": 6.283185307179586
+        }
+      },
+      "refs": [
+        1,
+        129
       ],
       "output": "brep",
       "required_validators": [

@@ -375,16 +375,23 @@
       "source_end_line": 366,
       "source_sha256": "a3e1fc991aa2dd02ea7a9cdcf2a700a763c21d560990c72d270a63f3bd589d26",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Ebene, Kugel und Box mit der festgelegten Vorzeichenkonvention und endlicher Felddomäne auswerten."
       ],
       "evidence": [
-        "workers/cad-occt/fields.py",
         "packages/compiler/index.ts",
-        "tests/geometry/test_field_primitives.py"
+        "workers/cad-occt/fields.py",
+        "tests/geometry/test_field_primitives.py",
+        "tests/geometry/test_compiled_fields.py",
+        "docs/primitive-distance-contracts.md",
+        "reports/verification.json"
       ],
-      "notes": "Neue Ebenenauswertung und vorhandene Kugel-/Boxpfade. Gezielte Tests bestanden; finaler Integrations-/Buildnachweis steht aus."
+      "notes": "Mathematische Formeln, Vorzeichen und zugelassene Definitionsbereiche direkt geprüft; kompilierter Produktionspfad und getrennte Referenz ausgeführt. Kein zusätzlicher globaler Gleitkomma- oder Oberflächenfehlernachweis behauptet.",
+      "review": {
+        "scope_match": true,
+        "findings": "Die Herleitungen in docs/primitive-distance-contracts.md decken die Distanzdefinitionen dieses Abschnitts ab; der Compiler erzwingt ihre Voraussetzungen. Der vollständige aktuelle lokale Prüflauf ist bestanden. Größere Fehler-/Topologieverträge sind eigenständige offene Abschnitte."
+      }
     },
     {
       "id": "6.6",
@@ -393,15 +400,23 @@
       "source_end_line": 400,
       "source_sha256": "f0c4bbd09a847dcb00623e40e97684ccc760594885fcb48cb4928969b775a346",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Geschlossenen Zylinder, Kapsel einschließlich degeneriertem Segment und regulären Torus als SDF auswerten."
       ],
       "evidence": [
+        "packages/compiler/index.ts",
         "workers/cad-occt/fields.py",
-        "tests/geometry/test_field_primitives.py"
+        "tests/geometry/test_field_primitives.py",
+        "tests/geometry/test_compiled_fields.py",
+        "docs/primitive-distance-contracts.md",
+        "reports/verification.json"
       ],
-      "notes": "Neue SDF-Pfade gezielt getestet; finale Gesamtprüfung noch ausstehend."
+      "notes": "Mathematische Formeln, Vorzeichen und zugelassene Definitionsbereiche direkt geprüft; kompilierter Produktionspfad und getrennte Referenz ausgeführt. Kein zusätzlicher globaler Gleitkomma- oder Oberflächenfehlernachweis behauptet.",
+      "review": {
+        "scope_match": true,
+        "findings": "Die Herleitungen in docs/primitive-distance-contracts.md decken die Distanzdefinitionen dieses Abschnitts ab; der Compiler erzwingt ihre Voraussetzungen. Der vollständige aktuelle lokale Prüflauf ist bestanden. Größere Fehler-/Topologieverträge sind eigenständige offene Abschnitte."
+      }
     },
     {
       "id": "6.7",
@@ -421,11 +436,19 @@
       "source_line": 421,
       "source_end_line": 433,
       "source_sha256": "b06cc2b0475e413853fba8c49ca4f74fdc25b940eed17b9b7dd48636d9a9ed6a",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Polynomiales weiches Minimum mit positiver, dimensionspassender Blendbreite.",
+        "Außerhalb des Blendbereichs exaktes Minimum; innerhalb ausdrücklich veränderte Form ohne CAD-Maßhaltigkeitsbehauptung.",
+        "Blend-Reihenfolge und Breite im Featuregraphen erhalten, Nichtassoziativität berücksichtigen; Passflächen standardmäßig schützen."
+      ],
+      "evidence": [
+        "packages/compiler/index.ts",
+        "workers/cad-occt/fields.py",
+        "tests/geometry/test_compiled_fields.py"
+      ],
+      "notes": "Geordneter AST und allgemeine Feldsemantik vorhanden; gesonderter Passflächenvertrag und vollständige Blend-Grenzfallprüfung fehlen."
     },
     {
       "id": "6.9",
@@ -481,11 +504,20 @@
       "source_line": 486,
       "source_end_line": 509,
       "source_sha256": "5f738a21839d8f51bdf9f012ba6804b4e009ab2c2a0ab23c05c5fa1229d23e79",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Bézier-Kurve und ihre Ableitung mit der Bernsteinbasis auswerten.",
+        "Tensorproduktflächen für kompakte Patches; lokale Verfeinerung über B-Splines oder hierarchische Patches vorsehen."
+      ],
+      "evidence": [
+        "packages/compiler/bernstein.ts",
+        "packages/compiler/patches.ts",
+        "packages/compiler/nurbs.ts",
+        "workers/cad-occt/geometry.py",
+        "tests/geometry/nurbs.test.ts"
+      ],
+      "notes": "Bézier-/rationale Patchpfade und NURBS-Verfeinerung vorhanden. Expliziter Abgleich aller Bézier-Definitionsbereiche und Ausgaben dieses Abschnitts noch ausstehend."
     },
     {
       "id": "6.12",
@@ -538,18 +570,21 @@
       "classification": "required",
       "status": "partial",
       "requirements": [
-        "Helix-/Gewindekonstruktion mit explizitem Profil, Steigung, Freigängen und Normstatus unterstützen.",
-        "Lineare und zyklische Muster als Instanzen verwalten.",
-        "Periodische Gyroid-Gitter als dimensionslose implizite Felder auswerten; Schwellwert nicht als Wandstärke ausgeben."
+        "Helix mit explizitem Gewindeprofil, Kern, Paarung, Auslauf, Freigängen und ehrlich deklariertem Normbezug.",
+        "Lineare und zyklische Muster standardmäßig als referenzierte Instanzen; gezielte Einzelvarianten.",
+        "Dimensionsloses Gyroidfeld mit expliziter Feldsemantik, ohne falsche Distanz- oder Wandstärkenbehauptung."
       ],
       "evidence": [
         "workers/cad-occt/advanced.py",
-        "workers/cad-occt/fields.py",
-        "tests/geometry/test_advanced.py",
-        "tests/geometry/gyroid.test.ts",
-        "tests/geometry/test_gyroid.py"
+        "workers/cad-occt/geometry.py",
+        "workers/cad-occt/topology.py",
+        "packages/compiler/index.ts",
+        "tests/geometry/patterns.test.ts",
+        "tests/geometry/test_patterns.py",
+        "tests/geometry/test_gyroid.py",
+        "docs/patterns.md"
       ],
-      "notes": "Custom-Gewinde, lineare Instanzen und Gyroid-Felder vorhanden. Zyklischer Musteroperator und genaue Gewinde-Paarungs-/Freigangsauswertung bleiben offen."
+      "notes": "Lineare und zyklische Muster samt gezielten Einzelvarianten und das dimensionslose Gyroidfeld sind implementiert und gezielt geprüft. Custom-Gewinde haben weiterhin keine allgemeine Paarungs-/Auslaufprüfung oder verifizierte Normdaten; der gesamte Abschnitt bleibt offen."
     },
     {
       "id": "6.15",
@@ -560,13 +595,15 @@
       "classification": "required",
       "status": "partial",
       "requirements": [
-        "Kurvenkrümmung/Torsion und lokale Flächennormalen/Hauptkrümmungen an expliziten Parametern messen."
+        "Reguläre Kurvenkrümmung, orientierte Flächennormalen sowie Gauß- und mittlere Krümmung mit konsistenter Vorzeichenkonvention.",
+        "Singuläre Kurven/Patches und fast verschwindende Nenner erkennen; implizite Krümmung nur bei geeigneter Regularität und existierenden Ableitungen."
       ],
       "evidence": [
         "workers/cad-occt/analysis.py",
+        "tests/geometry/test_analysis.py",
         "tests/geometry/analysis.test.ts"
       ],
-      "notes": "Native Differentialmessungen, Flächenauswahl, Singularitäts-/Domänengrenzen implementiert. Weitergehende Definitionsbereichstests und finale Integration fehlen."
+      "notes": "Native Punktanalysen vorhanden; implizite Hesse-/Krümmungsauswertung und deren Regularitätsprüfung fehlen."
     },
     {
       "id": "6.16",
@@ -574,11 +611,20 @@
       "source_line": 653,
       "source_end_line": 680,
       "source_sha256": "e9077aa7867e3032b8172da9f724ff32e33f7ae201bf28eaaf70528ca4af746c",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Beschränkte Parameteroptimierung mit dimensionslosen Residuen und Parameterskalierung.",
+        "Harte Gleichungen und Ungleichungen als Nebenbedingungen behandeln, nicht als kleine weiche Gewichte.",
+        "Nichtnullbedingungen für Richtungen und redundante Gleichungen/Rangprobleme erkennen; lokale Lösungen nicht als globale Optima ausgeben."
+      ],
+      "evidence": [
+        "workers/cad-occt/solver.py",
+        "packages/compiler/constraints.ts",
+        "tests/geometry/constraints.test.ts",
+        "tests/geometry/vector-expressions.test.ts"
+      ],
+      "notes": "Normierter lokaler SLSQP-Pfad und analytische Ableitungen geprüft. Allgemeine gewichtete robuste Residuen, ausdrückliche Rangdiagnostik und semantische Richtungsbedingungen bleiben offen."
     },
     {
       "id": "6.17",
@@ -586,11 +632,18 @@
       "source_line": 681,
       "source_end_line": 708,
       "source_sha256": "8ff78af9419a390c6b86ebb32579e9a6e3816e608ab8fa7314edd333192f51f9",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Lokale Jacobimatrix und gedämpfte inverse Schritte mit stabiler Skalierung, Faktorisierung und Rangprüfung.",
+        "Lineare Nebenbedingungen passend einbeziehen und lokale Sensitivität verständlich berichten.",
+        "Differenzierbarkeit bei Topologieänderungen oder Featuresprüngen nicht voraussetzen."
+      ],
+      "evidence": [
+        "workers/cad-occt/solver.py",
+        "tests/geometry/test_solver_vectors.py"
+      ],
+      "notes": "Analytische Solver-Jacobians vorhanden; eigenständiger Sensitivitätsbericht, Rangdiagnostik und Wiederverwendung geeigneter Faktorisierungen fehlen."
     },
     {
       "id": "6.18",
@@ -598,11 +651,18 @@
       "source_line": 709,
       "source_end_line": 737,
       "source_sha256": "2d51e16b1eed7ec80203a9ac95f0523adc38a19039baabc4cc2e7704f9209bc3",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Geometrische Abstandsaussagen nach sampled, bounded und exact_for_declared_domain unterscheiden.",
+        "Stichproben-Chamferwerte nicht als maximalen kontinuierlichen Hausdorff-Fehler ausgeben.",
+        "Volumen-IoU nicht als alleinigen Nachweis kleiner Details verwenden."
+      ],
+      "evidence": [
+        "workers/cad-occt/analysis.py",
+        "packages/validation/index.ts"
+      ],
+      "notes": "Native statische Abstände und abgegrenzte lokale Nachweise vorhanden; vollständiger Adapter-/Nachweisabgleich der geometrischen Fehlermaße steht aus."
     },
     {
       "id": "6.19",
@@ -610,11 +670,18 @@
       "source_line": 738,
       "source_end_line": 764,
       "source_sha256": "760ce0f329cd28bae829d6ef69af9b82b6fa49050531c0aa81f8e0e5d85608b5",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Dreiecksfläche und orientiertes Netzvolumen mit Voraussetzungen zu Geschlossenheit, Orientierung und inneren Hohlraumschalen.",
+        "Dimensionslose Dreiecksqualität und Euler-Charakteristik korrekt auswerten.",
+        "Positive Volumensumme oder Eulerwert nicht als alleinige Manifold-/Selbstschnittprüfung verwenden."
+      ],
+      "evidence": [
+        "workers/cad-occt/geometry.py",
+        "workers/cad-occt/fields.py"
+      ],
+      "notes": "Native Flächen/Volumina und Vorschau-Netze vorhanden; eigenständige geprüfte Netzqualität, Vertex-Links und Hohlraumorientierung fehlen."
     },
     {
       "id": "6.20",
@@ -622,11 +689,18 @@
       "source_line": 765,
       "source_end_line": 784,
       "source_sha256": "1b4977648f7d81c94d75d3ffe97f318da2765e46ca2be2f96d96b6641292229a",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Zellintervalle aus einem gültigen Lipschitz-Bound und Zentrumradius bilden und um bekannten Auswertefehler erweitern.",
+        "Nullstellenfreiheit nicht aus gleichen Eckvorzeichen allein ableiten.",
+        "Konservative Strahlschritte nur innerhalb des gültigen Gebiets mit gesicherten Bounds; unsichere Felder und Bilder nicht als Geometriebeweis behandeln."
+      ],
+      "evidence": [
+        "workers/cad-occt/fields.py",
+        "packages/compiler/index.ts"
+      ],
+      "notes": "Zentrums-/Lipschitz-Pruning und begrenzte Vorschau vorhanden; durchgängiger nachgewiesener numerischer Auswertefehler und konservativer Alternativpfad bei ungesichertem Fehler fehlen."
     },
     {
       "id": "6.21",
@@ -634,11 +708,18 @@
       "source_line": 785,
       "source_end_line": 813,
       "source_sha256": "f397cbd3af0ebf9cd6cbc0d209091154b84e89d8687a9a00be4b877c03758a7b",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Kreis-Sagitta nur im gültigen Fehlerbereich als Schranke nutzen.",
+        "Krümmungsbasierte Schrittweiten auf allgemeinen Flächen als Heuristik kennzeichnen.",
+        "Lokale Auflösung an Trimmkanten, Krümmungsänderungen und kleinen/dünnen Strukturen verfeinern; Auflösung allein nicht als Topologiebeweis ansehen."
+      ],
+      "evidence": [
+        "workers/cad-occt/geometry.py",
+        "workers/cad-occt/fields.py"
+      ],
+      "notes": "Native Deflection-Vorschau und begrenzte Octree-Auswertung vorhanden; registrierte lokale LOD-/Featureauflösung und Verfeinerungsregeln fehlen."
     },
     {
       "id": "6.22",
@@ -646,11 +727,16 @@
       "source_line": 814,
       "source_end_line": 824,
       "source_sha256": "613c7051e00b733cc0fc28b114dcbc1ba751a74ae7a381deae72d8906520728a",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "conditional",
+      "status": "partial",
+      "requirements": [
+        "Bei einer lokalen Tangentialdatenanpassung den Repräsentationspunkt auf die Zelle beschränken und regulär bestimmen.",
+        "Rangdefizienz, mehrere Komponenten, Ränder und Zellverknüpfungen gesondert behandeln; QEF-Punktwahl allein beweist keine Wasserdichtheit."
+      ],
+      "evidence": [
+        "workers/cad-occt/fields.py"
+      ],
+      "notes": "Der aktuelle Extraktor verwendet Tetraeder-Schnittpunkte, keine QEF-Anpassung. Die Anwendbarkeit dieses vorgeschlagenen Algorithmus bleibt gesondert zu prüfen."
     },
     {
       "id": "6.23",
@@ -1513,11 +1599,18 @@
       "source_line": 1625,
       "source_end_line": 1635,
       "source_sha256": "6e0aa0d3a2c3bd2c6fb515a13a61e3707d4b1b30815491344219f0906c1cacde",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "render_surface mit erlaubter Offenheit von watertight_solid mit nachgewiesener Manifold-, Orientierungs- und Selbstschnittprüfung unterscheiden.",
+        "precision_cad an native Gültigkeit und deklarierte Maße/Beziehungen binden.",
+        "manufacturing_candidate nur mit ausdrücklichen Prozessregeln anbieten, ohne automatische Fertigungszertifizierung."
+      ],
+      "evidence": [
+        "packages/semantic-ir/schema.ts",
+        "packages/validation/index.ts"
+      ],
+      "notes": "Zwei Profile umgesetzt; watertight_solid und manufacturing_candidate fehlen."
     },
     {
       "id": "17.2",
@@ -1525,11 +1618,21 @@
       "source_line": 1636,
       "source_end_line": 1649,
       "source_sha256": "b44f1ce15f3ff523bbe49b44591d02449601f2d8d6682072f12dcb118543b2b8",
-      "classification": "requires_review",
-      "status": "unverified",
-      "requirements": [],
-      "evidence": [],
-      "notes": "Abschnitt wird gegen Originaltext, Code und passende Ausführung geprüft. Vorhandene grüne Teiltests genügen nicht als Gesamtnachweis."
+      "classification": "required",
+      "status": "partial",
+      "requirements": [
+        "Struktur mit Schema, endlichen Zahlen, Einheiten, Referenzen, Bereichen und azyklischem Graphen prüfen.",
+        "Geometrische Degeneration, Singularitäten, Trimmungen, Selbstschnitte, unerwartete Durchdringungen und leere Resultate passend zum Profil prüfen.",
+        "Topologie einschließlich Kanteninzidenz, Vertex-Links, Orientierung, Komponenten und erwarteter Hohlräume prüfen.",
+        "Absicht und Export mit jeweils konkreten Messungen und passenden Nachweisstärken prüfen."
+      ],
+      "evidence": [
+        "packages/compiler/index.ts",
+        "packages/validation/index.ts",
+        "workers/cad-occt/geometry.py",
+        "tests/roundtrip/exports.test.ts"
+      ],
+      "notes": "Struktur-, native Teil-, Constraint- und Exportprüfungen vorhanden; vollständige Netz-/Hohlraum-/Selbstschnittprüfung und allgemeine Absichtskataloge fehlen."
     },
     {
       "id": "17.3",

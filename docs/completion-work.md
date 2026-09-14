@@ -1,20 +1,11 @@
 # Stand der Vervollständigung
 
-Nutzerauftrag: LLcad anhand des hochgeladenen Bauplans ausbauen und vollständig über das LLM bedienen. Es wurden keine weiteren Implementierungsagenten gestartet.
+LLcad wird anhand des unveränderten hochgeladenen Bauplans ausgebaut und vollständig über das LLM bedient. Der lokale Dienst und die Codex-Verbindung sind eingerichtet. Nutzer müssen keine Modell-IDs suchen, CAD-Befehle ausführen oder im Viewer klicken.
 
-Abgeschlossen und geprüft:
+Der aktuelle Entwicklungsstand enthält native technische Konstruktionen, NURBS samt rational begrenzter Verfeinerung, lokale Felder und Deformationen, affine Transformationen, lineare und zyklische Muster mit Einzelvarianten, sichere skalare und vektorielle Formeln sowie den begrenzten gekoppelten Maßsolver. Native Herkunft und exakte Dateiprüfsummen erhalten revisionsgebundene Auswahl auch über gespeicherte gedrehte Geometrie. Kandidaten benötigen weiterhin Validierung und Commit; alte Revisionen bleiben erhalten.
 
-- Native Konstruktoren für Punkt, Linie, Bogen, endliche Ebene, UV-Trimmung, Deckfläche, Vernähen, Regularisierung und benutzerdefiniertes Helixgewinde.
-- OCCT-Builderhistorien für Extrusion, Rotation, Loft, Sweep, Verrundung, Fase und Schale sowie persistente Profilkanten. Unklare Herkunft bleibt gesperrt.
-- Exakte rationale C0-/C1-/C2-Schranken einschließlich Regularität, Ressourcenlimits und Vergleich mit unabhängig ausgewerteten nativen OCCT-Ableitungen.
-- Gekoppelter SLSQP-Maßsolver mit Grenzen, gespeicherten Nebenbedingungen und normaler Kandidatenprüfung.
-- OpenVDB-Export mit vollständigem Rasterroundtrip und privatem räumlichem Samplecache. Neustart, lokale Änderungen, Eigentümergrenzen und Budgetfehler geprüft.
-- Drei tatsächliche LLM-Sprachaufträge, numerisch bewertet: Nut um 20 µm ändern und STEP exportieren; Durchmesser korrigieren; mehrdeutige Auswahl im Gespräch klären. Die gespeicherten lokalen Werkzeugfreigaben erlauben autorisierte Änderungen ohne zusätzliche Klicks.
-- Vollständiger lokaler Prüflauf: 56 TypeScript- und 26 Python-Tests, MCP-Workflow, Build und Chromium. Zusätzlich realer Codex-Hosttest mit zwei gleichzeitigen Verbindungen.
-- Vier vorhandene Modelle mit unveränderten Konstruktionen neu berechnet, Messwerte verglichen, validiert und übernommen. Alte Revisionen erhalten.
-- SciPy 1.18.1 und OpenVDB 10.0.1 gebunden; Python-/npm-Schwachstellenprüfungen, native SBOM, Lizenzinventar und Setup aktualisiert.
-- Lokaler Dienst wieder aktiv und für den Systemstart eingerichtet. Quellstandwechsel vor und während Jobs werden erkannt; solche Ergebnisse werden nicht übernommen.
+Die aktuelle lokale Verifikation hat 84 TypeScript- und 48 Python-Tests, MCP-Workflow, Build und Chromium bestanden. Der gesonderte Leistungstest ist ebenfalls bestanden. Sieben tatsächliche LLM-Sprachaufträge wurden mit einem numerischen Grader geprüft, einschließlich der Auswahl und Änderung genau eines Kreismustervorkommens. Alle 102 Werkzeugaufrufe dieses LLM-Laufs waren CAD-Aufrufe. Die Berichte in `reports/` enthalten die zugehörigen Buildhashes. Der reale lokale Host-Transporttest nach einer Übernahme in den Dienst bleibt ein gesonderter Nachweis ohne Modellturn.
 
-Der registrierte lokale Bereich ist nutzbar. Die vollständige Produktionsfreigabe des Gesamtkatalogs bleibt separat: Remote-HTTPS/IdP, breite unabhängige LLM-Evaluation, Modellfreigaben an andere Nutzer, allgemeine Flächennetze, VDB-Import, GPU-Profile und zusätzliche Spezialadapter sind nicht als erledigt deklariert. Die genaue Zuordnung steht in `implementation-status.md`.
+Die vollständige Freigabe des Originalplans bleibt offen. Der nachvollziehbare Abschnittsabgleich steht in `plan-audit.json`; `implementation-status.md` beschreibt die implementierten Bereiche und Grenzen. Noch ausstehend sind unter anderem Teil-/Projekthierarchie und lokale Bezugssysteme, Projektfreigaben und Rollen, zusätzliche Prüfprofile für geschlossene Netze und Fertigungskandidaten, allgemeine numerische Fehlerfortpflanzung, lokale adaptive Auflösung, weitere Importadapter und eine breite unabhängige LLM-Evaluation. Reale Remote-HTTPS-/OAuth-Zielhostabnahme und Produktionsfreigabe sind nicht als erledigt deklariert.
 
-Native Jobs behalten bewusst frische isolierte Prozesse. Ein gemeinsam veränderlicher Warm-Worker-Zustand wäre eine zusätzliche Sicherheitsgrenze; die vorhandenen persistenten B-Rep-/Topologie- und Feldcaches liefern bereits Wiederverwendung. Rechner: vier CPUs, etwa 4 GiB RAM, keine gefundene NVIDIA-GPU. Lokale Benchmarks nennen gemessene Grenzen, keine erfundenen GPU-Werte.
+Native Jobs verwenden frische isolierte Prozesse. Ein sicherer Warm-Worker-Pool ist noch nicht umgesetzt. Gemessene lokale Benchmarks und wiederverwendbare B-Rep-/Topologie-/Feldcaches ersetzen kein ungemessenes Laufzeitversprechen für beliebig große Szenen. Es wurden keine zusätzlichen Implementierungsagenten gestartet.

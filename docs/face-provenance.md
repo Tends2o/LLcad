@@ -11,3 +11,5 @@ Die vorhandenen Revisionen und Zugriffsprüfungen gelten auch für Flächenhandl
 Dies ist eine begrenzte, persistierte Herkunftsschicht, keine allgemeine OCAF-Naming-Implementierung. Insbesondere werden geteilte Flächen nicht anhand einer willkürlichen Reihenfolge wieder ausgewählt. OCCT-Historienmethoden werden je registriertem Builder getestet; ihre Verfügbarkeit ist nicht für alle Builder gleich. [OCCT: dokumentierte Unterschiede der Historienmethoden](https://github.com/Open-Cascade-SAS/OCCT/issues/1036)
 
 Tests: `tests/geometry/test_advanced.py`, `tests/geometry/selections.test.ts`, `tests/geometry/test_topology.py`, `tests/protocol/stdio.test.ts`, `scripts/mcp-workflow.ts` und der optionale Browserablauf.
+
+Topologiecache Version 3 prüft zusätzlich die ursprünglichen B-Rep-Dateibytes und bestimmt exakte Flächenfingerprints am fest gebundenen nativen Reader-Ergebnis. Details zu Kreismustern, Einzelvorkommen und stabilen gespeicherten Transformationen stehen in `docs/patterns.md`.

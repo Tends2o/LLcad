@@ -54,7 +54,7 @@ npm start
 - Typisierte Dezimalparameter mit Einheiten, gespeicherte mathematische Ausdrücke, DAG-Compiler, geschützte Parameter und begrenzte Ressourcen.
 - Quader, Kugel, Zylinder, Kegel, Torus; Profile, Bézier-/B-Spline-Kurven, rationale Flächen; Extrusion, Rotation, Loft, Sweep; CSG; Bohrungen, Taschen, Nuten, Verrundungen, Fasen und Schalen innerhalb ihrer Operatorverträge.
 - Punkte, Linien, Bögen, endliche Ebenen, UV-Trimmung, Deckflächen, Vernähen, Regularisierung und benutzerdefinierte Helixgewinde.
-- Transformationen, Spiegelung, Instanzen und Muster; analytische inverse Volumenkonstruktion und gekoppelter begrenzter SLSQP-Maßsolver; tatsächliche B-Rep-Messungen und Abstandsjobs.
+- Transformationen, Spiegelung, Instanzen sowie lineare und zyklische Muster mit gezielten Einzelvarianten; analytische inverse Volumenkonstruktion und gekoppelter begrenzter SLSQP-Maßsolver; tatsächliche B-Rep-Messungen und Abstandsjobs.
 - Implizite Feldgraphen, kompakte lokale Änderungen, invertierbare lokale Deformation, konservative Lipschitz-Schranken und sparse Octree-Oberflächenextraktion.
 - Lokale Kontrollpunktänderungen mit exakten rationalen C0-/C1-/C2-Schranken und Regularitätsprüfung für registrierte Patchanschlüsse; gebrochene Anschlüsse verhindern den Commit.
 - Ausdrückliche Neuberechnung nach einem Buildwechsel mit `cad_rebuild`, vollständiger Prüfung und unveränderten alten Revisionen.

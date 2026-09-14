@@ -9,7 +9,10 @@ export function faces(store: Store, revision: any, feature: string): any[] {
   if (!blob) return [];
   const data = JSON.parse(store.readBlob(blob).toString());
   requireThat(
-    [1, 2].includes(data.version) && data.cache_key === key,
+    [1, 2, 3].includes(data.version) &&
+      data.cache_key === key &&
+      (data.version !== 3 ||
+        data.brep_sha256 === revision.geometry.blobs[key + ".brep"]),
     "INTEGRITY_FAILURE",
     "Flächenhistorie passt nicht zur Revision.",
   );

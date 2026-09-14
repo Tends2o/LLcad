@@ -56,12 +56,13 @@ class TopologyTests(unittest.TestCase):
         self.assertEqual(len({x['origins'][0]['key'] for x in records['faces']}), 18)
         with tempfile.TemporaryDirectory() as directory:
             path = str(Path(directory) / 'shape.brep')
-            write_brep(shape, path)
+            _,_,records=t.archive(shape,trace,'key',path)
+            checksum=hashlib.sha256(Path(path).read_bytes()).hexdigest()
             restored = read_brep(path)
-            self.assertEqual(len(t.restore(restored, records, 'key')), 18)
+            self.assertEqual(len(t.restore(restored, records, 'key',checksum)), 18)
             records['faces'][0], records['faces'][1] = records['faces'][1], records['faces'][0]
             with self.assertRaises(GeometryError) as error:
-                t.restore(restored, records, 'key')
+                t.restore(restored, records, 'key',checksum)
             self.assertEqual(error.exception.code, 'INTEGRITY_FAILURE')
 
 

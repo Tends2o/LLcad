@@ -7,7 +7,7 @@ from geometry import *
 from OCP.BRepAdaptor import BRepAdaptor_Surface
 from OCP.GeomAbs import GeomAbs_Plane
 
-VERSION = 2
+VERSION = 3
 MAX_FACES = 8192
 
 
@@ -208,17 +208,22 @@ def evaluate_feature(f, deps, traces):
         return shape, trace
     if op in ('instance', 'transform', 'mirror'):
         return transform_trace(deps[0], traces[0], prefix, fid, x, y, z, p.get('angle', 0), p.get('scale', 1), op == 'mirror')
-    if op == 'pattern':
+    if op in ('pattern','circular_pattern'):
         copies, history = [], []
-        for i in range(int(p['count'])):
-            shape, trace = transform_trace(deps[0], traces[0], [prefix, i], fid, i*p.get('dx', 0), i*p.get('dy', 0), i*p.get('dz', 0))
+        for i,slot,transform in pattern_placements(f):
+            maker=BRepBuilderAPI_Transform(deps[slot],transform,False)
+            shape=maker.Shape()
+            trace=propagate(shape,[traces[slot]],[prefix,i],maker,fid)
+            for entry in trace:
+                for source in entry['origins']:
+                    source['occurrences']=[*source.get('occurrences',[]),{'feature_id':fid,'index':i}]
             copies.append(shape)
             history.append(trace)
-        shape = compound(copies)
-        return shape, propagate(shape, history, prefix)
+        maker = CompoundBuilder(copies);shape = maker.Shape()
+        return shape, propagate(shape, history, prefix, maker)
     if op == 'assembly':
-        shape = compound(deps)
-        return shape, propagate(shape, traces, prefix)
+        maker = CompoundBuilder(deps);shape = maker.Shape()
+        return shape, propagate(shape, traces, prefix, maker)
     shape = make_feature(f, deps)
     return shape, [{'shape': face, 'origins': []} for face in face_list(shape)]
 
@@ -241,9 +246,40 @@ def serialize(trace, key):
     return {'version': VERSION, 'cache_key': key, 'faces': records, 'edges': edges}
 
 
-def restore(shape, data, key):
+def archive(shape, trace, key, path):
+    """Bind history to one immutable file and its deterministic native read.
+
+    OCCT serializes ordered topology references. During the trusted writer /
+    reader operation only, this ordering transports native history. It never
+    matches entities across revisions. Face fingerprints are computed AFTER
+    the read because OCCT normalizes stored transformation matrices on input.
+    Retain these exact original file bytes for every subsequent cache read.
+    """
+    original_faces=face_list(shape)
+    traced_faces=[e for e in trace if e['shape'].ShapeType()==TopAbs_FACE]
+    require(len(original_faces)==len(traced_faces) and all(a.IsSame(b['shape']) for a,b in zip(original_faces,traced_faces)),
+            'Native Historie ist vor Speicherung nicht vollständig geordnet.', 'INTEGRITY_FAILURE')
+    traced_edges=[e for e in trace if e['shape'].ShapeType()==TopAbs_EDGE]
+    if traced_edges:
+        original_edges=edge_list(shape)
+        require(len(original_edges)==len(traced_edges) and all(a.IsSame(b['shape']) for a,b in zip(original_edges,traced_edges)),
+                'Native Kantenhistorie ist vor Speicherung nicht vollständig geordnet.', 'INTEGRITY_FAILURE')
+    write_brep(shape,path)
+    restored=read_brep(path);new_faces=face_list(restored)
+    require(len(new_faces)==len(traced_faces), 'Native Speicherung änderte die Flächenzahl.', 'INTEGRITY_FAILURE')
+    result=[dict(entry,shape=face) for entry,face in zip(traced_faces,new_faces)]
+    if traced_edges:
+        new_edges=edge_list(restored)
+        require(len(new_edges)==len(traced_edges), 'Native Speicherung änderte die Kantenzahl.', 'INTEGRITY_FAILURE')
+        result.extend(dict(entry,shape=edge) for entry,edge in zip(traced_edges,new_edges))
+    records=serialize(result,key)
+    with open(path,'rb') as handle:records['brep_sha256']=hashlib.sha256(handle.read()).hexdigest()
+    return restored,result,records
+
+
+def restore(shape, data, key, source_hash):
     faces = face_list(shape)
-    require(data['version'] == VERSION and data['cache_key'] == key and len(faces) == len(data['faces']),
+    require(data['version'] == VERSION and data['cache_key'] == key and len(faces) == len(data['faces']) and data.get('brep_sha256')==source_hash,
             'Flächenhistorie passt nicht zum Cache.', 'INTEGRITY_FAILURE')
     result = []
     for face, record in zip(faces, data['faces']):

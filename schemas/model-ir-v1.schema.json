@@ -711,13 +711,176 @@
                     "enum": [
                       "transform",
                       "instance",
-                      "mirror",
-                      "pattern"
+                      "mirror"
                     ]
                   }
                 },
                 "required": [
                   "operator"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "operator": {
+                    "type": "string",
+                    "const": "pattern"
+                  },
+                  "overrides": {
+                    "maxItems": 128,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "index": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9999
+                        },
+                        "source": {
+                          "type": "string",
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+                        },
+                        "translation": {
+                          "type": "array",
+                          "prefixItems": [
+                            {
+                              "type": "string",
+                              "maxLength": 48,
+                              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                            },
+                            {
+                              "type": "string",
+                              "maxLength": 48,
+                              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                            },
+                            {
+                              "type": "string",
+                              "maxLength": 48,
+                              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                            }
+                          ],
+                          "items": false,
+                          "minItems": 3,
+                          "maxItems": 3
+                        }
+                      },
+                      "required": [
+                        "index"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "operator"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "operator": {
+                    "type": "string",
+                    "const": "circular_pattern"
+                  },
+                  "axis": {
+                    "type": "array",
+                    "prefixItems": [
+                      {
+                        "type": "string",
+                        "maxLength": 48,
+                        "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                      },
+                      {
+                        "type": "string",
+                        "maxLength": 48,
+                        "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                      },
+                      {
+                        "type": "string",
+                        "maxLength": 48,
+                        "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                      }
+                    ],
+                    "items": false,
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "origin": {
+                    "type": "array",
+                    "prefixItems": [
+                      {
+                        "type": "string",
+                        "maxLength": 48,
+                        "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                      },
+                      {
+                        "type": "string",
+                        "maxLength": 48,
+                        "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                      },
+                      {
+                        "type": "string",
+                        "maxLength": 48,
+                        "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                      }
+                    ],
+                    "items": false,
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "overrides": {
+                    "maxItems": 128,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "index": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9999
+                        },
+                        "source": {
+                          "type": "string",
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+                        },
+                        "translation": {
+                          "type": "array",
+                          "prefixItems": [
+                            {
+                              "type": "string",
+                              "maxLength": 48,
+                              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                            },
+                            {
+                              "type": "string",
+                              "maxLength": 48,
+                              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                            },
+                            {
+                              "type": "string",
+                              "maxLength": 48,
+                              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                            }
+                          ],
+                          "items": false,
+                          "minItems": 3,
+                          "maxItems": 3
+                        }
+                      },
+                      "required": [
+                        "index"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "operator",
+                  "axis",
+                  "origin"
                 ],
                 "additionalProperties": false
               },

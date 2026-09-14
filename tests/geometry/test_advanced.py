@@ -44,8 +44,9 @@ class AdvancedTests(unittest.TestCase):
         shape,trace=t.evaluate_feature(profile,[],[])
         records=t.serialize(trace,'profile-key'); self.assertEqual(len(records['edges']),4)
         with tempfile.TemporaryDirectory() as directory:
-            path=str(Path(directory)/'profile.brep');write_brep(shape,path)
-            shape=read_brep(path);trace=t.restore(shape,records,'profile-key')
+            path=str(Path(directory)/'profile.brep');_,_,records=t.archive(shape,trace,'profile-key',path)
+            checksum=hashlib.sha256(Path(path).read_bytes()).hexdigest()
+            shape=read_brep(path);trace=t.restore(shape,records,'profile-key',checksum)
             other,history=t.evaluate_feature(feature('top','transform',{'z':4,'scale':.8}),[shape],[trace])
             result,history=t.evaluate_feature(feature('loft','loft'),[shape,other],[trace,history])
             self.assertTrue(properties(result)['valid'])

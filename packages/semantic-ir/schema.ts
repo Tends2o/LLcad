@@ -158,6 +158,19 @@ export const FieldNode: z.ZodType<any> = z.lazy(() =>
     }),
   ]),
 );
+const PatternOverride = z.strictObject({
+  source: Id.optional(),
+  translation: Point.optional(),
+});
+const PatternOverrides = z
+  .array(
+    z.strictObject({
+      index: z.int().min(0).max(9999),
+      ...PatternOverride.shape,
+    }),
+  )
+  .max(128)
+  .optional();
 export const Construction = z.discriminatedUnion("operator", [
   z.strictObject({ operator: z.enum(["point", "plane"]) }),
   z.strictObject({ operator: z.literal("line"), start: Point, end: Point }),
@@ -208,7 +221,17 @@ export const Construction = z.discriminatedUnion("operator", [
     opening: z.enum(["top", "bottom"]),
   }),
   z.strictObject({
-    operator: z.enum(["transform", "instance", "mirror", "pattern"]),
+    operator: z.enum(["transform", "instance", "mirror"]),
+  }),
+  z.strictObject({
+    operator: z.literal("pattern"),
+    overrides: PatternOverrides,
+  }),
+  z.strictObject({
+    operator: z.literal("circular_pattern"),
+    axis: Point,
+    origin: Point,
+    overrides: PatternOverrides,
   }),
   z.strictObject({
     operator: z.literal("affine_transform"),
@@ -375,6 +398,13 @@ export const SetParameter = z.strictObject({
   value: Quantity,
 });
 export const PatchOperation = z.discriminatedUnion("op", [
+  z.strictObject({
+    op: z.literal("set_pattern_occurrence"),
+    feature_id: Id,
+    expected_hash: z.string().regex(/^[a-f0-9]{64}$/),
+    index: z.int().min(0).max(9999),
+    override: PatternOverride.nullable(),
+  }),
   z.strictObject({
     op: z.literal("set_construction"),
     feature_id: Id,

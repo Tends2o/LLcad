@@ -12,7 +12,7 @@ from OCP.BRepBndLib import BRepBndLib
 from OCP.Bnd import Bnd_Box
 from OCP.TopExp import TopExp_Explorer, TopExp
 from OCP.TopAbs import TopAbs_FACE, TopAbs_EDGE, TopAbs_VERTEX, TopAbs_SOLID, TopAbs_REVERSED
-from OCP.TopoDS import TopoDS, TopoDS_Shape, TopoDS_Compound
+from OCP.TopoDS import TopoDS, TopoDS_Shape, TopoDS_Compound, TopoDS_Iterator
 from OCP.BRep import BRep_Builder, BRep_Tool
 from OCP.BRepTools import BRepTools
 from OCP.TopTools import TopTools_FormatVersion_VERSION_3, TopTools_ListOfShape, TopTools_IndexedMapOfShape
@@ -89,11 +89,31 @@ def shape_hash(shape):
     BRepTools.Write_s(shape, stream, False, False, TopTools_FormatVersion_VERSION_3)
     return hashlib.sha256(stream.getvalue()).hexdigest()
 
+class CompoundBuilder:
+    """Own only each occurrence's outer topology container.
+
+    OCCT Add locks its child's shared TShape (Free=False). Directly adding a
+    placed source therefore mutates source serialization. EmptyCopied keeps
+    geometry and descendants shared while giving the compound its own lock.
+    Root-face/edge replacements have explicit history, too.
+    """
+    def __init__(self,shapes):
+        self.shape=TopoDS_Compound();builder=BRep_Builder();builder.MakeCompound(self.shape)
+        self.inputs=TopTools_IndexedMapOfShape();self.copies={}
+        for source in shapes:
+            wrapper=source.EmptyCopied();wrapper.Free(True)
+            # Add compensates the parent's orientation/location; supply the
+            # composed child placement to retain exact TopLoc identity.
+            children=TopoDS_Iterator(source,True,True)
+            while children.More():
+                builder.Add(wrapper,children.Value());children.Next()
+            builder.Add(self.shape,wrapper)
+            index=self.inputs.Add(source);self.copies.setdefault(index,[]).append(wrapper)
+    def Shape(self):return self.shape
+    def Modified(self,source):return self.copies.get(self.inputs.FindIndex(source),[])
+
 def compound(shapes):
-    result = TopoDS_Compound(); builder = BRep_Builder(); builder.MakeCompound(result)
-    for shape in shapes:
-        builder.Add(result, shape)
-    return result
+    return CompoundBuilder(shapes).Shape()
 
 def boolean(op, a, b):
     operation = {'union':BRepAlgoAPI_Fuse, 'difference':BRepAlgoAPI_Cut, 'intersection':BRepAlgoAPI_Common}[op](a,b)
@@ -107,6 +127,26 @@ def translated(shape, x=0., y=0., z=0., angle=0., scale=1.):
         r = gp_Trsf(); r.SetRotation(gp_Ax1(gp_Pnt(0,0,0), gp_Dir(0,0,1)), angle); t = r.Multiplied(t)
     v = gp_Trsf(); v.SetTranslation(gp_Vec(x,y,z)); t = v.Multiplied(t)
     return BRepBuilderAPI_Transform(shape, t, False).Shape()
+
+def pattern_placements(f):
+    """Compact source references and rigid placements; never copy source geometry.
+
+    Circular samples include zero and exclude the end of the angular span.
+    Overrides translate in world millimetres after the base placement.
+    """
+    p,c=f['values'],f['construction'];count=int(p['count'])
+    require(1 <= count <= 10000 and count == p['count'], 'Ungültige Musteranzahl.', 'BUDGET_EXCEEDED')
+    overrides={o['index']:o for o in c.get('overrides',[])}
+    for index in range(count):
+        override=overrides.get(index,{})
+        slot=f['depends_on'].index(override['source']) if 'source' in override else 0
+        transform=gp_Trsf()
+        if c['operator']=='circular_pattern':
+            transform.SetRotation(gp_Ax1(gp_Pnt(*map(float,c['origin'])),gp_Dir(*map(float,c['axis']))),p['angle']*index/count)
+        else:
+            transform.SetTranslation(gp_Vec(*(index*p.get(k,0) for k in ('dx','dy','dz'))))
+        translation=gp_Trsf();translation.SetTranslation(gp_Vec(*map(float,override.get('translation',[0,0,0]))))
+        yield index,slot,translation.Multiplied(transform)
 
 def as_wire(shape):
     return TopoDS.Wire_s(shape)
@@ -164,7 +204,8 @@ def make_feature(f, deps):
     if op in ('instance','transform'):return translated(deps[0],x,y,z,p.get('angle',0),p.get('scale',1))
     if op=='mirror':
         t=gp_Trsf();t.SetMirror(gp_Ax2(gp_Pnt(0,0,0),gp_Dir(1,0,0)));return BRepBuilderAPI_Transform(deps[0],t,True).Shape()
-    if op=='pattern':return compound(translated(deps[0],i*p.get('dx',0),i*p.get('dy',0),i*p.get('dz',0)) for i in range(int(p['count'])))
+    if op in ('pattern','circular_pattern'):
+        return compound(BRepBuilderAPI_Transform(deps[slot],transform,False).Shape() for _,slot,transform in pattern_placements(f))
     if op=='assembly':return compound(deps)
     if op=='nurbs_surface':
         nu,nv=len(c['poles']),len(c['poles'][0]);pts=TColgp_Array2OfPnt(1,nu,1,nv);weights=TColStd_Array2OfReal(1,nu,1,nv)

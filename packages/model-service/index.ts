@@ -397,6 +397,7 @@ export class ModelService {
               "affine_transform",
               "mirror",
               "pattern",
+              "circular_pattern",
               "assembly",
               "plane",
               "trim_surface",
@@ -603,6 +604,17 @@ export class ModelService {
               : [],
           available_edit_operations: [
             { op: "set_construction" },
+            ...(["pattern", "circular_pattern"].includes(
+              f.construction.operator,
+            )
+              ? [
+                  {
+                    op: "set_pattern_occurrence",
+                    index_base: 0,
+                    override_null: "restore_shared_source_and_base_placement",
+                  },
+                ]
+              : []),
             ...Object.keys(f.parameters).map((parameter) => ({
               op: Object.hasOwn(f.expressions, parameter)
                 ? "set_expression"
@@ -614,6 +626,23 @@ export class ModelService {
               : []),
           ],
           construction_hash: hash(f.construction),
+          pattern_contract: ["pattern", "circular_pattern"].includes(
+            f.construction.operator,
+          )
+            ? {
+                source_feature: f.depends_on[0],
+                index_base: 0,
+                placement:
+                  f.construction.operator === "circular_pattern"
+                    ? "rotation(axis, origin, angle * index / count); angular endpoint excluded"
+                    : "translation(index * [dx, dy, dz])",
+                override_translation: "world millimetres after base placement",
+                default_geometry:
+                  "shared source; explicit source override materializes only that occurrence as a variant",
+                composition:
+                  "assembly compound; overlapping volumes are not a boolean union",
+              }
+            : null,
           transformation_contract:
             f.construction.operator === "affine_transform"
               ? affineContract(

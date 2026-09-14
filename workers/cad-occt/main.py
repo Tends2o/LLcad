@@ -1,5 +1,5 @@
 """One bounded job per process. JSON is carried via files to isolate kernel stdout."""
-import json, os, sys, time, resource, traceback
+import json, os, sys, time, resource, traceback, shutil
 from geometry import *
 import topology
 
@@ -27,10 +27,12 @@ def run(request):
         if os.path.isfile(cache) and os.path.isfile(history_cache):
             shape=read_brep(cache)
             with open(history_cache) as h: records=json.load(h)
-            trace=topology.restore(shape,records,key);hits+=1
+            with open(cache,'rb') as h:source_hash=hashlib.sha256(h.read()).hexdigest()
+            trace=topology.restore(shape,records,key,source_hash);hits+=1
+            shutil.copyfile(cache,'out/'+key+'.brep')
         else:
             shape,trace=topology.evaluate_feature(f,deps,[histories[d] for d in f['depends_on']])
-            records=topology.serialize(trace,key)
+            shape,trace,records=topology.archive(shape,trace,key,'out/'+key+'.brep')
         histories[fid]=trace;face_records[fid]=records
         with open('out/'+key+'.topology.json','w') as h:json.dump(records,h,allow_nan=False)
         require(not shape.IsNull(),'Leeres Operatorergebnis.')
@@ -40,10 +42,10 @@ def run(request):
                     'Native Randtoleranzen überschreiten die verlangte Modellgenauigkeit.','PRECISION_UNSUPPORTED')
         if f['depends_on']:
             f=dict(f,base_operator=next(x['construction']['operator'] for x in features if x['id']==f['depends_on'][0]))
-        props['dimensions']=dimensions(f,shape,deps);props['geometry_hash']=shape_hash(shape)
+        props['dimensions']=dimensions(f,shape,deps);props['geometry_hash']=records['brep_sha256']
         props['engine_build']=BUILD;props['cache_key']=key
         props['topology']={'version':topology.VERSION,'face_count':len(records['faces']),'tracked_faces':sum(bool(x['origins']) for x in records['faces'])}
-        write_brep(shape,'out/'+key+'.brep');shapes[fid]=shape;facts[fid]=props
+        shapes[fid]=shape;facts[fid]=props
     output_shapes=[shapes[fid] for fid in plan['outputs'] if fid in shapes]
     root=compound(output_shapes) if len(output_shapes)>1 else output_shapes[0] if output_shapes else None
     aggregate=properties(root) if root is not None else None

@@ -18,6 +18,7 @@ import { INSTRUCTIONS } from "../packages/mcp-gateway/tools.js";
 import { REGISTRY_HASH } from "../packages/compiler/index.js";
 import { IMPLEMENTATION_HASH } from "../packages/compiler/build.js";
 import { hash } from "../packages/semantic-ir/hash.js";
+import { faces } from "../packages/model-service/selections.js";
 
 const root = mkdtempSync(join(tmpdir(), "llcad-llm-eval-"));
 const data = join(root, "data"),
@@ -33,7 +34,7 @@ service.call = ((p, name, args) => {
 }) as typeof service.call;
 const p = { tenant: "local", user: "local-user", scopes: SCOPES };
 const cases: any[] = [];
-const expectedCaseCount = 6;
+const expectedCaseCount = 7;
 let server: any, host: CodexHostClient | undefined;
 try {
   // Bind first so Auth's exact Host allowlist receives the assigned port.
@@ -220,6 +221,51 @@ try {
         "Vertiefe im Gedrehten Spannhalter die rechteckige Tasche von 2 auf 2,3 mm. Erhalte ihre Breite, Länge und Position, die runde Bohrung sowie Außenmaße und Einbaulage. Prüfe und übernimm die Änderung.",
       kind: "new_combination",
     },
+    {
+      name: "Kugelanordnung",
+      kind: "circular_occurrence",
+      ir: ModelIR.parse({
+        schema_version: "1",
+        unit: "mm",
+        features: [
+          {
+            id: "ball-source",
+            semantic_name: "Gemeinsame Kugelform",
+            kind: "sphere",
+            parameters: {
+              radius: { value: "1", unit: "mm" },
+              x: { value: "10", unit: "mm" },
+            },
+            construction: { operator: "sphere" },
+          },
+          {
+            id: "ball-ring",
+            semantic_name: "Vier Kugeln um die Z-Achse",
+            kind: "pattern",
+            depends_on: ["ball-source"],
+            parameters: {
+              count: { value: "4", unit: "1" },
+              angle: { value: "360", unit: "deg" },
+            },
+            construction: {
+              operator: "circular_pattern",
+              axis: ["0", "0", "1"],
+              origin: ["0", "0", "0"],
+            },
+          },
+        ],
+        outputs: ["ball-ring"],
+        constraints: [
+          {
+            id: "shared-shape",
+            kind: "protected_feature",
+            feature_id: "ball-source",
+          },
+        ],
+      }),
+      prompt:
+        "Verschiebe in der Kugelanordnung nur die Kugel auf der positiven Y-Achse um 2 mm nach oben in positiver Z-Richtung. Die anderen drei Kugeln und alle Kugelradien bleiben erhalten. Prüfe und übernimm die Änderung. Erledige die Auswahl selbst anhand des Modells.",
+    },
   ];
   assert.equal(fixtures.length, expectedCaseCount);
   const models = [];
@@ -350,6 +396,7 @@ try {
         single_instance: "occurrence-1",
         local_detail: "organic",
         new_combination: "fixture-pocket",
+        circular_occurrence: "ball-ring",
       }[fixture.kind]!;
       const modified = actual.ir.features.find((f: any) => f.id === featureId);
       checks.committed =
@@ -365,7 +412,42 @@ try {
       const preservedFeature = preserved.features.find(
         (f: any) => f.id === featureId,
       )!;
-      if (fixture.kind === "local_detail") {
+      if (fixture.kind === "circular_occurrence") {
+        const before = faces(service.store, original, featureId),
+          after = faces(service.store, actual, featureId);
+        const occurrence = (items: any[], index: number) =>
+          items.filter((f) =>
+            f.origins.some((o: any) =>
+              o.occurrences?.some(
+                (p: any) => p.feature_id === featureId && p.index === index,
+              ),
+            ),
+          );
+        checks.occurrence_measurement =
+          before.length === 4 &&
+          after.length === 4 &&
+          [0, 1, 2, 3].every((index) => {
+            const a = occurrence(before, index),
+              b = occurrence(after, index);
+            return (
+              a.length === 1 &&
+              b.length === 1 &&
+              a[0].center.every(
+                (value: number, axis: number) =>
+                  Math.abs(
+                    b[0].center[axis] -
+                      value -
+                      (index === 1 && axis === 2 ? 2 : 0),
+                  ) < 1e-7,
+              ) &&
+              Math.abs(a[0].area - b[0].area) < 1e-7
+            );
+          });
+        checks.shared_source =
+          actual.geometry.facts["ball-source"].geometry_hash ===
+          original.geometry.facts["ball-source"].geometry_hash;
+        preservedFeature.construction = originalFeature.construction;
+      } else if (fixture.kind === "local_detail") {
         let expression: any =
           modified?.construction.operator === "field"
             ? modified.construction.expression
@@ -525,7 +607,7 @@ try {
         model_turns: cases.length,
         browser_interactions: 0,
         scope:
-          "six_synthetic_local_host_tasks_with_held_out_combinations_not_general_or_remote_acceptance",
+          "seven_synthetic_local_host_tasks_including_circular_occurrence_selection_not_general_or_remote_acceptance",
         cases,
       },
       null,
