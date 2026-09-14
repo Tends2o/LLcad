@@ -1204,12 +1204,13 @@
         "tests/security/recovery.test.ts",
         "docs/storage-durability.md",
         "reports/verification.json",
-        "reports/tests.log"
+        "reports/tests.log",
+        "reports/storage-migration.json"
       ],
       "notes": "Nachweis für einen exklusiven lokalen Store unter Linux auf einem Dateisystem mit korrekter Hardlink-/fsync-Semantik. Keine physische Stromausfallprüfung oder fremde Hardwarezertifizierung.",
       "review": {
         "scope_match": true,
-        "findings": "Kandidat-/Geometrie-/Registry-/Policy-Digest, aktuelle Berechtigung und Compare-and-Swap werden vor dem atomaren Commit geprüft. Vollständige Blobdaten und ihr veröffentlichter Verzeichniseintrag sind vorher synchronisiert; Altdateien werden bei der aufgezeichneten Migration geprüft und synchronisiert. Tatsächliche SIGKILL-Tests an vier Schreibpunkten zeigen keine übernommenen unvollständigen Dateireferenzen. Sync-Fehler rollen Metadaten/Idempotenz zurück, beschädigte Dateien und Stale-Kandidaten werden abgewiesen. Die Version-4-Migration wird atomar mit ihrem Auditdatensatz aufgezeichnet."
+        "findings": "Kandidat-/Geometrie-/Registry-/Policy-Digest, aktuelle Berechtigung und Compare-and-Swap werden vor dem atomaren Commit geprüft. Vollständige Blobdaten und ihr veröffentlichter Verzeichniseintrag sind vorher synchronisiert; Altdateien werden bei der aufgezeichneten Migration geprüft und synchronisiert. Tatsächliche SIGKILL-Tests an vier Schreibpunkten zeigen keine übernommenen unvollständigen Dateireferenzen. Sync-Fehler rollen Metadaten/Idempotenz zurück, beschädigte Dateien und Stale-Kandidaten werden abgewiesen. Die Version-4-Migration wird atomar mit ihrem Auditdatensatz aufgezeichnet. Die tatsächliche Migration des laufenden Speichers wurde mit neun Modellköpfen, 91 Revisionsdatensätzen und 118 synchronisierten Blobs bei unverändertem Inhalt protokolliert."
       }
     },
     {

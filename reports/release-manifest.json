@@ -1,7 +1,7 @@
 {
   "application_version": "0.1.0",
   "ir_schema_version": "1",
-  "created": "2026-09-14T13:19:25.710Z",
+  "created": "2026-09-14T13:21:21.438Z",
   "status": "not_released",
   "operator_registry_hash": "c06ba78af8863c6cdc8d07a330843aca7b8c58948c19c0f0921e2e2a616ee82f",
   "worker_source_digest": "b2c6445d83451753c6a8acba2ee5ac2026d0f3b8d5da05568cf626cce66d3446",
@@ -28,7 +28,7 @@
   },
   "local_codex_transport_tests": {
     "report": "reports/codex-host.json",
-    "status": "missing_or_stale",
+    "status": "passed",
     "model_turns": 0
   },
   "benchmark_report": "reports/benchmark.json",
@@ -42,7 +42,7 @@
   "completion_audit": {
     "status": "incomplete",
     "source_sha256": "39eb5f37ffcb1a0b3aa790d5e6db49e109a390ca57d1dcf47c23be231bce8ff0",
-    "audit_sha256": "62862346c710e52c65eedc18e47c13815e97403a2276366b30d9347fda21645f",
+    "audit_sha256": "14efcbc54d69c22955b2d299418b6b3c46089fa5680f128c59b0c8b8f9e27eab",
     "sections": 162,
     "verified": 6,
     "remaining": 156,
