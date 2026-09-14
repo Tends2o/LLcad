@@ -13,11 +13,20 @@ import { join, resolve } from "node:path";
 import { Store } from "./store.js";
 import { bytesHash, hash } from "../semantic-ir/hash.js";
 import { requireThat } from "../semantic-ir/errors.js";
+import {
+  syncFile,
+  syncDirectory,
+  syncCreatedDirectories,
+} from "./durable-files.js";
 export async function backupStore(store: Store, destination: string) {
   const target = resolve(destination);
   requireThat(!existsSync(target), "OUT_OF_SCOPE", "Backupziel muss neu sein.");
-  mkdirSync(join(target, "blobs"), { recursive: true, mode: 0o700 });
+  const firstCreated = mkdirSync(join(target, "blobs"), {
+    recursive: true,
+    mode: 0o700,
+  });
   await backup(store.db, join(target, "models.sqlite"));
+  syncFile(join(target, "models.sqlite"));
   const blobs = [];
   for (const name of readdirSync(join(store.root, "blobs"))) {
     requireThat(
@@ -27,6 +36,7 @@ export async function backupStore(store: Store, destination: string) {
     );
     const bytes = store.readBlob(name);
     copyFileSync(join(store.root, "blobs", name), join(target, "blobs", name));
+    syncFile(join(target, "blobs", name));
     blobs.push({ hash: name, bytes: bytes.length });
   }
   const manifest = {
@@ -41,6 +51,9 @@ export async function backupStore(store: Store, destination: string) {
     JSON.stringify(manifest, null, 2),
     { mode: 0o600 },
   );
+  syncFile(join(target, "backup-manifest.json"));
+  syncDirectory(join(target, "blobs"));
+  syncCreatedDirectories(target, firstCreated);
   return manifest;
 }
 export function restoreStore(source: string, destination: string) {
@@ -86,10 +99,18 @@ export function restoreStore(source: string, destination: string) {
   } finally {
     check.close();
   }
-  mkdirSync(join(target, "blobs"), { recursive: true, mode: 0o700 });
+  const firstCreated = mkdirSync(join(target, "blobs"), {
+    recursive: true,
+    mode: 0o700,
+  });
   copyFileSync(join(source, "models.sqlite"), join(target, "models.sqlite"));
-  for (const b of manifest.blobs)
+  syncFile(join(target, "models.sqlite"));
+  for (const b of manifest.blobs) {
     copyFileSync(join(source, "blobs", b.hash), join(target, "blobs", b.hash));
+    syncFile(join(target, "blobs", b.hash));
+  }
+  syncDirectory(join(target, "blobs"));
+  syncCreatedDirectories(target, firstCreated);
   return { status: "restored", blobs: manifest.blobs.length };
 }
 /** Offline retention GC: only unreferenced blobs older than the explicit retention window. */

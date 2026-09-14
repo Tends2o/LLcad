@@ -3,8 +3,6 @@ import { execFileSync } from "node:child_process";
 import {
   mkdirSync,
   readFileSync,
-  writeFileSync,
-  existsSync,
   chmodSync,
   openSync,
   closeSync,
@@ -13,6 +11,7 @@ import { join, resolve } from "node:path";
 import { bytesHash, hash, id } from "../semantic-ir/hash.js";
 import { requireThat } from "../semantic-ir/errors.js";
 import { Principal, authorize } from "../policy/index.js";
+import { durableBlob, prepareBlobStorage } from "./durable-files.js";
 
 export class Store {
   db!: DatabaseSync;
@@ -20,7 +19,7 @@ export class Store {
   private lock: number;
   constructor(root: string) {
     this.root = resolve(root);
-    mkdirSync(this.root, { recursive: true, mode: 0o700 });
+    const firstCreated = mkdirSync(this.root, { recursive: true, mode: 0o700 });
     mkdirSync(join(this.root, "blobs"), { recursive: true, mode: 0o700 });
     this.lock = openSync(join(this.root, ".store.lock"), "a", 0o600);
     try {
@@ -42,12 +41,17 @@ export class Store {
       const version = (this.db.prepare("PRAGMA user_version").get() as any)
         .user_version;
       requireThat(
-        version === 0 || version === 1 || version === 2 || version === 3,
+        [0, 1, 2, 3, 4].includes(version),
         "BUILD_MISMATCH",
         "Unbekannte Datenbankschemaversion; explizite Migration erforderlich.",
       );
+      const synchronized = prepareBlobStorage(
+        this.root,
+        firstCreated,
+        version < 4,
+      );
       this.db
-        .exec(`PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;
+        .exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;
       CREATE TABLE IF NOT EXISTS models(id TEXT PRIMARY KEY,tenant TEXT NOT NULL,owner TEXT NOT NULL,name TEXT NOT NULL,purpose TEXT NOT NULL,head TEXT NOT NULL,created TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS revisions(id TEXT PRIMARY KEY,model TEXT NOT NULL REFERENCES models(id),parent TEXT,ir TEXT NOT NULL,ir_hash TEXT NOT NULL,geometry TEXT,quality TEXT NOT NULL,created TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS transactions(id TEXT PRIMARY KEY,model TEXT NOT NULL REFERENCES models(id),tenant TEXT NOT NULL,owner TEXT NOT NULL,base TEXT NOT NULL,candidate TEXT NOT NULL,state TEXT NOT NULL,plan TEXT NOT NULL,result TEXT,validation TEXT,committed_revision TEXT);
@@ -59,8 +63,22 @@ export class Store {
       CREATE TABLE IF NOT EXISTS cache(tenant TEXT NOT NULL,key TEXT NOT NULL,blob TEXT NOT NULL,PRIMARY KEY(tenant,key));
       CREATE TABLE IF NOT EXISTS audit(seq INTEGER PRIMARY KEY AUTOINCREMENT,event TEXT NOT NULL,data TEXT NOT NULL,previous_hash TEXT NOT NULL,hash TEXT NOT NULL,created TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS outbox(id TEXT PRIMARY KEY,event TEXT NOT NULL,payload TEXT NOT NULL,delivered INTEGER NOT NULL DEFAULT 0);
-      CREATE TABLE IF NOT EXISTS scheduler(tenant TEXT NOT NULL,owner TEXT NOT NULL,last_tick INTEGER NOT NULL,PRIMARY KEY(tenant,owner));
-      PRAGMA user_version=3;`);
+      CREATE TABLE IF NOT EXISTS scheduler(tenant TEXT NOT NULL,owner TEXT NOT NULL,last_tick INTEGER NOT NULL,PRIMARY KEY(tenant,owner));`);
+      requireThat(
+        this.get("PRAGMA synchronous").synchronous === 2 &&
+          this.get("PRAGMA journal_mode").journal_mode === "wal",
+        "INTEGRITY_FAILURE",
+        "Datenspeicher benötigt WAL mit vollständiger Synchronisation.",
+      );
+      if (version < 4)
+        this.atomic(() => {
+          this.run("PRAGMA user_version=4");
+          this.audit("storage_durability_migrated", {
+            from_store_version: version,
+            to_store_version: 4,
+            synchronized_blobs: synchronized,
+          });
+        });
       chmodSync(join(this.root, "models.sqlite"), 0o600);
     } catch (error) {
       this.db!?.close();
@@ -164,11 +182,7 @@ export class Store {
     );
   }
   blob(data: Uint8Array | string) {
-    const h = bytesHash(data);
-    const path = join(this.root, "blobs", h);
-    if (!existsSync(path))
-      writeFileSync(path, data, { mode: 0o600, flag: "wx" });
-    return h;
+    return durableBlob(this.root, data);
   }
   readBlob(h: string) {
     requireThat(

@@ -14,7 +14,7 @@ Stand der lokalen Verifikation: 14. September 2026. Maßgeblich für einen erneu
 | OAuth-Ressourcenserver | Lokal geprüft | Signatur, Issuer, Audience, Ablauf, Scopes und signierte Mandantenbindung |
 | Realer OAuth-Anbieter mit PKCE und Zielhost | Offen | Kein kundenspezifischer Issuer, Callback oder freigegebener Client vorgegeben |
 | Lokaler Codex 0.154.0 | Transport und Werkzeugausführung geprüft | Echter App-Server, zwei gleichzeitige Verbindungen, Aufbau/Änderung/Prüfung/Commit/STEP; `reports/codex-host.json`; ohne Modellturn |
-| Lokale LLM-Sprachaufträge im Codex-Host | Begrenzter Testsatz geprüft | Sechs echte Modellturns mit numerischem Grader; `reports/llm-eval.json`; Buildhash auf Aktualität prüfen |
+| Lokale LLM-Sprachaufträge im Codex-Host | Begrenzter Testsatz geprüft | Sechs echte Modellturns mit numerischem Grader vor der Speicherhärtung; `reports/llm-eval-compiled-fields.json`; der aktuelle Speicherbuild hat noch keinen neuen LLM-Abnahmelauf |
 | Breite LLM-Evaluation und ChatGPT-Web-Host | Offen | Sechs lokale Aufträge ersetzen weder einen unabhängigen breiten Testsatz noch die reale Web-/OAuth-Verknüpfung |
 | Eingebettete Host-UI | Nicht implementiert | Eigenständiger authentifizierter Browser-Viewer vorhanden |
 | Öffentliche Bereitstellung / Plugin-Publikation | Nicht erfolgt | Deploymentvorlagen vorhanden; keine Veröffentlichung ausgeführt |

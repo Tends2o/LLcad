@@ -1,10 +1,10 @@
 {
   "status": "incomplete",
   "source_sha256": "39eb5f37ffcb1a0b3aa790d5e6db49e109a390ca57d1dcf47c23be231bce8ff0",
-  "audit_sha256": "33f5a10390d5d5c7d408b3bebfd3f3883ba004fd3a23ac40fc23f0feeec835d5",
+  "audit_sha256": "62862346c710e52c65eedc18e47c13815e97403a2276366b30d9347fda21645f",
   "sections": 162,
-  "verified": 5,
-  "remaining": 157,
+  "verified": 6,
+  "remaining": 156,
   "issues": [
     "1: 1. Ziel, Grenzen und Erfolgskriterien – Anforderungen noch nicht vollständig abgeleitet.",
     "1.1: 1.1 Was das System leisten soll – unvollständig oder nicht ausreichend geprüft.",
@@ -82,7 +82,6 @@
     "13: 13. Optionale Host-Hooks – Anforderungen noch nicht vollständig abgeleitet.",
     "14: 14. Transaktionen, Jobs und Wiederherstellung – Anforderungen noch nicht vollständig abgeleitet.",
     "14.1: 14.1 Zustandsautomat – Anforderungen noch nicht vollständig abgeleitet.",
-    "14.2: 14.2 Übernahme mit Compare-and-Swap – unvollständig oder nicht ausreichend geprüft.",
     "14.4: 14.4 Lange Jobs – Anforderungen noch nicht vollständig abgeleitet.",
     "14.5: 14.5 Pseudocode für die Pipeline – Anforderungen noch nicht vollständig abgeleitet.",
     "14.6: 14.6 Rücknahme und Wiederherstellung – Anforderungen noch nicht vollständig abgeleitet.",

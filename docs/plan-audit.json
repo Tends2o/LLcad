@@ -1187,7 +1187,7 @@
       "source_end_line": 1425,
       "source_sha256": "0d1bc26ea5c6d0796a62f4835a3807ed5b6c25c8919f8546464bd5b21747ea70",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Beim Commit aktuelle Basisrevision mit Compare-and-Swap prüfen.",
         "Prüfdigest an exakten Kandidaten, Geometrie, Registry und Policy binden und aktuelle Rechte prüfen.",
@@ -1197,11 +1197,20 @@
       "evidence": [
         "packages/model-service/index.ts",
         "packages/model-service/store.ts",
+        "packages/model-service/durable-files.ts",
         "packages/job-service/index.ts",
         "tests/security/transactions.test.ts",
-        "tests/security/recovery.test.ts"
+        "tests/security/blob-durability.test.ts",
+        "tests/security/recovery.test.ts",
+        "docs/storage-durability.md",
+        "reports/verification.json",
+        "reports/tests.log"
       ],
-      "notes": "Digest-/Policy-/Rechteprüfung und Compare-and-Swap liegen im synchronen BEGIN-IMMEDIATE-Deduplizierungsblock. Tests belegen doppelte Aufrufe, unveränderte alte Revisionen, Stale- und Fremdnachweisabwehr sowie dauerhafte Outbox. Blobdateien werden derzeit synchron geschrieben, aber ohne explizites Dateisystem-fsync vor dem Datenbank-Commit; die verlangte Haltbarkeit bei Stromverlust ist damit noch nicht vollständig belegt."
+      "notes": "Nachweis für einen exklusiven lokalen Store unter Linux auf einem Dateisystem mit korrekter Hardlink-/fsync-Semantik. Keine physische Stromausfallprüfung oder fremde Hardwarezertifizierung.",
+      "review": {
+        "scope_match": true,
+        "findings": "Kandidat-/Geometrie-/Registry-/Policy-Digest, aktuelle Berechtigung und Compare-and-Swap werden vor dem atomaren Commit geprüft. Vollständige Blobdaten und ihr veröffentlichter Verzeichniseintrag sind vorher synchronisiert; Altdateien werden bei der aufgezeichneten Migration geprüft und synchronisiert. Tatsächliche SIGKILL-Tests an vier Schreibpunkten zeigen keine übernommenen unvollständigen Dateireferenzen. Sync-Fehler rollen Metadaten/Idempotenz zurück, beschädigte Dateien und Stale-Kandidaten werden abgewiesen. Die Version-4-Migration wird atomar mit ihrem Auditdatensatz aufgezeichnet."
+      }
     },
     {
       "id": "14.3",
@@ -2004,9 +2013,9 @@
       "evidence": [
         "scripts/llm-eval.ts",
         "tests/llm-evals/README.md",
-        "reports/llm-eval.json"
+        "reports/llm-eval-compiled-fields.json"
       ],
-      "notes": "Sechs synthetische lokale Fälle sind mit 87 tatsächlich protokollierten CAD-Aufrufen bestanden: Nut, Durchmesser, Mehrdeutigkeit, einzelne Instanz, bestehende lokale Feldkorrektur und Tasche im gedrehten Bauteil. Verdeckte Innenkante und Wiederfinden nach Topologieänderung fehlen noch im tatsächlichen LLM-Test, obwohl native Historiengates separat getestet werden."
+      "notes": "Sechs synthetische lokale Fälle sind mit 87 tatsächlich protokollierten CAD-Aufrufen bestanden: Nut, Durchmesser, Mehrdeutigkeit, einzelne Instanz, bestehende lokale Feldkorrektur und Tasche im gedrehten Bauteil. Verdeckte Innenkante und Wiederfinden nach Topologieänderung fehlen noch im tatsächlichen LLM-Test, obwohl native Historiengates separat getestet werden. Diese sechs Modellturns gehören zum Build vor der Speicherhärtung; der aktuelle Speicherbuild hat noch keinen neuen Modellturn."
     },
     {
       "id": "24.4",
@@ -2048,9 +2057,9 @@
       "evidence": [
         "scripts/llm-eval.ts",
         "tests/llm-evals/README.md",
-        "reports/llm-eval.json"
+        "reports/llm-eval-compiled-fields.json"
       ],
-      "notes": "Auswertungsquelle und Fixtures sind für das getestete Modell nicht zugänglich; nur CAD-Werkzeuge und Sprachauftrag werden bereitgestellt. Sechs lokale Aufgaben sind bestanden, einschließlich neuer Instanz-/Feld-/Rotationskombinationen; 87 CAD-Aufrufe, null Browseraktionen. Breiter unabhängiger Korpus und vollständige feingliedrige Fehlerklassifikation bleiben offen; kein allgemeiner Erfolgssatz aus wenigen Beispielen."
+      "notes": "Auswertungsquelle und Fixtures sind für das getestete Modell nicht zugänglich; nur CAD-Werkzeuge und Sprachauftrag werden bereitgestellt. Sechs lokale Aufgaben sind bestanden, einschließlich neuer Instanz-/Feld-/Rotationskombinationen; 87 CAD-Aufrufe, null Browseraktionen. Breiter unabhängiger Korpus und vollständige feingliedrige Fehlerklassifikation bleiben offen; kein allgemeiner Erfolgssatz aus wenigen Beispielen. Diese sechs Modellturns gehören zum Build vor der Speicherhärtung; der aktuelle Speicherbuild hat noch keinen neuen Modellturn."
     },
     {
       "id": "24.7",
