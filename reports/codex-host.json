@@ -1,8 +1,8 @@
 {
   "status": "passed",
-  "created": "2026-09-14T13:20:04.462Z",
-  "registry_hash": "c06ba78af8863c6cdc8d07a330843aca7b8c58948c19c0f0921e2e2a616ee82f",
-  "implementation_hash": "1fbbd7557bac7068bb4b8a435d9a1ae2355406ff79e2976197d1f7e74e1022f2",
+  "created": "2026-09-14T13:42:11.007Z",
+  "registry_hash": "6e55ff16b3b201fe89f97ca904eb8ec81c2be68404efd4b6a68d83b3c252b9bf",
+  "implementation_hash": "49f91059fd9e90bc470bb5140bffabcd2aa2471f6ee98ae52e83bd983c4ec917",
   "scope": "Installed Codex app-server MCP transport and deterministic CAD workflow; no model turn or LLM reasoning evaluation.",
   "model_turns": 0,
   "browser_interactions": 0,
@@ -66,9 +66,9 @@
     "cad_validate"
   ],
   "simultaneous_connections": 2,
-  "model_id": "model-866be5f1-74ce-422d-8304-712c458cdd78",
-  "original_revision": "rev-2d419b2f-68dc-4d01-8937-5dec027f972b",
-  "edited_revision": "rev-18c43841-c2d7-4d36-9a52-bc1b950dc612",
+  "model_id": "model-cc23557f-4b1d-4e50-8706-8594044c5bd3",
+  "original_revision": "rev-b57c119d-ea12-4a72-ba4c-8f1bfc8d33f3",
+  "edited_revision": "rev-1f968f79-c601-4fe5-bc6c-6a95e6086f04",
   "measurements": {
     "status": "ok",
     "measurements": {
@@ -99,7 +99,7 @@
       },
       "geometry_hash": "3f9b19f96034a98b59cc1715bda9b32ee9d077c4ec93a1747b02c217a3ff21dd",
       "engine_build": "OCCT-7.9.3.1.1/mathforge-1",
-      "cache_key": "33e63fe8908eb1c70f78181ab6687e1505723e5f6e04025d57c7097e0e6b73dd",
+      "cache_key": "2408d86916c603d816451369056634b6b7dae2be25acfdbcdfad03316ad89635",
       "topology": {
         "version": 2,
         "face_count": 10,
@@ -112,12 +112,12 @@
     "assumptions": [],
     "artifacts": [],
     "recommended_next_actions": [],
-    "model_id": "model-866be5f1-74ce-422d-8304-712c458cdd78",
-    "revision": "rev-18c43841-c2d7-4d36-9a52-bc1b950dc612",
+    "model_id": "model-cc23557f-4b1d-4e50-8706-8594044c5bd3",
+    "revision": "rev-1f968f79-c601-4fe5-bc6c-6a95e6086f04",
     "metric": "all",
     "unit": "mm",
     "coverage": "registered_geometric_measurement",
-    "trace_id": "trace-0f9eb48c-529f-4061-babd-45c252278c95"
+    "trace_id": "trace-486d25d0-24ce-4a2a-84ec-472baf4a89ce"
   },
   "comparison": {
     "status": "ok",
@@ -128,9 +128,9 @@
     "assumptions": [],
     "artifacts": [],
     "recommended_next_actions": [],
-    "model_id": "model-866be5f1-74ce-422d-8304-712c458cdd78",
-    "from_revision": "rev-2d419b2f-68dc-4d01-8937-5dec027f972b",
-    "to_revision": "rev-18c43841-c2d7-4d36-9a52-bc1b950dc612",
+    "model_id": "model-cc23557f-4b1d-4e50-8706-8594044c5bd3",
+    "from_revision": "rev-b57c119d-ea12-4a72-ba4c-8f1bfc8d33f3",
+    "to_revision": "rev-1f968f79-c601-4fe5-bc6c-6a95e6086f04",
     "changed_features": [
       "feat-groove-07"
     ],
@@ -187,7 +187,7 @@
     ],
     "volume_delta": -1.5079644737234048,
     "coverage": "declared_dimensions_and_per_feature_hashes",
-    "trace_id": "trace-99f2734a-f98a-4bd2-b9c5-120547eb751c"
+    "trace_id": "trace-c8dc3d43-9ac0-411d-9c7c-2af27fa30feb"
   },
   "roundtrip": {
     "status": "checks_passed_within_profile",
