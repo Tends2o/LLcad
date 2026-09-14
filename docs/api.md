@@ -1,6 +1,6 @@
 # MCP und Werkzeugverträge
 
-Die Eingabeschemas unter `schemas/cad_*.schema.json` werden aus den strikten Zod-Schemas erzeugt. Unbekannte Felder werden abgelehnt. Status und Fehler bleiben maschinenlesbar; interne Pfade, Tokens und Stacktraces werden nicht in Toolfehlern zurückgegeben.
+Die Eingabeschemas unter `schemas/cad_*.schema.json` und die werkzeugspezifischen Ausgänge unter `schemas/cad_*.result.schema.json` werden aus denselben strikten Zod-Verträgen wie die Laufzeitprüfung erzeugt. Antworten tragen `result_schema_version: "1"`; nicht belegte Bindungen sind ausdrücklich `null`. Unbekannte Felder werden abgelehnt. Status und Fehler bleiben maschinenlesbar; interne Pfade, Tokens und Stacktraces werden nicht in Toolfehlern zurückgegeben. [Antwortverträge und Nachweisversionen](result-contracts.md) beschreiben Metadatenfelder, Ressourcenbudgets und die unveränderte Lesbarkeit älterer Datensätze.
 
 ## Werkzeuge
 
@@ -93,3 +93,5 @@ Logische Ressourcen sind `cad://models/{model_id}/revisions/{revision}/summary`,
 Der lokale Viewer lädt Dateien über `POST /api/uploads` mit `application/octet-stream` hoch. Die Antwort enthält die servergenerierte Artefakt-ID. `GET /api/artifacts/{artifact_id}` liefert nur autorisierte Inhalte. Es gibt keine frei abrufbare Hashadresse und keine automatische externe Veröffentlichung.
 
 Toolresultate sind auf 32 KiB begrenzt. Vollständige Validierungsberichte werden über ihre Ressourcen-URI gelesen; Geometrien bleiben im Artefaktspeicher. Ein Transportabbruch widerruft keinen bereits angenommenen dauerhaften Job. Dazu dient `cad_job_cancel`.
+
+Antwortform, endliche Zahlen, Zielbindung und Budget werden vor der Speicherung schreibender Ergebnisse geprüft. Ein `OUTPUT_CONTRACT_VIOLATION` oder überschrittenes Antwortbudget rollt die zugehörige SQL-Transaktion einschließlich des neuen Idempotenzdatensatzes zurück. Die Anfrage kann nach Behebung der Ursache mit demselben Schlüssel wiederholt werden. Neue Prüfnachweise verwenden Version 2 mit Kandidaten-, Engine- und Geometriebindung pro Einzelcheck. Der bei `cad_job_get` gelieferte Digest gehört zum vollständigen Ressourcenbericht, auch wenn nur die ersten fehlgeschlagenen Checks angezeigt werden.

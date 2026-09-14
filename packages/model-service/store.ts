@@ -95,18 +95,48 @@ export class Store {
   run(sql: string, ...params: any[]) {
     return this.db.prepare(sql).run(...params);
   }
+  private commitEffects: (() => void)[] | null = null;
+  afterCommit(fn: () => void) {
+    if (this.commitEffects) this.commitEffects.push(fn);
+    else fn();
+  }
   atomic<T>(fn: () => T): T {
     this.db.exec("BEGIN IMMEDIATE");
+    this.commitEffects = [];
+    let result: T;
+    let effects: (() => void)[];
     try {
-      const result = fn();
+      result = fn();
       this.db.exec("COMMIT");
-      return result;
+      effects = this.commitEffects;
     } catch (e) {
       this.db.exec("ROLLBACK");
       throw e;
+    } finally {
+      this.commitEffects = null;
     }
+    for (const effect of effects) {
+      try {
+        effect();
+      } catch {
+        // A failed wakeup/cancellation cannot undo the committed SQL state.
+        // Lease checks still prevent a cancelled worker from publishing data.
+        try {
+          this.audit("after_commit_effect_failed", {});
+        } catch {
+          /* best effort diagnostic */
+        }
+      }
+    }
+    return result;
   }
-  dedupe<T>(p: Principal, key: string, request: unknown, fn: () => T): T {
+  dedupe<T>(
+    p: Principal,
+    key: string,
+    request: unknown,
+    fn: () => T,
+    check?: (value: T) => void,
+  ): T {
     return this.atomic(() => {
       const digest = hash(request);
       const prior = this.get(
@@ -121,9 +151,12 @@ export class Store {
           "IDEMPOTENCY_CONFLICT",
           "Idempotenzschlüssel wurde mit anderen Argumenten verwendet.",
         );
-        return JSON.parse(prior.result);
+        const result = JSON.parse(prior.result);
+        check?.(result);
+        return result;
       }
       const result = fn();
+      check?.(result);
       this.run(
         "INSERT INTO idempotency VALUES(?,?,?,?,?)",
         p.tenant,

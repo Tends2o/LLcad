@@ -1,11 +1,11 @@
 {
   "application_version": "0.1.0",
   "ir_schema_version": "1",
-  "created": "2026-09-14T18:20:17.969Z",
+  "created": "2026-09-14T19:03:06.176Z",
   "status": "not_released",
-  "operator_registry_hash": "2c5919ecd79be717580ff8beb597454b584fd703537f831ad1216f179c70dd1c",
-  "worker_source_digest": "0a16a1760554d42f0bba5e309ce122bd2effebd50458bcb6055bd61b051fe44d",
-  "implementation_digest": "5847e281b77d28d5478326775060837ea14267aeaffda211b5806cf80e072726",
+  "operator_registry_hash": "c1f4d697af744a16d1c56c704402ff66ac91d08dea1b7e08d82e6e53fe57cd00",
+  "worker_source_digest": "8f1c98489b3017285ed99c3dd79604043cf6e94ee1b3205ff6681b2ba3abd622",
+  "implementation_digest": "a26c60d9ca5ff044af6de3d0b9111749f98aef659488c8c88bc8734e1753cccd",
   "worker_image_digests": null,
   "policy_bundle_hash": "694ac9f2925064cfac0733ec26b0a019c8ddd5b8f66df96ac7b71c942f4a0171",
   "dependency_lock_hashes": {
@@ -28,7 +28,7 @@
   },
   "local_codex_transport_tests": {
     "report": "reports/codex-host.json",
-    "status": "passed",
+    "status": "missing_or_stale",
     "model_turns": 0
   },
   "benchmark_report": "reports/benchmark.json",
@@ -42,10 +42,10 @@
   "completion_audit": {
     "status": "incomplete",
     "source_sha256": "39eb5f37ffcb1a0b3aa790d5e6db49e109a390ca57d1dcf47c23be231bce8ff0",
-    "audit_sha256": "02d2c0a9ef651d093bf955e8d7b1a74646457402b905a0b14f3acb211a8ee4e5",
+    "audit_sha256": "78fde9a6d2c5db1a04ee2a0f0cbc3abedcc4217e1d6532be82af5d9ee6f38a96",
     "sections": 162,
-    "verified": 42,
-    "remaining": 120,
+    "verified": 45,
+    "remaining": 117,
     "issues": [
       "1.1: 1.1 Was das System leisten soll – unvollständig oder nicht ausreichend geprüft.",
       "1.2: 1.2 Was „beliebig komplex“ hier bedeutet – unvollständig oder nicht ausreichend geprüft.",
@@ -90,11 +90,9 @@
       "8.6: 8.6 Verständnis vorhandener Fremdmodelle – unvollständig oder nicht ausreichend geprüft.",
       "9.2: 9.2 Operatorfamilien – unvollständig oder nicht ausreichend geprüft.",
       "9.3: 9.3 Vertrag pro Operator – unvollständig oder nicht ausreichend geprüft.",
-      "10.1: 10.1 Entwurfsprinzip – unvollständig oder nicht ausreichend geprüft.",
       "10.2: 10.2 Vorgesehene Werkzeuge – unvollständig oder nicht ausreichend geprüft.",
       "10.3: 10.3 Ressourcen – unvollständig oder nicht ausreichend geprüft.",
       "10.4: 10.4 Kleine Ergebnisse statt Geometrieflut – unvollständig oder nicht ausreichend geprüft.",
-      "11.4: 11.4 Einheitlicher Ergebnis- und Fehlerumschlag – unvollständig oder nicht ausreichend geprüft.",
       "12.1: 12.1 Bedeutung von „Hook“ in diesem Plan – unvollständig oder nicht ausreichend geprüft.",
       "12.2: 12.2 Hook-Matrix – unvollständig oder nicht ausreichend geprüft.",
       "12.3: 12.3 Vertrag und begrenzte Erweiterbarkeit – unvollständig oder nicht ausreichend geprüft.",
@@ -121,7 +119,6 @@
       "17.2: 17.2 Verpflichtende Prüfschichten – unvollständig oder nicht ausreichend geprüft.",
       "17.3: 17.3 Kleinste Details nachweisen – unvollständig oder nicht ausreichend geprüft.",
       "17.4: 17.4 Mindestwandstärke und Freigang – unvollständig oder nicht ausreichend geprüft.",
-      "17.5: 17.5 Nachweisdatensatz – unvollständig oder nicht ausreichend geprüft.",
       "17.6: 17.6 Zulässige Ergebnisbezeichnungen – unvollständig oder nicht ausreichend geprüft.",
       "18.1: 18.1 Bedrohungsmodell – unvollständig oder nicht ausreichend geprüft.",
       "18.2: 18.2 Verbindliche Schutzregeln – unvollständig oder nicht ausreichend geprüft.",

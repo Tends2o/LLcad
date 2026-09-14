@@ -6,6 +6,13 @@ import { ModelService } from "../packages/model-service/index.js";
 import { Principal, SCOPES } from "../packages/policy/index.js";
 import { ToolName } from "../packages/semantic-ir/schema.js";
 import { id } from "../packages/semantic-ir/hash.js";
+import { AjvJsonSchemaValidator } from "@modelcontextprotocol/sdk/validation/ajv";
+import { outputJSONSchema } from "../packages/semantic-ir/results.js";
+const jsonSchemas = new AjvJsonSchemaValidator();
+const validators = new Map<
+  ToolName,
+  ReturnType<typeof jsonSchemas.getValidator>
+>();
 export const principal: Principal = {
   tenant: "tenant-a",
   user: "alice",
@@ -31,6 +38,15 @@ export function call(
 ) {
   const r = s.call(p, tool, args);
   assert.notEqual(r.status, "failed", JSON.stringify(r));
+  let validator = validators.get(tool);
+  if (!validator) {
+    validator = jsonSchemas.getValidator(
+      JSON.parse(JSON.stringify(outputJSONSchema(tool))),
+    );
+    validators.set(tool, validator);
+  }
+  const check = validator(JSON.parse(JSON.stringify(r)));
+  assert.ok(check.valid, tool + ": " + check.errorMessage);
   return r;
 }
 export async function finish(s: ModelService, result: any, p = principal) {

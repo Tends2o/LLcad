@@ -1,39 +1,72 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": [
-    "status",
-    "errors",
-    "trace_id"
-  ],
-  "properties": {
-    "status": {
-      "type": "string"
+  "anyOf": [
+    {
+      "$ref": "cad_capabilities.result.schema.json"
     },
-    "errors": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": [
-          "code",
-          "message"
-        ],
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "message": {
-            "type": "string"
-          },
-          "details": {
-            "type": "object"
-          }
-        }
-      }
+    {
+      "$ref": "cad_list_models.result.schema.json"
     },
-    "trace_id": {
-      "type": "string"
+    {
+      "$ref": "cad_create_model.result.schema.json"
+    },
+    {
+      "$ref": "cad_get_model.result.schema.json"
+    },
+    {
+      "$ref": "cad_structure.result.schema.json"
+    },
+    {
+      "$ref": "cad_find.result.schema.json"
+    },
+    {
+      "$ref": "cad_inspect.result.schema.json"
+    },
+    {
+      "$ref": "cad_measure.result.schema.json"
+    },
+    {
+      "$ref": "cad_plan_edit.result.schema.json"
+    },
+    {
+      "$ref": "cad_solve_constraints.result.schema.json"
+    },
+    {
+      "$ref": "cad_apply_patch.result.schema.json"
+    },
+    {
+      "$ref": "cad_validate.result.schema.json"
+    },
+    {
+      "$ref": "cad_compare.result.schema.json"
+    },
+    {
+      "$ref": "cad_commit.result.schema.json"
+    },
+    {
+      "$ref": "cad_discard.result.schema.json"
+    },
+    {
+      "$ref": "cad_revert.result.schema.json"
+    },
+    {
+      "$ref": "cad_rebuild.result.schema.json"
+    },
+    {
+      "$ref": "cad_render.result.schema.json"
+    },
+    {
+      "$ref": "cad_import.result.schema.json"
+    },
+    {
+      "$ref": "cad_export.result.schema.json"
+    },
+    {
+      "$ref": "cad_job_get.result.schema.json"
+    },
+    {
+      "$ref": "cad_job_cancel.result.schema.json"
     }
-  },
-  "additionalProperties": true
+  ]
 }

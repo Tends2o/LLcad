@@ -2,15 +2,31 @@ import { writeFileSync, mkdirSync } from "node:fs";
 import { z } from "zod";
 import { ModelIR, Patch, ToolSchemas } from "../packages/semantic-ir/schema.js";
 import { OPERATORS, REGISTRY_HASH } from "../packages/compiler/index.js";
-import { OUTPUT_SCHEMA } from "../packages/mcp-gateway/tools.js";
+import {
+  FailureResponse,
+  ValidationReport,
+  outputJSONSchema,
+} from "../packages/semantic-ir/results.js";
 mkdirSync("schemas", { recursive: true });
 const schemas: Record<string, unknown> = {
   "model-ir-v1.schema.json": z.toJSONSchema(ModelIR),
   "parameter-patch-v1.schema.json": z.toJSONSchema(Patch),
-  "tool-results-v1.schema.json": OUTPUT_SCHEMA,
+  "tool-results-v1.schema.json": {
+    type: "object",
+    anyOf: Object.keys(ToolSchemas).map((name) => ({
+      $ref: name + ".result.schema.json",
+    })),
+  },
+  "tool-error-v1.schema.json": z.toJSONSchema(FailureResponse, {
+    reused: "ref",
+  }),
 };
-for (const [name, schema] of Object.entries(ToolSchemas))
+for (const [name, schema] of Object.entries(ToolSchemas)) {
   schemas[name + ".schema.json"] = z.toJSONSchema(schema);
+  schemas[name + ".result.schema.json"] = outputJSONSchema(
+    name as keyof typeof ToolSchemas,
+  );
+}
 schemas["operator-contract.schema.json"] = {
   type: "object",
   additionalProperties: false,
@@ -50,31 +66,9 @@ schemas["operator-contract.schema.json"] = {
     engine: { type: "string" },
   },
 };
-schemas["validation-result.schema.json"] = z.toJSONSchema(
-  z.object({
-    candidate_revision: z.string(),
-    ir_hash: z.string().regex(/^[a-f0-9]{64}$/),
-    geometry_digest: z.string(),
-    registry_hash: z.string(),
-    policy_hash: z.string(),
-    engine_build: z.string(),
-    profile: z.enum(["precision_cad", "render_surface"]),
-    status: z.enum(["failed", "checks_passed_within_profile"]),
-    digest: z.string().regex(/^[a-f0-9]{64}$/),
-    checks: z.array(
-      z.object({
-        check_id: z.string(),
-        target: z.string(),
-        method: z.string(),
-        guarantee: z.enum(["sampled", "bounded", "exact_for_declared_domain"]),
-        coverage: z.string(),
-        status: z.enum(["passed", "failed"]),
-        measured: z.unknown(),
-        error_bound: z.number().nullable(),
-      }),
-    ),
-  }),
-);
+schemas["validation-result.schema.json"] = z.toJSONSchema(ValidationReport, {
+  reused: "ref",
+});
 for (const [filename, schema] of Object.entries(schemas))
   writeFileSync(
     "schemas/" + filename,

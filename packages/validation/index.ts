@@ -9,6 +9,9 @@ import { equationValues, checkEquation } from "../compiler/constraints.js";
 import { sameFieldInRegion } from "../compiler/field-regions.js";
 import { compileStructure } from "../compiler/structure.js";
 type Check = {
+  revision: string;
+  engine_build: string;
+  source_geometry_hash: string;
   check_id: string;
   target: string;
   method: string;
@@ -39,11 +42,14 @@ export function validate(
     requested?: unknown,
   ) {
     checks.push({
+      revision: candidate,
+      engine_build: result.engine_build,
+      source_geometry_hash: hash(result.facts[target] ?? result.facts),
       check_id: id,
       target,
       status: pass ? "passed" : "failed",
       measured,
-      requested,
+      requested: requested ?? null,
       method,
       coverage,
       guarantee,
@@ -309,6 +315,7 @@ export function validate(
   }
   const failed = checks.filter((c) => c.status === "failed");
   const body = {
+    schema_version: "2",
     candidate_revision: candidate,
     ir_hash: hash(ir),
     geometry_digest: hash(result.facts),

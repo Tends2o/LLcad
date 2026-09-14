@@ -1338,17 +1338,25 @@
       "source_end_line": 1124,
       "source_sha256": "b4b0d661ada62c6b71c487f87f2a707990e4b5d1cfb7e995c9419541f692a90b",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Fachlich erkennbare Werkzeuge statt eines Werkzeugs pro mathematischem Operator bereitstellen.",
         "Versionierte strikte Ein- und Ausgangsschemata sowie structuredContent und verständliche Textdarstellung verwenden."
       ],
       "evidence": [
-        "packages/mcp-gateway/tools.ts",
-        "packages/semantic-ir/schema.ts",
-        "tests/protocol/http.test.ts"
+        "packages/semantic-ir/results.ts",
+        "packages/model-service/result-contracts.ts",
+        "scripts/schemas.ts",
+        "tests/security/result-contracts.test.ts",
+        "tests/protocol/http.test.ts",
+        "reports/verification.json",
+        "docs/result-contracts.md"
       ],
-      "notes": "22 fachliche Werkzeuge mit strikten Eingängen und beiden strukturierten Protokolladaptern sind vorhanden. Das gemeinsame Ausgangsschema beschreibt bisher nur Status/Fehler/Trace-ID mit offenen Zusatzfeldern; vollständige werkzeugspezifische Ausgangsverträge bleiben offen."
+      "notes": "22 fachliche Werkzeuge mit strikten Eingängen und eigenen versionierten Ausgangsverträgen, identischen generierten/angekündigten Schemas und beiden strukturierten Protokolladaptern. Laufzeit- und unabhängige SDK-Schemaprüfung tatsächlich serialisierter Integrationsantworten; geschlossene Wurzeln und fachliche Felder, ausdrücklich begrenzte JSON-Metadatendomänen.",
+      "review": {
+        "scope_match": true,
+        "findings": "Originalabschnitt mit fachlichen Aufgaben, Versionierung und structuredContent gegen die 22 Werkzeugdefinitionen und identisch exportierten Verträge geprüft. SDK-Prüfung tatsächlicher Integrationsantworten einschließlich Tupeln/rekursiven Daten besteht. Offene Metadaten sind benannte JSON-Domänen, keine offenen Werkzeugwurzeln."
+      }
     },
     {
       "id": "10.2",
@@ -1510,18 +1518,26 @@
       "source_end_line": 1283,
       "source_sha256": "1a762367f8361df002338519b147113585c4593ab1cede27b52c80b5e6e06728",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Einheitliche Ergebnisdaten mit Status, Modell-/Revisions-/Jobbindung, Messungen, Nachweisen, Warnungen, Fehlern, Annahmen und Artefakt-/Folgeaktionsangaben definieren.",
         "Fachliche Fehlercodes von adaptergerechten Protokollfehlern trennen und keine internen Pfade, Tokens oder Stacktraces ausgeben."
       ],
       "evidence": [
-        "packages/mcp-gateway/tools.ts",
-        "packages/semantic-ir/errors.ts",
-        "packages/model-service/index.ts",
-        "tests/protocol/http.test.ts"
+        "packages/semantic-ir/results.ts",
+        "packages/model-service/result-contracts.ts",
+        "packages/model-service/store.ts",
+        "packages/job-service/index.ts",
+        "tests/security/result-contracts.test.ts",
+        "tests/protocol/http.test.ts",
+        "reports/verification.json",
+        "docs/result-contracts.md"
       ],
-      "notes": "Status, Fehler und Trace-ID sowie sichere Fehlerbehandlung sind vorhanden. Vollständige werkzeugspezifische Ergebnisschemata und vereinheitlichte Folgeaktions-/Nullfelder bleiben mit 10.1 offen."
+      "notes": "Einheitlicher versionierter Umschlag einschließlich ausdrücklicher Nullbindungen, Listen und sicherer Fehler. Vor SQL-Commit werden Form, endliche Zahlen, Budget und Zielbindung geprüft; Tests belegen Rollback eines bereits ausgeführten cad_commit, erhaltene Wiederholbarkeit und verzögerten Workerabbruch. Fachlich negative Prüfergebnisse bleiben von fehlgeschlagenen Infrastrukturjobs getrennt.",
+      "review": {
+        "scope_match": true,
+        "findings": "Alle genannten Umschlagfelder sind vorhanden, nicht belegte Bindungen null. Fehler tragen sicheren Code/Erklärung; die beiden Adapter behalten ihre Protokollfehler. Fehlerhafte erfolgreiche Antworten, nichtendliche Zahlen und Größenüberschreitung rollen schreibende SQL-Effekte zurück. Test überprüft konkreten Modellkopf, Kandidat, Outbox und denselben Wiederholungsschlüssel; Workerabbruch erfolgt erst danach."
+      }
     },
     {
       "id": "12",
@@ -2212,17 +2228,26 @@
       "source_end_line": 1693,
       "source_sha256": "7c5907ac50d42031b02af3383cd10a54d24e09f2727c170bc26e10816912c105",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Prüfergebnisse an Kandidat, Ziel, Methode, Garantie, Anforderungen, Messung, Fehlergrenze, Abdeckung, Status, Engine und Quellgeometrie binden.",
         "Null als unbekannte Grenze behandeln; nur registrierte serverseitige Validatoren erzeugen Nachweise."
       ],
       "evidence": [
         "packages/validation/index.ts",
-        "packages/model-service/index.ts",
-        "tests/security/transactions.test.ts"
+        "packages/semantic-ir/results.ts",
+        "packages/model-service/result-contracts.ts",
+        "schemas/validation-result.schema.json",
+        "tests/security/result-contracts.test.ts",
+        "reports/output-legacy-compatibility.json",
+        "reports/verification.json",
+        "docs/result-contracts.md"
       ],
-      "notes": "Serverseitige Berichte binden Kandidat, IR, Geometriefakten, Registry, Policy und Engine; manipulierte Commitdigests werden abgewiesen. Vollständige je-Check-Metadaten und ein striktes eigenes Nachweisschema bleiben offen."
+      "notes": "Neue Nachweise in Version 2 tragen je Check Kandidatenrevision, Engine, Quellgeometriehash, explizite Anforderung oder null, Messung, Methode, Garantie, Abdeckung, Status und unbekannte Grenze als null. Bericht und Einzelchecks sind serverseitig gegen gespeicherte Konstruktion/Geometrie und Digest gebunden. Getrennte geschlossene Altschemas erhalten alte Originalnachweise; gekürzte Jobansichten referenzieren den unveränderten vollständigen Digest. Manipulations- und Kompatibilitätstests bestanden.",
+      "review": {
+        "scope_match": true,
+        "findings": "Jedes im Originalbeispiel genannte Nachweisfeld ist in neuen Checks vorhanden. Datensatz und Einzelchecks werden gegen Kandidat, Engine, tatsächliche Faktenhashes und Digest geprüft. Manipulationen an Revision/Engine/Geometriehash oder Status werden abgewiesen. Legacy-Nachweise behalten ihren ursprünglichen Inhalt; gekürzte Toolansichten verweisen ausdrücklich auf den vollständigen Originaldigest."
+      }
     },
     {
       "id": "17.6",

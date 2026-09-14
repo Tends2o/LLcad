@@ -11,6 +11,13 @@ import { exportPackage } from "../model-service/export-package.js";
 import { claimQueuedJob } from "./scheduler.js";
 import { checkEquation } from "../compiler/constraints.js";
 import { BUILD_HASH, currentBuildHash } from "../compiler/build.js";
+import {
+  assertJobResult,
+  assertJobView,
+  assertValidation,
+  assertResult,
+} from "../model-service/result-contracts.js";
+import { NativeWorkerResult } from "../semantic-ir/results.js";
 export class Jobs {
   private active: Worker | null = null;
   private activeID: string | null = null;
@@ -60,9 +67,12 @@ export class Jobs {
       "job_queued",
       JSON.stringify({ job_id: jid }),
     );
-    setImmediate(() => void this.pump());
+    this.store.afterCommit(() => {
+      setImmediate(() => void this.pump());
+    });
     return {
       status: "queued",
+      model_id: model,
       job_id: jid,
       transaction_id: tx ?? null,
       committed: false,
@@ -73,7 +83,7 @@ export class Jobs {
     const j = this.store.get("SELECT * FROM jobs WHERE id=?", jid);
     requireThat(j, "ACCESS_DENIED", "Job nicht zugänglich.");
     authorize(p, "model:read", j);
-    return {
+    const result = {
       job_id: j.id,
       model_id: j.model,
       transaction_id: j.tx,
@@ -82,6 +92,16 @@ export class Jobs {
       result: j.result ? JSON.parse(j.result) : null,
       error: j.error ? JSON.parse(j.error) : null,
     };
+    assertJobView(result, j.kind);
+    if (j.kind === "validate" && result.result) {
+      const tx = this.store.transaction(p, j.tx);
+      assertValidation(result.result, {
+        candidate: tx.candidate,
+        ir_hash: hash(tx.plan.ir),
+        facts: tx.result.facts,
+      });
+    }
+    return result;
   }
   cancel(p: Principal, jid: string) {
     const j = this.store.get("SELECT * FROM jobs WHERE id=?", jid);
@@ -100,7 +120,9 @@ export class Jobs {
         j.tx,
         "committed",
       );
-    if (this.activeID === jid) this.active?.cancel();
+    this.store.afterCommit(() => {
+      if (this.activeID === jid) this.active?.cancel();
+    });
     this.store.audit("job_cancelled", { job_id: jid });
     return this.get(p, jid);
   }
@@ -189,6 +211,12 @@ export class Jobs {
           cache_owner: job.owner,
           cache_model: job.model,
         });
+        assertResult(
+          NativeWorkerResult,
+          result,
+          "native_worker_result",
+          LIMITS.request_bytes * 8,
+        );
         requireThat(
           currentBuildHash() === BUILD_HASH,
           "BUILD_MISMATCH",
@@ -275,6 +303,12 @@ export class Jobs {
             recommended_next_actions: ["cad_validate"],
           };
         } else if (job.kind === "validate") {
+          const tx = this.store.transaction(p, job.tx);
+          assertValidation(result, {
+            candidate: tx.candidate,
+            ir_hash: hash(tx.plan.ir),
+            facts: tx.result.facts,
+          });
           this.store.run(
             "UPDATE transactions SET validation=?,state=? WHERE id=?",
             JSON.stringify(result),
@@ -454,9 +488,11 @@ export class Jobs {
           result = {
             status: "succeeded",
             ...exported,
+            ...(job.kind === "export" ? { result_schema_version: "1" } : {}),
             metrics: result.metrics,
           };
         }
+        assertJobResult(job.kind, result);
         this.store.run(
           "UPDATE jobs SET state='succeeded',result=?,lease=NULL,lease_until=NULL WHERE id=? AND lease=?",
           JSON.stringify(result),

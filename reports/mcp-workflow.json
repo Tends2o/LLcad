@@ -1,21 +1,20 @@
 {
   "status": "passed",
-  "created": "2026-09-14T18:07:32.552Z",
-  "registry_hash": "2c5919ecd79be717580ff8beb597454b584fd703537f831ad1216f179c70dd1c",
-  "implementation_hash": "5847e281b77d28d5478326775060837ea14267aeaffda211b5806cf80e072726",
+  "created": "2026-09-14T18:49:56.314Z",
+  "registry_hash": "c1f4d697af744a16d1c56c704402ff66ac91d08dea1b7e08d82e6e53fe57cd00",
+  "implementation_hash": "a26c60d9ca5ff044af6de3d0b9111749f98aef659488c8c88bc8734e1753cccd",
   "transport": "MCP Streamable HTTP",
   "client": "official SDK",
   "browser_interactions": 0,
-  "model_id": "model-7fae1004-112f-42c5-a47f-a2dde6c0f5cd",
-  "original_revision": "rev-ea096613-23b1-481a-8133-50cded496eb0",
-  "edited_revision": "rev-c2284cde-8d27-4589-b0ba-ac0d8dd68eb4",
+  "model_id": "model-f8e93f32-5f78-4b8e-8365-f44242e050b7",
+  "original_revision": "rev-95353a51-c222-4758-96b1-a1dbff6bcef5",
+  "edited_revision": "rev-ff9a0ad2-7ac6-4576-8d83-d532598706c7",
   "calls": [
     "cad_capabilities",
     "cad_list_models",
     "cad_create_model",
     "cad_plan_edit",
     "cad_apply_patch",
-    "cad_job_get",
     "cad_job_get",
     "cad_job_get",
     "cad_job_get",
@@ -57,6 +56,12 @@
   ],
   "measurements": {
     "status": "ok",
+    "result_schema_version": "1",
+    "model_id": "model-f8e93f32-5f78-4b8e-8365-f44242e050b7",
+    "revision": "rev-ff9a0ad2-7ac6-4576-8d83-d532598706c7",
+    "candidate_revision": null,
+    "transaction_id": null,
+    "job_id": null,
     "measurements": {
       "volume": 4738.173456577353,
       "area": 3783.0442390377443,
@@ -96,7 +101,7 @@
       "coordinate_frame": "world",
       "dimension_frame": "world",
       "engine_build": "OCCT-7.9.3.1.1/mathforge-1",
-      "cache_key": "3b6c13a0715fae96d31905fb2b90f243eca528f9439014ed32cf069404633d73",
+      "cache_key": "e9a961696089212f73f7796b4451124ac1774082d34d445a993fa5a76bbfd7ec",
       "topology": {
         "version": 3,
         "face_count": 10,
@@ -109,16 +114,20 @@
     "assumptions": [],
     "artifacts": [],
     "recommended_next_actions": [],
-    "model_id": "model-7fae1004-112f-42c5-a47f-a2dde6c0f5cd",
-    "revision": "rev-c2284cde-8d27-4589-b0ba-ac0d8dd68eb4",
     "metric": "all",
     "measurement_frame": "world",
     "unit": "mm",
     "coverage": "registered_geometric_measurement",
-    "trace_id": "trace-605e3c56-ae97-4aa1-80c8-c1542b1b4361"
+    "trace_id": "trace-6b67dfe6-2b68-4177-bda2-437ddac36af2"
   },
   "comparison": {
     "status": "ok",
+    "result_schema_version": "1",
+    "model_id": "model-f8e93f32-5f78-4b8e-8365-f44242e050b7",
+    "revision": null,
+    "candidate_revision": null,
+    "transaction_id": null,
+    "job_id": null,
     "measurements": null,
     "checks": [],
     "warnings": [],
@@ -126,9 +135,8 @@
     "assumptions": [],
     "artifacts": [],
     "recommended_next_actions": [],
-    "model_id": "model-7fae1004-112f-42c5-a47f-a2dde6c0f5cd",
-    "from_revision": "rev-ea096613-23b1-481a-8133-50cded496eb0",
-    "to_revision": "rev-c2284cde-8d27-4589-b0ba-ac0d8dd68eb4",
+    "from_revision": "rev-95353a51-c222-4758-96b1-a1dbff6bcef5",
+    "to_revision": "rev-ff9a0ad2-7ac6-4576-8d83-d532598706c7",
     "structure_changed": false,
     "changed_features": [
       "feat-groove-07"
@@ -186,7 +194,7 @@
     ],
     "volume_delta": -1.5079644737234048,
     "coverage": "declared_dimensions_and_per_feature_hashes",
-    "trace_id": "trace-2a180894-dd40-4d48-a65e-30e85d57718c"
+    "trace_id": "trace-fbe2672b-2c92-4958-a24e-bc2a7b493a48"
   },
   "roundtrip": {
     "status": "checks_passed_within_profile",

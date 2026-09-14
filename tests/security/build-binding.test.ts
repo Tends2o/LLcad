@@ -77,7 +77,7 @@ test("explicit rebuild binds the target build, preserves old revisions and requi
     const plan = call(s, "cad_rebuild", request);
     assert.equal(plan.status, "planned");
     assert.equal(plan.source_ir_hash, plan.candidate_ir_hash);
-    assert.equal(plan.job_id, undefined);
+    assert.equal(plan.job_id, null);
     assert.deepEqual(plan.protected_constraints, revision.ir.constraints);
     const buildRequest = {
       ...binding,

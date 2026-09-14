@@ -34,6 +34,16 @@ import { affineContract } from "../compiler/affine.js";
 import { compileStructure, contextHash } from "../compiler/structure.js";
 import { structurePage } from "./structure.js";
 import {
+  ArtifactResource,
+  ToolPayloadSchemas,
+} from "../semantic-ir/results.js";
+import {
+  assertResult,
+  assertValidation,
+  checkedToolResponse,
+  failureResponse,
+} from "./result-contracts.js";
+import {
   faces,
   faceSummary,
   resolveSelection,
@@ -62,40 +72,39 @@ export class ModelService {
         "BUDGET_EXCEEDED",
         "Request ist zu groß.",
       );
-      requireThat(tool in ToolSchemas, "INVALID_SCHEMA", "Werkzeug unbekannt.");
+      requireThat(
+        Object.hasOwn(ToolSchemas, tool),
+        "INVALID_SCHEMA",
+        "Werkzeug unbekannt.",
+      );
       authorize(p, scopeFor(tool));
       this.gates.run("before_request", { trace_id: trace, tool });
       const args: any = parse(ToolSchemas[tool], input);
       if (args.model_id) this.store.model(p, args.model_id, scopeFor(tool));
       const run = () => this.dispatch(p, tool, args);
-      const result = args.idempotency_key
-        ? this.store.dedupe(p, args.idempotency_key, { tool, args }, run)
-        : run();
-      const response = {
-        status: "ok",
-        measurements: null,
-        checks: [],
-        warnings: [],
-        errors: [],
-        assumptions: [],
-        artifacts: [],
-        recommended_next_actions: [],
-        ...result,
-        trace_id: trace,
+      let response: any;
+      const check = (result: any) => {
+        response = checkedToolResponse(tool, result, trace);
+        for (const key of [
+          "model_id",
+          "base_revision",
+          "transaction_id",
+          "revision",
+        ])
+          if (args[key] !== undefined && result[key] !== undefined)
+            requireThat(
+              args[key] === result[key],
+              "OUTPUT_CONTRACT_VIOLATION",
+              "Antwort ist an ein anderes Ziel gebunden.",
+              { contract: tool },
+            );
       };
-      requireThat(
-        Buffer.byteLength(JSON.stringify(response)) <= LIMITS.response_bytes,
-        "BUDGET_EXCEEDED",
-        "Antwort überschreitet das Toolbudget. Engeren Ausschnitt oder Ressourcenabruf verwenden.",
-      );
+      if (args.idempotency_key)
+        this.store.dedupe(p, args.idempotency_key, { tool, args }, run, check);
+      else this.store.atomic(() => check(run()));
       return response;
     } catch (error) {
-      return {
-        status: "failed",
-        errors: [safeError(error)],
-        trace_id: trace,
-        committed: false,
-      };
+      return failureResponse(error, trace);
     }
   }
   mustFresh(p: Principal, a: any) {
@@ -988,6 +997,11 @@ export class ModelService {
             "VALIDATION_REQUIRED",
             "Prüfnachweis passt nicht zu Kandidat, Build oder Policy.",
           );
+          assertValidation(tx.validation, {
+            candidate: tx.candidate,
+            ir_hash: hash(tx.plan.ir),
+            facts: tx.result.facts,
+          });
         });
         const rev = id("rev");
         this.store.run(
@@ -1315,30 +1329,43 @@ export class ModelService {
           deflection,
         });
       }
-      case "cad_job_get": {
-        const j = this.jobs.get(p, a.job_id);
-        if (j.result?.checks) {
-          j.result = {
-            ...j.result,
-            check_count: j.result.checks.length,
-            checks: j.result.checks
-              .filter((c: any) => c.status !== "passed")
-              .slice(0, 16),
-            validation_uri: `cad://transactions/${j.transaction_id}/validation`,
-          };
-        }
-        return j;
-      }
+      case "cad_job_get":
+        return this.jobSummary(this.jobs.get(p, a.job_id));
       case "cad_job_cancel":
-        return this.jobs.cancel(p, a.job_id);
+        return this.jobSummary(this.jobs.cancel(p, a.job_id));
     }
   }
+  private jobSummary(j: any) {
+    if (j.result?.checks)
+      j.result = {
+        ...j.result,
+        check_count: j.result.checks.length,
+        checks: j.result.checks
+          .filter((c: any) => c.status !== "passed")
+          .slice(0, 16),
+        validation_uri: `cad://transactions/${j.transaction_id}/validation`,
+      };
+    return j;
+  }
   resource(p: Principal, uri: string) {
+    return this.store.atomic(() => this.readResource(p, uri));
+  }
+  private readResource(p: Principal, uri: string) {
+    const checked = (tool: "cad_get_model" | "cad_inspect", args: any) => {
+      const result = this.dispatch(p, tool, args);
+      assertResult(
+        ToolPayloadSchemas[tool],
+        result,
+        tool + "_resource",
+        LIMITS.request_bytes,
+      );
+      return result;
+    };
     let m;
     if (
       (m = /^cad:\/\/models\/([^/]+)\/revisions\/([^/]+)\/summary$/.exec(uri))
     )
-      return this.dispatch(p, "cad_get_model", {
+      return checked("cad_get_model", {
         model_id: m[1],
         revision: m[2],
         offset: 0,
@@ -1350,7 +1377,7 @@ export class ModelService {
           uri,
         ))
     )
-      return this.dispatch(p, "cad_inspect", {
+      return checked("cad_inspect", {
         model_id: m[1],
         revision: m[2],
         feature_id: m[3],
@@ -1364,17 +1391,29 @@ export class ModelService {
         "VALIDATION_REQUIRED",
         "Prüfbericht steht noch aus.",
       );
+      assertValidation(tx.validation, {
+        candidate: tx.candidate,
+        ir_hash: hash(tx.plan.ir),
+        facts: tx.result.facts,
+      });
       return tx.validation;
     }
     if ((m = /^cad:\/\/artifacts\/([^/]+)\/manifest$/.exec(uri))) {
       const a = this.store.getArtifact(p, m[1]);
-      return {
+      const result = {
         artifact_id: a.id,
         hash: a.hash,
         mime: a.mime,
         size: a.size,
         manifest: a.manifest,
       };
+      assertResult(
+        ArtifactResource,
+        result,
+        "artifact_manifest",
+        LIMITS.request_bytes,
+      );
+      return result;
     }
     throw new CadError("ACCESS_DENIED", "Ressource nicht zugänglich.");
   }

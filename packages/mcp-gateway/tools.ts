@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ToolSchemas, READ_TOOLS, ToolName } from "../semantic-ir/schema.js";
+import { outputJSONSchema } from "../semantic-ir/results.js";
 export const SERVER_INFO = { name: "mathforge-3d", version: "0.1.0" };
 export const INSTRUCTIONS =
   "Operate CAD entirely through tools; never require the user to click in the viewer. Discover existing private models with cad_list_models and identify features with cad_find and cad_inspect. Read the current revision before editing. Apply a bounded patch, poll its job, validate the candidate, then commit with the returned validation digest. Always preserve units and protected constraints. Resolve genuine ambiguity through semantic tool queries or a short natural-language clarification. Preview is not validation.";
@@ -48,34 +49,13 @@ export const descriptions: Record<ToolName, string> = {
   cad_job_cancel:
     "Cancel an authorized unfinished job. Committed revisions remain immutable.",
 };
-export const OUTPUT_SCHEMA = {
-  type: "object",
-  required: ["status", "errors", "trace_id"],
-  properties: {
-    status: { type: "string" },
-    errors: {
-      type: "array",
-      items: {
-        type: "object",
-        required: ["code", "message"],
-        properties: {
-          code: { type: "string" },
-          message: { type: "string" },
-          details: { type: "object" },
-        },
-      },
-    },
-    trace_id: { type: "string" },
-  },
-  additionalProperties: true,
-} as const;
 export function toolDefinitions() {
   return Object.entries(ToolSchemas).map(([name, schema]) => ({
     name,
     title: name.replace("cad_", "").replaceAll("_", " "),
     description: descriptions[name as ToolName],
     inputSchema: z.toJSONSchema(schema),
-    outputSchema: OUTPUT_SCHEMA,
+    outputSchema: outputJSONSchema(name as ToolName),
     annotations: {
       readOnlyHint: READ_TOOLS.has(name as ToolName) && name !== "cad_measure",
       destructiveHint: ["cad_commit", "cad_discard", "cad_job_cancel"].includes(

@@ -3,6 +3,7 @@ import type { Principal } from "../policy/index.js";
 import { hash } from "../semantic-ir/hash.js";
 import { requireThat } from "../semantic-ir/errors.js";
 import { IMPLEMENTATION_HASH } from "../compiler/build.js";
+import { assertValidation } from "./result-contracts.js";
 
 type Artifact = ReturnType<Store["artifact"]>;
 /** Private, revision-bound components. Data in sidecars is never executable. */
@@ -26,6 +27,10 @@ export function exportPackage(
   );
   const validation = JSON.parse(row.validation),
     { digest, ...body } = validation;
+  assertValidation(validation, {
+    ir_hash: revision.ir_hash,
+    facts: revision.geometry.facts,
+  });
   requireThat(
     digest === hash(body) &&
       body.ir_hash === revision.ir_hash &&

@@ -5,7 +5,8 @@ import { createServer } from "node:net";
 import { request as httpRequest } from "node:http";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import { setup, principal } from "../helpers.js";
+import { setup, principal, importFixture } from "../helpers.js";
+import { sphere } from "../../scripts/fixtures.js";
 import { createApp } from "../../packages/mcp-gateway/app.js";
 const TOKEN = "protocol-test-" + "x".repeat(32);
 async function server() {
@@ -143,6 +144,30 @@ test("official legacy SDK initialization, tool schemas and structured result", a
       arguments: {},
     });
     assert.equal((result.structuredContent as any).ir_schema_version, "1");
+    const model = await importFixture(env.service, sphere, {
+      ...principal,
+      tenant: "local",
+      user: "local-user",
+    });
+    const inspected = await client.callTool({
+      name: "cad_inspect",
+      arguments: { model_id: model.model_id, feature_id: "sphere" },
+    });
+    assert.equal(
+      (inspected.structuredContent as any).face_page.faces[0].center.length,
+      3,
+    );
+    const measured = await client.callTool({
+      name: "cad_measure",
+      arguments: { model_id: model.model_id, metric: "bounds" },
+    });
+    assert.equal((measured.structuredContent as any).measurements.length, 6);
+    const denied = await client.callTool({
+      name: "cad_get_model",
+      arguments: { model_id: "unavailable" },
+    });
+    assert.equal(denied.isError, true);
+    assert.equal((denied.structuredContent as any).committed, false);
   } finally {
     await client.close();
     await env.stop();
