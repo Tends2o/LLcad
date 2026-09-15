@@ -201,5 +201,51 @@
       ]
     }
   ],
-  "distribution_approval": false
+  "distribution_approval": false,
+  "native_components": [
+    {
+      "name": "libcgal-dev",
+      "version": "6.0.1-1",
+      "copyright_file": "/usr/share/doc/libcgal-dev/copyright",
+      "copyright_sha256": "16fb8b939a0a56fa74a98e197c34cddfd8f8ec535b1d7d07470cd987e01e5804"
+    },
+    {
+      "name": "libgmp-dev",
+      "version": "2:6.3.0+dfsg-3",
+      "copyright_file": "/usr/share/doc/libgmp-dev/copyright",
+      "copyright_sha256": "7d366aef5ba325150246de1d7820c4c9926cd27ca61a69948492b26cd3b61601"
+    },
+    {
+      "name": "libgmp10",
+      "version": "2:6.3.0+dfsg-3",
+      "copyright_file": "/usr/share/doc/libgmp10/copyright",
+      "copyright_sha256": "7d366aef5ba325150246de1d7820c4c9926cd27ca61a69948492b26cd3b61601"
+    },
+    {
+      "name": "libmpfr-dev",
+      "version": "4.2.2-1",
+      "copyright_file": "/usr/share/doc/libmpfr-dev/copyright",
+      "copyright_sha256": "c434a44e656a89e72b5cee13bba6719011e0899bfc626ab9c08205010ab2dbbe"
+    },
+    {
+      "name": "libmpfr6",
+      "version": "4.2.2-1",
+      "copyright_file": "/usr/share/doc/libmpfr6/copyright",
+      "copyright_sha256": "c434a44e656a89e72b5cee13bba6719011e0899bfc626ab9c08205010ab2dbbe"
+    },
+    {
+      "name": "libboost1.83-dev",
+      "version": "1.83.0-4.2",
+      "copyright_file": "/usr/share/doc/libboost1.83-dev/copyright",
+      "copyright_sha256": "87ff229c71d391f951383b2246ba630c849e2024ea42a2ac9113dc9646f1e667"
+    },
+    {
+      "name": "g++-14",
+      "version": "14.2.0-19",
+      "copyright_file": "/usr/share/doc/g++-14/copyright",
+      "copyright_sha256": "20390f8a6f3b1e4d7cb45dd8652dabb259bbef688cbad839bcdb0b9ba7252f79"
+    }
+  ],
+  "cgal_pmp_header_license": "GPL-3.0-or-later OR LicenseRef-Commercial",
+  "native_inventory_created": "2026-09-14T23:36:11.668328+00:00"
 }

@@ -1,10 +1,10 @@
 {
   "status": "incomplete",
   "source_sha256": "39eb5f37ffcb1a0b3aa790d5e6db49e109a390ca57d1dcf47c23be231bce8ff0",
-  "audit_sha256": "8425f83989ecf51817f490456506e0242da8929677a4b777b118730c085ee954",
+  "audit_sha256": "3a48a3e5de404e8cf260b899d855484aa1b361b4a5c73c745aa529cc2329e51d",
   "sections": 162,
-  "verified": 45,
-  "remaining": 117,
+  "verified": 46,
+  "remaining": 116,
   "issues": [
     "1.1: 1.1 Was das System leisten soll – unvollständig oder nicht ausreichend geprüft.",
     "1.2: 1.2 Was „beliebig komplex“ hier bedeutet – unvollständig oder nicht ausreichend geprüft.",
@@ -29,7 +29,6 @@
     "6.16: 6.16 Nebenbedingungen und Optimierung – unvollständig oder nicht ausreichend geprüft.",
     "6.17: 6.17 Lokale Sensitivität und inverse Änderungen – unvollständig oder nicht ausreichend geprüft.",
     "6.18: 6.18 Geometrische Abstände und Fehlermaße – unvollständig oder nicht ausreichend geprüft.",
-    "6.19: 6.19 Flächen, Volumen und Dreiecksqualität – unvollständig oder nicht ausreichend geprüft.",
     "6.20: 6.20 Lipschitz-Schranken und sichere Feldauswertung – unvollständig oder nicht ausreichend geprüft.",
     "6.21: 6.21 Adaptive Tessellation und lokale Auflösung – unvollständig oder nicht ausreichend geprüft.",
     "6.22: 6.22 Oberfläche aus lokalen Tangentialdaten – unvollständig oder nicht ausreichend geprüft.",

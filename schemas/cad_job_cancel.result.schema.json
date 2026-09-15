@@ -1271,7 +1271,8 @@
       "type": "string",
       "enum": [
         "precision_cad",
-        "render_surface"
+        "render_surface",
+        "watertight_solid"
       ]
     },
     "__schema19": {

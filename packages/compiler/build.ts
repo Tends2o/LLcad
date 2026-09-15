@@ -10,6 +10,10 @@ const buildFiles = [
   "workers/cad-occt/analysis.py",
   "workers/cad-occt/solver.py",
   "workers/cad-occt/main.py",
+  "workers/cad-occt/mesh_quality.py",
+  "workers/mesh-cgal/check.cpp",
+  "scripts/build-native.py",
+  "packages/compiler/native-build.ts",
   "workers/cad-occt/fields.py",
   "workers/cad-occt/field_cache.py",
   "workers/cad-occt/volume_io.py",
@@ -29,6 +33,7 @@ const buildFiles = [
   "packages/semantic-ir/units.ts",
   "packages/semantic-ir/hash.ts",
   "packages/semantic-ir/schema.ts",
+  "packages/semantic-ir/mesh.ts",
   "packages/semantic-ir/identifiers.ts",
   "packages/semantic-ir/access.ts",
   "packages/validation/index.ts",
@@ -58,7 +63,9 @@ const implementationFiles = [
     .map(String)
     .filter(
       (path) =>
-        /\.(ts|py|json|sh|service|example)$/.test(path) || path === "Caddyfile",
+        !path.includes(".meshcheck") &&
+        (/\.(ts|py|cpp|hpp|json|sh|service|example)$/.test(path) ||
+          path === "Caddyfile"),
     )
     .map((path) => directory + "/" + path),
 );

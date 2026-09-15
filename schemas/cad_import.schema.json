@@ -27,6 +27,13 @@
         "stl"
       ]
     },
+    "validation_profile": {
+      "type": "string",
+      "enum": [
+        "render_surface",
+        "watertight_solid"
+      ]
+    },
     "source_unit": {
       "type": "string",
       "enum": [

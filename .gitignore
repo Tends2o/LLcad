@@ -8,3 +8,5 @@ __pycache__/
 .env
 test-results/
 playwright-report/
+workers/cad-occt/meshcheck
+workers/cad-occt/.meshcheck*

@@ -29,7 +29,7 @@ const bounds = z.tuple([
 ]);
 const pageOffset = count.nullable();
 const quality = z.enum(["preview_only", "checks_passed_within_profile"]);
-const profile = z.enum(["precision_cad", "render_surface"]);
+const profile = z.enum(["precision_cad", "render_surface", "watertight_solid"]);
 const source = Feature.shape.purpose.unwrap();
 const parameters = Feature.shape.parameters;
 const expressions = Feature.shape.expressions.removeDefault();
@@ -494,6 +494,7 @@ const capabilities = z.strictObject({
   policy_hash: Digest,
   formats: z.strictObject({ import: strings, export: strings }),
   quality_profiles: z.array(profile),
+  mesh_validation: Metadata,
   analysis: Metadata,
   field_operators: strings,
   constraint_solver: Metadata,

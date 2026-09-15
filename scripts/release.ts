@@ -64,7 +64,11 @@ const manifest = {
     npm: bytesHash(readFileSync("package-lock.json")),
     python: bytesHash(readFileSync("requirements.lock")),
   },
-  supported_quality_profiles: ["precision_cad", "render_surface"],
+  supported_quality_profiles: [
+    "precision_cad",
+    "render_surface",
+    "watertight_solid",
+  ],
   protocol_compatibility_tests: "reports/tests.log",
   target_host_tests: host ?? { status: "not_run" },
   local_llm_tests: {

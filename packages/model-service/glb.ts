@@ -103,7 +103,9 @@ export function packGLB(preview: any) {
   let maxError = 0,
     verticesChecked = 0,
     indicesChecked = 0;
+  const restoredMeshes: { vertices: number[][]; triangles: number[][] }[] = [];
   for (const [i, node] of restored.nodes.entries()) {
+    const restoredVertices: number[][] = [];
     const source = preview.meshes[i],
       primitive = restored.meshes[node.mesh].primitives[0];
     const accessor = restored.accessors[primitive.attributes.POSITION],
@@ -124,6 +126,7 @@ export function packGLB(preview: any) {
         (v, k) => v + 2 * (qw * uv[k] + uuv[k]) + node.translation[k],
       );
       const restoredMM = [world[0] * 1000, -world[2] * 1000, world[1] * 1000];
+      restoredVertices.push(restoredMM);
       for (let k = 0; k < 3; k++)
         maxError = Math.max(
           maxError,
@@ -148,6 +151,10 @@ export function packGLB(preview: any) {
       );
       indicesChecked++;
     }
+    restoredMeshes.push({
+      vertices: restoredVertices,
+      triangles: source.triangles,
+    });
   }
   requireThat(
     Number.isFinite(maxError),
@@ -156,6 +163,7 @@ export function packGLB(preview: any) {
   );
   return {
     buffer,
+    restored_meshes: restoredMeshes,
     report: {
       status: "checks_passed_within_profile",
       method: "GLB_serialized_positions_indices_and_node_transform_roundtrip",

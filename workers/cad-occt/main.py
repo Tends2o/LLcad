@@ -3,13 +3,22 @@ import json, os, sys, time, resource, traceback, shutil
 from geometry import *
 import topology
 import frames
+import mesh_quality
 
 def run(request):
+    if request.get('action')=='mesh_check':
+        restored=mesh_quality.combine(request['meshes'])
+        report={'mesh_quality':mesh_quality.inspect_mesh(restored)}
+        if 'original_meshes' in request:
+            report['measured_vertex_error_bound_mm']=mesh_quality.correspondence_bound(mesh_quality.combine(request['original_meshes']),restored)
+            require(report['measured_vertex_error_bound_mm']<=request['tolerance'],
+                    'GLB-Quantisierung überschreitet die verlangte Geometriegenauigkeit.','PRECISION_UNSUPPORTED')
+        return dict(status='candidate_ready',facts={},aggregate=report,files=[],engine_build=BUILD,metrics={})
     if request.get('action')=='solve_constraints':
         from solver import solve
         return dict(status='succeeded',facts={},aggregate=solve(request['solver']),files=[],engine_build=BUILD,metrics={})
     shapes={}; local_shapes={}; local_histories={}; facts={}; histories={}; face_records={}; samplers={}; hits=0; started=time.monotonic()
-    plan=request['plan'];features=plan['features'];field_results={}
+    plan=request['plan'];features=plan['features'];field_results={};mesh_results={}
     definitions={f['id']:f for f in features}
     def cached_shape(key):
         cache='cache/'+key+'.brep';history_cache='cache/'+key+'.topology.json'
@@ -24,6 +33,18 @@ def run(request):
         with open('out/'+key+'.topology.json','w') as h:json.dump(records,h,allow_nan=False)
     for f in features:
         fid=f['id'];op=f['construction']['operator']
+        if op=='imported' and f['construction']['format']=='stl':
+            source=mesh_quality.read_stl('input-'+f['construction']['artifact_id']+'.stl',f['construction']['source_unit'])
+            require(source['source_conversion']['coordinate_error_bound_mm']<=plan['tolerance'],
+                    'STL-Einheitenkonvertierung überschreitet die Modellgenauigkeit.','PRECISION_UNSUPPORTED')
+            local_bounds=[*[min(p[i] for p in source['vertices']) for i in range(3)],*[max(p[i] for p in source['vertices']) for i in range(3)]]
+            source=frames.world_mesh(source,f.get('placement'))
+            source.update(feature_id=fid,quality='preview_only',deflection=0.,certified_bound=None)
+            mesh_results[fid]=source;facts[fid]=mesh_quality.mesh_facts(source,f)
+            facts[fid]['local_bounds']=local_bounds
+            require(facts[fid]['valid'],'Mesh enthält degenerierte oder doppelte Dreiecke.')
+            with open('out/'+f['cache_key']+'.mesh.json','w') as h:json.dump(source,h,allow_nan=False,separators=(',',':'))
+            continue
         if op=='field':
             from fields import extract, field_facts
             from field_cache import Sampler
@@ -75,23 +96,27 @@ def run(request):
     output_shapes=[shapes[fid] for fid in plan['outputs'] if fid in shapes]
     root=compound(output_shapes) if len(output_shapes)>1 else output_shapes[0] if output_shapes else None
     aggregate=properties(root) if root is not None else None
-    if any(fid in field_results for fid in plan['outputs']):
+    if any(fid in field_results or fid in mesh_results for fid in plan['outputs']):
         declared=[facts[fid]['bounds'] for fid in plan['outputs']]
         aggregate={'valid':all(facts[fid]['valid'] for fid in plan['outputs']),
                    'bounds':[*(min(b[i] for b in declared) for i in range(3)),*(max(b[i+3] for b in declared) for i in range(3))],
                    'volume':None,'area':None,'solids':None,'precision_solid_only':False,
                    'coverage':'declared_world_bounds_without_implicit_volume_certificate'}
+    if plan['outputs'] and all(fid in mesh_results for fid in plan['outputs']):
+        combined=mesh_quality.combine([mesh_results[fid] for fid in plan['outputs']])
+        aggregate=mesh_quality.mesh_facts(combined,{'cache_key':'aggregate'})
     if plan['profile']=='precision_cad' and plan['outputs']:
         require(root is not None and len(output_shapes)==len(plan['outputs']),'CAD-Profil benötigt native Körper.')
         require(all(facts[fid]['precision_solid_only'] and facts[fid]['volume']>0 for fid in plan['outputs']),'Jede Ausgabe des CAD-Profils muss ausschließlich aus Volumenkörpern bestehen.')
         require(aggregate['solids']>0 and aggregate['volume']>0,'CAD-Profil benötigt nichtleere Volumenkörper.')
-    files=[];action=request.get('action','evaluate')
+    files=[definitions[fid]['cache_key']+'.mesh.json' for fid in mesh_results];action=request.get('action','evaluate')
     if root is not None:
         write_brep(root,'out/model.brep');files.append('model.brep')
     if action=='render':
         selected=request.get('feature_id');targets=[selected] if selected else plan['outputs'];meshes=[]
         for fid in targets:
             if fid in shapes:meshes.append(mesh(shapes[fid],request['deflection'],fid,face_records[fid]['faces']))
+            elif fid in mesh_results:meshes.append(mesh_results[fid])
             elif fid in field_results:
                 from fields import extract
                 meshes.append(frames.world_mesh(extract(field_results[fid],samplers[fid]),field_results[fid].get('placement')))
@@ -103,6 +128,16 @@ def run(request):
         fid=plan['outputs'][0];report=export_vdb(field_results[fid],'out/model.vdb',samplers[fid]);files.append('model.vdb')
         with open('out/roundtrip.json','w') as h:json.dump(report,h,allow_nan=False)
         files.append('roundtrip.json')
+    elif action=='export' and mesh_results:
+        require(all(fid in mesh_results for fid in plan['outputs']),
+                'Gemischte Geometrie darf beim Meshexport nicht still weggelassen werden.','OUT_OF_SCOPE')
+        require(request['format']=='stl','Ein maßgebliches Mesh benötigt STL, GLB oder IR; B-Rep-Rekonstruktion ist eine eigene Konvertierung.','OUT_OF_SCOPE')
+        source=mesh_quality.combine([mesh_results[fid] for fid in plan['outputs']])
+        restored,quality,report=mesh_quality.export_stl(source,'out/model.stl',plan['tolerance'])
+        if plan['profile']=='watertight_solid':require(quality['watertight_solid'],'Exportiertes STL erfüllt das Meshkörperprofil nicht.')
+        report.update(before=aggregate,after=mesh_quality.mesh_facts(restored,{'cache_key':'roundtrip'},quality))
+        with open('out/roundtrip.json','w') as h:json.dump(report,h,allow_nan=False)
+        files.extend(['model.stl','roundtrip.json'])
     elif action=='export':
         require(root is not None,'Dieses Format benötigt B-Rep-Geometrie.','OUT_OF_SCOPE')
         require(len(output_shapes)==len(plan['outputs']),'Dieses native Exportformat darf implizite Ausgaben nicht still weglassen. GLB/IR verwenden oder Ausgaben ausdrücklich auswählen.','OUT_OF_SCOPE')

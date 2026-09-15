@@ -773,7 +773,7 @@
       "source_end_line": 764,
       "source_sha256": "760ce0f329cd28bae829d6ef69af9b82b6fa49050531c0aa81f8e0e5d85608b5",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Dreiecksfläche und orientiertes Netzvolumen mit Voraussetzungen zu Geschlossenheit, Orientierung und inneren Hohlraumschalen.",
         "Dimensionslose Dreiecksqualität und Euler-Charakteristik korrekt auswerten.",
@@ -781,9 +781,20 @@
       ],
       "evidence": [
         "workers/cad-occt/geometry.py",
-        "workers/cad-occt/fields.py"
+        "workers/cad-occt/fields.py",
+        "workers/mesh-cgal/check.cpp",
+        "workers/cad-occt/mesh_quality.py",
+        "packages/semantic-ir/mesh.ts",
+        "tests/geometry/test_mesh_quality.py",
+        "tests/geometry/mesh.test.ts",
+        "docs/mesh-quality.md",
+        "reports/verification.json"
       ],
-      "notes": "Native Flächen/Volumina und Vorschau-Netze vorhanden; eigenständige geprüfte Netzqualität, Vertex-Links und Hohlraumorientierung fehlen."
+      "notes": "Flächen-/Volumenintervalle, dimensionslose Dreiecksqualität, Euler/Genus, Vertex-Links und verschachtelte Hohlraumorientierung sind für indizierte binary64-Netze umgesetzt. Die aktuelle vollständige lokale Abnahme ist im Verifikationsbericht gebunden.",
+      "review": {
+        "scope_match": true,
+        "findings": "Die Formeln (50)–(52) sind im indizierten Meshgebiet vollständig abgedeckt: exakte orientierte Tetraedervolumensumme mit Intervall, Flächenintervalle, q und Euler/Genus. Volumen wird erst nach vollständiger Kanten-/Vertex-Link-/Orientierungs-/Selbstschnitt- und Schalenverschachtelungsprüfung als Körpermessung ausgegeben. Analytische Würfel/Tetraeder, korrekt und falsch orientierte Hohlräume, Inseln, Selbstschnitte, Vertex-Verzweigungen und Float32-Verluste sind tatsächlich getestet. Maßvorgaben werden gegen Intervalle mit exakter rationaler Auswertung ihrer Dezimalstrings verglichen."
+      }
     },
     {
       "id": "6.20",
@@ -2097,9 +2108,15 @@
       "evidence": [
         "workers/cad-occt/geometry.py",
         "packages/model-service/glb.ts",
-        "tests/roundtrip/exports.test.ts"
+        "tests/roundtrip/exports.test.ts",
+        "workers/mesh-cgal/check.cpp",
+        "workers/cad-occt/mesh_quality.py",
+        "packages/semantic-ir/mesh.ts",
+        "tests/geometry/test_mesh_quality.py",
+        "tests/geometry/mesh.test.ts",
+        "docs/mesh-quality.md"
       ],
-      "notes": "Native Kerneloperationen und Export-Roundtrips sind vorhanden. Explizite exakte Mesh-Prädikate/-Konstruktionen und zertifizierte Selbstschnittprüfung fehlen."
+      "notes": "CGAL EPECK prüft Orientierung und Selbstschnitte im deklarierten Meshgebiet ohne Nähe-Epsilon; STL und GLB werden nach tatsächlicher Serialisierung erneut geprüft. Allgemeine exakte Rekonstruktions- und Remeshingoperatoren bleiben offen."
     },
     {
       "id": "16.5",
@@ -2155,9 +2172,15 @@
       ],
       "evidence": [
         "packages/semantic-ir/schema.ts",
-        "packages/validation/index.ts"
+        "packages/validation/index.ts",
+        "workers/mesh-cgal/check.cpp",
+        "workers/cad-occt/mesh_quality.py",
+        "packages/semantic-ir/mesh.ts",
+        "tests/geometry/test_mesh_quality.py",
+        "tests/geometry/mesh.test.ts",
+        "docs/mesh-quality.md"
       ],
-      "notes": "Zwei Profile umgesetzt; watertight_solid und manufacturing_candidate fehlen."
+      "notes": "Drei Profile umgesetzt: render_surface, precision_cad und watertight_solid mit Meshprüfungen. Prozessabhängiges manufacturing_candidate bleibt offen; keine automatische Fertigungszertifizierung."
     },
     {
       "id": "17.2",
@@ -2177,9 +2200,15 @@
         "packages/compiler/index.ts",
         "packages/validation/index.ts",
         "workers/cad-occt/geometry.py",
-        "tests/roundtrip/exports.test.ts"
+        "tests/roundtrip/exports.test.ts",
+        "workers/mesh-cgal/check.cpp",
+        "workers/cad-occt/mesh_quality.py",
+        "packages/semantic-ir/mesh.ts",
+        "tests/geometry/test_mesh_quality.py",
+        "tests/geometry/mesh.test.ts",
+        "docs/mesh-quality.md"
       ],
-      "notes": "Struktur-, native Teil-, Constraint- und Exportprüfungen vorhanden; vollständige Netz-/Hohlraum-/Selbstschnittprüfung und allgemeine Absichtskataloge fehlen."
+      "notes": "Struktur-, native Teil-, Constraint-, vollständige Mesh-/Hohlraum-/Selbstschnitt- und tatsächliche STL-/GLB-Ausgabeprüfungen sind umgesetzt. Allgemeine Absichtskataloge, beliebige Trimmregularität und weitere Repräsentationsadapter bleiben offen."
     },
     {
       "id": "17.3",

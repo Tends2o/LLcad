@@ -306,7 +306,35 @@ export class ModelService {
             import: ["ir", "step", "stl"],
             export: ["ir", "step", "stl", "brep", "glb", "vdb"],
           },
-          quality_profiles: ["precision_cad", "render_surface"],
+          quality_profiles: [
+            "precision_cad",
+            "render_surface",
+            "watertight_solid",
+          ],
+          mesh_validation: {
+            engine: "CGAL-6.0.1/EPECK",
+            authority: "indexed_STL_mesh_at_decoded_binary64_world_coordinates",
+            checks: [
+              "nondegenerate",
+              "unique_triangles",
+              "closed_vertex_manifold",
+              "consistent_orientation",
+              "no_self_intersections",
+              "nested_shell_orientation",
+            ],
+            import_profile_argument: "validation_profile",
+            import_profiles: ["render_surface", "watertight_solid"],
+            export_rechecks: [
+              "stl_binary32",
+              "glb_decoded_binary64_world_coordinates",
+            ],
+            automatic_repair: false,
+            proximity_welding: false,
+            maximum_triangles: 100000,
+            maximum_aabb_pairs: 2000000,
+            manufacturing_certified: false,
+            analytic_source_surface_bound: null,
+          },
           analysis: {
             metrics: [
               "distance",
@@ -492,7 +520,6 @@ export class ModelService {
             "public_publish",
             "GPU",
             "OpenVDB_import",
-            "CGAL_certified_mesh_profile",
             "general_OCAF_topology_rebinding",
             "simulation",
           ],
@@ -790,7 +817,7 @@ export class ModelService {
           ) => {
             const f = r.ir.features.find((f: any) => f.id === fid);
             requireThat(
-              f && f.construction.operator !== "field",
+              f && f.authoritative_representation === "brep",
               "OUT_OF_SCOPE",
               "Analyse benötigt native B-Rep-Geometrie.",
             );
@@ -890,6 +917,15 @@ export class ModelService {
             revision: r.id,
             feature_id: a.other_feature_id,
           });
+          requireThat(
+            [a.feature_id, a.other_feature_id].every(
+              (fid) =>
+                r.ir.features.find((f: any) => f.id === fid)
+                  ?.authoritative_representation === "brep",
+            ),
+            "OUT_OF_SCOPE",
+            "Diese Abstandsmessung benötigt native B-Rep-Geometrie.",
+          );
           return this.jobs.enqueue(p, a.model_id, "measure", {
             plan: this.revisionPlan(r),
             action: "distance",
@@ -1230,6 +1266,11 @@ export class ModelService {
           "BUDGET_EXCEEDED",
           "Importdatei überschreitet das Budget.",
         );
+        requireThat(
+          !a.validation_profile || a.format === "stl",
+          "OUT_OF_SCOPE",
+          "Explizites Meshprüfprofil gilt für STL-Importe.",
+        );
         if (a.format === "ir") {
           requireThat(
             base.ir.features.length === 0,
@@ -1302,7 +1343,13 @@ export class ModelService {
                 },
               }
             : {}),
-          profile: a.format === "stl" ? "render_surface" : base.ir.profile,
+          profile:
+            a.format === "stl"
+              ? (a.validation_profile ??
+                (base.ir.profile === "watertight_solid"
+                  ? "watertight_solid"
+                  : "render_surface"))
+              : base.ir.profile,
           features: [
             {
               id: fid,

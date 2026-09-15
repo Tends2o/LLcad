@@ -451,6 +451,13 @@ export function compile(input: unknown) {
       "OUT_OF_SCOPE",
       "Repräsentation passt nicht zum Operator.",
     );
+    if (f.construction.operator === "imported")
+      requireThat(
+        f.authoritative_representation ===
+          (f.construction.format === "stl" ? "mesh" : "brep"),
+        "OUT_OF_SCOPE",
+        "Importformat und geometrische Hoheit müssen übereinstimmen.",
+      );
     const specs: Record<string, Param> = contract.params;
     const values: Record<string, number> = {};
     const solved = new Set<string>(),
@@ -699,6 +706,14 @@ export function compile(input: unknown) {
   ir.outputs.forEach((fid) =>
     requireThat(map.has(fid), "INVALID_SCHEMA", "Ausgabe-Feature fehlt."),
   );
+  if (ir.profile === "watertight_solid")
+    requireThat(
+      ir.outputs.every(
+        (fid) => map.get(fid)!.authoritative_representation === "mesh",
+      ),
+      "OUT_OF_SCOPE",
+      "Das Meshkörperprofil benötigt ausdrücklich maßgebliche Mesh-Ausgaben; B-Rep und Feld behalten ihre eigenen Profile.",
+    );
   requireThat(
     ir.constraints.filter((c) => c.kind === "patch_continuity").length <=
       LIMITS.patch_join_constraints,

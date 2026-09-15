@@ -4,5 +4,12 @@
   "libopenvdb10.0t64": "10.0.1-2.3+b1",
   "python_module": "pyopenvdb",
   "module_path": "/usr/lib/python3/dist-packages",
-  "library_version": "10.0.1"
+  "library_version": "10.0.1",
+  "libcgal-dev": "6.0.1-1",
+  "libgmp-dev": "2:6.3.0+dfsg-3",
+  "libgmp10": "2:6.3.0+dfsg-3",
+  "libmpfr-dev": "4.2.2-1",
+  "libmpfr6": "4.2.2-1",
+  "libboost1.83-dev": "1.83.0-4.2",
+  "g++-14": "14.2.0-19"
 }

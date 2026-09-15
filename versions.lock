@@ -41,12 +41,19 @@
   ],
   "distribution_packages": {
     "python3-openvdb": "10.0.1-2.3+b1",
-    "libopenvdb10.0t64": "10.0.1-2.3+b1"
+    "libopenvdb10.0t64": "10.0.1-2.3+b1",
+    "libcgal-dev": "6.0.1-1",
+    "libgmp-dev": "2:6.3.0+dfsg-3",
+    "libgmp10": "2:6.3.0+dfsg-3",
+    "libmpfr-dev": "4.2.2-1",
+    "libmpfr6": "4.2.2-1",
+    "libboost1.83-dev": "1.83.0-4.2",
+    "g++-14": "14.2.0-19"
   },
   "ci_container": "debian:13-slim@sha256:d7e12182ce18b85b93007c1dedf31f2d29e01ccf3182cc4017c709b6259bc132",
   "locks": {
     "package-lock.json": "42ac7c8e0c28094040be14bd3a1fad16da311191e7ec38af972126751dde5fe1",
     "requirements.lock": "196c2b596526a78afbfd0159d1763b48c51294cb8a5ef3e32cf1cad6095b05a4",
-    "deployment/native-packages.json": "c480656e4e1f90b482106cf0e6ea2b60eac6582c6ee6f5e0f2596ca62220a967"
+    "deployment/native-packages.json": "88c5c5f97b71fa32a8eec6b46aa867ef3f10e10a6f4c9e8b80415bf094ad68de"
   }
 }

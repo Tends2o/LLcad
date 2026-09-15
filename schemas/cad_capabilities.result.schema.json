@@ -121,9 +121,13 @@
             "type": "string",
             "enum": [
               "precision_cad",
-              "render_surface"
+              "render_surface",
+              "watertight_solid"
             ]
           }
+        },
+        "mesh_validation": {
+          "$ref": "#/definitions/__schema12"
         },
         "analysis": {
           "$ref": "#/definitions/__schema12"
@@ -213,6 +217,7 @@
         "policy_hash",
         "formats",
         "quality_profiles",
+        "mesh_validation",
         "analysis",
         "field_operators",
         "constraint_solver",

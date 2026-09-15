@@ -1,3 +1,4 @@
+import { meshSTL, meshIR } from "../scripts/mesh-fixtures.js";
 import { cpus, totalmem, platform, release } from "node:os";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
@@ -145,6 +146,42 @@ try {
     0,
     fieldEvaluation.stderr || String(fieldEvaluation.error),
   );
+  const meshAsset = s.store.artifact(
+    principal,
+    meshSTL(),
+    "model/stl",
+    null,
+    null,
+    { source: "benchmark_fixture" },
+  );
+  const meshStart = performance.now();
+  const meshModel = await importFixture(s, meshIR(meshAsset.artifact_id));
+  const meshImportMs = performance.now() - meshStart;
+  const meshExports: Record<string, unknown> = {};
+  for (const format of ["stl", "glb"]) {
+    const start = performance.now();
+    const output = await finish(
+      s,
+      call(s, "cad_export", {
+        model_id: meshModel.model_id,
+        revision: meshModel.revision,
+        format,
+        idempotency_key: id("mesh-export"),
+      }),
+    );
+    const file = output.artifacts.find(
+      (a: any) => a.manifest.filename === "model." + format,
+    );
+    assert.equal(
+      file.manifest.roundtrip.restored_mesh_quality.watertight_solid,
+      true,
+    );
+    meshExports[format] = {
+      duration_ms: performance.now() - start,
+      triangle_count:
+        file.manifest.roundtrip.restored_mesh_quality.topology.triangles,
+    };
+  }
   const report = {
     status: "measured",
     created: new Date().toISOString(),
@@ -170,6 +207,11 @@ try {
     organic_full_pipeline_with_preview_ms: organicMs,
     field_evaluation: JSON.parse(fieldEvaluation.stdout),
     budget_rejection_verified: budgetRejected,
+    mesh_pipeline: {
+      import_validate_commit_ms: meshImportMs,
+      exports: meshExports,
+      scope: "one_synthetic_cube_not_large_mesh_SLO",
+    },
     worker_metrics: metrics,
     error_rate: 0,
     limitations: [

@@ -18,6 +18,8 @@ import {
   assertResult,
 } from "../model-service/result-contracts.js";
 import { NativeWorkerResult } from "../semantic-ir/results.js";
+import { MeshQuality } from "../semantic-ir/mesh.js";
+import { NATIVE_MESH_SOURCE_HASH } from "../compiler/native-build.js";
 export class Jobs {
   private active: Worker | null = null;
   private activeID: string | null = null;
@@ -177,7 +179,9 @@ export class Jobs {
       const authorization = this.store.access.checkJob(job);
       const request = JSON.parse(job.request),
         p = authorization.principal;
-      let result: any;
+      let result: any,
+        preparedGLB: ReturnType<typeof packGLB> | null = null;
+      let glbMeshReport: any = null;
       if (job.kind === "validate") {
         const tx = this.store.transaction(p, job.tx);
         requireThat(
@@ -218,12 +222,17 @@ export class Jobs {
         });
         this.active = new Worker();
         this.activeID = job.id;
+        const nativeDeadline = Date.now() + authorization.seconds * 1000;
+        const effectiveExpiry = Math.min(
+          nativeDeadline,
+          authorization.expires ?? Infinity,
+        );
         result = await this.active.run(this.store, job.tenant, {
           ...request,
           cache_owner: job.owner,
           cache_model: job.model,
           policy_budget_seconds: authorization.seconds,
-          policy_expires_at: authorization.expires,
+          policy_expires_at: effectiveExpiry,
         });
         assertResult(
           NativeWorkerResult,
@@ -231,6 +240,47 @@ export class Jobs {
           "native_worker_result",
           LIMITS.request_bytes * 8,
         );
+        if (
+          (job.kind === "export" || job.kind === "render") &&
+          request.format === "glb"
+        ) {
+          const preview = JSON.parse(
+            this.store.readBlob(result.blobs["preview.json"]).toString(),
+          );
+          preparedGLB = packGLB(preview);
+          if (request.plan.profile === "watertight_solid") {
+            this.store.access.checkJob(job);
+            requireThat(
+              Date.now() < nativeDeadline,
+              "BUDGET_EXCEEDED",
+              "Gemeinsames Exportprüfbudget ist erschöpft.",
+            );
+            const checked = await this.active.run(this.store, job.tenant, {
+              action: "mesh_check",
+              plan: { ...request.plan, features: [] },
+              meshes: preparedGLB.restored_meshes,
+              original_meshes: preview.meshes,
+              tolerance: request.plan.tolerance,
+              policy_budget_seconds: authorization.seconds,
+              policy_expires_at: effectiveExpiry,
+            });
+            assertResult(
+              NativeWorkerResult,
+              checked,
+              "mesh_roundtrip_worker_result",
+              LIMITS.request_bytes * 8,
+            );
+            const q = MeshQuality.parse(checked.aggregate.mesh_quality);
+            requireThat(
+              q.native.source_hash === NATIVE_MESH_SOURCE_HASH &&
+                q.watertight_solid &&
+                Object.values(q.checks).every(Boolean),
+              "GEOMETRY_INVALID",
+              "Exportierte GLB-Geometrie erfüllt das Meshkörperprofil nicht.",
+            );
+            glbMeshReport = checked.aggregate;
+          }
+        }
         requireThat(
           currentBuildHash() === BUILD_HASH,
           "BUILD_MISMATCH",
@@ -414,21 +464,38 @@ export class Jobs {
         } else if (job.kind === "render" || job.kind === "export") {
           const artifacts = [];
           if (request.format === "glb") {
-            const preview = JSON.parse(
-              this.store.readBlob(result.blobs["preview.json"]).toString(),
+            requireThat(
+              preparedGLB,
+              "INTEGRITY_FAILURE",
+              "GLB-Ausgabeprüfung fehlt.",
             );
-            const glb = packGLB(preview);
+            const glb = preparedGLB;
             const manifest = {
               filename: "model.glb",
               model_id: job.model,
               revision: request.revision,
               unit: "m",
               source_unit: "mm",
-              quality: "preview_only",
+              quality: glbMeshReport
+                ? "checks_passed_within_profile"
+                : "preview_only",
               lost_semantics: ["parametric_history"],
               certified_surface_bound: null,
               requested_deflection: request.deflection,
-              roundtrip: glb.report,
+              roundtrip: {
+                ...glb.report,
+                ...(glbMeshReport
+                  ? {
+                      restored_mesh_quality: glbMeshReport.mesh_quality,
+                      measured_vertex_error_bound_mm:
+                        glbMeshReport.measured_vertex_error_bound_mm,
+                      corresponding_triangle_surface_bound_mm:
+                        glbMeshReport.measured_vertex_error_bound_mm,
+                      bound_domain:
+                        "authoritative_mesh_to_decoded_GLB_binary64_world_coordinates",
+                    }
+                  : {}),
+              },
             };
             artifacts.push(
               this.store.artifact(
@@ -442,7 +509,8 @@ export class Jobs {
             );
           } else
             for (const file of result.files) {
-              if (file.endsWith(".field.json")) continue;
+              if (file.endsWith(".field.json") || file.endsWith(".mesh.json"))
+                continue;
               if (
                 file === "model.brep" &&
                 (job.kind === "render" || request.format !== "brep")

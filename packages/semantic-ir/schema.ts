@@ -427,7 +427,9 @@ export const ModelIR = z.strictObject({
   constraints: z.array(Constraint).max(256).default([]),
   assumptions: z.array(z.string().max(1000)).max(64).default([]),
   tolerance: Quantity.default({ value: "0.001", unit: "mm" }),
-  profile: z.enum(["precision_cad", "render_surface"]).default("precision_cad"),
+  profile: z
+    .enum(["precision_cad", "render_surface", "watertight_solid"])
+    .default("precision_cad"),
 });
 export type ModelIR = z.infer<typeof ModelIR>;
 export const SetParameter = z.strictObject({
@@ -531,7 +533,7 @@ export const ToolSchemas = {
     purpose: z.string().max(1000).default(""),
     unit: z.literal("mm").default("mm"),
     profile: z
-      .enum(["precision_cad", "render_surface"])
+      .enum(["precision_cad", "render_surface", "watertight_solid"])
       .default("precision_cad"),
     idempotency_key: z.string().min(16).max(128),
   }),
@@ -637,6 +639,9 @@ export const ToolSchemas = {
     ...WriteBinding,
     artifact_id: Id,
     format: z.enum(["ir", "step", "stl"]),
+    validation_profile: z
+      .enum(["render_surface", "watertight_solid"])
+      .optional(),
     source_unit: z.enum(["mm", "m", "um"]),
   }),
   cad_export: z.strictObject({

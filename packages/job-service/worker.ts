@@ -16,6 +16,7 @@ import { Store } from "../model-service/store.js";
 import { CadError, requireThat } from "../semantic-ir/errors.js";
 import { LIMITS } from "../compiler/index.js";
 import { hash } from "../semantic-ir/hash.js";
+import { checkNativeMeshBuild } from "../compiler/native-build.js";
 export const PROJECT_ROOT = resolve(
   process.env.MATHFORGE_ROOT ?? process.cwd(),
 );
@@ -61,6 +62,7 @@ export class Worker {
     }
   }
   async run(store: Store, tenant: string, request: any) {
+    checkNativeMeshBuild();
     const seconds = request.policy_budget_seconds ?? LIMITS.job_seconds;
     const expires = request.policy_expires_at ?? null;
     requireThat(
@@ -315,7 +317,11 @@ export class Worker {
       );
       const names = [
         ...(request.action === "solve_constraints" ? [] : request.plan.features)
-          .filter((f: any) => f.construction.operator !== "field")
+          .filter(
+            (f: any) =>
+              f.construction.operator !== "field" &&
+              f.authoritative_representation !== "mesh",
+          )
           .flatMap((f: any) =>
             [
               ...new Set<string>([
@@ -328,7 +334,7 @@ export class Worker {
       ];
       for (const name of new Set<string>(names)) {
         requireThat(
-          /^(model\.(brep|step|stl|vdb)|preview\.json|roundtrip\.json|[a-f0-9]{64}\.(brep|topology\.json|field\.json))$/.test(
+          /^(model\.(brep|step|stl|vdb)|preview\.json|roundtrip\.json|[a-f0-9]{64}\.(brep|topology\.json|field\.json|mesh\.json))$/.test(
             name,
           ),
           "KERNEL_FAILURE",

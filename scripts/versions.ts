@@ -2,6 +2,8 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { bytesHash, hash } from "../packages/semantic-ir/hash.js";
+import { checkNativeMeshBuild } from "../packages/compiler/native-build.js";
+checkNativeMeshBuild();
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
 const requirements = readFileSync("requirements.lock", "utf8")
   .split(/\r?\n/)
@@ -40,7 +42,17 @@ const native = JSON.parse(
   readFileSync("deployment/native-packages.json", "utf8"),
 );
 const nativePackages = Object.fromEntries(
-  ["python3-openvdb", "libopenvdb10.0t64"].map((name) => {
+  [
+    "python3-openvdb",
+    "libopenvdb10.0t64",
+    "libcgal-dev",
+    "libgmp-dev",
+    "libgmp10",
+    "libmpfr-dev",
+    "libmpfr6",
+    "libboost1.83-dev",
+    "g++-14",
+  ].map((name) => {
     const version = execFileSync("dpkg-query", ["-W", "-f=${Version}", name], {
       encoding: "utf8",
     }).trim();

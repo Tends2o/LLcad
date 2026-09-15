@@ -1,3 +1,4 @@
+import { meshSTL, meshIR } from "./mesh-fixtures.js";
 /** Product acceptance: actual model reasons over CAD tools and synthetic models.
  * The tested model never receives implementation tasks or grader source.
  */
@@ -38,7 +39,7 @@ service.call = ((p, name, args) => {
 }) as typeof service.call;
 const p = { tenant: "local", user: "local-user", scopes: SCOPES };
 const cases: any[] = [];
-const expectedCaseCount = 9;
+const expectedCaseCount = 10;
 const moduleDevice = ModelIR.parse({
   schema_version: "1",
   unit: "mm",
@@ -122,7 +123,22 @@ try {
     dataRoot: data,
   });
   server.on("request", app);
+  const meshAsset = service.store.artifact(
+    p,
+    meshSTL(),
+    "model/stl",
+    null,
+    null,
+    { source: "synthetic_fixture_upload" },
+  );
   const fixtures = [
+    {
+      name: "Netzprüfkörper",
+      kind: "mesh_roundtrip",
+      ir: meshIR(meshAsset.artifact_id),
+      prompt:
+        "Prüfe den importierten Netzprüfkörper auf Geschlossenheit, korrekte Orientierung und Selbstüberschneidungen. Nenne Volumen und Oberfläche und exportiere ihn als STL und GLB mit geprüfter Ausgabe. Erhalte die Geometrie und das gewählte Prüfprofil. Erledige Auswahl, Prüfung und Exporte selbst über die CAD-Werkzeuge.",
+    },
     {
       name: "Prüfgehäuse",
       ir: housing,
@@ -499,7 +515,36 @@ try {
         otherActions.length === 0 && tools.every((t) => t.server === "llcad"),
       discovered: tools.some((t) => t.tool === "cad_list_models"),
     };
-    if (fixture.kind === "ambiguity") {
+    if (fixture.kind === "mesh_roundtrip") {
+      checks.unchanged = actual.id === model.revision;
+      checks.watertight =
+        actual.ir.profile === "watertight_solid" &&
+        actual.geometry.aggregate.mesh_quality.watertight_solid;
+      checks.measurements =
+        tools.some(
+          (t) =>
+            t.tool === "cad_measure" &&
+            ["all", "volume"].includes(t.arguments.metric),
+        ) &&
+        Math.abs(actual.geometry.aggregate.volume - 1) < 1e-10 &&
+        Math.abs(actual.geometry.aggregate.area - 6) < 1e-10;
+      checks.inspected = tools.some((t) => t.tool === "cad_inspect");
+      const manifests = service.store
+        .all(
+          "SELECT manifest FROM artifacts WHERE model=? AND revision=?",
+          model.model_id,
+          actual.id,
+        )
+        .map((a) => JSON.parse(a.manifest));
+      for (const format of ["stl", "glb"])
+        checks[format + "_roundtrip"] = manifests.some(
+          (m) =>
+            m.filename === "model." + format &&
+            m.roundtrip?.restored_mesh_quality?.watertight_solid === true &&
+            m.roundtrip.measured_vertex_error_bound_mm <= 0.0001,
+        );
+      checks.only_requested_parameter_changed = checks.unchanged;
+    } else if (fixture.kind === "ambiguity") {
       checks.unchanged = actual.id === model.revision;
       checks.no_patch = tools.every(
         (t) => !["cad_apply_patch", "cad_commit"].includes(t.tool),
@@ -762,7 +807,7 @@ try {
         model_turns: cases.length,
         browser_interactions: 0,
         scope:
-          "nine_synthetic_local_host_tasks_including_scoped_shared_project_not_general_or_remote_acceptance",
+          "ten_synthetic_local_host_tasks_including_mesh_roundtrips_and_scoped_shared_project_not_general_or_remote_acceptance",
         cases,
       },
       null,

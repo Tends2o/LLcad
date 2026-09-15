@@ -8,6 +8,42 @@ import { Decimal } from "decimal.js";
 import { equationValues, checkEquation } from "../compiler/constraints.js";
 import { sameFieldInRegion } from "../compiler/field-regions.js";
 import { compileStructure } from "../compiler/structure.js";
+import { MeshQuality } from "../semantic-ir/mesh.js";
+import { NATIVE_MESH_SOURCE_HASH } from "../compiler/native-build.js";
+import * as R from "../compiler/bernstein.js";
+/** Preserve every binary64 bit when comparing an interval to decimal intent. */
+function binaryRational(value: number) {
+  const bytes = Buffer.alloc(8);
+  bytes.writeDoubleBE(value);
+  const bits = bytes.readBigUInt64BE(),
+    exponent = Number((bits >> 52n) & 2047n);
+  const mantissa = (bits & ((1n << 52n) - 1n)) + (exponent ? 1n << 52n : 0n);
+  const power = exponent ? exponent - 1075 : -1074;
+  return R.fraction(
+    (bits >> 63n ? -mantissa : mantissa) << BigInt(Math.max(power, 0)),
+    1n << BigInt(Math.max(-power, 0)),
+  );
+}
+function meshVolumeWithin(
+  interval: unknown,
+  target: string,
+  tolerance: string,
+) {
+  if (
+    !Array.isArray(interval) ||
+    interval.length !== 2 ||
+    !interval.every((n) => typeof n === "number" && Number.isFinite(n)) ||
+    interval[0] > interval[1]
+  )
+    return false;
+  const center = R.decimal(target),
+    radius = R.decimal(tolerance);
+  return (
+    R.cmp(radius, R.zero) >= 0 &&
+    R.cmp(binaryRational(interval[0]), R.sub(center, radius)) >= 0 &&
+    R.cmp(binaryRational(interval[1]), R.add(center, radius)) <= 0
+  );
+}
 type Check = {
   revision: string;
   engine_build: string;
@@ -90,9 +126,11 @@ export function validate(
       f.id,
       !!fact?.valid,
       fact?.valid ?? null,
-      f.authoritative_representation === "implicit"
-        ? "analytic_field_contract"
-        : "OCCT_BRepCheck_Analyzer",
+      f.authoritative_representation === "mesh"
+        ? "indexed_mesh_nondegeneracy_and_unique_triangles"
+        : f.authoritative_representation === "implicit"
+          ? "analytic_field_contract"
+          : "OCCT_BRepCheck_Analyzer",
       "operator_output",
     );
     const required: Record<string, string[]> = {
@@ -117,6 +155,87 @@ export function validate(
         "sampled",
         target,
       );
+    }
+  }
+  if (ir.profile === "watertight_solid") {
+    add(
+      "mesh-outputs",
+      "model",
+      plan.outputs.length > 0,
+      plan.outputs.length,
+      "declared_mesh_outputs",
+      "all_outputs",
+      "exact_for_declared_domain",
+    );
+    for (const target of [...plan.outputs, "model"]) {
+      const fact = target === "model" ? result.aggregate : result.facts[target];
+      const parsed = MeshQuality.safeParse(fact?.mesh_quality);
+      const q = parsed.success ? parsed.data : null;
+      const bound =
+        !!q &&
+        q.geometry_hash === fact.geometry_hash &&
+        q.native.source_hash === NATIVE_MESH_SOURCE_HASH &&
+        q.watertight_solid === Object.values(q.checks).every(Boolean);
+      add(
+        "mesh-report-" + target,
+        target,
+        bound,
+        q
+          ? {
+              geometry_hash: q.geometry_hash,
+              native_source_hash: q.native.source_hash,
+            }
+          : null,
+        "strict_mesh_report_and_build_binding",
+        "entire_indexed_mesh",
+        "exact_for_declared_domain",
+      );
+      const decisions = q
+        ? {
+            nondegenerate: q.native.degenerate_triangles === 0,
+            unique_triangles: q.topology.duplicate_triangles === 0,
+            closed_vertex_manifold:
+              q.topology.closed_vertex_manifold &&
+              [
+                q.topology.boundary_edges,
+                q.topology.nonmanifold_edges,
+                q.topology.nonmanifold_vertices,
+                q.topology.isolated_vertices,
+              ].every((n) => n === 0),
+            consistent_orientation:
+              q.topology.consistent_orientation &&
+              q.topology.inconsistently_oriented_edges === 0,
+            no_self_intersections:
+              !q.native.self_intersections_found &&
+              q.native.intersection_examples.length === 0,
+            nested_shell_orientation:
+              q.native.volume_checked &&
+              q.native.nested_orientation_valid &&
+              q.native.bounded_solids > 0 &&
+              q.native.signed_volume_interval_mm3[0] > 0 &&
+              q.native.components.length === q.topology.surface_components &&
+              q.native.components.every(
+                (c) => c.outward === (c.nesting_depth % 2 === 0),
+              ),
+          }
+        : null;
+      for (const key of [
+        "nondegenerate",
+        "unique_triangles",
+        "closed_vertex_manifold",
+        "consistent_orientation",
+        "no_self_intersections",
+        "nested_shell_orientation",
+      ] as const)
+        add(
+          "mesh-" + key + "-" + target,
+          target,
+          bound && !!decisions?.[key] && !!q?.checks[key],
+          decisions?.[key] ?? null,
+          "indexed_topology_and_CGAL_EPECK_" + key,
+          "entire_indexed_mesh",
+          "exact_for_declared_domain",
+        );
     }
   }
   if (ir.profile === "precision_cad")
@@ -178,16 +297,26 @@ export function validate(
       const measured = fact?.volume,
         target = Number(c.target.value),
         tolerance = Number(c.tolerance.value);
+      const meshInterval =
+        f.authoritative_representation === "mesh"
+          ? fact?.mesh_quality?.native?.signed_volume_interval_mm3
+          : null;
       add(
         c.id,
         f.id,
         typeof measured === "number" &&
-          Math.abs(measured - target) <= tolerance,
-        measured ?? null,
-        "OCCT_adaptive_volume_integration",
+          (f.authoritative_representation === "mesh"
+            ? meshVolumeWithin(meshInterval, c.target.value, c.tolerance.value)
+            : Math.abs(measured - target) <= tolerance),
+        meshInterval ?? measured ?? null,
+        f.authoritative_representation === "mesh"
+          ? "exact_oriented_tetrahedra_with_outward_binary64_interval"
+          : "OCCT_adaptive_volume_integration",
         "feature_volume",
-        "sampled",
-        target,
+        f.authoritative_representation === "mesh" ? "bounded" : "sampled",
+        f.authoritative_representation === "mesh"
+          ? { target: c.target, tolerance: c.tolerance }
+          : target,
       );
     } else if (c.kind === "parameter" || c.kind === "protected_parameter") {
       const q = f.parameters[c.parameter],

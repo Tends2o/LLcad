@@ -24,6 +24,18 @@ test_constant_and_compact_variable_shell (test_field_primitives.FieldPrimitiveTe
 test_normalized_plane_and_capped_cylinder (test_field_primitives.FieldPrimitiveTests.test_normalized_plane_and_capped_cylinder) ... ok
 test_periodicity_reference_values_analytic_gradient_and_value_conversion (test_gyroid.GyroidTests.test_periodicity_reference_values_analytic_gradient_and_value_conversion) ... ok
 test_vdb_checks_finite_storage_and_reports_actual_sampling_losses (test_gyroid.GyroidTests.test_vdb_checks_finite_storage_and_reports_actual_sampling_losses) ... ok
+test_bad_data_and_malformed_ascii_normals (test_mesh_quality.MeshQualityTests.test_bad_data_and_malformed_ascii_normals) ... ok
+test_bowtie_vertex_is_not_a_manifold_despite_closed_edges (test_mesh_quality.MeshQualityTests.test_bowtie_vertex_is_not_a_manifold_despite_closed_edges) ... ok
+test_cavities_islands_disconnected_solids_and_reversed_outer (test_mesh_quality.MeshQualityTests.test_cavities_islands_disconnected_solids_and_reversed_outer) ... ok
+test_cube_area_volume_topology_and_quality (test_mesh_quality.MeshQualityTests.test_cube_area_volume_topology_and_quality) ... ok
+test_duplicate_degenerate_and_nonmanifold_edge (test_mesh_quality.MeshQualityTests.test_duplicate_degenerate_and_nonmanifold_edge) ... ok
+test_exact_contacts_crossings_coplanar_overlap_and_small_gap (test_mesh_quality.MeshQualityTests.test_exact_contacts_crossings_coplanar_overlap_and_small_gap) ... ok
+test_export_rejects_precision_loss_and_detects_float32_collapse (test_mesh_quality.MeshQualityTests.test_export_rejects_precision_loss_and_detects_float32_collapse) ... ok
+test_large_translation_keeps_small_binary64_geometry (test_mesh_quality.MeshQualityTests.test_large_translation_keeps_small_binary64_geometry) ... ok
+test_open_mesh_and_inconsistent_winding (test_mesh_quality.MeshQualityTests.test_open_mesh_and_inconsistent_winding) ... ok
+test_overlap_budget_and_corresponding_triangle_bound (test_mesh_quality.MeshQualityTests.test_overlap_budget_and_corresponding_triangle_bound) ... ok
+test_stl_exact_indexing_units_and_export_bound (test_mesh_quality.MeshQualityTests.test_stl_exact_indexing_units_and_export_bound) ... ok
+test_tetrahedron_analytic_measurements (test_mesh_quality.MeshQualityTests.test_tetrahedron_analytic_measurements) ... ok
 test_compact_support_far_region_unchanged (test_native.FieldTests.test_compact_support_far_region_unchanged) ... ok
 test_csg_sign_and_anisotropic_field (test_native.FieldTests.test_csg_sign_and_anisotropic_field) ... ok
 test_local_deformation_inverse_moves_only_the_support (test_native.FieldTests.test_local_deformation_inverse_moves_only_the_support) ... ok
@@ -46,7 +58,7 @@ test_step_brep_stl_roundtrip (test_native.NativeGeometryTests.test_step_brep_stl
 ******        Transfer Mode = 0  I.E.  As Is       ******[0m
 [32;1m******        Transferring Shape, ShapeType = 2                      ******[0m
 [32;1m** WorkSession : Sending all data[0m
-[32;1m Step File Name : /tmp/tmp5ih0ipu1/shape.step(32 ents)  Write  Done[0m
+[32;1m Step File Name : /tmp/tmphu_lb9v4/shape.step(32 ents)  Write  Done[0m
 ok
 test_transform_inverse_and_instance_volume (test_native.NativeGeometryTests.test_transform_inverse_and_instance_volume) ... ok
 test_explicit_rational_quarter_circle_uses_weights_and_clamped_basis (test_nurbs.NurbsTests.test_explicit_rational_quarter_circle_uses_weights_and_clamped_basis) ... ok
@@ -61,6 +73,6 @@ test_registered_history_preserves_the_existing_geometry_contract (test_topology.
 test_unknown_history_is_never_replaced_with_a_geometric_guess (test_topology.TopologyTests.test_unknown_history_is_never_replaced_with_a_geometric_guess) ... ok
 
 ----------------------------------------------------------------------
-Ran 48 tests in 2.846s
+Ran 60 tests in 2.891s
 
 OK

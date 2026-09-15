@@ -10,7 +10,7 @@
     "dev": "tsx packages/mcp-gateway/main.ts",
     "start": "node dist/packages/mcp-gateway/main.js",
     "mcp": "node dist/packages/mcp-gateway/stdio.js",
-    "build": "tsc && esbuild packages/viewer/app.ts --bundle --format=esm --minify --outfile=public/app.js",
+    "build": "python3 scripts/build-native.py && tsc && esbuild packages/viewer/app.ts --bundle --format=esm --minify --outfile=public/app.js",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test --test-concurrency=1 tests/**/*.test.ts",
     "test:geometry": ".venv/bin/python -m unittest discover -s tests/geometry -v",
@@ -24,10 +24,11 @@
     "release:check": "tsx scripts/release.ts",
     "plan:check": "tsx scripts/plan-audit.ts",
     "versions:check": "tsx scripts/versions.ts",
-    "verify": "tsx scripts/verify.ts",
+    "verify": "python3 scripts/build-native.py && tsx scripts/verify.ts",
     "format": "prettier --write packages hooks scripts tests benchmarks public/index.html public/style.css",
     "format:check": "prettier --check packages hooks scripts tests benchmarks public/index.html public/style.css",
-    "setup": "bash deployment/setup.sh"
+    "setup": "bash deployment/setup.sh",
+    "build:native": "python3 scripts/build-native.py"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.30.0",

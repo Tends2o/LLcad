@@ -22,7 +22,8 @@
       "type": "string",
       "enum": [
         "precision_cad",
-        "render_surface"
+        "render_surface",
+        "watertight_solid"
       ]
     },
     "idempotency_key": {
