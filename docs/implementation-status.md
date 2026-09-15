@@ -19,6 +19,7 @@ Diese Zuordnung verhindert, dass die lauffähige lokale Version mit einer vollst
 
 ## Nachweise
 
+- `reports/deployment-mesh-quality.json` belegt die aktuelle Übernahme mit 14 Modell-Neuberechnungen, 17 aktuellen Modellköpfen und unveränderten 231 alten Revisionen, 108 Prüfnachweisen, 231 Jobergebnissen sowie 328 Blobdateien. `reports/codex-host-mesh.json` belegt den zusätzlichen tatsächlichen Upload-/Mesh-/STL-/GLB-Pfad im installierten Host ohne Modellturn.
 - `reports/deployment-project-access.json` belegt die private Sicherung, Speicherstandmigration 4 → 5, unveränderte Historie und erfolgreiche Übernahme in den lokalen Dienst. `reports/project-access-live-heads.json` prüft alle aktuellen Modellköpfe über den tatsächlich installierten Host.
 - `reports/verification.json` und die zugehörigen Logs dokumentieren den tatsächlich ausgeführten Testlauf.
 - `reports/benchmark.json` enthält Laufzeiten, Rechnerdaten, Buildhash, Stichprobenzahlen und Messgrenzen.
@@ -41,4 +42,4 @@ Es wurde keine öffentliche Veröffentlichung, kein externer Modellversand und k
 
 Projektfreigaben und ihre Grenzen sind in [project-access.md](project-access.md) beschrieben. Grants werden ausschließlich mit synthetischen Akteuren getestet; bestehende reale Modelle erhalten durch die Migration keine Mitglieder.
 
-Die neue Mesh-Prüfung mit `watertight_solid`, ihren Grenzen und tatsächlichen Export-Roundtrips ist in [mesh-quality.md](mesh-quality.md) beschrieben. Die zugehörigen Quelländerungen werden erst nach vollständiger lokaler Abnahme in den laufenden Dienst übernommen.
+Die neue Mesh-Prüfung mit `watertight_solid`, ihren Grenzen und tatsächlichen Export-Roundtrips ist in [mesh-quality.md](mesh-quality.md) beschrieben. Die Änderungen sind nach vollständiger lokaler Abnahme in den laufenden Dienst übernommen.

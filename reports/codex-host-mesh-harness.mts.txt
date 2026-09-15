@@ -1,0 +1,41 @@
+import assert from 'node:assert/strict';
+import {readFileSync,writeFileSync} from 'node:fs';
+import {setTimeout as delay} from 'node:timers/promises';
+import {createHash} from 'node:crypto';
+import {CodexHostClient} from '/root/projekte/LLcad/scripts/codex-host-client.ts';
+import {meshSTL} from '/root/projekte/LLcad/scripts/mesh-fixtures.ts';
+import {id} from '/root/projekte/LLcad/packages/semantic-ir/hash.ts';
+import {REGISTRY_HASH} from '/root/projekte/LLcad/packages/compiler/index.ts';
+import {IMPLEMENTATION_HASH} from '/root/projekte/LLcad/packages/compiler/build.ts';
+const client=new CodexHostClient(),calls:string[]=[];
+const evidence:any={status:'failed',created:new Date().toISOString(),registry_hash:REGISTRY_HASH,implementation_hash:IMPLEMENTATION_HASH,model_turns:0,browser_interactions:0,calls,exports:[]};
+async function tool(name:string,args:any={}) {calls.push(name);const r=await client.callTool(name,args);assert.equal(r.isError??false,false,JSON.stringify(r));const value=r.structuredContent;assert.notEqual(value.status,'failed',JSON.stringify(value));return value;}
+async function wait(job:any) {const deadline=Date.now()+60000;while(Date.now()<deadline){const r=await tool('cad_job_get',{job_id:job.job_id});if(r.status==='succeeded')return r.result;assert.notEqual(r.status,'cancelled');await delay(250);}throw Error('Job timeout');}
+try {
+ await client.connect();const caps=await tool('cad_capabilities');assert.equal(caps.registry_hash,REGISTRY_HASH);assert.equal(caps.implementation_hash,IMPLEMENTATION_HASH);
+ const token=readFileSync('/root/projekte/LLcad/data/local-token','utf8').trim();
+ const headers={Authorization:'Bearer '+token};
+ const source=Buffer.from(meshSTL());
+ const upload=await fetch('http://127.0.0.1:4310/api/uploads',{method:'POST',headers:{...headers,'Content-Type':'application/octet-stream'},body:source});assert.equal(upload.status,201);
+ const asset:any=await upload.json();assert.equal(asset.hash,createHash('sha256').update(source).digest('hex'));
+ const model=await tool('cad_create_model',{name:'Codex-Hostprüfung · geschlossenes STL-Netz',profile:'watertight_solid',idempotency_key:id('mesh-host')});
+ evidence.model_id=model.model_id;evidence.original_asset_hash=asset.hash;
+ const draft=await tool('cad_import',{model_id:model.model_id,base_revision:model.revision,artifact_id:asset.artifact_id,source_unit:'mm',format:'stl',idempotency_key:id('mesh-import')});
+ await wait(draft);const binding={model_id:model.model_id,base_revision:model.revision,transaction_id:draft.transaction_id};
+ const proof=await wait(await tool('cad_validate',{...binding,idempotency_key:id('mesh-validate')}));assert.equal(proof.status,'checks_passed_within_profile');
+ const committed=await tool('cad_commit',{...binding,validation_digest:proof.digest,idempotency_key:id('mesh-commit')});
+ evidence.revision=committed.revision;evidence.validation_digest=proof.digest;
+ const modelView=await tool('cad_get_model',{model_id:model.model_id});assert.equal(modelView.build_compatibility.status,'current');
+ const detail=await tool('cad_inspect',{model_id:model.model_id,revision:committed.revision,feature_id:modelView.features[0].id});assert.equal(detail.known_facts.mesh_quality.watertight_solid,true);
+ evidence.mesh_quality=detail.known_facts.mesh_quality;evidence.measurements=await tool('cad_measure',{model_id:model.model_id,revision:committed.revision,metric:'all'});
+ for(const format of ['stl','glb']) {
+  const output=await wait(await tool('cad_export',{model_id:model.model_id,revision:committed.revision,format,idempotency_key:id('mesh-export')}));
+  const artifact=output.artifacts.find((a:any)=>a.manifest.filename==='model.'+format);assert.ok(artifact);
+  assert.equal(artifact.manifest.roundtrip.restored_mesh_quality.watertight_solid,true);
+  const response=await fetch(new URL(artifact.download,'http://127.0.0.1:4310'),{headers});assert.equal(response.status,200);const bytes=Buffer.from(await response.arrayBuffer());assert.equal(createHash('sha256').update(bytes).digest('hex'),artifact.hash);
+  writeFileSync('/root/projekte/LLcad/reports/codex-host-mesh.'+format,bytes);
+  evidence.exports.push({format,sha256:artifact.hash,byte_length:bytes.length,roundtrip:artifact.manifest.roundtrip});
+ }
+ const restored=await fetch(new URL(asset.download,'http://127.0.0.1:4310'),{headers});assert.equal(restored.status,200);assert.deepEqual(Buffer.from(await restored.arrayBuffer()),source);
+ evidence.original_asset_unchanged=true;evidence.status='passed';console.log(JSON.stringify({status:evidence.status,model_id:evidence.model_id,tool_calls:calls.length,exports:evidence.exports.map((e:any)=>({format:e.format,bytes:e.byte_length}))}));
+} finally {await client.close();writeFileSync('/root/projekte/LLcad/reports/codex-host-mesh.json',JSON.stringify(evidence,null,2)+'\n');}

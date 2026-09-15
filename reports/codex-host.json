@@ -1,8 +1,8 @@
 {
   "status": "passed",
-  "created": "2026-09-14T20:06:12.043Z",
-  "registry_hash": "6825d4227063f970fcbf1304148eed6a2184369e847dfdc23c96dd63157396ad",
-  "implementation_hash": "1d54ed0a5e9aa31f21d8b7bfcf13f88c3a89e86a81f66d7cf598bc3157cfec58",
+  "created": "2026-09-15T10:31:02.445Z",
+  "registry_hash": "3f2946e25a737d1a88f874b696dbef7069d41bdfa5693adddc4a1e03956478d2",
+  "implementation_hash": "19bc858290cbf8e44e1d9864a6e7d85580f84e14891bffe086414ca7ee0ea74e",
   "scope": "Installed Codex app-server MCP transport and deterministic CAD workflow; no model turn or LLM reasoning evaluation.",
   "model_turns": 0,
   "browser_interactions": 0,
@@ -68,14 +68,14 @@
     "cad_validate"
   ],
   "simultaneous_connections": 2,
-  "model_id": "model-87becebf-f487-450c-bffb-70c15a3ac739",
-  "original_revision": "rev-d1a52555-cd73-4700-b4ab-9000ebe88592",
-  "edited_revision": "rev-8e429c5a-621d-4713-a074-99d77a47c804",
+  "model_id": "model-edb6c60c-e40d-4f63-b5a4-e84d4c6e76d0",
+  "original_revision": "rev-0480a2f6-5264-4b14-a1fb-f980ded0b423",
+  "edited_revision": "rev-51366dde-ebd3-4374-8219-556d3cac1ae9",
   "measurements": {
     "status": "ok",
     "result_schema_version": "1",
-    "model_id": "model-87becebf-f487-450c-bffb-70c15a3ac739",
-    "revision": "rev-8e429c5a-621d-4713-a074-99d77a47c804",
+    "model_id": "model-edb6c60c-e40d-4f63-b5a4-e84d4c6e76d0",
+    "revision": "rev-51366dde-ebd3-4374-8219-556d3cac1ae9",
     "candidate_revision": null,
     "transaction_id": null,
     "job_id": null,
@@ -118,7 +118,7 @@
       "coordinate_frame": "world",
       "dimension_frame": "world",
       "engine_build": "OCCT-7.9.3.1.1/mathforge-1",
-      "cache_key": "04190586393a87a2c63283047adc67be6834d77790591309e7680bbe692f457f",
+      "cache_key": "29fc95e12f2f21720fcbe3b65a361b83624a44daec82593398263087f3d4abfe",
       "topology": {
         "version": 3,
         "face_count": 10,
@@ -135,12 +135,12 @@
     "measurement_frame": "world",
     "unit": "mm",
     "coverage": "registered_geometric_measurement",
-    "trace_id": "trace-c29e4e20-08a6-4feb-995f-79432dc1b958"
+    "trace_id": "trace-69d86d51-33cd-4d13-bdd8-acb2667e6ce9"
   },
   "comparison": {
     "status": "ok",
     "result_schema_version": "1",
-    "model_id": "model-87becebf-f487-450c-bffb-70c15a3ac739",
+    "model_id": "model-edb6c60c-e40d-4f63-b5a4-e84d4c6e76d0",
     "revision": null,
     "candidate_revision": null,
     "transaction_id": null,
@@ -152,8 +152,8 @@
     "assumptions": [],
     "artifacts": [],
     "recommended_next_actions": [],
-    "from_revision": "rev-d1a52555-cd73-4700-b4ab-9000ebe88592",
-    "to_revision": "rev-8e429c5a-621d-4713-a074-99d77a47c804",
+    "from_revision": "rev-0480a2f6-5264-4b14-a1fb-f980ded0b423",
+    "to_revision": "rev-51366dde-ebd3-4374-8219-556d3cac1ae9",
     "structure_changed": false,
     "changed_features": [
       "feat-groove-07"
@@ -211,7 +211,7 @@
     ],
     "volume_delta": -1.5079644737234048,
     "coverage": "declared_dimensions_and_per_feature_hashes",
-    "trace_id": "trace-b55f8ab7-c02d-439a-9a8d-809bc81bc139"
+    "trace_id": "trace-f1365c8f-c3dc-46b1-9693-ca96d4f370ac"
   },
   "roundtrip": {
     "status": "checks_passed_within_profile",
