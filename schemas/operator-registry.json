@@ -1,5 +1,5 @@
 {
-  "hash": "3f2946e25a737d1a88f874b696dbef7069d41bdfa5693adddc4a1e03956478d2",
+  "hash": "eb4a00f528e505fe50a343f094d0065a77b34664aef2d23672ece69b3e33c10d",
   "operators": {
     "point": {
       "version": 1,
@@ -28,13 +28,46 @@
         0
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_new_feature",
+        "derivatives": "registered_analytic_dimension_derivatives",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "line": {
       "version": 1,
@@ -44,13 +77,46 @@
         0
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_new_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "arc": {
       "version": 1,
@@ -60,13 +126,46 @@
         0
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_new_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "plane": {
       "version": 1,
@@ -105,13 +204,46 @@
         0
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_new_feature",
+        "derivatives": "registered_analytic_dimension_derivatives",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "trim_surface": {
       "version": 1,
@@ -142,13 +274,46 @@
         1
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "local_to_declared_parameters_within_input_geometry",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "cap": {
       "version": 1,
@@ -158,13 +323,46 @@
         16
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_dependent_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "sew": {
       "version": 1,
@@ -180,13 +378,46 @@
         128
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_dependent_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "regularize": {
       "version": 1,
@@ -196,13 +427,46 @@
         1
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_dependent_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "thread": {
       "version": 1,
@@ -210,12 +474,14 @@
         "root_radius": {
           "dimension": "length",
           "min": 0.00001,
-          "max": 100000
+          "max": 100000,
+          "optional": true
         },
         "pitch": {
           "dimension": "length",
           "min": 0.00001,
-          "max": 100000
+          "max": 100000,
+          "optional": true
         },
         "height": {
           "dimension": "length",
@@ -225,12 +491,26 @@
         "tooth_depth": {
           "dimension": "length",
           "min": 0.00001,
-          "max": 100000
+          "max": 100000,
+          "optional": true
         },
         "tooth_width": {
           "dimension": "length",
           "min": 0.00001,
-          "max": 100000
+          "max": 100000,
+          "optional": true
+        },
+        "crest_width": {
+          "dimension": "length",
+          "min": 0,
+          "max": 100000,
+          "optional": true
+        },
+        "runout": {
+          "dimension": "length",
+          "min": 0,
+          "max": 100000,
+          "optional": true
         }
       },
       "refs": [
@@ -238,13 +518,101 @@
         1
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "local_to_declared_parameters_within_input_geometry",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
+    },
+    "offset_solid": {
+      "version": 1,
+      "params": {
+        "distance": {
+          "dimension": "length",
+          "min": -1000,
+          "max": 1000
+        }
+      },
+      "refs": [
+        1,
+        1
+      ],
+      "output": "brep",
+      "inputs": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "local_to_declared_parameters_within_input_geometry",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "box": {
       "version": 1,
@@ -288,13 +656,46 @@
         0
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_new_feature",
+        "derivatives": "registered_analytic_dimension_derivatives",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "sphere": {
       "version": 1,
@@ -328,13 +729,46 @@
         0
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_new_feature",
+        "derivatives": "registered_analytic_dimension_derivatives",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "cylinder": {
       "version": 1,
@@ -373,13 +807,46 @@
         0
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_new_feature",
+        "derivatives": "registered_analytic_dimension_derivatives",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "cone": {
       "version": 1,
@@ -423,13 +890,46 @@
         0
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_new_feature",
+        "derivatives": "registered_analytic_dimension_derivatives",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "torus": {
       "version": 1,
@@ -468,13 +968,46 @@
         0
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_new_feature",
+        "derivatives": "registered_analytic_dimension_derivatives",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "profile": {
       "version": 1,
@@ -484,13 +1017,46 @@
         0
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_new_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "circle": {
       "version": 1,
@@ -524,13 +1090,46 @@
         0
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_new_feature",
+        "derivatives": "registered_analytic_dimension_derivatives",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "bezier": {
       "version": 1,
@@ -540,13 +1139,46 @@
         0
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_new_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "bspline": {
       "version": 1,
@@ -556,13 +1188,46 @@
         0
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_new_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "nurbs_curve": {
       "version": 1,
@@ -572,13 +1237,46 @@
         0
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_new_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "nurbs_surface": {
       "version": 1,
@@ -588,13 +1286,46 @@
         0
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_new_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "extrude": {
       "version": 1,
@@ -610,13 +1341,46 @@
         1
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_dependent_feature",
+        "derivatives": "registered_analytic_dimension_derivatives",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "revolve": {
       "version": 1,
@@ -632,13 +1396,46 @@
         1
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_dependent_feature",
+        "derivatives": "registered_analytic_dimension_derivatives",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "loft": {
       "version": 1,
@@ -648,29 +1445,115 @@
         16
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_dependent_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "sweep": {
       "version": 1,
-      "params": {},
+      "params": {
+        "twist": {
+          "dimension": "angle",
+          "min": -6.283185307179586,
+          "max": 6.283185307179586,
+          "optional": true
+        },
+        "scale_end": {
+          "dimension": "scalar",
+          "min": 0.05,
+          "max": 20,
+          "optional": true
+        },
+        "sections": {
+          "dimension": "scalar",
+          "min": 2,
+          "max": 256,
+          "integer": true,
+          "optional": true
+        }
+      },
       "refs": [
         2,
         2
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_dependent_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "union": {
       "version": 1,
@@ -680,13 +1563,46 @@
         16
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_dependent_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "intersection": {
       "version": 1,
@@ -696,13 +1612,46 @@
         16
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_dependent_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "difference": {
       "version": 1,
@@ -712,13 +1661,46 @@
         16
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_dependent_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "hole": {
       "version": 1,
@@ -757,13 +1739,46 @@
         1
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "local_to_declared_parameters_within_input_geometry",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "pocket": {
       "version": 1,
@@ -807,13 +1822,46 @@
         1
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "local_to_declared_parameters_within_input_geometry",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "groove": {
       "version": 1,
@@ -857,13 +1905,46 @@
         1
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "local_to_declared_parameters_within_input_geometry",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "fillet": {
       "version": 1,
@@ -879,13 +1960,46 @@
         1
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "local_to_declared_parameters_within_input_geometry",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "chamfer": {
       "version": 1,
@@ -901,13 +2015,46 @@
         1
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "local_to_declared_parameters_within_input_geometry",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "shell": {
       "version": 1,
@@ -923,13 +2070,46 @@
         1
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "local_to_declared_parameters_within_input_geometry",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "transform": {
       "version": 1,
@@ -970,13 +2150,46 @@
         1
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_dependent_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "affine_transform": {
       "version": 1,
@@ -986,13 +2199,46 @@
         1
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_dependent_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "rotate": {
       "version": 1,
@@ -1008,13 +2254,46 @@
         1
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_dependent_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "instance": {
       "version": 1,
@@ -1049,13 +2328,46 @@
         1
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_dependent_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "mirror": {
       "version": 1,
@@ -1065,13 +2377,46 @@
         1
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_dependent_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "pattern": {
       "version": 1,
@@ -1106,13 +2451,46 @@
         129
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_dependent_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "circular_pattern": {
       "version": 1,
@@ -1134,13 +2512,46 @@
         129
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_dependent_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "assembly": {
       "version": 1,
@@ -1150,13 +2561,46 @@
         128
       ],
       "output": "brep",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_dependent_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "field": {
       "version": 1,
@@ -1166,13 +2610,46 @@
         0
       ],
       "output": "implicit",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_new_feature",
+        "derivatives": "interval_forward_mode_and_finite_differences",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     },
     "imported": {
       "version": 1,
@@ -1182,13 +2659,366 @@
         0
       ],
       "output": "source",
+      "inputs": "brep",
       "required_validators": [
         "structure",
         "finite",
         "geometry",
         "constraints"
       ],
-      "engine": "OCCT-7.9.3.1.1"
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_new_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
+    },
+    "mesh_repair": {
+      "version": 1,
+      "params": {
+        "weld_tolerance": {
+          "dimension": "length",
+          "min": 0.000001,
+          "max": 1,
+          "optional": true
+        }
+      },
+      "refs": [
+        1,
+        1
+      ],
+      "output": "mesh",
+      "inputs": "mesh",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "mathforge-mesh-1/CGAL-6.0.1",
+      "contract": {
+        "effect_region": "local_to_declared_parameters_within_input_geometry",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_native_mesh_source_and_indexed_input",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/mesh-operators.test.ts",
+          "tests/geometry/test_mesh_ops.py"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
+    },
+    "remesh_region": {
+      "version": 1,
+      "params": {
+        "radius": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "target_edge": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "iterations": {
+          "dimension": "scalar",
+          "min": 1,
+          "max": 20,
+          "integer": true,
+          "optional": true
+        },
+        "x": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "y": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "z": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        }
+      },
+      "refs": [
+        1,
+        1
+      ],
+      "output": "mesh",
+      "inputs": "mesh",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "mathforge-mesh-1/CGAL-6.0.1",
+      "contract": {
+        "effect_region": "local_to_declared_parameters_within_input_geometry",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_native_mesh_source_and_indexed_input",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/mesh-operators.test.ts",
+          "tests/geometry/test_mesh_ops.py"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
+    },
+    "local_mesh_deform": {
+      "version": 1,
+      "params": {
+        "radius": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "iterations": {
+          "dimension": "scalar",
+          "min": 1,
+          "max": 50,
+          "integer": true,
+          "optional": true
+        },
+        "x": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "y": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        },
+        "z": {
+          "dimension": "length",
+          "min": -1000000,
+          "max": 1000000,
+          "optional": true
+        }
+      },
+      "refs": [
+        1,
+        1
+      ],
+      "output": "mesh",
+      "inputs": "mesh",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "mathforge-mesh-1/CGAL-6.0.1",
+      "contract": {
+        "effect_region": "local_to_declared_parameters_within_input_geometry",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_native_mesh_source_and_indexed_input",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/mesh-operators.test.ts",
+          "tests/geometry/test_mesh_ops.py"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
+    },
+    "tessellate": {
+      "version": 1,
+      "params": {
+        "deflection": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 10
+        }
+      },
+      "refs": [
+        1,
+        1
+      ],
+      "output": "mesh",
+      "inputs": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_dependent_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_native_mesh_source_and_indexed_input",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/mesh-operators.test.ts",
+          "tests/geometry/test_mesh_ops.py"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
+    },
+    "extract_isosurface": {
+      "version": 1,
+      "params": {},
+      "refs": [
+        1,
+        1
+      ],
+      "output": "mesh",
+      "inputs": "implicit",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "mathforge-mesh-1/CGAL-6.0.1",
+      "contract": {
+        "effect_region": "entire_dependent_feature",
+        "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_native_mesh_source_and_indexed_input",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/mesh-operators.test.ts",
+          "tests/geometry/test_mesh_ops.py"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
     }
   }
 }

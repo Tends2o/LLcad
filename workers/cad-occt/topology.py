@@ -32,19 +32,26 @@ def successors(maker, method, shape):
     return list(result)
 
 def adjacent_edges(shape, trace):
-    """An edge's source is its incident faces, without geometric matching."""
+    """An edge's or vertex's source is its incident faces, without geometric matching."""
     entries=[]
-    for edge in edge_list(shape):
-        sources={}; unknown=False
-        for face in trace:
-            if face['shape'].ShapeType()!=TopAbs_FACE: continue
-            if any(edge.IsSame(candidate) for candidate in explore(face['shape'],TopAbs_EDGE)):
-                if not face['origins']: unknown=True
-                for source in face['origins']: sources[source['key']]=source
-        keys=sorted(sources)
-        entries.append({'shape':edge,'origins': [] if unknown or not keys else [
-            {'key':digest(['incident_faces',keys]),'feature_id':next(iter(sources.values()))['feature_id'],'role':'edge_between_source_faces'}], 'kind':'edge'})
+    for kind,role,items in (('edge','edge_between_source_faces',edge_list(shape)),('vertex','vertex_between_source_faces',vertex_list(shape))):
+        for item in items:
+            sources={}; unknown=False
+            for face in trace:
+                if face['shape'].ShapeType()!=TopAbs_FACE: continue
+                if any(item.IsSame(candidate) for candidate in explore(face['shape'],TopAbs_EDGE if kind=='edge' else TopAbs_VERTEX)):
+                    if not face['origins']: unknown=True
+                    for source in face['origins']: sources[source['key']]=source
+            keys=sorted(sources)
+            entries.append({'shape':item,'origins': [] if unknown or not keys else [
+                {'key':digest(['incident_faces',kind,keys]),'feature_id':next(iter(sources.values()))['feature_id'],'role':role}], 'kind':kind})
     return entries
+
+
+def vertex_list(shape):
+    mapping = TopTools_IndexedMapOfShape(); TopExp.MapShapes_s(shape, TopAbs_VERTEX, mapping)
+    require(mapping.Extent() <= MAX_FACES * 4, 'Eckenbudget überschritten.', 'BUDGET_EXCEEDED')
+    return [mapping.FindKey(i) for i in range(1, mapping.Extent()+1)]
 
 
 def origin(fid, operator, role):
@@ -114,6 +121,7 @@ def builder_trace(shape, deps, traces, prefix, fid, op, maker, named):
                         else: face['_unknown']=True
     for face,source in generated:
         if not any(s['key']==source['key'] for s in face['origins']): face['origins'].append(source)
+    named={k:v for k,v in named.items() if not k.startswith('_')}
     for face in result:
         if face.get('_unknown'): face['origins']=[]
         role=next((role for role,native in named.items() if face['shape'].IsSame(native)),None)
@@ -231,6 +239,15 @@ def evaluate_feature(f, deps, traces):
 def serialize(trace, key):
     records = []
     faces=[entry for entry in trace if entry['shape'].ShapeType()==TopAbs_FACE]
+    # Face adjacency through shared native edges (same TShape), never by coordinate proximity.
+    edge_map=TopTools_IndexedMapOfShape();incident={}
+    for index,entry in enumerate(faces):
+        for edge in explore(entry['shape'],TopAbs_EDGE):
+            slot=edge_map.Add(edge);incident.setdefault(slot,set()).add(index)
+    adjacency={index:set() for index in range(len(faces))}
+    for members in incident.values():
+        for a in members:
+            adjacency[a].update(b for b in members if b!=a)
     for index, entry in enumerate(faces):
         face = entry['shape']
         props = GProp_GProps()
@@ -242,6 +259,7 @@ def serialize(trace, key):
                         'area': props.Mass(), 'center': [center.X(), center.Y(), center.Z()],
                         'bounds': bounds(face), 'surface': BRepAdaptor_Surface(TopoDS.Face_s(face)).GetType().name})
         records[-1]['uv_bounds']=list(BRepTools.UVBounds_s(TopoDS.Face_s(face)))
+        records[-1]['adjacent_face_ids']=['face_' + digest([key, other])[:32] for other in sorted(adjacency[index])][:256]
     edges=[{'fingerprint':shape_hash(entry['shape']),'origins':entry['origins']} for entry in trace if entry['shape'].ShapeType()==TopAbs_EDGE]
     return {'version': VERSION, 'cache_key': key, 'faces': records, 'edges': edges}
 

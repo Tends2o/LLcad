@@ -113,10 +113,88 @@ export function restoreStore(source: string, destination: string) {
   syncCreatedDirectories(target, firstCreated);
   return { status: "restored", blobs: manifest.blobs.length };
 }
+/** Retention policy (Bauplan 15.2, 18.5): derived previews and unreferenced cache generations expire
+ * after explicit windows; committed revisions, their proofs and export packages are never collected. */
+export const RETENTION_POLICY = {
+  version: 1,
+  orphan_blob_minimum_age_ms: 7 * 24 * 60 * 60 * 1000,
+  preview_artifact_ttl_ms: 7 * 24 * 60 * 60 * 1000,
+  orphan_cache_ttl_ms: 30 * 24 * 60 * 60 * 1000,
+  expired_publication_grace_ms: 24 * 60 * 60 * 1000,
+  never_collected: [
+    "revisions",
+    "commit_proofs",
+    "export_packages",
+    "imported_originals",
+    "audit",
+  ],
+  external_backups: "operator_retention_and_erasure_required_separately",
+};
+/** Remove expired preview artifacts, stale publications and cache generations no revision references. */
+export function applyRetention(store: Store, now = Date.now()) {
+  const previews = store.all(
+    "SELECT id,created,manifest FROM artifacts WHERE json_extract(manifest,'$.quality')='preview_only' AND json_extract(manifest,'$.filename')='preview.json'",
+  );
+  let removedPreviews = 0;
+  for (const row of previews)
+    if (
+      now - Date.parse(row.created) >=
+      RETENTION_POLICY.preview_artifact_ttl_ms
+    ) {
+      store.run("DELETE FROM artifacts WHERE id=?", row.id);
+      removedPreviews++;
+    }
+  const referencedKeys = new Set<string>();
+  for (const row of store.all(
+    "SELECT geometry FROM revisions WHERE geometry IS NOT NULL",
+  )) {
+    const facts = JSON.parse(row.geometry).facts ?? {};
+    for (const fact of Object.values<any>(facts)) {
+      if (fact?.cache_key) {
+        referencedKeys.add(fact.cache_key);
+        referencedKeys.add(fact.cache_key + ":topology");
+      }
+      if (fact?.local_cache_key) {
+        referencedKeys.add(fact.local_cache_key);
+        referencedKeys.add(fact.local_cache_key + ":topology");
+      }
+    }
+  }
+  let removedCache = 0;
+  for (const row of store.all("SELECT tenant,key,created FROM cache"))
+    if (
+      !referencedKeys.has(row.key) &&
+      !row.key.startsWith("field:") &&
+      row.created !== null &&
+      now - row.created >= RETENTION_POLICY.orphan_cache_ttl_ms
+    ) {
+      store.run(
+        "DELETE FROM cache WHERE tenant=? AND key=?",
+        row.tenant,
+        row.key,
+      );
+      removedCache++;
+    }
+  const expiredPublications = store.run(
+    "DELETE FROM publications WHERE expires < ?",
+    now - RETENTION_POLICY.expired_publication_grace_ms,
+  ).changes;
+  store.audit("retention_applied", {
+    removed_preview_artifacts: removedPreviews,
+    removed_cache_generations: removedCache,
+    removed_expired_publications: expiredPublications,
+    policy_version: RETENTION_POLICY.version,
+  });
+  return {
+    removed_preview_artifacts: removedPreviews,
+    removed_cache_generations: removedCache,
+    removed_expired_publications: expiredPublications,
+  };
+}
 /** Offline retention GC: only unreferenced blobs older than the explicit retention window. */
 export function garbageCollect(
   store: Store,
-  minimumAgeMs = 7 * 24 * 60 * 60 * 1000,
+  minimumAgeMs = RETENTION_POLICY.orphan_blob_minimum_age_ms,
 ) {
   requireThat(
     minimumAgeMs >= 0,

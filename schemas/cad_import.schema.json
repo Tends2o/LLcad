@@ -24,7 +24,8 @@
       "enum": [
         "ir",
         "step",
-        "stl"
+        "stl",
+        "vdb"
       ]
     },
     "validation_profile": {
@@ -41,6 +42,19 @@
         "m",
         "um"
       ]
+    },
+    "structure": {
+      "default": "flatten",
+      "type": "string",
+      "enum": [
+        "flatten",
+        "preserve"
+      ]
+    },
+    "grid": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
     }
   },
   "required": [
@@ -49,7 +63,8 @@
     "idempotency_key",
     "artifact_id",
     "format",
-    "source_unit"
+    "source_unit",
+    "structure"
   ],
   "additionalProperties": false
 }

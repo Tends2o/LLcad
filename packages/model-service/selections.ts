@@ -203,6 +203,7 @@ export function selectionHandle(
   p: Principal,
   model: string,
   selection: ReturnType<typeof resolveSelection>,
+  anchor: Record<string, unknown> | null = null,
 ) {
   const handle = id("sel");
   store.run(
@@ -217,12 +218,63 @@ export function selectionHandle(
   );
   if (selection.selectedFace)
     store.run(
-      "INSERT INTO selection_faces VALUES(?,?,?)",
+      "INSERT INTO selection_faces(selection_id,geometry_feature,face_id,anchor) VALUES(?,?,?,?)",
       handle,
       selection.geometryFeature,
       selection.selectedFace.face_id,
+      anchor ? JSON.stringify(anchor) : null,
     );
   return handle;
+}
+/** Semantic anchor of a viewer hit: revision-bound face, local frame, barycentric point and camera relation. */
+export function selectionAnchor(
+  args: any,
+  selection: ReturnType<typeof resolveSelection>,
+  stored: string | null,
+) {
+  const provided = args.anchor ?? (stored ? JSON.parse(stored) : null);
+  if (!provided || !selection.selectedFace) return null;
+  const point = provided.point.map(Number),
+    normal = provided.normal ? provided.normal.map(Number) : null,
+    view = provided.view_direction ? provided.view_direction.map(Number) : null;
+  requireThat(
+    [...point, ...(normal ?? []), ...(view ?? [])].every(
+      (v: number) => Number.isFinite(v) && Math.abs(v) <= 1e6,
+    ),
+    "INVALID_SCHEMA",
+    "Ungültiger Auswahlanker.",
+  );
+  const box = selection.selectedFace.bounds;
+  const slack = 1e-6;
+  requireThat(
+    !box ||
+      point.every(
+        (v: number, i: number) =>
+          v >= box[i] - slack && v <= box[i + 3] + slack,
+      ),
+    "OUT_OF_SCOPE",
+    "Der Ankerpunkt liegt nicht auf der gewählten Fläche.",
+  );
+  const facing =
+    normal && view
+      ? normal.reduce(
+          (sum: number, n: number, i: number) => sum + n * view[i],
+          0,
+        ) < 0
+      : null;
+  return {
+    point_mm: point,
+    normal,
+    barycentric: provided.barycentric ? provided.barycentric.map(Number) : null,
+    triangle_index: provided.triangle_index ?? null,
+    local_frame: selection.feature.local_frame,
+    geometry_feature_id: selection.geometryFeature!,
+    face_id: selection.selectedFace.face_id,
+    view_relative: {
+      facing_camera: facing,
+      note: "left/right/inside are camera or topology relative; this anchor records the camera direction explicitly",
+    },
+  };
 }
 
 export function faceSummary(face: any) {

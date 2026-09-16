@@ -201,8 +201,80 @@ let wireframe = false,
   section = false,
   measuring = false,
   exploded = false,
-  meshData: any = null;
+  meshData: any = null,
+  beforeData: any = null;
+type OverlayMode = "lit" | "unlit" | "normals" | "curvature";
+let overlayMode: OverlayMode = "lit",
+  lodTarget = 0.02,
+  currentMmPerPixel = 0.1,
+  lastScalePx = -1;
+const regionGroup = new THREE.Group(),
+  markerGroup = new THREE.Group();
+scene.add(regionGroup, markerGroup);
 const measurementPoints: THREE.Vector3[] = [];
+/** Semantic anchor of a viewer hit (Bauplan 8.4): world point, native normal, barycentric coordinates, camera. */
+function anchorFor(hit: THREE.Intersection) {
+  const mesh = hit.object as THREE.Mesh;
+  const geometry = mesh.geometry as THREE.BufferGeometry;
+  const index = geometry.getIndex();
+  const decimal = (v: number) => v.toFixed(6);
+  const anchor: Record<string, unknown> = {
+    point: hit.point.toArray().map(decimal),
+    view_direction: activeCamera
+      .getWorldDirection(new THREE.Vector3())
+      .toArray()
+      .map(decimal),
+  };
+  if (hit.face) anchor.normal = hit.face.normal.toArray().map(decimal);
+  if (index && hit.faceIndex != null) {
+    const corner = (k: number) =>
+      new THREE.Vector3()
+        .fromBufferAttribute(
+          geometry.attributes.position as THREE.BufferAttribute,
+          index.getX(hit.faceIndex! * 3 + k),
+        )
+        .add(mesh.position);
+    const bary = THREE.Triangle.getBarycoord(
+      hit.point,
+      corner(0),
+      corner(1),
+      corner(2),
+      new THREE.Vector3(),
+    );
+    if (bary)
+      anchor.barycentric = bary
+        .toArray()
+        .map((v) => Math.min(1, Math.max(0, v)).toFixed(6));
+    anchor.triangle_index = hit.faceIndex;
+  }
+  return anchor;
+}
+function drawMarkers() {
+  clearGroup(markerGroup);
+  if (!measurementPoints.length) return;
+  const origin = measurementPoints[0];
+  const radius = Math.max(currentMmPerPixel * 3, 1e-4);
+  for (const point of measurementPoints) {
+    const marker = new THREE.Mesh(
+      new THREE.SphereGeometry(radius, 12, 8),
+      new THREE.MeshBasicMaterial({ color: 0xd55c37, depthTest: false }),
+    );
+    marker.position.copy(point);
+    markerGroup.add(marker);
+  }
+  if (measurementPoints.length === 2) {
+    const geometry = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(),
+      measurementPoints[1].clone().sub(origin),
+    ]);
+    const line = new THREE.Line(
+      geometry,
+      new THREE.LineBasicMaterial({ color: 0xd55c37, depthTest: false }),
+    );
+    line.position.copy(origin);
+    markerGroup.add(line);
+  }
+}
 const raycaster = new THREE.Raycaster();
 let down = [0, 0];
 renderer.domElement.addEventListener("pointerdown", (e) => {
@@ -225,6 +297,7 @@ renderer.domElement.addEventListener("pointerup", (event) => {
   if (measuring) {
     measurementPoints.push(hit.point.clone());
     if (measurementPoints.length > 2) measurementPoints.shift();
+    drawMarkers();
     el("measurement").hidden = false;
     if (measurementPoints.length === 1)
       text("measurement", "Zweiten Oberflächenpunkt auswählen …");
@@ -241,8 +314,9 @@ renderer.domElement.addEventListener("pointerup", (event) => {
         hit.faceIndex < range.first_triangle + range.triangle_count,
     );
     if (face) {
+      const anchor = anchorFor(hit);
       void action(async () =>
-        selectFeature(hit.object.userData.feature_id, face.face_id),
+        selectFeature(hit.object.userData.feature_id, face.face_id, anchor),
       )();
       return;
     }
@@ -260,11 +334,75 @@ renderer.domElement.addEventListener("pointerup", (event) => {
 function clearGroup(group: THREE.Group) {
   for (const child of [...group.children]) {
     group.remove(child);
-    if (child instanceof THREE.Mesh) {
+    if (
+      child instanceof THREE.Mesh ||
+      child instanceof THREE.Line ||
+      child instanceof THREE.LineSegments
+    ) {
       child.geometry.dispose();
       (child.material as THREE.Material).dispose();
     }
   }
+}
+/** Display channels (Bauplan 19.3): lit shading, an unlit diagnostic channel, normals and native per-face curvature. */
+function materialFor(
+  m: any,
+  ghost: boolean,
+  geometry: THREE.BufferGeometry,
+): THREE.Material {
+  const common = {
+    side: THREE.DoubleSide,
+    transparent: ghost,
+    opacity: ghost ? 0.24 : 1,
+    wireframe,
+    clippingPlanes: section ? [clipping] : [],
+  };
+  if (ghost || overlayMode === "lit")
+    return new THREE.MeshStandardMaterial({
+      color: ghost ? 0x769281 : candidate ? 0xd38a63 : 0x91a58b,
+      roughness: 0.48,
+      metalness: 0.18,
+      ...common,
+    });
+  if (overlayMode === "normals") return new THREE.MeshNormalMaterial(common);
+  if (overlayMode === "curvature") {
+    // Native maximum principal curvature per face from the adaptive preview; faces without it stay grey.
+    const ranges: any[] = (m.face_ranges ?? []).filter(
+      (r: any) => r.curvature_max_per_mm != null,
+    );
+    const colors = new Float32Array(
+      geometry.attributes.position.count * 3,
+    ).fill(0.72);
+    const index = geometry.getIndex()!;
+    const max = Math.max(
+      1e-9,
+      ...ranges.map((r: any) => r.curvature_max_per_mm),
+    );
+    for (const r of ranges) {
+      const c = new THREE.Color().setHSL(
+        0.62 - 0.62 * (r.curvature_max_per_mm / max),
+        0.65,
+        0.48,
+      );
+      for (
+        let tri = r.first_triangle;
+        tri < r.first_triangle + r.triangle_count;
+        tri++
+      )
+        for (let k = 0; k < 3; k++) {
+          const v = index.getX(tri * 3 + k);
+          colors[v * 3] = c.r;
+          colors[v * 3 + 1] = c.g;
+          colors[v * 3 + 2] = c.b;
+        }
+    }
+    geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+    return new THREE.MeshBasicMaterial({ vertexColors: true, ...common });
+  }
+  return new THREE.MeshBasicMaterial({
+    color: candidate ? 0xd38a63 : 0x91a58b,
+    ...common,
+  });
 }
 function draw(data: any, group = mainGroup, ghost = false) {
   clearGroup(group);
@@ -277,16 +415,7 @@ function draw(data: any, group = mainGroup, ghost = false) {
     );
     geometry.setIndex(m.triangles.flat());
     geometry.computeVertexNormals();
-    const material = new THREE.MeshStandardMaterial({
-      color: ghost ? 0x769281 : candidate ? 0xd38a63 : 0x91a58b,
-      roughness: 0.48,
-      metalness: 0.18,
-      side: THREE.DoubleSide,
-      transparent: ghost,
-      opacity: ghost ? 0.24 : 1,
-      wireframe,
-      clippingPlanes: section ? [clipping] : [],
-    });
+    const material = materialFor(m, ghost, geometry);
     const mesh = new THREE.Mesh(geometry, material);
     mesh.position.fromArray(local.origin);
     mesh.userData.origin = local.origin;
@@ -296,18 +425,126 @@ function draw(data: any, group = mainGroup, ghost = false) {
     group.add(mesh);
     if (!ghost && exploded) mesh.position.x += (group.children.length - 1) * 10;
   }
-  if (!ghost) {
+  if (ghost) beforeData = data;
+  else {
     meshData = data;
     el("empty-state").hidden = true;
     text(
       "triangle-count",
-      `${data.meshes.reduce((n: number, m: any) => n + m.triangles.length, 0).toLocaleString("de-DE")} Dreiecke`,
+      `${data.meshes.reduce((n: number, m: any) => n + m.triangles.length, 0).toLocaleString("de-DE")} Dreiecke${data.clip ? " · Ausschnitt" : ""}`,
     );
+    const r = data.resolution;
     text(
       "resolution",
-      `Vorschau · angeforderte Abweichung ${data.meshes[0]?.deflection?.toPrecision(3) ?? "?"} mm · kein Flächennachweis`,
+      r
+        ? `Vorschau · Auflösung ≤ ${r.absolute_resolution_mm.toPrecision(2)} mm · kleinstes aufgelöstes Merkmal ≈ ${r.minimum_feature_resolved_mm.toPrecision(2)} mm · kein Flächennachweis`
+        : `Vorschau · angeforderte Abweichung ${data.meshes[0]?.deflection?.toPrecision(3) ?? "?"} mm · kein Flächennachweis`,
     );
   }
+}
+function redraw() {
+  if (meshData) draw(meshData);
+  if (beforeData && candidate) draw(beforeData, beforeGroup, true);
+}
+/** Scale bar from the camera's current millimetres per pixel (Bauplan 19.2). */
+function updateScaleBar() {
+  const h = renderer.domElement.clientHeight || 1,
+    w = renderer.domElement.clientWidth || 1;
+  currentMmPerPixel =
+    activeCamera === camera
+      ? (2 *
+          camera.position.distanceTo(controls.target) *
+          Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) /
+        h
+      : (orthoCamera.right - orthoCamera.left) / orthoCamera.zoom / w;
+  if (!Number.isFinite(currentMmPerPixel) || currentMmPerPixel <= 0) return;
+  const target = 90 * currentMmPerPixel,
+    decade = 10 ** Math.floor(Math.log10(target));
+  const length = [1, 2, 5, 10]
+    .map((k) => k * decade)
+    .reduce(
+      (best, k) => (Math.abs(k - target) < Math.abs(best - target) ? k : best),
+      decade,
+    );
+  const px = length / currentMmPerPixel;
+  if (Math.abs(px - lastScalePx) < 0.5) return;
+  lastScalePx = px;
+  el("scale-bar-line").style.width = px.toFixed(1) + "px";
+  text(
+    "scale-bar-text",
+    `${Number(length.toPrecision(3))} mm · ${currentMmPerPixel.toPrecision(2)} mm/px`,
+  );
+}
+/** Protected and change regions of the selected feature in world coordinates (Bauplan 19.2). */
+function drawRegions() {
+  clearGroup(regionGroup);
+  el("regions").replaceChildren();
+  if (!selected) return;
+  const placement = selected.frame_to_world;
+  const toWorld = (p: number[]) => {
+    const r = placement.rotation,
+      t = placement.translation;
+    return new THREE.Vector3(
+      r[0][0] * p[0] + r[0][1] * p[1] + r[0][2] * p[2] + t[0],
+      r[1][0] * p[0] + r[1][1] * p[1] + r[1][2] * p[2] + t[1],
+      r[2][0] * p[0] + r[2][1] * p[1] + r[2][2] * p[2] + t[2],
+    );
+  };
+  const notes: string[] = [];
+  for (const c of selected.protected_constraints) {
+    if (c.kind === "protected_region") {
+      const min = c.min.map(Number),
+        max = c.max.map(Number);
+      const corners = [0, 1, 2, 3, 4, 5, 6, 7].map((i) =>
+        toWorld([
+          i & 1 ? max[0] : min[0],
+          i & 2 ? max[1] : min[1],
+          i & 4 ? max[2] : min[2],
+        ]),
+      );
+      const center = corners
+        .reduce((a, b) => a.add(b), new THREE.Vector3())
+        .multiplyScalar(1 / 8);
+      const edges = [
+        0, 1, 1, 3, 3, 2, 2, 0, 4, 5, 5, 7, 7, 6, 6, 4, 0, 4, 1, 5, 2, 6, 3, 7,
+      ];
+      const geometry = new THREE.BufferGeometry().setFromPoints(
+        edges.map((i) => corners[i].clone().sub(center)),
+      );
+      const lines = new THREE.LineSegments(
+        geometry,
+        new THREE.LineBasicMaterial({ color: 0x386957 }),
+      );
+      lines.position.copy(center);
+      regionGroup.add(lines);
+      notes.push(
+        `⌑ Schutzregion (Box im Rahmen ${selected.local_frame}): ${(max[0] - min[0]).toPrecision(3)} × ${(max[1] - min[1]).toPrecision(3)} × ${(max[2] - min[2]).toPrecision(3)} mm`,
+      );
+    } else if (c.kind === "change_region") {
+      if (c.local_frame && c.local_frame !== selected.local_frame) {
+        notes.push(
+          `◌ Änderungsregion in anderem Rahmen (${c.local_frame}), nicht eingezeichnet`,
+        );
+        continue;
+      }
+      const radius = Number(c.radius);
+      const sphere = new THREE.Mesh(
+        new THREE.SphereGeometry(radius, 24, 16),
+        new THREE.MeshBasicMaterial({
+          color: 0xd55c37,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.35,
+        }),
+      );
+      sphere.position.copy(toWorld(c.center.map(Number)));
+      regionGroup.add(sphere);
+      notes.push(
+        `◌ Änderungsregion: Kugel r = ${radius.toPrecision(3)} mm${c.compute_margin ? ` · Rechenrand ${Number(c.compute_margin).toPrecision(3)} mm` : ""}`,
+      );
+    }
+  }
+  el("regions").textContent = notes.join(" · ");
 }
 function fit() {
   const box = new THREE.Box3().setFromObject(mainGroup);
@@ -340,6 +577,7 @@ const resize = () => {
 new ResizeObserver(resize).observe(viewport);
 renderer.setAnimationLoop(() => {
   controls.update();
+  updateScaleBar();
   renderer.render(scene, activeCamera);
 });
 el("fit").onclick = fit;
@@ -381,10 +619,57 @@ el("section").onclick = () => {
 el("measure").onclick = () => {
   measuring = !measuring;
   measurementPoints.length = 0;
+  clearGroup(markerGroup);
   el("measure").classList.toggle("active", measuring);
   el("measurement").hidden = !measuring;
   text("measurement", "Zwei Punkte auf der Oberfläche auswählen.");
 };
+/** Pixel-size LOD (Bauplan 19.4): the target deflection follows the current screen resolution and,
+ *  for models larger than the view, only the region around the view target is refined. */
+async function lodRender() {
+  if (!current || !displayRevision) return;
+  lodTarget = Math.min(0.2, Math.max(0.005, currentMmPerPixel / 2));
+  const visible =
+    activeCamera === camera
+      ? camera.position.distanceTo(controls.target) *
+        Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) *
+        1.6
+      : ((orthoCamera.right - orthoCamera.left) / orthoCamera.zoom) * 0.8;
+  const box = new THREE.Box3().setFromObject(mainGroup);
+  const region =
+    !box.isEmpty() && box.getSize(new THREE.Vector3()).length() > visible * 2
+      ? {
+          center: controls.target.toArray().map((v) => v.toFixed(3)),
+          radius: Math.max(visible, 1e-3).toFixed(3),
+        }
+      : undefined;
+  busy(`Vorschau wird auf ${lodTarget.toPrecision(2)} mm verfeinert …`);
+  try {
+    await preview(displayRevision, undefined, false, {
+      adaptive: true,
+      region,
+    });
+  } finally {
+    busy("", false);
+  }
+  activity(
+    "Pixel-LOD",
+    `Zielabweichung ${lodTarget.toPrecision(2)} mm aus ${currentMmPerPixel.toPrecision(2)} mm/px${region ? " · Ausschnitt um den Blickpunkt" : ""} · kein Flächennachweis.`,
+  );
+}
+el("lod").onclick = action(lodRender);
+el<HTMLSelectElement>("overlay").onchange = action(async () => {
+  overlayMode = el<HTMLSelectElement>("overlay").value as OverlayMode;
+  const hasCurvature = meshData?.meshes.some((m: any) =>
+    m.face_ranges?.some((r: any) => r.curvature_max_per_mm != null),
+  );
+  if (overlayMode === "curvature" && meshData && !hasCurvature) {
+    toast(
+      "Der Krümmungskanal zeigt die native Flächenkrümmung der adaptiven Vorschau; sie wird jetzt berechnet.",
+    );
+    await lodRender();
+  } else redraw();
+});
 el("explode").onclick = () => {
   exploded = !exploded;
   el("explode").classList.toggle("active", exploded);
@@ -396,7 +681,14 @@ el("explode").onclick = () => {
       "Dieses Modell besitzt ein Ausgabeobjekt. Mehrere Ausgabeteile lassen sich auseinanderziehen.",
     );
 };
-async function preview(revision: string, featureID?: string, ghost = false) {
+async function preview(
+  revision: string,
+  featureID?: string,
+  ghost = false,
+  lod: { adaptive: boolean; region?: { center: string[]; radius: string } } = {
+    adaptive: false,
+  },
+) {
   const result = await job(
     await tool("cad_render", {
       model_id: current.model_id,
@@ -404,6 +696,15 @@ async function preview(revision: string, featureID?: string, ghost = false) {
       idempotency_key: key(),
       feature_id: featureID,
       deflection: { value: "0.02", unit: "mm" },
+      ...(lod.adaptive
+        ? {
+            adaptive: {
+              target_error: { value: lodTarget.toFixed(4), unit: "mm" },
+              feature_factor: "0.5",
+            },
+          }
+        : {}),
+      ...(lod.region ? { region: lod.region } : {}),
     }),
   );
   const a = result.artifacts.find(
@@ -423,6 +724,89 @@ function resetCandidate() {
     el("step-" + step).classList.remove("done");
   text("validation-summary", "Noch keine ausstehende Änderung.");
   clearGroup(beforeGroup);
+  beforeData = null;
+}
+async function selectPart(part: any) {
+  document
+    .querySelectorAll(".structure .part")
+    .forEach((b) =>
+      b.classList.toggle(
+        "selected",
+        (b as HTMLElement).dataset.part === part.entity_id,
+      ),
+    );
+  document
+    .querySelectorAll<HTMLElement>(".feature")
+    .forEach(
+      (b) => (b.hidden = !!b.dataset.part && b.dataset.part !== part.entity_id),
+    );
+  const first =
+    part.definition.outputs?.[0] ??
+    current?.features.find((f: any) => f.owner_part === part.entity_id)?.id;
+  if (first) await selectFeature(first);
+  else toast("Dieses Teil besitzt noch keine Merkmale.");
+}
+/** Part and assembly tree from cad_structure (Bauplan 19.2). */
+async function structureTree() {
+  const container = el("structure");
+  container.replaceChildren();
+  const fetchAll = async (kind: string) => {
+    const entries: any[] = [];
+    let offset: number | null = 0;
+    while (offset !== null) {
+      const page = await tool("cad_structure", {
+        model_id: current.model_id,
+        revision: current.revision,
+        kind,
+        offset,
+        limit: 16,
+      });
+      entries.push(...page.entries);
+      offset = page.next_offset;
+    }
+    return entries;
+  };
+  const [assemblies, parts] = await Promise.all([
+    fetchAll("assembly"),
+    fetchAll("part"),
+  ]);
+  text(
+    "structure-count",
+    `${assemblies.length} Baugruppen · ${parts.length} Teile`,
+  );
+  const children = new Map<string | undefined, any[]>();
+  for (const a of assemblies) {
+    const parent = a.definition.parent_assembly;
+    children.set(parent, [...(children.get(parent) ?? []), a]);
+  }
+  const render = (parent: string | undefined, depth: number): HTMLElement[] => [
+    ...(children.get(parent) ?? []).map((a) => {
+      const details = document.createElement("details");
+      details.open = depth < 2;
+      const summary = document.createElement("summary");
+      summary.textContent = a.semantic_name;
+      const small = document.createElement("small");
+      small.textContent = `${a.part_count} Teile · ${a.definition.local_frame}`;
+      summary.append(small);
+      details.append(summary, ...render(a.entity_id, depth + 1));
+      return details;
+    }),
+    ...parts
+      .filter((p) => p.definition.assembly === parent)
+      .map((p) => {
+        const button = document.createElement("button");
+        button.className = "part";
+        button.dataset.part = p.entity_id;
+        button.textContent = p.semantic_name;
+        const small = document.createElement("small");
+        small.textContent = `${p.definition.authoritative_representation} · ${p.feature_count} Merkmale`;
+        button.append(small);
+        button.onclick = action(async () => selectPart(p));
+        return button;
+      }),
+  ];
+  container.append(...render(undefined, 0));
+  if (!container.children.length) container.textContent = "Keine Struktur.";
 }
 async function openModel(modelID: string, fitView = true) {
   busy("Modell und Geometrie werden geladen …");
@@ -474,6 +858,7 @@ async function openModel(modelID: string, fitView = true) {
             : f.kind === "field"
               ? "∿"
               : "◇";
+      button.dataset.part = f.owner_part;
       const content = document.createElement("div");
       content.textContent = f.semantic_name;
       const small = document.createElement("small");
@@ -483,6 +868,9 @@ async function openModel(modelID: string, fitView = true) {
       button.onclick = action(async () => selectFeature(f.id));
       el("features").append(button);
     }
+    clearGroup(regionGroup);
+    clearGroup(markerGroup);
+    await structureTree();
     el("detail-body").hidden = true;
     el("empty-state").hidden = !!current.features.length;
     if (current.features.length) {
@@ -499,14 +887,26 @@ async function openModel(modelID: string, fitView = true) {
     busy("", false);
   }
 }
-async function selectFeature(featureID: string, faceID?: string) {
+async function selectFeature(
+  featureID: string,
+  faceID?: string,
+  anchor?: Record<string, unknown>,
+) {
   if (!current) return;
   selected = await tool("cad_inspect", {
     model_id: current.model_id,
     revision: displayRevision ?? current.revision,
     feature_id: featureID,
     ...(faceID ? { face_id: faceID } : {}),
+    ...(anchor ? { anchor } : {}),
   });
+  const a = selected.selection_anchor;
+  text(
+    "anchor",
+    a
+      ? `Anker: (${a.point_mm.map((v: number) => v.toFixed(3)).join(", ")}) mm · Fläche ${a.face_id.slice(0, 13)} · Rahmen ${a.local_frame}${a.barycentric ? ` · baryzentrisch (${a.barycentric.map((v: number) => v.toFixed(2)).join(", ")})` : ""}${a.view_relative?.facing_camera != null ? (a.view_relative.facing_camera ? " · der Kamera zugewandt" : " · von der Kamera abgewandt") : ""}`
+      : "",
+  );
   featureID = selected.selected_entities[0];
   document
     .querySelectorAll(".feature")
@@ -583,6 +983,7 @@ async function selectFeature(featureID: string, faceID?: string) {
             .join(" · ")
       : "",
   );
+  drawRegions();
 }
 el<HTMLSelectElement>("model-select").onchange = action(async () =>
   openModel(el<HTMLSelectElement>("model-select").value),

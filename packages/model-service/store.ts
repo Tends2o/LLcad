@@ -44,7 +44,7 @@ export class Store {
       const version = (this.db.prepare("PRAGMA user_version").get() as any)
         .user_version;
       requireThat(
-        [0, 1, 2, 3, 4, 5].includes(version),
+        [0, 1, 2, 3, 4, 5, 6].includes(version),
         "BUILD_MISMATCH",
         "Unbekannte Datenbankschemaversion; explizite Migration erforderlich.",
       );
@@ -57,13 +57,16 @@ export class Store {
         .exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;
       CREATE TABLE IF NOT EXISTS models(id TEXT PRIMARY KEY,tenant TEXT NOT NULL,owner TEXT NOT NULL,name TEXT NOT NULL,purpose TEXT NOT NULL,head TEXT NOT NULL,created TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS revisions(id TEXT PRIMARY KEY,model TEXT NOT NULL REFERENCES models(id),parent TEXT,ir TEXT NOT NULL,ir_hash TEXT NOT NULL,geometry TEXT,quality TEXT NOT NULL,created TEXT NOT NULL);
-      CREATE TABLE IF NOT EXISTS transactions(id TEXT PRIMARY KEY,model TEXT NOT NULL REFERENCES models(id),tenant TEXT NOT NULL,owner TEXT NOT NULL,base TEXT NOT NULL,candidate TEXT NOT NULL,state TEXT NOT NULL,plan TEXT NOT NULL,result TEXT,validation TEXT,committed_revision TEXT);
-      CREATE TABLE IF NOT EXISTS jobs(id TEXT PRIMARY KEY,tenant TEXT NOT NULL,owner TEXT NOT NULL,model TEXT NOT NULL,tx TEXT,kind TEXT NOT NULL,state TEXT NOT NULL,request TEXT NOT NULL,result TEXT,error TEXT,lease TEXT,lease_until INTEGER,attempts INTEGER NOT NULL DEFAULT 0,created TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS transactions(id TEXT PRIMARY KEY,model TEXT NOT NULL REFERENCES models(id),tenant TEXT NOT NULL,owner TEXT NOT NULL,base TEXT NOT NULL,candidate TEXT NOT NULL,state TEXT NOT NULL,plan TEXT NOT NULL,result TEXT,validation TEXT,committed_revision TEXT,repair_of TEXT,repair_cause TEXT);
+      CREATE TABLE IF NOT EXISTS metrics(name TEXT PRIMARY KEY,count INTEGER NOT NULL,sum REAL NOT NULL,max REAL NOT NULL,updated TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS publications(id TEXT PRIMARY KEY,tenant TEXT NOT NULL,owner TEXT NOT NULL,model TEXT NOT NULL REFERENCES models(id) ON DELETE CASCADE,revision TEXT NOT NULL,package_artifact TEXT NOT NULL,package_hash TEXT NOT NULL,recipient TEXT NOT NULL,approval_request TEXT NOT NULL,expires INTEGER NOT NULL,created TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS publication_artifacts(publication TEXT NOT NULL REFERENCES publications(id) ON DELETE CASCADE,artifact TEXT NOT NULL REFERENCES artifacts(id) ON DELETE CASCADE,PRIMARY KEY(publication,artifact));
+      CREATE TABLE IF NOT EXISTS jobs(id TEXT PRIMARY KEY,tenant TEXT NOT NULL,owner TEXT NOT NULL,model TEXT NOT NULL,tx TEXT,kind TEXT NOT NULL,state TEXT NOT NULL,request TEXT NOT NULL,result TEXT,error TEXT,lease TEXT,lease_until INTEGER,attempts INTEGER NOT NULL DEFAULT 0,created TEXT NOT NULL,phase TEXT,heartbeat INTEGER,budget_seconds INTEGER,started INTEGER,finished INTEGER);
       CREATE TABLE IF NOT EXISTS idempotency(tenant TEXT NOT NULL,owner TEXT NOT NULL,key TEXT NOT NULL,request_hash TEXT NOT NULL,result TEXT NOT NULL,PRIMARY KEY(tenant,owner,key));
       CREATE TABLE IF NOT EXISTS artifacts(id TEXT PRIMARY KEY,tenant TEXT NOT NULL,owner TEXT NOT NULL,model TEXT,revision TEXT,hash TEXT NOT NULL,mime TEXT NOT NULL,size INTEGER NOT NULL,manifest TEXT NOT NULL,created TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS selections(id TEXT PRIMARY KEY,tenant TEXT NOT NULL,owner TEXT NOT NULL,model TEXT NOT NULL,revision TEXT NOT NULL,feature TEXT NOT NULL,expires INTEGER NOT NULL);
-      CREATE TABLE IF NOT EXISTS selection_faces(selection_id TEXT PRIMARY KEY REFERENCES selections(id) ON DELETE CASCADE,geometry_feature TEXT NOT NULL,face_id TEXT NOT NULL);
-      CREATE TABLE IF NOT EXISTS cache(tenant TEXT NOT NULL,key TEXT NOT NULL,blob TEXT NOT NULL,PRIMARY KEY(tenant,key));
+      CREATE TABLE IF NOT EXISTS selection_faces(selection_id TEXT PRIMARY KEY REFERENCES selections(id) ON DELETE CASCADE,geometry_feature TEXT NOT NULL,face_id TEXT NOT NULL,anchor TEXT);
+      CREATE TABLE IF NOT EXISTS cache(tenant TEXT NOT NULL,key TEXT NOT NULL,blob TEXT NOT NULL,created INTEGER,PRIMARY KEY(tenant,key));
       CREATE TABLE IF NOT EXISTS audit(seq INTEGER PRIMARY KEY AUTOINCREMENT,event TEXT NOT NULL,data TEXT NOT NULL,previous_hash TEXT NOT NULL,hash TEXT NOT NULL,created TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS outbox(id TEXT PRIMARY KEY,event TEXT NOT NULL,payload TEXT NOT NULL,delivered INTEGER NOT NULL DEFAULT 0);
       CREATE TABLE IF NOT EXISTS scheduler(tenant TEXT NOT NULL,owner TEXT NOT NULL,last_tick INTEGER NOT NULL,PRIMARY KEY(tenant,owner));`);
@@ -119,6 +122,37 @@ export class Store {
             ).n,
           });
         });
+      if (version < 6)
+        this.atomic(() => {
+          // Additive typed columns; existing rows keep NULLs and are never rewritten.
+          const add = (table: string, column: string, definition: string) => {
+            const present = this.all(`PRAGMA table_info(${table})`).some(
+              (c: any) => c.name === column,
+            );
+            if (!present)
+              this.db.exec(
+                `ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`,
+              );
+          };
+          add("jobs", "phase", "TEXT");
+          add("jobs", "heartbeat", "INTEGER");
+          add("jobs", "budget_seconds", "INTEGER");
+          add("jobs", "started", "INTEGER");
+          add("jobs", "finished", "INTEGER");
+          add("selection_faces", "anchor", "TEXT");
+          add("cache", "created", "INTEGER");
+          add("transactions", "repair_of", "TEXT");
+          add("transactions", "repair_cause", "TEXT");
+          this.run("PRAGMA user_version=6");
+          this.audit("job_progress_publication_migrated", {
+            from_store_version: version,
+            to_store_version: 6,
+            existing_jobs: this.get("SELECT COUNT(*) AS n FROM jobs").n,
+            existing_revisions_unchanged: this.get(
+              "SELECT COUNT(*) AS n FROM revisions",
+            ).n,
+          });
+        });
       chmodSync(join(this.root, "models.sqlite"), 0o600);
     } catch (error) {
       this.db!?.close();
@@ -169,6 +203,22 @@ export class Store {
       }
     }
     return result;
+  }
+  private savepoints = 0;
+  /** Nested all-or-nothing section inside an open transaction. */
+  savepoint<T>(fn: () => T): T {
+    if (!this.db.isTransaction) return this.atomic(fn);
+    const name = "sp" + ++this.savepoints;
+    this.db.exec(`SAVEPOINT ${name}`);
+    try {
+      const result = fn();
+      this.db.exec(`RELEASE ${name}`);
+      return result;
+    } catch (error) {
+      this.db.exec(`ROLLBACK TO ${name}`);
+      this.db.exec(`RELEASE ${name}`);
+      throw error;
+    }
   }
   dedupe<T>(
     p: Principal,
@@ -312,6 +362,8 @@ export class Store {
       "ACCESS_DENIED",
       "Artefakt nicht zugänglich.",
     );
+    if (this.access.publishedTo(p, aid))
+      return { ...row, manifest: JSON.parse(row.manifest) };
     if (row.model) this.model(p, row.model);
     else if (row.owner !== p.user) {
       const visible = this.access.visible(p, "m");

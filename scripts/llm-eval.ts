@@ -39,7 +39,7 @@ service.call = ((p, name, args) => {
 }) as typeof service.call;
 const p = { tenant: "local", user: "local-user", scopes: SCOPES };
 const cases: any[] = [];
-const expectedCaseCount = 10;
+const expectedCaseCount = 12;
 const moduleDevice = ModelIR.parse({
   schema_version: "1",
   unit: "mm",
@@ -363,6 +363,108 @@ try {
         "Vertiefe im Modulgerät die innere Dichtungsnut des Gehäuses im Wartungsmodul um 20 µm. Das Referenzmodul bleibt unverändert. Erhalte Nutbreite, Bohrungen, Außenmaße und beide Einbaulagen. Prüfe die Restwand und übernimm die Änderung. Löse die Auswahl selbst anhand der Projektstruktur auf.",
     },
     {
+      name: "Flanschgehäuse",
+      kind: "hidden_edge",
+      ir: ModelIR.parse({
+        schema_version: "1",
+        unit: "mm",
+        features: [
+          ...housing.features
+            .slice(0, 2)
+            .map((f) =>
+              f.id === "feat-groove-07"
+                ? {
+                    ...f,
+                    id: "hidden-groove",
+                    semantic_name: "innere Dichtungsnut unter dem Flansch",
+                  }
+                : f,
+            ),
+          {
+            id: "flange",
+            semantic_name: "Deckflansch",
+            kind: "box",
+            parameters: {
+              width: { value: "50", unit: "mm" },
+              depth: { value: "50", unit: "mm" },
+              height: { value: "1", unit: "mm" },
+              x: { value: "-25", unit: "mm" },
+              y: { value: "-25", unit: "mm" },
+              z: { value: "3", unit: "mm" },
+            },
+            construction: { operator: "box" },
+          },
+          {
+            id: "flanged-body",
+            semantic_name: "Gehäuse mit Deckflansch",
+            kind: "union",
+            parameters: {},
+            construction: { operator: "union" },
+            depends_on: ["hidden-groove", "flange"],
+          },
+        ],
+        outputs: ["flanged-body"],
+        constraints: [
+          {
+            id: "flange-fixed",
+            kind: "protected_feature",
+            feature_id: "flange",
+          },
+          {
+            id: "groove-width",
+            kind: "protected_parameter",
+            feature_id: "hidden-groove",
+            parameter: "width",
+          },
+          {
+            id: "groove-wall",
+            kind: "minimum",
+            feature_id: "hidden-groove",
+            metric: "remaining_wall",
+            target: { value: "2.00", unit: "mm" },
+          },
+        ],
+      }),
+      prompt:
+        "Vertiefe im Flanschgehäuse die innere Dichtungsnut, die unter dem Deckflansch verborgen liegt, um 20 µm. Der Flansch, die Nutbreite und die Außenmaße bleiben erhalten; prüfe die Restwand und übernimm die Änderung. Die Nut ist in der Ansicht nicht sichtbar; löse sie über die Modellstruktur auf.",
+    },
+    {
+      name: "Nut nach Umbau",
+      kind: "topology_refind",
+      ir: ModelIR.parse({
+        ...housing,
+        features: [
+          ...housing.features,
+          {
+            id: "service-pocket",
+            semantic_name: "Wartungstasche",
+            kind: "pocket",
+            parameters: {
+              width: { value: "6", unit: "mm" },
+              length: { value: "6", unit: "mm" },
+              depth: { value: "1", unit: "mm" },
+              x: { value: "-13", unit: "mm" },
+              y: { value: "-3", unit: "mm" },
+              z: { value: "3", unit: "mm" },
+            },
+            construction: { operator: "pocket" },
+            depends_on: ["feat-hole-01"],
+          },
+        ],
+        outputs: ["service-pocket"],
+        constraints: [
+          ...housing.constraints,
+          {
+            id: "pocket-fixed",
+            kind: "protected_feature",
+            feature_id: "service-pocket",
+          },
+        ],
+      }),
+      prompt:
+        "Im Modell Nut nach Umbau wurde die innere Dichtungsnut nachträglich von einer Wartungstasche unterbrochen; die Nutflächen sind dadurch geteilt. Vertiefe dieselbe Dichtungsnut um 20 µm. Tasche, Nutbreite, Bohrung und Außenmaße bleiben erhalten; prüfe die Restwand und übernimm die Änderung.",
+    },
+    {
       name: "Freigegebenes Prüfteil",
       kind: "shared_project",
       ir: housing,
@@ -569,6 +671,8 @@ try {
         new_combination: "fixture-pocket",
         circular_occurrence: "ball-ring",
         framed_hierarchy: "module-b-feat-groove-07",
+        hidden_edge: "hidden-groove",
+        topology_refind: "feat-groove-07",
       }[fixture.kind]!;
       const modified = actual.ir.features.find((f: any) => f.id === featureId);
       checks.committed =
@@ -678,6 +782,8 @@ try {
             "groove",
             "framed_hierarchy",
             "shared_project",
+            "hidden_edge",
+            "topology_refind",
           ].includes(fixture.kind)
             ? 0.82
             : fixture.kind === "diameter"
@@ -709,6 +815,28 @@ try {
         "cad_validate",
         "cad_commit",
       ].every((name) => tools.some((t) => t.tool === name));
+      if (fixture.kind === "hidden_edge")
+        checks.flange_unchanged =
+          actual.geometry.facts["flange"].geometry_hash ===
+            original.geometry.facts["flange"].geometry_hash &&
+          Math.abs(
+            actual.geometry.facts["flanged-body"].volume -
+              original.geometry.facts["flanged-body"].volume +
+              Math.PI * 20 * 1.2 * 0.02,
+          ) < 1e-3;
+      if (fixture.kind === "topology_refind")
+        checks.pocket_unchanged =
+          actual.geometry.facts["service-pocket"].geometry_hash !==
+            original.geometry.facts["service-pocket"].geometry_hash &&
+          actual.ir.features.find((f: any) => f.id === "service-pocket")
+            .parameters.depth.value === "1" &&
+          tools.every(
+            (t) =>
+              t.tool !== "cad_apply_patch" ||
+              t.arguments.operations.every(
+                (o: any) => o.feature_id === "feat-groove-07",
+              ),
+          );
       if (fixture.kind === "shared_project") {
         const access = service.store.access.inspect(p, model.model_id, 0, 8);
         checks.scoped_shared_project =
@@ -737,24 +865,47 @@ try {
             );
           });
     }
+    // Failure classes (Bauplan 24.6): planning, wrong selection, kernel limit, solver conflict,
+    // unclear intent, security block and budget limit are counted separately.
+    const errorCodes = tools.flatMap(
+      (t) => t.result?.errors?.map((e: any) => e.code) ?? [],
+    );
+    const failed = !Object.values(checks).every(Boolean);
+    const category = !failed
+      ? null
+      : !checks.only_cad_actions
+        ? "security_or_non_cad_action"
+        : fixture.kind === "ambiguity"
+          ? "unclear_intent_not_asked"
+          : !checks.turn_completed
+            ? "planning_or_host_timeout"
+            : errorCodes.includes("BUDGET_EXCEEDED")
+              ? "budget_limit"
+              : errorCodes.some((c) =>
+                    [
+                      "KERNEL_FAILURE",
+                      "GEOMETRY_INVALID",
+                      "PRECISION_UNSUPPORTED",
+                    ].includes(c),
+                  )
+                ? "kernel_limit"
+                : errorCodes.includes("CONSTRAINT_CONFLICT")
+                  ? "solver_or_constraint_conflict"
+                  : errorCodes.includes("ACCESS_DENIED")
+                    ? "security_block"
+                    : errorCodes.includes("AMBIGUOUS_SELECTION") ||
+                        !checks.only_requested_parameter_changed
+                      ? "wrong_selection_or_scope"
+                      : "geometry_or_validation";
     cases.push({
       task: fixture.kind,
       fixture_hash: hash(fixture.ir),
       host: host.version,
       model: modelName,
       duration_ms: Date.now() - start,
-      status: Object.values(checks).every(Boolean) ? "passed" : "failed",
-      failure_category: Object.values(checks).every(Boolean)
-        ? null
-        : !checks.only_cad_actions
-          ? "security"
-          : fixture.kind === "ambiguity"
-            ? "ambiguity"
-            : !checks.turn_completed
-              ? "planning_or_host_timeout"
-              : !checks.only_requested_parameter_changed
-                ? "wrong_selection_or_scope"
-                : "geometry_or_validation",
+      status: failed ? "failed" : "passed",
+      failure_category: category,
+      tool_error_codes: errorCodes,
       checks,
       tool_calls: tools.length,
       cad_calls: tools,
@@ -807,7 +958,7 @@ try {
         model_turns: cases.length,
         browser_interactions: 0,
         scope:
-          "ten_synthetic_local_host_tasks_including_mesh_roundtrips_and_scoped_shared_project_not_general_or_remote_acceptance",
+          "twelve_synthetic_local_host_tasks_including_hidden_inner_edge_and_refinding_after_topology_change_not_general_or_remote_acceptance",
         cases,
       },
       null,

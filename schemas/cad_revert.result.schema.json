@@ -59,6 +59,100 @@
         },
         "base_revision": {
           "$ref": "#/definitions/__schema1"
+        },
+        "repair_attempt": {
+          "type": "object",
+          "properties": {
+            "attempt": {
+              "$ref": "#/definitions/__schema11"
+            },
+            "of_transaction": {
+              "$ref": "#/definitions/__schema1"
+            },
+            "cause": {
+              "$ref": "#/definitions/__schema6"
+            },
+            "remaining": {
+              "$ref": "#/definitions/__schema11"
+            },
+            "intent_comparison": {
+              "type": "object",
+              "properties": {
+                "original_changed_features": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/__schema1"
+                  }
+                },
+                "this_changed_features": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/__schema1"
+                  }
+                },
+                "same_targets": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "original_changed_features",
+                "this_changed_features",
+                "same_targets"
+              ],
+              "additionalProperties": false
+            },
+            "previous_attempts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "transaction_id": {
+                    "$ref": "#/definitions/__schema1"
+                  },
+                  "cause": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/definitions/__schema6"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "state": {
+                    "$ref": "#/definitions/__schema6"
+                  },
+                  "cost_seconds": {
+                    "anyOf": [
+                      {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "transaction_id",
+                  "cause",
+                  "state",
+                  "cost_seconds"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "attempt",
+            "of_transaction",
+            "cause",
+            "remaining",
+            "intent_comparison",
+            "previous_attempts"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
@@ -292,9 +386,7 @@
             "$ref": "#/definitions/__schema6"
           },
           "size": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 9007199254740991
+            "$ref": "#/definitions/__schema11"
           },
           "manifest": {
             "$ref": "#/definitions/__schema8"
@@ -311,6 +403,11 @@
         ],
         "additionalProperties": false
       }
+    },
+    "__schema11": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
     }
   },
   "type": "object"

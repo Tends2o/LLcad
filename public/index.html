@@ -34,6 +34,13 @@
           </div>
         </div>
         <div class="section-heading">
+          <h2>Struktur</h2>
+          <span id="structure-count">—</span>
+        </div>
+        <div id="structure" class="structure">
+          <p class="muted empty-tree">Teile und Baugruppen erscheinen hier.</p>
+        </div>
+        <div class="section-heading">
           <h2>Konstruktionsbaum</h2>
           <span id="feature-count">0</span>
         </div>
@@ -106,8 +113,18 @@
             ><button id="measure" title="Zwei Oberflächenpunkte messen">
               ↔ <span>Messen</span></button
             ><button id="explode" title="Ausgabeteile auseinanderziehen">
-              ⤢ <span>Teile</span>
-            </button>
+              ⤢ <span>Teile</span></button
+            ><button id="lod" title="Vorschau an die Pixelgröße anpassen">
+              ◍ <span>Pixel-LOD</span></button
+            ><select id="overlay" aria-label="Darstellungskanal">
+              <option value="lit">Beleuchtet</option>
+              <option value="unlit">Unbeleuchtet</option>
+              <option value="normals">Normalen</option>
+              <option value="curvature">Krümmung</option>
+            </select>
+          </div>
+          <div id="scale-bar">
+            <span id="scale-bar-line"></span><span id="scale-bar-text">—</span>
           </div>
           <div id="measurement" hidden></div>
           <div class="axis-widget">
@@ -153,6 +170,8 @@
           </div>
           <div id="measurements" class="measurements"></div>
           <div id="protections" class="protections"></div>
+          <div id="regions" class="regions"></div>
+          <div id="anchor" class="anchor"></div>
           <button id="isolate" class="full">Merkmal isoliert ansehen</button
           ><button id="stage-edit" class="primary full">
             Änderung vorbereiten <span>→</span>

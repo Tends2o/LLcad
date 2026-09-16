@@ -168,6 +168,48 @@ try {
   await page.locator("#busy").waitFor({ state: "hidden", timeout: 60000 });
   await page.locator("#validate").click();
   await page.locator("#step-validation.done").waitFor({ timeout: 60000 });
+  assert.match(await page.locator("#structure").innerText(), /Gehäuse/);
+  assert.match(await page.locator("#scale-bar-text").innerText(), /mm\/px/);
+  await page.locator("#overlay").selectOption("normals");
+  await page.locator("#overlay").selectOption("curvature");
+  await page.locator("#busy").waitFor({ state: "hidden", timeout: 60000 });
+  assert.match(await page.locator("#resolution").innerText(), /Auflösung/);
+  await page.locator("#lod").click();
+  await page.locator("#busy").waitFor({ state: "hidden", timeout: 60000 });
+  assert.match(await page.locator("#activity-title").innerText(), /Pixel-LOD/);
+  await page.locator("#overlay").selectOption("unlit");
+  await page.locator("#overlay").selectOption("lit");
+  await canvas.click({
+    position: { x: canvasBox.width / 2, y: canvasBox.height / 2 },
+  });
+  await page
+    .locator("#detail-name")
+    .filter({ hasText: "Gehäuseboden" })
+    .waitFor();
+  assert.match(
+    await page.locator("#anchor").innerText(),
+    /Anker: \(.*\) mm · Fläche face_/,
+  );
+  await page.locator('[data-feature="feat-groove-07"]').click();
+  await page
+    .locator("#detail-name")
+    .filter({ hasText: "innere Dichtungsnut" })
+    .waitFor();
+  assert.match(
+    await page.locator("#regions").innerText(),
+    /Schutzregion|Änderungsregion|^$/,
+  );
+  await page.locator("#measure").click();
+  await canvas.click({
+    position: { x: canvasBox.width / 2, y: canvasBox.height / 2 },
+  });
+  await canvas.click({
+    position: { x: canvasBox.width / 2 + 40, y: canvasBox.height / 2 },
+  });
+  assert.match(await page.locator("#measurement").innerText(), /mm/);
+  await page.locator("#measure").click();
+  await page.locator(".structure .part").first().click();
+  await page.locator("#busy").waitFor({ state: "hidden", timeout: 60000 });
   await page.locator("#section").click();
   await page.locator("#ortho").click();
   await page.screenshot({
@@ -204,6 +246,12 @@ try {
           "native face picking after local GPU coordinate conversion at large world coordinates",
           "20-micrometre edit with base/candidate overlay at large world coordinates",
           "preserved object placement after explosion toggle, section and orthographic view",
+          "part and assembly tree from cad_structure",
+          "scale bar from camera millimetres per pixel",
+          "unlit, normal and native curvature display channels",
+          "pixel-size LOD preview with adaptive per-face resolution report",
+          "semantic selection anchor from a native face hit",
+          "measurement markers between two preview points",
         ],
         errors,
       },

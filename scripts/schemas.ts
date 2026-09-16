@@ -6,7 +6,12 @@ import {
   ToolSchemas,
   inputJSONSchema,
 } from "../packages/semantic-ir/schema.js";
-import { OPERATORS, REGISTRY_HASH } from "../packages/compiler/index.js";
+import {
+  OPERATORS,
+  REGISTRY_HASH,
+  operatorContract,
+} from "../packages/compiler/index.js";
+import { PIPELINE_POLICY } from "../hooks/server-registry/index.js";
 import {
   FailureResponse,
   ValidationReport,
@@ -90,7 +95,24 @@ for (const [filename, schema] of Object.entries(schemas))
   );
 writeFileSync(
   "schemas/operator-registry.json",
-  JSON.stringify({ hash: REGISTRY_HASH, operators: OPERATORS }, null, 2) + "\n",
+  JSON.stringify(
+    {
+      hash: REGISTRY_HASH,
+      operators: Object.fromEntries(
+        Object.entries(OPERATORS).map(([name, contract]) => [
+          name,
+          { ...contract, contract: operatorContract(name, contract as any) },
+        ]),
+      ),
+    },
+    null,
+    2,
+  ) + "\n",
+);
+// The effective pipeline policy is generated from the registry, never hand-edited YAML.
+writeFileSync(
+  "hooks/server-registry/pipeline-policy.json",
+  JSON.stringify(PIPELINE_POLICY, null, 2) + "\n",
 );
 console.log(
   `Generated ${Object.keys(schemas).length} schemas and operator registry.`,

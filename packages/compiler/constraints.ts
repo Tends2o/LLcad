@@ -52,6 +52,7 @@ export function checkEquation(equation: any, values: Record<string, Quantity>) {
     passed: violation <= tolerance,
   };
 }
+const weight_of = (value: string) => Number(value);
 export function solverRequest(
   ir: ModelIR,
   problem: z.infer<typeof SolverProblem>,
@@ -130,12 +131,52 @@ export function solverRequest(
     return { fn: e.fn, args: e.args.map(convert) };
   };
   for (const equation of problem.equations) checkEquation(equation, values);
+  requireThat(
+    new Set(problem.objectives.map((o) => o.id)).size ===
+      problem.objectives.length,
+    "INVALID_SCHEMA",
+    "Doppelte Zielterm-ID.",
+  );
+  for (const objective of problem.objectives) {
+    const result = evaluate(objective.expression, values);
+    requireThat(
+      result.length === 0 && result.angle === 0,
+      "UNIT_MISMATCH",
+      "Zielterme müssen dimensionslos normalisiert sein.",
+    );
+    const weight = Number(objective.weight),
+      scale = Number(objective.scale);
+    requireThat(
+      weight > 0 && weight <= 1e6 && scale >= 1e-9 && scale <= 1e9,
+      "INVALID_SCHEMA",
+      "Zielgewicht muss in (0, 1e6] und die Skala in [1e-9, 1e9] liegen.",
+    );
+  }
+  const regularization = Number(problem.regularization);
+  requireThat(
+    regularization >= 0 && regularization <= 1e6,
+    "INVALID_SCHEMA",
+    "Dämpfung muss in [0, 1e6] liegen.",
+  );
+  requireThat(
+    regularization > 0 || problem.objectives.length > 0,
+    "CONSTRAINT_CONFLICT",
+    "Ohne Dämpfung ist mindestens ein Zielterm erforderlich.",
+  );
   return {
     variables,
     equations: problem.equations.map((e) => ({
       ...e,
       expression: convert(e.expression),
     })),
+    objectives: problem.objectives.map((o) => ({
+      id: o.id,
+      expression: convert(o.expression),
+      weight: weight_of(o.weight),
+      scale: weight_of(o.scale),
+      loss: o.loss,
+    })),
+    regularization,
     max_iterations: problem.max_iterations,
   };
 }

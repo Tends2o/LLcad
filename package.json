@@ -24,6 +24,7 @@
     "release:check": "tsx scripts/release.ts",
     "plan:check": "tsx scripts/plan-audit.ts",
     "versions:check": "tsx scripts/versions.ts",
+    "licenses": "tsx scripts/licenses.ts",
     "verify": "python3 scripts/build-native.py && tsx scripts/verify.ts",
     "format": "prettier --write packages hooks scripts tests benchmarks public/index.html public/style.css",
     "format:check": "prettier --check packages hooks scripts tests benchmarks public/index.html public/style.css",

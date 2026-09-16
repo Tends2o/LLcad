@@ -63,10 +63,13 @@ npm start
 - Versionierte Projekte, Baugruppen und Teile, getrennte geometrische Hoheiten und hierarchische lokale Bezugsrahmen; LLM-Abfragen über `cad_structure`.
 - Native Flächenherkunft für registrierte Primitive, boolesche Operationen, Nut/Bohrung/Tasche, Transformationen und Instanzen; gespeicherte Flächenhandles und ausdrückliche eindeutige Neuzuordnung. Teilungen, Zusammenführungen und unbekannte Herkunft werden sicher abgewiesen.
 - Dauerhafte faire Jobverteilung zwischen Nutzern, Offline-Betriebssperre, geprüfter Backup-/Restorepfad und mandantenbezogene Löschung des aktiven Datenspeichers.
-- IR-/STEP-/STL-Import sowie IR-, STEP-, B-Rep-, STL-, GLB- und OpenVDB-Export mit erneuter Prüfung. Mesh- und Feldvorschauen behalten ihren ausdrücklich begrenzten Nachweisstatus.
-- Viewer mit Featurebaum, Parametern, Messwerten, Revisionen, Schnitt, Drahtgitter, Zoom, orthografischer Ansicht, Punktmessung und Vorher-/Nachher-Überlagerung.
+- IR-/STEP-/STL-/OpenVDB-Import (STEP wahlweise mit Produktstruktur als Rahmen, Baugruppen und Teile) sowie IR-, STEP-, B-Rep-, STL-, GLB- und OpenVDB-Export mit erneuter Prüfung. Mesh- und Feldvorschauen behalten ihren ausdrücklich begrenzten Nachweisstatus.
+- Rigorose Intervallarithmetik mit Gradientenfluss-Zertifikaten für Feldänderungen, blendfreie Passregionen, Dual Contouring, implizite Krümmung, ISO-Gewindegrundprofile, Offsets, Sweeps mit rotationsminimierenden Rahmen, Netzreparatur, lokales Remeshing und ARAP-Deformation maßgeblicher Netze.
+- Messungen mit ausgewiesener Beweisstärke: Chamfer-/Hausdorff-Proben, exakter Minimalabstand und IoU, abgetastete Wandstärke, Freigang entlang einer Bewegung; Profil `manufacturing_candidate` mit abgetasteten Prozessregeln ohne Zertifizierung.
+- Adaptive Tessellation je Fläche mit Auflösungsbericht, räumliche Ausschnitte, SVG-Schnitt- und Projektionsansichten, Fehlerbudget, Reparaturketten, interne Veröffentlichung mit kurzlebigen signierten Links, Aufbewahrungspolitik, Kennzahlen und ein kleiner Pool vorgewärmter isolierter Worker.
+- Viewer mit Struktur- und Featurebaum, Parametern, Messwerten, Revisionen, Schnitt, Drahtgitter, Zoom, orthografischer Ansicht, Punktmessung mit Markierungen, Vorher-/Nachher-Überlagerung, Schutz-/Änderungsregionen, Maßstabsbalken, Diagnosekanälen und Pixel-LOD.
 
-Die aktuelle Liste kommt aus `cad_capabilities`. Ein Exportprofil mit Fertigungszertifizierung, OpenVDB-Import, GPU-Auswertung oder eine allgemeine OCAF-Flächenwiederauflösung werden nicht als verfügbar ausgegeben.
+Die aktuelle Liste kommt aus `cad_capabilities`. Eine Fertigungszertifizierung, GPU-Auswertung oder eine allgemeine OCAF-Flächenwiederauflösung werden nicht als verfügbar ausgegeben.
 
 ## Prüfbarer Beispielablauf
 
@@ -95,13 +98,13 @@ Alle 23 Werkzeuge sind in [Schnittstellen](docs/api.md) beschrieben. Zusätzlich
 
 ```bash
 npm run verify          # TypeScript, Integration, native Geometrie, MCP-Ablauf, Build, Chromium
-npm run test:llm        # Drei echte Sprachaufträge im installierten Codex-Host; Modellnutzung
+npm run test:llm        # Zwölf echte Sprachaufträge im installierten Codex-Host; Modellnutzung
 npm run benchmark       # Gemessene lokale Latenzen und Ressourcen
 npm run schemas         # JSON-Schemas und Operatorregister aus dem Quellcode
 npm run format:check
 npm run release:check   # Exit 2, solange Produktionsnachweise fehlen
 ```
 
-Die Ergebnisse stehen in `reports/`; insbesondere `verification.json`, `benchmark.json`, `release-manifest.json` und `demo/report.json`. [Architektur](docs/architecture.md), [Mathematikverträge](docs/mathematical-contracts.md), [Bedrohungsmodell](docs/threat-model.md) und [Betriebsanleitung](docs/operating-runbook.md) beschreiben Grenzen und Wiederherstellung.
+Die Ergebnisse stehen in `reports/`; insbesondere `verification.json`, `benchmark.json`, `release-manifest.json` und `demo/report.json`. [Architektur](docs/architecture.md), [Mathematikverträge](docs/mathematical-contracts.md), [Intervallzertifikate](docs/intervals-and-certificates.md), [Messungen](docs/measures.md), [Importe](docs/imports.md), [Viewer](docs/viewer.md), [Bedrohungsmodell](docs/threat-model.md) und [Betriebsanleitung](docs/operating-runbook.md) beschreiben Grenzen und Wiederherstellung. `tsx scripts/minimize-fixture.ts <fixture.json> --expect <CODE>` verkleinert ein fehlschlagendes IR auf eine minimale Reproduktion; `tests/regression/corpus.ts` hält die geometrischen Grenzklassen mit deklarierten Erwartungen.
 
 Die lokale systemd-Installation ist aktiv. Weitere systemd- und HTTPS-Proxy-Vorlagen liegen unter `deployment/`. Ein öffentlicher Dienst wurde nicht veröffentlicht.

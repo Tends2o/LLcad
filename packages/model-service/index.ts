@@ -7,7 +7,7 @@ import {
   scopeFor,
   POLICY_HASH,
 } from "../policy/index.js";
-import { Gates } from "../../hooks/server-registry/index.js";
+import { Gates, PIPELINE_POLICY } from "../../hooks/server-registry/index.js";
 import {
   ToolSchemas,
   ToolName,
@@ -21,10 +21,12 @@ import { CadError, requireThat, safeError } from "../semantic-ir/errors.js";
 import {
   compile,
   applyPatch,
+  attachDeviationReferences,
   OPERATORS,
   LIMITS,
   REGISTRY_HASH,
   checkDepth,
+  referencedArtifacts,
 } from "../compiler/index.js";
 import { compare } from "../validation/index.js";
 import { BUILD_HASH, IMPLEMENTATION_HASH } from "../compiler/build.js";
@@ -32,6 +34,8 @@ import { solverRequest } from "../compiler/constraints.js";
 import { exportPackage } from "./export-package.js";
 import { affineContract } from "../compiler/affine.js";
 import { compileStructure, contextHash } from "../compiler/structure.js";
+import { threadFit, THREAD_LIBRARY } from "../compiler/threads.js";
+import { DownloadTokens } from "../policy/downloads.js";
 import { structurePage } from "./structure.js";
 import {
   ArtifactResource,
@@ -48,7 +52,9 @@ import {
   faceSummary,
   resolveSelection,
   selectionHandle,
+  selectionAnchor,
 } from "./selections.js";
+import { revisionIndex } from "./spatial.js";
 
 export class ModelService {
   store: Store;
@@ -59,13 +65,53 @@ export class ModelService {
     this.gates = new Gates((event, data) => this.store.audit(event, data));
     this.jobs = new Jobs(this.store, this.gates);
     this.store.access.onRevoked = (jobs) => this.jobs.cancelRevoked(jobs);
+    this.store.access.onPublish = (context, check) =>
+      this.gates.run("before_publish", context, check);
+    this.jobs.continuation = (p, request, report) =>
+      this.importStructure(p, request.import, report);
   }
+  /** Set by the HTTP gateway; without it publications list plain authenticated links only. */
+  downloads: DownloadTokens | null = null;
   async close() {
     await this.jobs.close();
     this.store.close();
   }
   call(p: Principal, tool: ToolName, input: unknown): any {
     const trace = id("trace");
+    const startedAt = performance.now();
+    const response = this.callInner(p, tool, input, trace);
+    try {
+      this.jobs.metrics.increment("tool_calls", 1, tool);
+      this.jobs.metrics.observe(
+        "tool_latency_ms",
+        performance.now() - startedAt,
+        tool,
+      );
+      if (response?.status === "failed") {
+        const code = response.errors?.[0]?.code ?? "UNKNOWN";
+        this.jobs.metrics.increment("tool_failures", 1, code);
+        if (code === "AMBIGUOUS_SELECTION")
+          this.jobs.metrics.increment("ambiguous_selections");
+        if (code === "STALE_REVISION")
+          this.jobs.metrics.increment("stale_revisions");
+        if (code === "BUDGET_EXCEEDED")
+          this.jobs.metrics.increment("budget_rejections");
+        if (code === "PRECISION_UNSUPPORTED")
+          this.jobs.metrics.increment("precision_rejections");
+        if (tool === "cad_commit")
+          this.jobs.metrics.increment("blocked_commits", 1, code);
+      }
+    } catch {
+      /* telemetry never changes a response */
+    }
+    return response;
+  }
+  private callInner(
+    p: Principal,
+    tool: ToolName,
+    input: unknown,
+    trace: string,
+  ): any {
     try {
       checkDepth(input);
       requireThat(
@@ -82,7 +128,10 @@ export class ModelService {
       this.gates.run("before_request", { trace_id: trace, tool });
       const args: any = parse(ToolSchemas[tool], input);
       if (args.model_id) this.store.model(p, args.model_id, scopeFor(tool));
-      if (tool === "cad_access" && args.mode !== "inspect")
+      if (
+        tool === "cad_access" &&
+        !["inspect", "publications"].includes(args.mode)
+      )
         this.store.access.context(p, args.model_id, "model:publish");
       if (args.transaction_id) {
         const tx = this.store.transaction(p, args.transaction_id);
@@ -202,25 +251,86 @@ export class ModelService {
         );
     }
     const plan = applyPatch(base.ir, a);
-    for (const f of plan.features)
-      if (f.construction.operator === "imported")
-        this.store.getArtifact(p, f.construction.artifact_id);
+    for (const input of referencedArtifacts(plan.features))
+      this.store.getArtifact(p, input.artifact_id);
     this.gates.run("after_compile", {
       model_id: a.model_id,
       registry_hash: REGISTRY_HASH,
     });
     return plan;
   }
+  /** Bounded repair chain (Bauplan 12.5): every attempt records cause, cost and intent comparison. */
+  private repairAttempt(p: Principal, a: any, plan: any) {
+    if (!a.repair) return null;
+    const original = this.store.transaction(p, a.repair.of_transaction);
+    requireThat(
+      original.model === a.model_id && original.base === a.base_revision,
+      "OUT_OF_SCOPE",
+      "Ein Reparaturversuch bezieht sich auf einen Kandidaten derselben Basisrevision.",
+    );
+    requireThat(
+      original.state !== "committed",
+      "CONSTRAINT_CONFLICT",
+      "Übernommene Revisionen werden nicht repariert; eine neue Änderung planen.",
+    );
+    const chain: any[] = [];
+    let cursor: any = original;
+    for (let depth = 0; depth < 16 && cursor; depth++) {
+      chain.push(cursor);
+      cursor = cursor.repair_of
+        ? this.store.transaction(p, cursor.repair_of)
+        : null;
+    }
+    const attempts = chain.filter((t) => t.repair_of).length + 1;
+    const limit = PIPELINE_POLICY.repair_policy.max_candidate_retries;
+    const previous = chain.map((t) => ({
+      transaction_id: t.id,
+      cause: t.repair_cause ?? null,
+      state: t.state,
+      cost_seconds:
+        typeof t.result?.metrics?.seconds === "number"
+          ? t.result.metrics.seconds
+          : null,
+    }));
+    requireThat(
+      attempts <= limit,
+      "BUDGET_EXCEEDED",
+      "Das Reparaturbudget ist ausgeschöpft; Diagnose statt weiterer Versuche.",
+      { repair_attempts: previous, max_candidate_retries: limit },
+    );
+    const root = chain[chain.length - 1];
+    const originalTargets: string[] = root.plan.changed_features ?? [];
+    const theseTargets: string[] = plan.changed_features ?? [];
+    requireThat(
+      hash(plan.ir) !== hash(original.plan.ir),
+      "CONSTRAINT_CONFLICT",
+      "Ein Reparaturversuch benötigt einen tatsächlich geänderten Kandidaten.",
+    );
+    return {
+      attempt: attempts,
+      of_transaction: original.id,
+      cause: a.repair.cause,
+      remaining: limit - attempts,
+      intent_comparison: {
+        original_changed_features: originalTargets,
+        this_changed_features: theseTargets,
+        same_targets:
+          hash([...originalTargets].sort()) === hash([...theseTargets].sort()),
+      },
+      previous_attempts: previous,
+    };
+  }
   candidate(p: Principal, a: any, plan: any) {
     const base = this.store.revision(p, a.model_id, a.base_revision);
     this.store.access.checkEdit(p, a.model_id, base.ir, plan);
-    for (const f of plan.features)
-      if (f.construction.operator === "imported")
-        this.store.bindArtifact(p, f.construction.artifact_id, a.model_id);
+    attachDeviationReferences(base.ir, plan);
+    const repair = this.repairAttempt(p, a, plan);
+    for (const input of referencedArtifacts(plan.features))
+      this.store.bindArtifact(p, input.artifact_id, a.model_id);
     const tx = id("tx"),
       candidate = id("candidate");
     this.store.run(
-      "INSERT INTO transactions(id,model,tenant,owner,base,candidate,state,plan) VALUES(?,?,?,?,?,?,?,?)",
+      "INSERT INTO transactions(id,model,tenant,owner,base,candidate,state,plan,repair_of,repair_cause) VALUES(?,?,?,?,?,?,?,?,?,?)",
       tx,
       a.model_id,
       p.tenant,
@@ -229,8 +339,17 @@ export class ModelService {
       candidate,
       "planned",
       JSON.stringify(plan),
+      repair?.of_transaction ?? null,
+      repair?.cause ?? null,
     );
     this.store.access.bindTransaction(p, a.model_id, tx);
+    if (repair)
+      this.store.audit("repair_attempt", {
+        model_id: a.model_id,
+        transaction_id: tx,
+        of_transaction: repair.of_transaction,
+        attempt: repair.attempt,
+      });
     return {
       ...this.jobs.enqueue(
         p,
@@ -242,6 +361,7 @@ export class ModelService {
       candidate_revision: candidate,
       model_id: a.model_id,
       base_revision: a.base_revision,
+      ...(repair ? { repair_attempt: repair } : {}),
     };
   }
   resolve(p: Principal, a: any) {
@@ -260,6 +380,21 @@ export class ModelService {
   dispatch(p: Principal, tool: ToolName, a: any): any {
     switch (tool) {
       case "cad_access":
+        if (a.mode === "publications")
+          return this.store.access.publications(
+            p,
+            a.offset,
+            a.limit,
+            (artifact, publication) =>
+              this.downloads
+                ? this.downloads.issue({
+                    tenant: p.tenant,
+                    user: p.user,
+                    artifact_id: artifact,
+                    publication_id: publication,
+                  })
+                : null,
+          );
         if (a.mode === "inspect")
           return this.store.access.inspect(p, a.model_id, a.offset, a.limit);
         if (a.mode === "propose") return this.store.access.propose(p, a);
@@ -303,14 +438,31 @@ export class ModelService {
           implementation_hash: IMPLEMENTATION_HASH,
           policy_hash: POLICY_HASH,
           formats: {
-            import: ["ir", "step", "stl"],
+            import: ["ir", "step", "stl", "vdb"],
             export: ["ir", "step", "stl", "brep", "glb", "vdb"],
+            step_structure:
+              "cad_import structure=preserve probes the XCAF occurrence tree and continues into a candidate with frames, assemblies, parts and per-component features",
+            vdb_import:
+              "single axis-aligned scalar grid as trilinear field over the active voxel box with measured Lipschitz bound",
           },
           quality_profiles: [
             "precision_cad",
             "render_surface",
             "watertight_solid",
+            "manufacturing_candidate",
           ],
+          manufacturing_candidate: {
+            rules: [
+              "minimum_wall",
+              "minimum_hole_diameter",
+              "maximum_overhang",
+            ],
+            processes: ["fdm", "sla", "cnc_3axis", "sheet_metal", "generic"],
+            evidence:
+              "area_weighted_surface_samples_and_declared_hole_parameters",
+            status_vocabulary: ["rules_sampled", "not_certified"],
+            certification: false,
+          },
           mesh_validation: {
             engine: "CGAL-6.0.1/EPECK",
             authority: "indexed_STL_mesh_at_decoded_binary64_world_coordinates",
@@ -344,7 +496,25 @@ export class ModelService {
               "radius",
               "area",
               "volume",
+              "surface_distance",
+              "wall_thickness",
+              "blend_activity",
             ],
+            distance_strengths: {
+              sampled: [
+                "chamfer",
+                "hausdorff_samples",
+                "wall_thickness",
+                "motion_clearance",
+              ],
+              exact_for_declared_domain: ["minimum_distance", "volume_iou"],
+              bounded: [
+                "surface_deviation_certificate",
+                "blend_inactivity_certificate",
+              ],
+            },
+            motion_clearance:
+              "linear_translation_sampled_at_up_to_65_positions_no_swept_volume_certificate",
             differential_targets:
               "native_single_edge_curves_or_revision_bound_faces",
             curve_parameter: "normalized_0_to_1",
@@ -372,6 +542,7 @@ export class ModelService {
             "affine_transform",
             "local_field_delta",
             "local_deform",
+            "sampled_grid",
           ],
           constraint_solver: {
             engine: "SciPy_SLSQP",
@@ -400,7 +571,53 @@ export class ModelService {
             storage: "float32_truncated_implicit_samples",
             roundtrip: "all_stored_samples",
             continuous_distance_certificate: null,
-            import: false,
+            import: "sampled_grid_field_node_and_cad_import_format_vdb",
+            import_limits: {
+              active_box_voxels: 2000000,
+              transforms: "axis_aligned_scale_and_translation",
+              interpolation: "trilinear_C0",
+              lipschitz:
+                "max_forward_difference_per_axis_measured_and_verified_against_declared",
+            },
+          },
+          thread_library: {
+            standards: ["custom", THREAD_LIBRARY.name],
+            library_version: THREAD_LIBRARY.version,
+            sources: THREAD_LIBRARY.sources,
+            validity: THREAD_LIBRARY.validity,
+            designations: Object.keys(THREAD_LIBRARY.coarse_pitch_mm),
+            fine_pitch: "M<d>x<P>",
+            profile: "trapezoid_with_crest_flat_or_custom_triangle",
+            runout: "parameter_runout_tapers_the_ridge_at_both_ends",
+            fit: "cad_measure metric=thread_fit compares basic profiles; tolerance classes are not modeled",
+            conformity_certified: false,
+          },
+          sweep_contract: {
+            frames: ["corrected_frenet", "rotation_minimizing"],
+            rotation_minimizing_method: "double_reflection_sections",
+            twist_and_scale: "sectioned_loft_of_transformed_profile_copies",
+            self_contact_check: "OCCT_BOPAlgo_ArgumentAnalyzer_default_on",
+            end_caps: "solid_sections",
+          },
+          field_certificates: {
+            method: "interval_arithmetic_gradient_flow_certificate",
+            claim:
+              "hausdorff_distance_between_zero_sets_of_two_field_expressions_within_declared_domain",
+            prerequisites: [
+              "C1_reference_and_candidate_on_epsilon_expanded_band_cells",
+              "positive_certified_gradient_lower_bound",
+              "compatible_difference_bound_at_most_epsilon_times_gradient_bound",
+              "band_cells_inside_domain_margin",
+            ],
+            evaluation_error_model:
+              "IEEE754_binary64_directed_rounding_per_operation_with_declared_trig_widening",
+            constraint: "surface_deviation",
+            measurement:
+              "cad_measure metric=surface_deviation with other_revision",
+            extraction_pruning: ["lipschitz", "interval"],
+            extraction_methods: ["marching_tetrahedra", "dual_contouring"],
+            subcell_topology_certified: false,
+            csg_creases: "refused_as_nonsmooth",
           },
           field_cache: {
             scope: "tenant_owner_model_feature",
@@ -514,6 +731,23 @@ export class ModelService {
               "semantic_tool_query_or_natural_language_clarification",
           },
           worker_isolation: Worker.probe() ? "available" : "unavailable",
+          worker_pool: {
+            concurrency: this.jobs.concurrency,
+            pre_warmed_single_use_sandboxes: Worker.poolSize(),
+            model: "one_isolated_process_per_job_prewarmed_kernel_import",
+            heartbeat_seconds: 5,
+            phases: [
+              "queued",
+              "native_execution",
+              "validating",
+              "persisting",
+              "succeeded",
+              "failed",
+              "cancelled",
+            ],
+          },
+          observability: this.jobs.metrics.snapshot(),
+          pipeline_policy: PIPELINE_POLICY,
           unsupported: [
             "manufacturing_certification",
             "arbitrary_code",
@@ -616,6 +850,28 @@ export class ModelService {
       case "cad_find": {
         const r = this.store.revision(p, a.model_id, a.revision);
         const tokens = a.query.toLocaleLowerCase().split(/\s+/).filter(Boolean);
+        let spatial: Set<string> | null = null;
+        let spatialFilter: string | null = null;
+        if (a.point || a.box) {
+          const index = revisionIndex(r);
+          const query: [number, number, number, number, number, number] = a.box
+            ? ([...a.box.min.map(Number), ...a.box.max.map(Number)] as any)
+            : ([...a.point.map(Number), ...a.point.map(Number)] as any);
+          requireThat(
+            query.every((v) => Number.isFinite(v) && Math.abs(v) <= 1e6) &&
+              query[0] <= query[3] &&
+              query[1] <= query[4] &&
+              query[2] <= query[5],
+            "INVALID_SCHEMA",
+            "Ungültiger räumlicher Suchbereich.",
+          );
+          spatial = new Set(index.query(query));
+          spatialFilter =
+            (a.box ? "bvh_box_overlap" : "bvh_point_containment") +
+            "_of_stored_world_extents(" +
+            index.size +
+            "_indexed)";
+        }
         const matches = r.ir.features.filter(
           (f: any) =>
             tokens.every((t: string) =>
@@ -625,22 +881,13 @@ export class ModelService {
             ) &&
             (!a.kind || f.kind === a.kind) &&
             (!a.owner_part || f.owner_part === a.owner_part) &&
-            (!a.point ||
-              (() => {
-                const b = r.geometry?.facts?.[f.id]?.bounds;
-                return (
-                  b &&
-                  a.point.every(
-                    (n: string, i: number) =>
-                      Number(n) >= b[i] && Number(n) <= b[i + 3],
-                  )
-                );
-              })()),
+            (!spatial || spatial.has(f.id)),
         );
         return {
           model_id: a.model_id,
           revision: r.id,
           ambiguity: matches.length > 1,
+          spatial_filter: spatialFilter,
           total_matches: matches.length,
           matches: matches.slice(0, a.limit).map((f: any) => {
             const handle = id("sel");
@@ -658,16 +905,46 @@ export class ModelService {
               feature_id: f.id,
               semantic_name: f.semantic_name,
               selection_handle: handle,
-              reason: "semantic_tokens_and_optional_bounds",
+              reason: spatial
+                ? "semantic_tokens_and_bvh_extent_candidate_not_a_containment_proof"
+                : "semantic_tokens",
             };
           }),
         };
       }
       case "cad_inspect": {
+        requireThat(
+          !a.anchor || a.face_id,
+          "INVALID_SCHEMA",
+          "Ein Auswahlanker benötigt eine ausdrückliche Flächen-ID.",
+        );
         const selection = this.resolve(p, a);
         const { rev: r, feature: f } = selection;
         const geometryFeature = selection.geometryFeature ?? f.id;
-        const topology = faces(this.store, r, geometryFeature);
+        const sections = new Set<string>(
+          a.sections ?? [
+            "faces",
+            "constraints",
+            "facts",
+            "contracts",
+            "quality",
+            "adjacency",
+          ],
+        );
+        const topology = sections.has("faces")
+          ? faces(this.store, r, geometryFeature)
+          : [];
+        const stripAdjacency = (face: any) =>
+          sections.has("adjacency")
+            ? face
+            : (({ adjacent_face_ids, ...rest }) => rest)(face);
+        const storedAnchor = a.selection_handle
+          ? (this.store.get(
+              "SELECT anchor FROM selection_faces WHERE selection_id=?",
+              a.selection_handle,
+            )?.anchor ?? null)
+          : null;
+        const anchor = selectionAnchor(a, selection, storedAnchor);
         return {
           model_id: a.model_id,
           revision: r.id,
@@ -678,20 +955,24 @@ export class ModelService {
             p,
             a.model_id,
             selection,
+            a.anchor ?? (storedAnchor ? JSON.parse(storedAnchor) : null),
           ),
           selected_face: selection.selectedFace
             ? {
-                ...faceSummary(selection.selectedFace),
+                ...stripAdjacency(faceSummary(selection.selectedFace)),
                 geometry_feature_id: geometryFeature,
               }
             : null,
           face_page: {
             geometry_feature_id: geometryFeature,
-            total: topology.length,
+            total: sections.has("faces")
+              ? topology.length
+              : faces(this.store, r, geometryFeature).length,
             faces: topology
               .slice(a.face_offset, a.face_offset + a.face_limit)
-              .map(faceSummary),
+              .map((face) => stripAdjacency(faceSummary(face))),
             next_offset:
+              sections.has("faces") &&
               a.face_offset + a.face_limit < topology.length
                 ? a.face_offset + a.face_limit
                 : null,
@@ -699,7 +980,14 @@ export class ModelService {
           role: f.kind,
           quality: r.quality,
           profile: r.ir.profile,
-          known_facts: r.geometry?.facts?.[f.id] ?? null,
+          quality_status: sections.has("quality")
+            ? this.qualityStatus(p, r, f.id)
+            : null,
+          selection_anchor: anchor,
+          sections: [...sections],
+          known_facts: sections.has("facts")
+            ? (r.geometry?.facts?.[f.id] ?? null)
+            : null,
           purpose: f.purpose ?? null,
           parameters: f.parameters,
           expressions: f.expressions,
@@ -709,9 +997,9 @@ export class ModelService {
           owner_part: f.owner_part,
           context_hash: contextHash(f),
           frame_to_world: compileStructure(r.ir).placements[f.local_frame],
-          protected_constraints: r.ir.constraints.filter(
-            (c: any) => c.feature_id === f.id,
-          ),
+          protected_constraints: sections.has("constraints")
+            ? r.ir.constraints.filter((c: any) => c.feature_id === f.id)
+            : [],
           likely_dependencies: r.ir.features
             .filter((x: any) => x.depends_on.includes(f.id))
             .map((x: any) => x.id),
@@ -746,26 +1034,27 @@ export class ModelService {
               : []),
           ],
           construction_hash: hash(f.construction),
-          pattern_contract: ["pattern", "circular_pattern"].includes(
-            f.construction.operator,
-          )
-            ? {
-                source_feature: f.depends_on[0],
-                index_base: 0,
-                placement:
-                  f.construction.operator === "circular_pattern"
-                    ? "rotation(axis, origin, angle * index / count); angular endpoint excluded"
-                    : "translation(index * [dx, dy, dz])",
-                coordinate_frame: f.local_frame,
-                override_translation:
-                  "feature-local millimetres after base placement; use frame_to_world to interpret world directions",
-                default_geometry:
-                  "shared source; explicit source override materializes only that occurrence as a variant",
-                composition:
-                  "assembly compound; overlapping volumes are not a boolean union",
-              }
-            : null,
+          pattern_contract:
+            sections.has("contracts") &&
+            ["pattern", "circular_pattern"].includes(f.construction.operator)
+              ? {
+                  source_feature: f.depends_on[0],
+                  index_base: 0,
+                  placement:
+                    f.construction.operator === "circular_pattern"
+                      ? "rotation(axis, origin, angle * index / count); angular endpoint excluded"
+                      : "translation(index * [dx, dy, dz])",
+                  coordinate_frame: f.local_frame,
+                  override_translation:
+                    "feature-local millimetres after base placement; use frame_to_world to interpret world directions",
+                  default_geometry:
+                    "shared source; explicit source override materializes only that occurrence as a variant",
+                  composition:
+                    "assembly compound; overlapping volumes are not a boolean union",
+                }
+              : null,
           transformation_contract:
+            sections.has("contracts") &&
             f.construction.operator === "affine_transform"
               ? affineContract(
                   f.construction.matrix,
@@ -784,11 +1073,281 @@ export class ModelService {
       }
       case "cad_measure": {
         const r = this.store.revision(p, a.model_id, a.revision);
+        if (a.metric === "surface_deviation") {
+          requireThat(
+            a.feature_id &&
+              a.idempotency_key &&
+              a.other_revision &&
+              a.maximum_deviation &&
+              !a.other_feature_id &&
+              !a.face_id &&
+              !a.other_face_id &&
+              !a.uv &&
+              !a.other_uv &&
+              !a.curve_parameter &&
+              !a.other_curve_parameter &&
+              !a.minimum_clearance,
+            "INVALID_SCHEMA",
+            "Oberflächenabweichung benötigt Feature, Vergleichsrevision, maximum_deviation und einen Idempotenzschlüssel.",
+          );
+          const other = this.store.revision(p, a.model_id, a.other_revision);
+          const current = r.ir.features.find((f: any) => f.id === a.feature_id),
+            reference = other.ir.features.find(
+              (f: any) => f.id === a.feature_id,
+            );
+          requireThat(
+            current?.construction.operator === "field" &&
+              reference?.construction.operator === "field",
+            "OUT_OF_SCOPE",
+            "Oberflächenabweichung wird zwischen zwei Revisionen eines analytischen Feldes zertifiziert.",
+          );
+          requireThat(
+            hash(current.construction.domain) ===
+              hash(reference.construction.domain) &&
+              current.local_frame === reference.local_frame,
+            "OUT_OF_SCOPE",
+            "Vergleich benötigt dieselbe Felddomäne und denselben Bezugsrahmen.",
+          );
+          const epsilon = quantity(a.maximum_deviation, "length");
+          requireThat(
+            epsilon >= 1e-6 && epsilon <= 1000,
+            "PRECISION_UNSUPPORTED",
+            "Abweichungsschranke: 0.000001 bis 1000 mm.",
+          );
+          return this.jobs.enqueue(p, a.model_id, "analysis", {
+            plan: this.revisionPlan(r),
+            action: "analysis",
+            metric: a.metric,
+            revision: r.id,
+            other_revision: other.id,
+            feature_id: a.feature_id,
+            reference_expression: reference.construction.expression,
+            inputs: referencedArtifacts([reference]),
+            epsilon,
+          });
+        }
+        requireThat(
+          !a.other_revision && !a.maximum_deviation,
+          "INVALID_SCHEMA",
+          "Vergleichsrevision und maximum_deviation gelten nur für surface_deviation.",
+        );
+        if (a.metric === "fit_primitives") {
+          requireThat(
+            a.feature_id &&
+              a.idempotency_key &&
+              !a.other_feature_id &&
+              !a.face_id &&
+              !a.uv &&
+              !a.point,
+            "INVALID_SCHEMA",
+            "Primitivhypothesen benötigen ein Netzfeature und einen Idempotenzschlüssel.",
+          );
+          const target = r.ir.features.find((f: any) => f.id === a.feature_id);
+          requireThat(
+            target?.authoritative_representation === "mesh",
+            "OUT_OF_SCOPE",
+            "Primitiv- und Symmetriehypothesen werden für maßgebliche Netze berechnet.",
+          );
+          return this.jobs.enqueue(p, a.model_id, "analysis", {
+            plan: this.revisionPlan(r),
+            action: "analysis",
+            metric: a.metric,
+            revision: r.id,
+            feature_id: a.feature_id,
+          });
+        }
+        if (a.metric === "thread_fit") {
+          requireThat(
+            a.feature_id && a.other_feature_id,
+            "INVALID_SCHEMA",
+            "Gewindepaarung benötigt ein äußeres und ein inneres Gewindefeature.",
+          );
+          const threads = [a.feature_id, a.other_feature_id].map((fid) => {
+            const f = r.ir.features.find((x: any) => x.id === fid);
+            requireThat(
+              f?.construction.operator === "thread",
+              "OUT_OF_SCOPE",
+              "Gewindepaarung vergleicht zwei Gewindefeatures.",
+            );
+            return f;
+          });
+          const external = threads.find(
+              (t) => t.construction.mode === "external",
+            ),
+            internal = threads.find((t) => t.construction.mode === "internal");
+          requireThat(
+            external && internal,
+            "OUT_OF_SCOPE",
+            "Gewindepaarung benötigt genau ein Außen- und ein Innengewinde.",
+          );
+          return {
+            model_id: a.model_id,
+            revision: r.id,
+            measurements: threadFit(external, internal),
+            metric: a.metric,
+            measurement_frame: "model",
+            unit: "mm",
+            coverage: "basic_profile_parameters_only_no_tolerance_class",
+          };
+        }
+        if (a.metric === "blend_activity") {
+          requireThat(
+            a.feature_id &&
+              a.idempotency_key &&
+              a.region &&
+              !a.other_feature_id &&
+              !a.motion &&
+              !a.point,
+            "INVALID_SCHEMA",
+            "Blendaktivität benötigt ein Feldfeature, eine Region und einen Idempotenzschlüssel.",
+          );
+          const target = r.ir.features.find((f: any) => f.id === a.feature_id);
+          requireThat(
+            target?.construction.operator === "field",
+            "OUT_OF_SCOPE",
+            "Blendaktivität wird für analytische Felder zertifiziert.",
+          );
+          const min = a.region.min.map(Number),
+            max = a.region.max.map(Number);
+          requireThat(
+            min.every(
+              (v: number, i: number) =>
+                Number.isFinite(v) &&
+                max[i] > v &&
+                Math.abs(v) <= 1e6 &&
+                Math.abs(max[i]) <= 1e6,
+            ),
+            "GEOMETRY_INVALID",
+            "Ungültige Passregion.",
+          );
+          return this.jobs.enqueue(p, a.model_id, "analysis", {
+            plan: this.revisionPlan(r),
+            action: "analysis",
+            metric: a.metric,
+            revision: r.id,
+            feature_id: a.feature_id,
+            region: { min, max },
+            cell_size: quantity(target.construction.cell_size, "length"),
+          });
+        }
+        if (a.metric === "surface_distance" || a.metric === "wall_thickness") {
+          requireThat(
+            a.feature_id &&
+              a.idempotency_key &&
+              (a.metric === "wall_thickness") === !a.other_feature_id &&
+              !a.motion &&
+              !a.region &&
+              !a.point,
+            "INVALID_SCHEMA",
+            a.metric === "surface_distance"
+              ? "Oberflächenabstand benötigt zwei Features und einen Idempotenzschlüssel."
+              : "Wandstärke benötigt genau ein Feature und einen Idempotenzschlüssel.",
+          );
+          for (const fid of [a.feature_id, a.other_feature_id].filter(
+            Boolean,
+          )) {
+            this.resolve(p, {
+              model_id: a.model_id,
+              revision: r.id,
+              feature_id: fid,
+            });
+            requireThat(
+              r.ir.features.find((f: any) => f.id === fid)
+                ?.authoritative_representation === "brep",
+              "OUT_OF_SCOPE",
+              "Diese Messung benötigt native B-Rep-Geometrie.",
+            );
+          }
+          return this.jobs.enqueue(p, a.model_id, "analysis", {
+            plan: this.revisionPlan(r),
+            action: "analysis",
+            metric: a.metric,
+            revision: r.id,
+            feature_id: a.feature_id,
+            other_feature_id: a.other_feature_id,
+          });
+        }
+        requireThat(
+          !a.region,
+          "INVALID_SCHEMA",
+          "Eine Region gilt nur für die Blendaktivität.",
+        );
+        requireThat(
+          !a.motion || a.metric === "clearance",
+          "INVALID_SCHEMA",
+          "Eine Bewegung gilt nur für die Freiganganalyse.",
+        );
         if (["angle", "curvature", "clearance"].includes(a.metric)) {
           requireThat(
             a.feature_id && a.idempotency_key,
             "INVALID_SCHEMA",
             "Analyse benötigt ein Feature und einen Idempotenzschlüssel.",
+          );
+          const implicitTarget = r.ir.features.find(
+            (f: any) =>
+              f.id === a.feature_id &&
+              f.authoritative_representation === "implicit",
+          );
+          if (implicitTarget) {
+            requireThat(
+              a.metric === "curvature" &&
+                a.point &&
+                !a.other_feature_id &&
+                !a.face_id &&
+                !a.uv &&
+                !a.curve_parameter,
+              "OUT_OF_SCOPE",
+              "Für Felder ist die Krümmung der Niveaufläche an einem ausdrücklichen Weltpunkt registriert.",
+            );
+            const placement = compileStructure(r.ir).placements[
+              implicitTarget.local_frame
+            ];
+            const world = a.point.map(Number);
+            requireThat(
+              world.every(
+                (v: number) => Number.isFinite(v) && Math.abs(v) <= 1e6,
+              ),
+              "INVALID_SCHEMA",
+              "Ungültiger Auswertepunkt.",
+            );
+            const shifted = world.map(
+              (v: number, i: number) => v - placement.translation[i],
+            );
+            const local = [0, 1, 2].map((i) =>
+              placement.rotation.reduce(
+                (sum, row, j) => sum + row[i] * shifted[j],
+                0,
+              ),
+            );
+            const domain = implicitTarget.construction.domain;
+            requireThat(
+              local.every(
+                (v, i) =>
+                  v >= Number(domain.min[i]) && v <= Number(domain.max[i]),
+              ),
+              "OUT_OF_SCOPE",
+              "Der Punkt liegt außerhalb des deklarierten Feldgebiets.",
+            );
+            const step = a.step ? quantity(a.step, "length") : 0.001;
+            requireThat(
+              step >= 1e-7 && step <= 1,
+              "PRECISION_UNSUPPORTED",
+              "Differenzenschrittweite: 1e-7 bis 1 mm.",
+            );
+            return this.jobs.enqueue(p, a.model_id, "analysis", {
+              plan: this.revisionPlan(r),
+              action: "analysis",
+              metric: "curvature",
+              revision: r.id,
+              feature_id: a.feature_id,
+              point_local: local,
+              step,
+            });
+          }
+          requireThat(
+            !a.point && !a.step,
+            "INVALID_SCHEMA",
+            "Punkt und Schrittweite gelten nur für implizite Krümmungsmessungen.",
           );
           requireThat(
             a.metric === "curvature" || a.other_feature_id,
@@ -882,6 +1441,18 @@ export class ModelService {
             "INVALID_SCHEMA",
             "Mindestfreigang gilt nur für die Freiganganalyse.",
           );
+          let motion = null;
+          if (a.motion) {
+            const translation = a.motion.translation.map(Number);
+            requireThat(
+              translation.every(
+                (v: number) => Number.isFinite(v) && Math.abs(v) <= 1e6,
+              ) && Math.hypot(...translation) > 0,
+              "GEOMETRY_INVALID",
+              "Ungültige Bewegungsrichtung.",
+            );
+            motion = { translation, steps: a.motion.steps };
+          }
           return this.jobs.enqueue(p, a.model_id, "analysis", {
             plan: this.revisionPlan(r),
             action: "analysis",
@@ -892,6 +1463,7 @@ export class ModelService {
             selection,
             other_selection,
             minimum_clearance: minimum,
+            ...(motion ? { motion } : {}),
           });
         }
         requireThat(
@@ -901,7 +1473,9 @@ export class ModelService {
             !a.other_uv &&
             !a.curve_parameter &&
             !a.other_curve_parameter &&
-            !a.minimum_clearance,
+            !a.minimum_clearance &&
+            !a.point &&
+            !a.step,
           "INVALID_SCHEMA",
           "Lokale Analyseparameter sind für diese Messung nicht registriert.",
         );
@@ -1014,6 +1588,8 @@ export class ModelService {
               expressions: f.expressions,
             })),
           protected_constraints: plan.ir.constraints,
+          sensitivity: plan.sensitivity ?? [],
+          conditioning: plan.conditioning,
           committed: false,
         };
       }
@@ -1244,12 +1820,100 @@ export class ModelService {
           "PRECISION_UNSUPPORTED",
           "Ungültige Vorschauauflösung.",
         );
+        let adaptive = null;
+        if (a.adaptive) {
+          const target = quantity(a.adaptive.target_error, "length");
+          const ceiling = a.adaptive.max_deflection
+            ? quantity(a.adaptive.max_deflection, "length")
+            : target;
+          const factor = Number(a.adaptive.feature_factor);
+          requireThat(
+            target >= 1e-5 &&
+              target <= 10 &&
+              ceiling >= target &&
+              ceiling <= 10 &&
+              factor >= 0.01 &&
+              factor <= 10,
+            "PRECISION_UNSUPPORTED",
+            "Adaptive Vorschau: Zielfehler 1e-5 bis 10 mm, Obergrenze nicht unter dem Ziel, Merkmalsfaktor 0.01 bis 10.",
+          );
+          adaptive = {
+            target_error_mm: target,
+            feature_factor: factor,
+            max_deflection_mm: ceiling,
+          };
+        }
+        let clip = null;
+        if (a.region) {
+          const center = a.region.center.map(Number),
+            radius = Number(a.region.radius);
+          requireThat(
+            center.every(
+              (v: number) => Number.isFinite(v) && Math.abs(v) <= 1e6,
+            ) &&
+              radius >= 1e-5 &&
+              radius <= 1e6,
+            "INVALID_SCHEMA",
+            "Ungültiger Vorschauausschnitt.",
+          );
+          clip = { center, radius };
+        }
+        let view = null;
+        if (a.view) {
+          const vector = (v: any, name: string) => {
+            const values = v.map(Number);
+            requireThat(
+              values.every(
+                (x: number) => Number.isFinite(x) && Math.abs(x) <= 1e6,
+              ) && Math.hypot(...values) >= 1e-9,
+              "INVALID_SCHEMA",
+              `Ungültige Ansichtsangabe ${name}.`,
+            );
+            return values;
+          };
+          const discretization = a.view.discretization
+            ? quantity(a.view.discretization, "length")
+            : 0.01;
+          requireThat(
+            discretization >= 1e-4 && discretization <= 10,
+            "PRECISION_UNSUPPORTED",
+            "Diskretisierung der Ansicht: 0.0001 bis 10 mm.",
+          );
+          view =
+            a.view.kind === "section"
+              ? {
+                  kind: "section",
+                  origin: a.view.origin ? a.view.origin.map(Number) : [0, 0, 0],
+                  normal: vector(a.view.normal ?? ["0", "0", "1"], "normal"),
+                  discretization,
+                }
+              : {
+                  kind: "orthographic",
+                  direction: vector(
+                    a.view.direction ?? ["0", "0", "1"],
+                    "direction",
+                  ),
+                  hidden_lines: a.view.hidden_lines ?? true,
+                  discretization,
+                };
+          requireThat(
+            view.origin === undefined ||
+              view.origin.every(
+                (x: number) => Number.isFinite(x) && Math.abs(x) <= 1e6,
+              ),
+            "INVALID_SCHEMA",
+            "Ungültiger Schnittursprung.",
+          );
+        }
         return this.jobs.enqueue(p, a.model_id, "render", {
           plan: this.revisionPlan(r),
           action: "render",
           revision: r.id,
           feature_id: a.feature_id,
           deflection,
+          adaptive,
+          clip_region: clip,
+          view,
         });
       }
       case "cad_import": {
@@ -1266,11 +1930,46 @@ export class ModelService {
           "BUDGET_EXCEEDED",
           "Importdatei überschreitet das Budget.",
         );
+        // Archives are never unpacked: no archive bombs, nested members or symlink escapes.
+        const head = data.subarray(0, 8);
+        const archive =
+          head.subarray(0, 4).equals(Buffer.from([0x50, 0x4b, 0x03, 0x04])) ||
+          head.subarray(0, 2).equals(Buffer.from([0x1f, 0x8b])) ||
+          head
+            .subarray(0, 6)
+            .equals(Buffer.from("7z\xbc\xaf\x27\x1c", "latin1")) ||
+          head.subarray(0, 4).equals(Buffer.from("Rar!", "latin1")) ||
+          head.subarray(0, 3).equals(Buffer.from("BZh", "latin1")) ||
+          (data.length > 262 &&
+            data.subarray(257, 262).equals(Buffer.from("ustar", "latin1")));
+        requireThat(
+          !archive,
+          "OUT_OF_SCOPE",
+          "Archive werden nicht entpackt; die Geometriedatei direkt hochladen.",
+        );
         requireThat(
           !a.validation_profile || a.format === "stl",
           "OUT_OF_SCOPE",
           "Explizites Meshprüfprofil gilt für STL-Importe.",
         );
+        requireThat(
+          a.structure === "flatten" || a.format === "step",
+          "OUT_OF_SCOPE",
+          "Strukturerhaltender Import gilt für STEP-Baugruppen.",
+        );
+        requireThat(
+          a.grid === undefined || a.format === "vdb",
+          "OUT_OF_SCOPE",
+          "Ein Gridname gilt für OpenVDB-Importe.",
+        );
+        if (a.format === "vdb")
+          requireThat(
+            data.length >= 8 &&
+              data.readUInt32LE(0) === 0x56444220 &&
+              data.readUInt32LE(4) === 0,
+            "INVALID_SCHEMA",
+            "Datei ist kein unterstütztes OpenVDB.",
+          );
         if (a.format === "ir") {
           requireThat(
             base.ir.features.length === 0,
@@ -1283,7 +1982,7 @@ export class ModelService {
           } catch {
             throw new CadError("INVALID_SCHEMA", "Ungültiges IR-JSON.");
           }
-          return this.candidate(p, a, compile(input));
+          return this.candidate(p, a, this.importPlan(compile(input)));
         }
         requireThat(
           base.ir.features.length === 0,
@@ -1305,6 +2004,23 @@ export class ModelService {
             "Externe STEP-Referenzen werden nicht nachgeladen.",
           );
         }
+        if (a.format === "step" && a.structure === "preserve") {
+          // The product structure is only known to the native reader: probe first, then the
+          // continuation builds frames, assemblies, parts and per-component features.
+          return this.jobs.enqueue(p, a.model_id, "probe", {
+            action: "probe_step",
+            plan: {
+              registry_hash: REGISTRY_HASH,
+              features: [],
+              outputs: [],
+              tolerance: quantity(base.ir.tolerance, "length"),
+              profile: base.ir.profile,
+            },
+            inputs: [{ artifact_id: a.artifact_id, format: "step" }],
+            artifact_id: a.artifact_id,
+            import: a,
+          });
+        }
         if (a.format === "stl") {
           const binary =
             data.length >= 84 &&
@@ -1323,6 +2039,12 @@ export class ModelService {
         }
         const fid = id("import");
         const importedPart = base.ir.structure ? id("part") : "part-main";
+        const representation =
+          a.format === "stl"
+            ? "mesh"
+            : a.format === "vdb"
+              ? "implicit"
+              : "brep";
         const ir = parse<ModelIR>(ModelIR, {
           ...base.ir,
           ...(base.ir.structure
@@ -1335,8 +2057,7 @@ export class ModelService {
                       id: importedPart,
                       semantic_name: "Importiertes Teil",
                       local_frame: "world",
-                      authoritative_representation:
-                        a.format === "stl" ? "mesh" : "brep",
+                      authoritative_representation: representation,
                       outputs: [fid],
                     },
                   ],
@@ -1349,21 +2070,23 @@ export class ModelService {
                 (base.ir.profile === "watertight_solid"
                   ? "watertight_solid"
                   : "render_surface"))
-              : base.ir.profile,
+              : a.format === "vdb"
+                ? "render_surface"
+                : base.ir.profile,
           features: [
             {
               id: fid,
               semantic_name: "Importierte Geometrie",
               kind: "imported",
               owner_part: importedPart,
-              authoritative_representation:
-                a.format === "stl" ? "mesh" : "brep",
+              authoritative_representation: representation,
               parameters: {},
               construction: {
                 operator: "imported",
                 artifact_id: a.artifact_id,
                 format: a.format,
                 source_unit: a.source_unit,
+                ...(a.grid ? { grid: a.grid } : {}),
               },
             },
           ],
@@ -1371,9 +2094,14 @@ export class ModelService {
           assumptions: [
             "Originale Konstruktionshistorie unbekannt.",
             "Importtexte sind Daten, keine Anweisungen.",
+            ...(a.format === "vdb"
+              ? [
+                  "OpenVDB-Werte sind abgetastete, trilinear interpolierte Feldwerte über der aktiven Voxelbox; die Lipschitz-Schranke wird aus den Voxeldifferenzen gemessen, ein kontinuierlicher Distanznachweis fehlt.",
+                ]
+              : []),
           ],
         });
-        return this.candidate(p, a, compile(ir));
+        return this.candidate(p, a, this.importPlan(compile(ir)));
       }
       case "cad_export": {
         const r = this.store.revision(p, a.model_id, a.revision);
@@ -1438,6 +2166,235 @@ export class ModelService {
       case "cad_job_cancel":
         return this.jobSummary(this.jobs.cancel(p, a.job_id));
     }
+  }
+  /** Structure-preserving STEP import: the probe's occurrence tree becomes frames, assemblies,
+   *  parts and one imported component feature per leaf occurrence (Bauplan 3.2, 21.5). */
+  importStructure(p: Principal, a: any, report: any) {
+    const base = this.mustFresh(p, a);
+    requireThat(
+      base.ir.features.length === 0,
+      "OUT_OF_SCOPE",
+      "Geometrieimport benötigt ein leeres Modell.",
+    );
+    const nodes: any[] = Array.isArray(report?.nodes) ? report.nodes : [];
+    requireThat(
+      nodes.length >= 1 && nodes.length <= 128,
+      "INVALID_SCHEMA",
+      "Ungültiger STEP-Strukturbericht.",
+    );
+    const taken = new Set<string>([
+      base.ir.structure?.project.id ?? "project-main",
+      ...(base.ir.structure?.frames ?? []).map((f: any) => f.id),
+      ...(base.ir.structure?.assemblies ?? []).map((x: any) => x.id),
+      ...(base.ir.structure?.parts ?? []).map((x: any) => x.id),
+    ]);
+    const unique = (candidate: string) => {
+      let name = candidate;
+      for (let n = 2; taken.has(name); n++) name = candidate + "-" + n;
+      taken.add(name);
+      return name;
+    };
+    const clean = (name: unknown, fallback: string) => {
+      const text = String(name ?? "")
+        .replace(/[^\p{L}\p{N} _.,()\-+/]/gu, "")
+        .trim()
+        .slice(0, 120);
+      return text || fallback;
+    };
+    const decimal = (value: unknown) => {
+      const v = Number(value);
+      requireThat(
+        Number.isFinite(v) && Math.abs(v) <= 1e6,
+        "GEOMETRY_INVALID",
+        "STEP-Platzierung außerhalb des zulässigen Bereichs.",
+      );
+      return (Math.abs(v) < 5e-10 ? 0 : v).toFixed(9);
+    };
+    const byEntry = new Map<string, any>();
+    nodes.forEach((node, index) => {
+      requireThat(
+        typeof node.entry === "string" && !byEntry.has(node.entry),
+        "INVALID_SCHEMA",
+        "STEP-Vorkommen benötigen eindeutige Pfade.",
+      );
+      byEntry.set(node.entry, { ...node, index });
+    });
+    const frames: any[] = [],
+      assemblies: any[] = [],
+      parts: any[] = [],
+      features: any[] = [];
+    const frameOf = new Map<string, string>();
+    const assemblyOf = new Map<string, string>();
+    for (const node of byEntry.values()) {
+      const parent = node.parent_entry ? byEntry.get(node.parent_entry) : null;
+      requireThat(
+        node.parent_entry === null ||
+          node.parent_entry === undefined ||
+          (parent && parent.kind === "assembly" && parent.index < node.index),
+        "INVALID_SCHEMA",
+        "STEP-Vorkommen verweist auf ein ungültiges übergeordnetes Vorkommen.",
+      );
+      const label = clean(
+        node.name,
+        node.kind === "assembly" ? "Baugruppe" : "Teil",
+      );
+      const suffix = String(node.index + 1);
+      const t = node.transform ?? {};
+      let frame = parent ? frameOf.get(parent.entry)! : "world";
+      const identity =
+        Number(t.angle_deg) === 0 &&
+        Array.isArray(t.translation) &&
+        t.translation.every((v: unknown) => Number(v) === 0);
+      if (!identity) {
+        const frameId = unique("frame-" + suffix);
+        frames.push({
+          id: frameId,
+          semantic_name: "Lage " + label,
+          parent: frame,
+          translation: (t.translation ?? [0, 0, 0]).map(decimal),
+          axis: (t.axis ?? [0, 0, 1]).map(decimal),
+          angle: { value: decimal(t.angle_deg ?? 0), unit: "deg" },
+        });
+        frame = frameId;
+      }
+      frameOf.set(node.entry, frame);
+      if (node.kind === "assembly") {
+        const assemblyId = unique("assembly-" + suffix);
+        assemblyOf.set(node.entry, assemblyId);
+        assemblies.push({
+          id: assemblyId,
+          semantic_name: label,
+          ...(parent ? { parent_assembly: assemblyOf.get(parent.entry) } : {}),
+          local_frame: frame,
+        });
+        continue;
+      }
+      const partId = unique("part-" + suffix),
+        featureId = unique("component-" + suffix);
+      parts.push({
+        id: partId,
+        semantic_name: label,
+        ...(parent ? { assembly: assemblyOf.get(parent.entry) } : {}),
+        local_frame: frame,
+        authoritative_representation: "brep",
+        outputs: [featureId],
+      });
+      features.push({
+        id: featureId,
+        semantic_name: label,
+        kind: "imported",
+        purpose: {
+          value: ("STEP-Vorkommen " + String(node.entry)).slice(0, 200),
+          status: "imported",
+        },
+        owner_part: partId,
+        local_frame: frame,
+        authoritative_representation: "brep",
+        parameters: {},
+        construction: {
+          operator: "imported",
+          artifact_id: a.artifact_id,
+          format: "step",
+          source_unit: a.source_unit,
+          component: node.prototype_entry,
+        },
+      });
+    }
+    requireThat(
+      features.length >= 1,
+      "GEOMETRY_INVALID",
+      "Die STEP-Struktur enthält keine Teilgeometrie.",
+    );
+    const ir = parse<ModelIR>(ModelIR, {
+      ...base.ir,
+      structure: {
+        project: base.ir.structure?.project ?? {
+          id: "project-import",
+          semantic_name: clean(nodes[0]?.name, "Importierte Baugruppe"),
+        },
+        frames: [...(base.ir.structure?.frames ?? []), ...frames],
+        assemblies: [...(base.ir.structure?.assemblies ?? []), ...assemblies],
+        parts: [...(base.ir.structure?.parts ?? []), ...parts],
+      },
+      features,
+      outputs: features.map((f) => f.id),
+      assumptions: [
+        "Originale Konstruktionshistorie unbekannt.",
+        "Importtexte sind Daten, keine Anweisungen.",
+        "STEP-Produktstruktur wurde als Rahmen, Baugruppen und Teile übernommen; Komponentenlagen sind starre Achse-Winkel-Platzierungen relativ zum übergeordneten Vorkommen.",
+      ],
+    });
+    this.gates.run("after_compile", {
+      model_id: a.model_id,
+      registry_hash: REGISTRY_HASH,
+    });
+    return this.candidate(p, a, this.importPlan(compile(ir)));
+  }
+  /** Imports start from an empty model: every feature is new and dirty relative to the base. */
+  private importPlan(plan: any) {
+    const ids = plan.features.map((f: any) => f.id);
+    return {
+      ...plan,
+      changed_features: ids,
+      dependent_features: [],
+      dirty_features: ids,
+    };
+  }
+  /** Per-entity quality from the stored commit proof of this revision (Bauplan 8.2). */
+  private qualityStatus(p: Principal, r: any, fid: string) {
+    const row = this.store.get(
+      "SELECT validation FROM transactions WHERE committed_revision=? AND model=? AND state='committed'",
+      r.id,
+      r.model,
+    );
+    if (!row?.validation)
+      return {
+        dimensional_status: "not_evaluated" as const,
+        topology_status: "not_evaluated" as const,
+        manufacturing_status: "not_evaluated" as const,
+        source:
+          r.quality === "preview_only"
+            ? "candidate_or_draft_without_commit_proof"
+            : "commit_proof_unavailable",
+        check_ids: [],
+      };
+    const validation = JSON.parse(row.validation);
+    const mine = validation.checks.filter((c: any) => c.target === fid);
+    const status = (predicate: (c: any) => boolean) => {
+      const relevant = mine.filter(predicate);
+      if (!relevant.length) return "not_evaluated" as const;
+      return relevant.every((c: any) => c.status === "passed")
+        ? ("checks_passed" as const)
+        : ("failed" as const);
+    };
+    const dimensional = (c: any) =>
+      /^dimension-/.test(c.check_id) ||
+      r.ir.constraints.some(
+        (k: any) =>
+          k.id === c.check_id &&
+          [
+            "dimension",
+            "parameter",
+            "volume",
+            "surface_deviation",
+            "equation",
+            "minimum",
+          ].includes(k.kind),
+      );
+    const topological = (c: any) =>
+      /^(geometry-|mesh-|native-tolerance-)/.test(c.check_id);
+    const manufacturing = mine.filter((c: any) =>
+      /^manufacturing-/.test(c.check_id),
+    );
+    return {
+      dimensional_status: status(dimensional),
+      topology_status: status(topological),
+      manufacturing_status: manufacturing.length
+        ? ("rules_sampled" as const)
+        : ("not_certified" as const),
+      source: "commit_proof_" + validation.digest.slice(0, 16),
+      check_ids: mine.map((c: any) => c.check_id).slice(0, 64),
+    };
   }
   private jobSummary(j: any) {
     if (j.result?.checks)

@@ -29,7 +29,12 @@ const bounds = z.tuple([
 ]);
 const pageOffset = count.nullable();
 const quality = z.enum(["preview_only", "checks_passed_within_profile"]);
-const profile = z.enum(["precision_cad", "render_surface", "watertight_solid"]);
+const profile = z.enum([
+  "precision_cad",
+  "render_surface",
+  "watertight_solid",
+  "manufacturing_candidate",
+]);
 const source = Feature.shape.purpose.unwrap();
 const parameters = Feature.shape.parameters;
 const expressions = Feature.shape.expressions.removeDefault();
@@ -79,6 +84,7 @@ export const LegacyValidationReport = z.strictObject({
 export const ValidationReportV2 = LegacyValidationReport.extend({
   schema_version: z.literal("2"),
   checks: z.array(ValidationCheckV2).min(1),
+  error_budget: Metadata.optional(),
 });
 export const ValidationReport = z.union([
   LegacyValidationReport,
@@ -144,6 +150,27 @@ const candidate = queued.extend({
   transaction_id: Id,
   candidate_revision: Id,
   ...baseBinding,
+  repair_attempt: z
+    .strictObject({
+      attempt: count,
+      of_transaction: Id,
+      cause: text,
+      remaining: count,
+      intent_comparison: z.strictObject({
+        original_changed_features: z.array(Id),
+        this_changed_features: z.array(Id),
+        same_targets: z.boolean(),
+      }),
+      previous_attempts: z.array(
+        z.strictObject({
+          transaction_id: Id,
+          cause: text.nullable(),
+          state: text,
+          cost_seconds: z.number().nonnegative().nullable(),
+        }),
+      ),
+    })
+    .optional(),
 });
 const planned = z.strictObject({
   status: z.literal("planned"),
@@ -201,6 +228,14 @@ const solver = z.strictObject({
   expression_evaluations: count,
   engine: text,
   global_optimum_claimed: z.literal(false),
+  objective_terms: z.array(
+    z.strictObject({
+      id: Id,
+      value: z.number(),
+      loss: z.enum(["none", "huber", "cauchy"]),
+    }),
+  ),
+  diagnostics: Metadata,
 });
 const solved = z.strictObject({
   status: z.literal("succeeded"),
@@ -244,7 +279,75 @@ const differential = z.strictObject({
   certified_error_bound: z.null(),
 });
 const sample = z.union([surfaceSample, curveSample]);
-const analysed = z.discriminatedUnion("metric", [
+const implicitCurvature = z.strictObject({
+  status: z.literal("succeeded"),
+  ...binding,
+  metrics,
+  metric: z.literal("curvature"),
+  unit: z.literal("per_mm_and_per_mm2"),
+  method: z.literal(
+    "central_finite_difference_hessian_with_interval_regularity",
+  ),
+  coverage: z.literal("single_point_and_its_two_step_cell"),
+  certified_error_bound: z.null(),
+  domain_frame: Id,
+  measurements: Metadata,
+});
+const primitiveFit = z.strictObject({
+  status: z.literal("succeeded"),
+  ...binding,
+  metrics,
+  metric: z.literal("fit_primitives"),
+  unit: z.literal("mm"),
+  method: z.literal("normal_region_growing_with_least_squares_primitive_fits"),
+  coverage: text,
+  certified_error_bound: z.null(),
+  guarantee: z.literal("sampled"),
+  measurements: Metadata,
+});
+const sampledAnalysis = (metric: string, method: z.ZodTypeAny) =>
+  z.strictObject({
+    status: z.literal("succeeded"),
+    ...binding,
+    metrics,
+    metric: z.literal(metric),
+    unit: z.literal("mm"),
+    method,
+    coverage: text,
+    certified_error_bound: z.null(),
+    guarantee: z.enum(["sampled", "bounded", "not_certified"]),
+    measurements: Metadata,
+  });
+const surfaceDistance = sampledAnalysis(
+  "surface_distance",
+  z.literal("sampled_chamfer_hausdorff_exact_extrema_and_boolean_iou"),
+);
+const wallThickness = sampledAnalysis("wall_thickness", text);
+const blendActivity = sampledAnalysis(
+  "blend_activity",
+  z.literal("interval_arithmetic_blend_inactivity"),
+).extend({ domain_frame: Id });
+const motionClearance = z.strictObject({
+  status: z.literal("succeeded"),
+  ...binding,
+  metrics,
+  metric: z.literal("clearance"),
+  unit: z.literal("mm"),
+  method: z.literal(
+    "OCCT_BRepExtrema_DistShapeShape_along_sampled_linear_motion",
+  ),
+  coverage: text,
+  certified_error_bound: z.null(),
+  motion_or_global_wall_certificate: z.literal(false),
+  measurements: Metadata,
+});
+const analysed = z.union([
+  implicitCurvature,
+  primitiveFit,
+  surfaceDistance,
+  wallThickness,
+  blendActivity,
+  motionClearance,
   differential.extend({
     metric: z.literal("curvature"),
     unit: z.literal("per_mm_and_per_mm2"),
@@ -271,6 +374,19 @@ const analysed = z.discriminatedUnion("metric", [
       first: sample,
       second: sample,
     }),
+  }),
+  z.strictObject({
+    status: z.literal("succeeded"),
+    ...binding,
+    metrics,
+    metric: z.literal("surface_deviation"),
+    unit: z.literal("mm"),
+    method: z.literal("interval_arithmetic_gradient_flow_certificate"),
+    coverage: z.literal("entire_declared_domain"),
+    certified_error_bound: z.number().nonnegative().nullable(),
+    guarantee: z.enum(["bounded", "not_certified"]),
+    domain_frame: Id,
+    measurements: Metadata,
   }),
   z.strictObject({
     status: z.literal("succeeded"),
@@ -306,6 +422,16 @@ const nativeExported = rendered.extend({
 export const LegacyExportResult = rendered.extend({
   package_manifest: exported.package_manifest.optional(),
 });
+const probed = z.strictObject({
+  status: z.literal("succeeded"),
+  ...baseBinding,
+  structure: Metadata,
+  continuation: z.union([
+    candidate,
+    z.strictObject({ status: z.literal("failed"), error: ErrorDetail }),
+  ]),
+  metrics,
+});
 export const JobResultSchemas = {
   evaluate: evaluated,
   validate: ValidationReport,
@@ -314,6 +440,7 @@ export const JobResultSchemas = {
   analysis: analysed,
   render: rendered,
   export: nativeExported,
+  probe: probed,
 };
 export type JobKind = keyof typeof JobResultSchemas;
 const jobResult = z.union([
@@ -326,6 +453,7 @@ const jobResult = z.union([
   rendered,
   nativeExported,
   LegacyExportResult,
+  probed,
 ]);
 export const JobView = z.strictObject({
   job_id: Id,
@@ -333,6 +461,22 @@ export const JobView = z.strictObject({
   transaction_id: Id.nullable(),
   status: z.enum(["queued", "running", "succeeded", "failed", "cancelled"]),
   attempts: count,
+  phase: z
+    .enum([
+      "queued",
+      "native_execution",
+      "validating",
+      "persisting",
+      "succeeded",
+      "failed",
+      "cancelled",
+    ])
+    .nullable(),
+  budget_seconds: z.number().positive().nullable(),
+  started_at: z.iso.datetime().nullable(),
+  heartbeat_at: z.iso.datetime().nullable(),
+  finished_at: z.iso.datetime().nullable(),
+  elapsed_seconds: z.number().nonnegative().nullable(),
   result: jobResult.nullable(),
   error: ErrorDetail.nullable(),
 });
@@ -357,6 +501,7 @@ const face = z.strictObject({
   uv_bounds: z
     .tuple([z.number(), z.number(), z.number(), z.number()])
     .optional(),
+  adjacent_face_ids: z.array(Id).max(256).optional(),
   unit: z.literal("mm"),
   area_unit: z.literal("mm2"),
 });
@@ -435,6 +580,37 @@ const inspect = z.strictObject({
     .nullable(),
   surface_poles_hash: Digest.nullable(),
   field_expression_hash: Digest.nullable(),
+  quality_status: z
+    .strictObject({
+      dimensional_status: z.enum(["checks_passed", "failed", "not_evaluated"]),
+      topology_status: z.enum(["checks_passed", "failed", "not_evaluated"]),
+      manufacturing_status: z.enum([
+        "not_certified",
+        "rules_sampled",
+        "not_evaluated",
+      ]),
+      source: text,
+      check_ids: z.array(text).max(64),
+    })
+    .nullable(),
+  selection_anchor: z
+    .strictObject({
+      point_mm: point,
+      normal: point.nullable(),
+      barycentric: z.tuple([z.number(), z.number(), z.number()]).nullable(),
+      triangle_index: count.nullable(),
+      local_frame: Id,
+      geometry_feature_id: Id,
+      face_id: Id,
+      view_relative: z
+        .strictObject({
+          facing_camera: z.boolean().nullable(),
+          note: text,
+        })
+        .nullable(),
+    })
+    .nullable(),
+  sections: strings,
 });
 const summary = z.strictObject({
   ...binding,
@@ -492,8 +668,14 @@ const capabilities = z.strictObject({
   worker_build_hash: Digest,
   implementation_hash: Digest,
   policy_hash: Digest,
-  formats: z.strictObject({ import: strings, export: strings }),
+  formats: z.strictObject({
+    import: strings,
+    export: strings,
+    step_structure: text,
+    vdb_import: text,
+  }),
   quality_profiles: z.array(profile),
+  manufacturing_candidate: Metadata,
   mesh_validation: Metadata,
   analysis: Metadata,
   field_operators: strings,
@@ -506,11 +688,17 @@ const capabilities = z.strictObject({
   transformations: Metadata,
   field_values: Metadata,
   model_hierarchy: Metadata,
+  thread_library: Metadata,
+  sweep_contract: Metadata,
+  field_certificates: Metadata,
   limits: z.record(text, z.number().nonnegative()),
   protocols: strings,
   host_test_status: text,
   face_selection: Metadata,
   worker_isolation: z.enum(["available", "unavailable"]),
+  worker_pool: Metadata,
+  observability: Metadata,
+  pipeline_policy: Metadata,
   unsupported: strings,
 });
 const structure = z.strictObject({
@@ -574,6 +762,27 @@ const plan = z.strictObject({
     z.strictObject({ feature_id: Id, parameters, expressions }),
   ),
   protected_constraints: constraints,
+  conditioning: z.strictObject({
+    max_coordinate_magnitude_mm: z.number().nonnegative(),
+    binary64_ulp_at_max_mm: z.number().positive(),
+    tolerance_mm: z.number().positive(),
+    ulp_to_tolerance_ratio: z.number().nonnegative(),
+    rule: text,
+  }),
+  sensitivity: z.array(
+    z.strictObject({
+      feature_id: Id,
+      quantity: text,
+      parameter_feature: Id,
+      parameter: text,
+      derivative: z.number(),
+      unit: text,
+      method: z.enum([
+        "registered_analytic_dimension",
+        "expression_finite_difference",
+      ]),
+    }),
+  ),
   committed: z.literal(false),
 });
 export const ToolPayloadSchemas = {
@@ -602,6 +811,7 @@ export const ToolPayloadSchemas = {
   cad_find: z.strictObject({
     ...binding,
     ambiguity: z.boolean(),
+    spatial_filter: text.nullable(),
     total_matches: count,
     matches: z.array(
       z.strictObject({
@@ -661,7 +871,7 @@ export const ToolPayloadSchemas = {
   }),
   cad_rebuild: z.union([planned, candidate]),
   cad_revert: candidate,
-  cad_import: candidate,
+  cad_import: z.union([candidate, queued]),
   cad_render: queued,
   cad_export: z.union([
     queued,

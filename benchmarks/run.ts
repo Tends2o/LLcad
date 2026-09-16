@@ -14,6 +14,7 @@ import { housing, assembly, organic } from "../scripts/fixtures.js";
 import { id } from "../packages/semantic-ir/hash.js";
 import { REGISTRY_HASH, compile } from "../packages/compiler/index.js";
 import { IMPLEMENTATION_HASH } from "../packages/compiler/build.js";
+import { Worker } from "../packages/job-service/worker.js";
 const env = setup(),
   s = env.service;
 const stats = (values: number[]) => {
@@ -86,6 +87,37 @@ try {
       previews.push(performance.now() - t);
     }
   }
+  // Cold versus warm native worker starts (Bauplan 15.6): drained pool against a pre-warmed sandbox.
+  const render = () =>
+    finish(
+      s,
+      call(s, "cad_render", {
+        model_id: m.model_id,
+        revision: m.revision,
+        idempotency_key: id("worker-start"),
+      }),
+    );
+  Worker.drainPool();
+  const coldWorkerStart = performance.now();
+  const coldRender = await render();
+  const coldWorkerMs = performance.now() - coldWorkerStart;
+  Worker.ensurePool();
+  for (let i = 0; i < 100 && Worker.poolSize() === 0; i++)
+    await new Promise((r) => setTimeout(r, 50));
+  const warmWorkerStart = performance.now();
+  const warmRender = await render();
+  const warmWorkerMs = performance.now() - warmWorkerStart;
+  const stepStart = performance.now();
+  const stepExport = await finish(
+    s,
+    call(s, "cad_export", {
+      model_id: m.model_id,
+      revision: m.revision,
+      format: "step",
+      idempotency_key: id("step-export"),
+    }),
+  );
+  const stepExportMs = performance.now() - stepStart;
   const assemblyStart = performance.now();
   const a = await importFixture(s, assembly);
   const assemblyMs = performance.now() - assemblyStart;
@@ -192,7 +224,8 @@ try {
       cpu: cpus()[0].model,
       logical_cpus: cpus().length,
       memory_bytes: totalmem(),
-      worker_processes: 1,
+      worker_processes: Number(process.env.MATHFORGE_WORKERS ?? "2"),
+      warm_worker_pool: Number(process.env.MATHFORGE_WARM_WORKERS ?? "1"),
     },
     registry_hash: REGISTRY_HASH,
     implementation_hash: IMPLEMENTATION_HASH,
@@ -202,6 +235,26 @@ try {
     candidate: stats(candidate),
     validation: stats(validation),
     preview: stats(previews),
+    worker_start: {
+      cold_render_ms: coldWorkerMs,
+      cold_confirmed: coldRender.metrics?.warm_start === false,
+      warm_render_ms: warmWorkerMs,
+      warm_confirmed: warmRender.metrics?.warm_start === true,
+      idle_wait_seconds: warmRender.metrics?.idle_wait_seconds ?? null,
+    },
+    export_profiles: {
+      step: {
+        duration_ms: stepExportMs,
+        roundtrip_status:
+          stepExport.artifacts.find(
+            (x: any) => x.manifest.filename === "model.step",
+          )?.manifest.roundtrip?.status ?? null,
+      },
+    },
+    validation_profiles: {
+      precision_cad: stats(validation),
+      watertight_solid_import_validate_commit_ms: null as number | null,
+    },
     assembly_100_instances_full_pipeline_ms: assemblyMs,
     stress_at_instance_limit: stressReport,
     organic_full_pipeline_with_preview_ms: organicMs,
@@ -216,10 +269,13 @@ try {
     error_rate: 0,
     limitations: [
       "12 warm CAD samples and 5 preview samples; not a production SLO study.",
-      "Worker processes are cold; the content-addressed geometry cache is warm.",
+      "Cold and warm worker starts are measured once each; the content-addressed geometry cache is warm for repeated edits.",
+      "Export and validation profiles cover the synthetic housing and one mesh cube; no large production fixtures.",
       "LLM, external network and real target host latency are not included.",
     ],
   };
+  report.validation_profiles.watertight_solid_import_validate_commit_ms =
+    meshImportMs;
   mkdirSync("reports", { recursive: true });
   writeFileSync(
     "reports/benchmark.json",

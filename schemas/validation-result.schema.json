@@ -107,6 +107,15 @@
         "schema_version": {
           "type": "string",
           "const": "2"
+        },
+        "error_budget": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/__schema2"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/__schema8"
+          }
         }
       },
       "required": [
@@ -144,7 +153,8 @@
       "enum": [
         "precision_cad",
         "render_surface",
-        "watertight_solid"
+        "watertight_solid",
+        "manufacturing_candidate"
       ]
     },
     "__schema4": {

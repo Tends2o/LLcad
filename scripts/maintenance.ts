@@ -4,13 +4,15 @@ import {
   restoreStore,
   garbageCollect,
   eraseTenant,
+  applyRetention,
 } from "../packages/model-service/maintenance.js";
 import { requireThat } from "../packages/semantic-ir/errors.js";
 const [command, source, target, flag] = process.argv.slice(2);
 requireThat(
-  source && ["backup", "restore", "gc", "erase-tenant"].includes(command),
+  source &&
+    ["backup", "restore", "gc", "retention", "erase-tenant"].includes(command),
   "INVALID_SCHEMA",
-  "Aufruf: tsx scripts/maintenance.ts backup DATA NEUES_ZIEL | restore BACKUP NEUES_ZIEL | gc DATA | erase-tenant DATA TENANT [--apply]",
+  "Aufruf: tsx scripts/maintenance.ts backup DATA NEUES_ZIEL | restore BACKUP NEUES_ZIEL | gc DATA | retention DATA | erase-tenant DATA TENANT [--apply]",
 );
 if (command === "restore") {
   requireThat(target, "INVALID_SCHEMA", "Ziel fehlt.");
@@ -29,7 +31,9 @@ if (command === "restore") {
         "Mandant und optional --apply erforderlich.",
       );
       console.log(eraseTenant(store, target, flag === "--apply"));
-    } else console.log(garbageCollect(store));
+    } else if (command === "retention")
+      console.log({ ...applyRetention(store), ...garbageCollect(store) });
+    else console.log(garbageCollect(store));
   } finally {
     store.close();
   }

@@ -69,6 +69,83 @@
         "attempts": {
           "$ref": "#/definitions/__schema16"
         },
+        "phase": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "queued",
+                "native_execution",
+                "validating",
+                "persisting",
+                "succeeded",
+                "failed",
+                "cancelled"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "budget_seconds": {
+          "anyOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "started_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "heartbeat_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "finished_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "elapsed_seconds": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "result": {
           "anyOf": [
             {
@@ -253,6 +330,9 @@
                         },
                         "schema_version": {
                           "$ref": "#/definitions/__schema26"
+                        },
+                        "error_budget": {
+                          "$ref": "#/definitions/__schema27"
                         }
                       },
                       "required": [
@@ -323,7 +403,7 @@
                           "$ref": "#/definitions/__schema16"
                         },
                         "validation_uri": {
-                          "$ref": "#/definitions/__schema27"
+                          "$ref": "#/definitions/__schema28"
                         }
                       },
                       "required": [
@@ -390,11 +470,14 @@
                         "schema_version": {
                           "$ref": "#/definitions/__schema26"
                         },
+                        "error_budget": {
+                          "$ref": "#/definitions/__schema27"
+                        },
                         "check_count": {
                           "$ref": "#/definitions/__schema16"
                         },
                         "validation_uri": {
-                          "$ref": "#/definitions/__schema27"
+                          "$ref": "#/definitions/__schema28"
                         }
                       },
                       "required": [
@@ -488,6 +571,37 @@
                         "global_optimum_claimed": {
                           "type": "boolean",
                           "const": false
+                        },
+                        "objective_terms": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "$ref": "#/definitions/__schema1"
+                              },
+                              "value": {
+                                "type": "number"
+                              },
+                              "loss": {
+                                "type": "string",
+                                "enum": [
+                                  "none",
+                                  "huber",
+                                  "cauchy"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "value",
+                              "loss"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "diagnostics": {
+                          "$ref": "#/definitions/__schema9"
                         }
                       },
                       "required": [
@@ -497,7 +611,9 @@
                         "iterations",
                         "expression_evaluations",
                         "engine",
-                        "global_optimum_claimed"
+                        "global_optimum_claimed",
+                        "objective_terms",
+                        "diagnostics"
                       ],
                       "additionalProperties": false
                     },
@@ -509,7 +625,7 @@
                       "minItems": 1,
                       "type": "array",
                       "items": {
-                        "$ref": "#/definitions/__schema28"
+                        "$ref": "#/definitions/__schema29"
                       }
                     },
                     "recommended_next_actions": {
@@ -576,12 +692,369 @@
                   "additionalProperties": false
                 },
                 {
-                  "oneOf": [
+                  "anyOf": [
                     {
                       "type": "object",
                       "properties": {
                         "status": {
-                          "$ref": "#/definitions/__schema52"
+                          "type": "string",
+                          "const": "succeeded"
+                        },
+                        "model_id": {
+                          "$ref": "#/definitions/__schema1"
+                        },
+                        "revision": {
+                          "$ref": "#/definitions/__schema1"
+                        },
+                        "metrics": {
+                          "$ref": "#/definitions/__schema17"
+                        },
+                        "metric": {
+                          "type": "string",
+                          "const": "curvature"
+                        },
+                        "unit": {
+                          "type": "string",
+                          "const": "per_mm_and_per_mm2"
+                        },
+                        "method": {
+                          "type": "string",
+                          "const": "central_finite_difference_hessian_with_interval_regularity"
+                        },
+                        "coverage": {
+                          "type": "string",
+                          "const": "single_point_and_its_two_step_cell"
+                        },
+                        "certified_error_bound": {
+                          "type": "null"
+                        },
+                        "domain_frame": {
+                          "$ref": "#/definitions/__schema1"
+                        },
+                        "measurements": {
+                          "$ref": "#/definitions/__schema9"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "model_id",
+                        "revision",
+                        "metrics",
+                        "metric",
+                        "unit",
+                        "method",
+                        "coverage",
+                        "certified_error_bound",
+                        "domain_frame",
+                        "measurements"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "const": "succeeded"
+                        },
+                        "model_id": {
+                          "$ref": "#/definitions/__schema1"
+                        },
+                        "revision": {
+                          "$ref": "#/definitions/__schema1"
+                        },
+                        "metrics": {
+                          "$ref": "#/definitions/__schema17"
+                        },
+                        "metric": {
+                          "type": "string",
+                          "const": "fit_primitives"
+                        },
+                        "unit": {
+                          "type": "string",
+                          "const": "mm"
+                        },
+                        "method": {
+                          "type": "string",
+                          "const": "normal_region_growing_with_least_squares_primitive_fits"
+                        },
+                        "coverage": {
+                          "$ref": "#/definitions/__schema7"
+                        },
+                        "certified_error_bound": {
+                          "type": "null"
+                        },
+                        "guarantee": {
+                          "type": "string",
+                          "const": "sampled"
+                        },
+                        "measurements": {
+                          "$ref": "#/definitions/__schema9"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "model_id",
+                        "revision",
+                        "metrics",
+                        "metric",
+                        "unit",
+                        "method",
+                        "coverage",
+                        "certified_error_bound",
+                        "guarantee",
+                        "measurements"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "const": "succeeded"
+                        },
+                        "model_id": {
+                          "$ref": "#/definitions/__schema1"
+                        },
+                        "revision": {
+                          "$ref": "#/definitions/__schema1"
+                        },
+                        "metrics": {
+                          "$ref": "#/definitions/__schema17"
+                        },
+                        "metric": {
+                          "type": "string",
+                          "const": "surface_distance"
+                        },
+                        "unit": {
+                          "type": "string",
+                          "const": "mm"
+                        },
+                        "method": {
+                          "type": "string",
+                          "const": "sampled_chamfer_hausdorff_exact_extrema_and_boolean_iou"
+                        },
+                        "coverage": {
+                          "$ref": "#/definitions/__schema7"
+                        },
+                        "certified_error_bound": {
+                          "type": "null"
+                        },
+                        "guarantee": {
+                          "type": "string",
+                          "enum": [
+                            "sampled",
+                            "bounded",
+                            "not_certified"
+                          ]
+                        },
+                        "measurements": {
+                          "$ref": "#/definitions/__schema9"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "model_id",
+                        "revision",
+                        "metrics",
+                        "metric",
+                        "unit",
+                        "method",
+                        "coverage",
+                        "certified_error_bound",
+                        "guarantee",
+                        "measurements"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "const": "succeeded"
+                        },
+                        "model_id": {
+                          "$ref": "#/definitions/__schema1"
+                        },
+                        "revision": {
+                          "$ref": "#/definitions/__schema1"
+                        },
+                        "metrics": {
+                          "$ref": "#/definitions/__schema17"
+                        },
+                        "metric": {
+                          "type": "string",
+                          "const": "wall_thickness"
+                        },
+                        "unit": {
+                          "type": "string",
+                          "const": "mm"
+                        },
+                        "method": {
+                          "$ref": "#/definitions/__schema7"
+                        },
+                        "coverage": {
+                          "$ref": "#/definitions/__schema7"
+                        },
+                        "certified_error_bound": {
+                          "type": "null"
+                        },
+                        "guarantee": {
+                          "type": "string",
+                          "enum": [
+                            "sampled",
+                            "bounded",
+                            "not_certified"
+                          ]
+                        },
+                        "measurements": {
+                          "$ref": "#/definitions/__schema9"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "model_id",
+                        "revision",
+                        "metrics",
+                        "metric",
+                        "unit",
+                        "method",
+                        "coverage",
+                        "certified_error_bound",
+                        "guarantee",
+                        "measurements"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "const": "succeeded"
+                        },
+                        "model_id": {
+                          "$ref": "#/definitions/__schema1"
+                        },
+                        "revision": {
+                          "$ref": "#/definitions/__schema1"
+                        },
+                        "metrics": {
+                          "$ref": "#/definitions/__schema17"
+                        },
+                        "metric": {
+                          "type": "string",
+                          "const": "blend_activity"
+                        },
+                        "unit": {
+                          "type": "string",
+                          "const": "mm"
+                        },
+                        "method": {
+                          "type": "string",
+                          "const": "interval_arithmetic_blend_inactivity"
+                        },
+                        "coverage": {
+                          "$ref": "#/definitions/__schema7"
+                        },
+                        "certified_error_bound": {
+                          "type": "null"
+                        },
+                        "guarantee": {
+                          "type": "string",
+                          "enum": [
+                            "sampled",
+                            "bounded",
+                            "not_certified"
+                          ]
+                        },
+                        "measurements": {
+                          "$ref": "#/definitions/__schema9"
+                        },
+                        "domain_frame": {
+                          "$ref": "#/definitions/__schema1"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "model_id",
+                        "revision",
+                        "metrics",
+                        "metric",
+                        "unit",
+                        "method",
+                        "coverage",
+                        "certified_error_bound",
+                        "guarantee",
+                        "measurements",
+                        "domain_frame"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "const": "succeeded"
+                        },
+                        "model_id": {
+                          "$ref": "#/definitions/__schema1"
+                        },
+                        "revision": {
+                          "$ref": "#/definitions/__schema1"
+                        },
+                        "metrics": {
+                          "$ref": "#/definitions/__schema17"
+                        },
+                        "metric": {
+                          "type": "string",
+                          "const": "clearance"
+                        },
+                        "unit": {
+                          "type": "string",
+                          "const": "mm"
+                        },
+                        "method": {
+                          "type": "string",
+                          "const": "OCCT_BRepExtrema_DistShapeShape_along_sampled_linear_motion"
+                        },
+                        "coverage": {
+                          "$ref": "#/definitions/__schema7"
+                        },
+                        "certified_error_bound": {
+                          "type": "null"
+                        },
+                        "motion_or_global_wall_certificate": {
+                          "type": "boolean",
+                          "const": false
+                        },
+                        "measurements": {
+                          "$ref": "#/definitions/__schema9"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "model_id",
+                        "revision",
+                        "metrics",
+                        "metric",
+                        "unit",
+                        "method",
+                        "coverage",
+                        "certified_error_bound",
+                        "motion_or_global_wall_certificate",
+                        "measurements"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "$ref": "#/definitions/__schema54"
                         },
                         "model_id": {
                           "$ref": "#/definitions/__schema1"
@@ -593,13 +1066,13 @@
                           "$ref": "#/definitions/__schema17"
                         },
                         "method": {
-                          "$ref": "#/definitions/__schema53"
+                          "$ref": "#/definitions/__schema55"
                         },
                         "coverage": {
-                          "$ref": "#/definitions/__schema54"
+                          "$ref": "#/definitions/__schema56"
                         },
                         "certified_error_bound": {
-                          "$ref": "#/definitions/__schema55"
+                          "$ref": "#/definitions/__schema57"
                         },
                         "metric": {
                           "type": "string",
@@ -615,25 +1088,25 @@
                               "type": "object",
                               "properties": {
                                 "kind": {
-                                  "$ref": "#/definitions/__schema56"
+                                  "$ref": "#/definitions/__schema58"
                                 },
                                 "point_mm": {
-                                  "$ref": "#/definitions/__schema57"
-                                },
-                                "uv": {
-                                  "$ref": "#/definitions/__schema58"
-                                },
-                                "uv_bounds": {
                                   "$ref": "#/definitions/__schema59"
                                 },
-                                "direction_kind": {
+                                "uv": {
                                   "$ref": "#/definitions/__schema60"
                                 },
+                                "uv_bounds": {
+                                  "$ref": "#/definitions/__schema61"
+                                },
+                                "direction_kind": {
+                                  "$ref": "#/definitions/__schema62"
+                                },
                                 "direction": {
-                                  "$ref": "#/definitions/__schema57"
+                                  "$ref": "#/definitions/__schema59"
                                 },
                                 "principal_curvatures_per_mm": {
-                                  "$ref": "#/definitions/__schema58"
+                                  "$ref": "#/definitions/__schema60"
                                 },
                                 "mean_curvature_per_mm": {
                                   "type": "number"
@@ -664,22 +1137,22 @@
                               "type": "object",
                               "properties": {
                                 "kind": {
-                                  "$ref": "#/definitions/__schema61"
-                                },
-                                "point_mm": {
-                                  "$ref": "#/definitions/__schema57"
-                                },
-                                "curve_parameter": {
-                                  "$ref": "#/definitions/__schema62"
-                                },
-                                "native_parameter": {
                                   "$ref": "#/definitions/__schema63"
                                 },
-                                "direction_kind": {
+                                "point_mm": {
+                                  "$ref": "#/definitions/__schema59"
+                                },
+                                "curve_parameter": {
                                   "$ref": "#/definitions/__schema64"
                                 },
+                                "native_parameter": {
+                                  "$ref": "#/definitions/__schema65"
+                                },
+                                "direction_kind": {
+                                  "$ref": "#/definitions/__schema66"
+                                },
                                 "direction": {
-                                  "$ref": "#/definitions/__schema57"
+                                  "$ref": "#/definitions/__schema59"
                                 },
                                 "curvature_per_mm": {
                                   "type": "number",
@@ -733,7 +1206,7 @@
                       "type": "object",
                       "properties": {
                         "status": {
-                          "$ref": "#/definitions/__schema52"
+                          "$ref": "#/definitions/__schema54"
                         },
                         "model_id": {
                           "$ref": "#/definitions/__schema1"
@@ -745,13 +1218,13 @@
                           "$ref": "#/definitions/__schema17"
                         },
                         "method": {
-                          "$ref": "#/definitions/__schema53"
+                          "$ref": "#/definitions/__schema55"
                         },
                         "coverage": {
-                          "$ref": "#/definitions/__schema54"
+                          "$ref": "#/definitions/__schema56"
                         },
                         "certified_error_bound": {
-                          "$ref": "#/definitions/__schema55"
+                          "$ref": "#/definitions/__schema57"
                         },
                         "metric": {
                           "type": "string",
@@ -775,10 +1248,10 @@
                               "maximum": 180
                             },
                             "first": {
-                              "$ref": "#/definitions/__schema65"
+                              "$ref": "#/definitions/__schema67"
                             },
                             "second": {
-                              "$ref": "#/definitions/__schema65"
+                              "$ref": "#/definitions/__schema67"
                             }
                           },
                           "required": [
@@ -800,6 +1273,79 @@
                         "certified_error_bound",
                         "metric",
                         "unit",
+                        "measurements"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "const": "succeeded"
+                        },
+                        "model_id": {
+                          "$ref": "#/definitions/__schema1"
+                        },
+                        "revision": {
+                          "$ref": "#/definitions/__schema1"
+                        },
+                        "metrics": {
+                          "$ref": "#/definitions/__schema17"
+                        },
+                        "metric": {
+                          "type": "string",
+                          "const": "surface_deviation"
+                        },
+                        "unit": {
+                          "type": "string",
+                          "const": "mm"
+                        },
+                        "method": {
+                          "type": "string",
+                          "const": "interval_arithmetic_gradient_flow_certificate"
+                        },
+                        "coverage": {
+                          "type": "string",
+                          "const": "entire_declared_domain"
+                        },
+                        "certified_error_bound": {
+                          "anyOf": [
+                            {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "guarantee": {
+                          "type": "string",
+                          "enum": [
+                            "bounded",
+                            "not_certified"
+                          ]
+                        },
+                        "domain_frame": {
+                          "$ref": "#/definitions/__schema1"
+                        },
+                        "measurements": {
+                          "$ref": "#/definitions/__schema9"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "model_id",
+                        "revision",
+                        "metrics",
+                        "metric",
+                        "unit",
+                        "method",
+                        "coverage",
+                        "certified_error_bound",
+                        "guarantee",
+                        "domain_frame",
                         "measurements"
                       ],
                       "additionalProperties": false
@@ -899,10 +1445,10 @@
                   "type": "object",
                   "properties": {
                     "status": {
-                      "$ref": "#/definitions/__schema66"
+                      "$ref": "#/definitions/__schema68"
                     },
                     "artifacts": {
-                      "$ref": "#/definitions/__schema67"
+                      "$ref": "#/definitions/__schema69"
                     },
                     "metrics": {
                       "$ref": "#/definitions/__schema17"
@@ -919,10 +1465,10 @@
                   "type": "object",
                   "properties": {
                     "status": {
-                      "$ref": "#/definitions/__schema66"
+                      "$ref": "#/definitions/__schema68"
                     },
                     "artifacts": {
-                      "$ref": "#/definitions/__schema67"
+                      "$ref": "#/definitions/__schema69"
                     },
                     "metrics": {
                       "$ref": "#/definitions/__schema17"
@@ -932,7 +1478,7 @@
                       "const": "1"
                     },
                     "package_manifest": {
-                      "$ref": "#/definitions/__schema68"
+                      "$ref": "#/definitions/__schema70"
                     }
                   },
                   "required": [
@@ -948,10 +1494,10 @@
                   "type": "object",
                   "properties": {
                     "status": {
-                      "$ref": "#/definitions/__schema66"
+                      "$ref": "#/definitions/__schema68"
                     },
                     "artifacts": {
-                      "$ref": "#/definitions/__schema67"
+                      "$ref": "#/definitions/__schema69"
                     },
                     "metrics": {
                       "$ref": "#/definitions/__schema17"
@@ -959,7 +1505,7 @@
                     "package_manifest": {
                       "allOf": [
                         {
-                          "$ref": "#/definitions/__schema68"
+                          "$ref": "#/definitions/__schema70"
                         }
                       ]
                     }
@@ -967,6 +1513,193 @@
                   "required": [
                     "status",
                     "artifacts",
+                    "metrics"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "const": "succeeded"
+                    },
+                    "model_id": {
+                      "$ref": "#/definitions/__schema1"
+                    },
+                    "base_revision": {
+                      "$ref": "#/definitions/__schema1"
+                    },
+                    "structure": {
+                      "$ref": "#/definitions/__schema9"
+                    },
+                    "continuation": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "const": "queued"
+                            },
+                            "model_id": {
+                              "$ref": "#/definitions/__schema1"
+                            },
+                            "job_id": {
+                              "$ref": "#/definitions/__schema1"
+                            },
+                            "transaction_id": {
+                              "$ref": "#/definitions/__schema1"
+                            },
+                            "committed": {
+                              "type": "boolean",
+                              "const": false
+                            },
+                            "recommended_next_actions": {
+                              "$ref": "#/definitions/__schema6"
+                            },
+                            "candidate_revision": {
+                              "$ref": "#/definitions/__schema1"
+                            },
+                            "base_revision": {
+                              "$ref": "#/definitions/__schema1"
+                            },
+                            "repair_attempt": {
+                              "type": "object",
+                              "properties": {
+                                "attempt": {
+                                  "$ref": "#/definitions/__schema16"
+                                },
+                                "of_transaction": {
+                                  "$ref": "#/definitions/__schema1"
+                                },
+                                "cause": {
+                                  "$ref": "#/definitions/__schema7"
+                                },
+                                "remaining": {
+                                  "$ref": "#/definitions/__schema16"
+                                },
+                                "intent_comparison": {
+                                  "type": "object",
+                                  "properties": {
+                                    "original_changed_features": {
+                                      "type": "array",
+                                      "items": {
+                                        "$ref": "#/definitions/__schema1"
+                                      }
+                                    },
+                                    "this_changed_features": {
+                                      "type": "array",
+                                      "items": {
+                                        "$ref": "#/definitions/__schema1"
+                                      }
+                                    },
+                                    "same_targets": {
+                                      "type": "boolean"
+                                    }
+                                  },
+                                  "required": [
+                                    "original_changed_features",
+                                    "this_changed_features",
+                                    "same_targets"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                "previous_attempts": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "transaction_id": {
+                                        "$ref": "#/definitions/__schema1"
+                                      },
+                                      "cause": {
+                                        "anyOf": [
+                                          {
+                                            "$ref": "#/definitions/__schema7"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ]
+                                      },
+                                      "state": {
+                                        "$ref": "#/definitions/__schema7"
+                                      },
+                                      "cost_seconds": {
+                                        "anyOf": [
+                                          {
+                                            "type": "number",
+                                            "minimum": 0
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "transaction_id",
+                                      "cause",
+                                      "state",
+                                      "cost_seconds"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                }
+                              },
+                              "required": [
+                                "attempt",
+                                "of_transaction",
+                                "cause",
+                                "remaining",
+                                "intent_comparison",
+                                "previous_attempts"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "status",
+                            "model_id",
+                            "job_id",
+                            "transaction_id",
+                            "committed",
+                            "recommended_next_actions",
+                            "candidate_revision",
+                            "base_revision"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "const": "failed"
+                            },
+                            "error": {
+                              "$ref": "#/definitions/__schema8"
+                            }
+                          },
+                          "required": [
+                            "status",
+                            "error"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "metrics": {
+                      "$ref": "#/definitions/__schema17"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "model_id",
+                    "base_revision",
+                    "structure",
+                    "continuation",
                     "metrics"
                   ],
                   "additionalProperties": false
@@ -1006,6 +1739,12 @@
         "artifacts",
         "recommended_next_actions",
         "attempts",
+        "phase",
+        "budget_seconds",
+        "started_at",
+        "heartbeat_at",
+        "finished_at",
+        "elapsed_seconds",
         "result",
         "error"
       ],
@@ -1272,7 +2011,8 @@
       "enum": [
         "precision_cad",
         "render_surface",
-        "watertight_solid"
+        "watertight_solid",
+        "manufacturing_candidate"
       ]
     },
     "__schema19": {
@@ -1422,6 +2162,13 @@
       "const": "2"
     },
     "__schema27": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/__schema9"
+        }
+      ]
+    },
+    "__schema28": {
       "pattern": "^cad:\\/\\/transactions\\/[a-zA-Z0-9_-]+\\/validation$",
       "allOf": [
         {
@@ -1429,7 +2176,7 @@
         }
       ]
     },
-    "__schema28": {
+    "__schema29": {
       "oneOf": [
         {
           "type": "object",
@@ -1452,10 +2199,10 @@
                       "$ref": "#/definitions/__schema1"
                     },
                     "semantic_name": {
-                      "$ref": "#/definitions/__schema29"
+                      "$ref": "#/definitions/__schema30"
                     },
                     "purpose": {
-                      "$ref": "#/definitions/__schema30"
+                      "$ref": "#/definitions/__schema31"
                     }
                   },
                   "required": [
@@ -1468,21 +2215,21 @@
                   "maxItems": 128,
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/__schema32"
+                    "$ref": "#/definitions/__schema33"
                   }
                 },
                 "assemblies": {
                   "maxItems": 64,
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/__schema36"
+                    "$ref": "#/definitions/__schema37"
                   }
                 },
                 "parts": {
                   "maxItems": 128,
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/__schema37"
+                    "$ref": "#/definitions/__schema38"
                   }
                 }
               },
@@ -1557,10 +2304,10 @@
                   "type": "object",
                   "properties": {
                     "source": {
-                      "$ref": "#/definitions/__schema38"
+                      "$ref": "#/definitions/__schema39"
                     },
                     "translation": {
-                      "$ref": "#/definitions/__schema39"
+                      "$ref": "#/definitions/__schema40"
                     }
                   },
                   "additionalProperties": false
@@ -1595,7 +2342,7 @@
               "pattern": "^[a-f0-9]{64}$"
             },
             "construction": {
-              "$ref": "#/definitions/__schema40"
+              "$ref": "#/definitions/__schema41"
             }
           },
           "required": [
@@ -1632,11 +2379,11 @@
               "maxItems": 14,
               "type": "array",
               "items": {
-                "$ref": "#/definitions/__schema34"
+                "$ref": "#/definitions/__schema35"
               }
             },
             "maximum_deviation": {
-              "$ref": "#/definitions/__schema35"
+              "$ref": "#/definitions/__schema36"
             }
           },
           "required": [
@@ -1668,7 +2415,7 @@
               "maxItems": 16,
               "type": "array",
               "items": {
-                "$ref": "#/definitions/__schema50"
+                "$ref": "#/definitions/__schema52"
               }
             }
           },
@@ -1695,10 +2442,10 @@
               "pattern": "^[a-z][a-z0-9_]{0,63}$"
             },
             "expected": {
-              "$ref": "#/definitions/__schema35"
+              "$ref": "#/definitions/__schema36"
             },
             "value": {
-              "$ref": "#/definitions/__schema35"
+              "$ref": "#/definitions/__schema36"
             }
           },
           "required": [
@@ -1725,10 +2472,10 @@
               "pattern": "^[a-z][a-z0-9_]{0,63}$"
             },
             "expected": {
-              "$ref": "#/definitions/__schema35"
+              "$ref": "#/definitions/__schema36"
             },
             "expression": {
-              "$ref": "#/definitions/__schema51"
+              "$ref": "#/definitions/__schema53"
             }
           },
           "required": [
@@ -1760,13 +2507,13 @@
               ]
             },
             "expected": {
-              "$ref": "#/definitions/__schema35"
+              "$ref": "#/definitions/__schema36"
             },
             "target": {
               "type": "object",
               "properties": {
                 "value": {
-                  "$ref": "#/definitions/__schema34"
+                  "$ref": "#/definitions/__schema35"
                 },
                 "unit": {
                   "type": "string",
@@ -1783,7 +2530,7 @@
               "type": "object",
               "properties": {
                 "value": {
-                  "$ref": "#/definitions/__schema34"
+                  "$ref": "#/definitions/__schema35"
                 },
                 "unit": {
                   "type": "string",
@@ -1848,7 +2595,7 @@
                 "purpose": {
                   "allOf": [
                     {
-                      "$ref": "#/definitions/__schema31"
+                      "$ref": "#/definitions/__schema32"
                     }
                   ]
                 },
@@ -1868,7 +2615,7 @@
                     "pattern": "^[a-z][a-z0-9_]{0,63}$"
                   },
                   "additionalProperties": {
-                    "$ref": "#/definitions/__schema35"
+                    "$ref": "#/definitions/__schema36"
                   }
                 },
                 "expressions": {
@@ -1879,7 +2626,7 @@
                     "pattern": "^[a-z][a-z0-9_]{0,63}$"
                   },
                   "additionalProperties": {
-                    "$ref": "#/definitions/__schema51"
+                    "$ref": "#/definitions/__schema53"
                   }
                 },
                 "parameter_sources": {
@@ -1889,11 +2636,11 @@
                     "type": "string"
                   },
                   "additionalProperties": {
-                    "$ref": "#/definitions/__schema31"
+                    "$ref": "#/definitions/__schema32"
                   }
                 },
                 "construction": {
-                  "$ref": "#/definitions/__schema40"
+                  "$ref": "#/definitions/__schema41"
                 },
                 "depends_on": {
                   "default": [],
@@ -1989,7 +2736,7 @@
                       "$ref": "#/definitions/__schema1"
                     },
                     "expression": {
-                      "$ref": "#/definitions/__schema51"
+                      "$ref": "#/definitions/__schema53"
                     },
                     "relation": {
                       "type": "string",
@@ -2000,7 +2747,7 @@
                       ]
                     },
                     "tolerance": {
-                      "$ref": "#/definitions/__schema34"
+                      "$ref": "#/definitions/__schema35"
                     },
                     "kind": {
                       "type": "string",
@@ -2070,7 +2817,7 @@
                       ]
                     },
                     "tolerance": {
-                      "$ref": "#/definitions/__schema35"
+                      "$ref": "#/definitions/__schema36"
                     }
                   },
                   "required": [
@@ -2100,7 +2847,7 @@
                       "type": "object",
                       "properties": {
                         "value": {
-                          "$ref": "#/definitions/__schema34"
+                          "$ref": "#/definitions/__schema35"
                         },
                         "unit": {
                           "type": "string",
@@ -2117,7 +2864,7 @@
                       "type": "object",
                       "properties": {
                         "value": {
-                          "$ref": "#/definitions/__schema34"
+                          "$ref": "#/definitions/__schema35"
                         },
                         "unit": {
                           "type": "string",
@@ -2158,10 +2905,10 @@
                       "maxLength": 64
                     },
                     "target": {
-                      "$ref": "#/definitions/__schema35"
+                      "$ref": "#/definitions/__schema36"
                     },
                     "tolerance": {
-                      "$ref": "#/definitions/__schema35"
+                      "$ref": "#/definitions/__schema36"
                     }
                   },
                   "required": [
@@ -2192,10 +2939,10 @@
                       "maxLength": 64
                     },
                     "target": {
-                      "$ref": "#/definitions/__schema35"
+                      "$ref": "#/definitions/__schema36"
                     },
                     "tolerance": {
-                      "$ref": "#/definitions/__schema35"
+                      "$ref": "#/definitions/__schema36"
                     }
                   },
                   "required": [
@@ -2226,7 +2973,7 @@
                       "const": "remaining_wall"
                     },
                     "target": {
-                      "$ref": "#/definitions/__schema35"
+                      "$ref": "#/definitions/__schema36"
                     }
                   },
                   "required": [
@@ -2299,7 +3046,7 @@
                       "$ref": "#/definitions/__schema1"
                     },
                     "tolerance": {
-                      "$ref": "#/definitions/__schema35"
+                      "$ref": "#/definitions/__schema36"
                     }
                   },
                   "required": [
@@ -2331,10 +3078,107 @@
                       ]
                     },
                     "min": {
-                      "$ref": "#/definitions/__schema33"
+                      "$ref": "#/definitions/__schema34"
                     },
                     "max": {
-                      "$ref": "#/definitions/__schema33"
+                      "$ref": "#/definitions/__schema34"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "feature_id",
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "$ref": "#/definitions/__schema1"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "const": "surface_deviation"
+                    },
+                    "feature_id": {
+                      "$ref": "#/definitions/__schema1"
+                    },
+                    "maximum": {
+                      "$ref": "#/definitions/__schema36"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "feature_id",
+                    "maximum"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "$ref": "#/definitions/__schema1"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "const": "change_region"
+                    },
+                    "feature_id": {
+                      "$ref": "#/definitions/__schema1"
+                    },
+                    "local_frame": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/__schema1"
+                        }
+                      ]
+                    },
+                    "center": {
+                      "$ref": "#/definitions/__schema34"
+                    },
+                    "radius": {
+                      "$ref": "#/definitions/__schema35"
+                    },
+                    "compute_margin": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/__schema35"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "feature_id",
+                    "center",
+                    "radius"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "$ref": "#/definitions/__schema1"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "const": "blend_free_region"
+                    },
+                    "feature_id": {
+                      "$ref": "#/definitions/__schema1"
+                    },
+                    "min": {
+                      "$ref": "#/definitions/__schema34"
+                    },
+                    "max": {
+                      "$ref": "#/definitions/__schema34"
                     }
                   },
                   "required": [
@@ -2370,7 +3214,7 @@
               "pattern": "^[a-f0-9]{64}$"
             },
             "expression": {
-              "$ref": "#/definitions/__schema48"
+              "$ref": "#/definitions/__schema50"
             }
           },
           "required": [
@@ -2383,19 +3227,19 @@
         }
       ]
     },
-    "__schema29": {
+    "__schema30": {
       "type": "string",
       "minLength": 1,
       "maxLength": 200
     },
-    "__schema30": {
+    "__schema31": {
       "allOf": [
         {
-          "$ref": "#/definitions/__schema31"
+          "$ref": "#/definitions/__schema32"
         }
       ]
     },
-    "__schema31": {
+    "__schema32": {
       "type": "object",
       "properties": {
         "value": {
@@ -2425,17 +3269,17 @@
       ],
       "additionalProperties": false
     },
-    "__schema32": {
+    "__schema33": {
       "type": "object",
       "properties": {
         "id": {
           "$ref": "#/definitions/__schema1"
         },
         "semantic_name": {
-          "$ref": "#/definitions/__schema29"
+          "$ref": "#/definitions/__schema30"
         },
         "purpose": {
-          "$ref": "#/definitions/__schema30"
+          "$ref": "#/definitions/__schema31"
         },
         "parent": {
           "default": "world",
@@ -2446,13 +3290,13 @@
           ]
         },
         "translation": {
-          "$ref": "#/definitions/__schema33"
+          "$ref": "#/definitions/__schema34"
         },
         "axis": {
-          "$ref": "#/definitions/__schema33"
+          "$ref": "#/definitions/__schema34"
         },
         "angle": {
-          "$ref": "#/definitions/__schema35"
+          "$ref": "#/definitions/__schema36"
         }
       },
       "required": [
@@ -2465,33 +3309,33 @@
       ],
       "additionalProperties": false
     },
-    "__schema33": {
+    "__schema34": {
       "type": "array",
       "items": [
         {
-          "$ref": "#/definitions/__schema34"
+          "$ref": "#/definitions/__schema35"
         },
         {
-          "$ref": "#/definitions/__schema34"
+          "$ref": "#/definitions/__schema35"
         },
         {
-          "$ref": "#/definitions/__schema34"
+          "$ref": "#/definitions/__schema35"
         }
       ],
       "additionalItems": false,
       "minItems": 3,
       "maxItems": 3
     },
-    "__schema34": {
+    "__schema35": {
       "type": "string",
       "maxLength": 48,
       "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
     },
-    "__schema35": {
+    "__schema36": {
       "type": "object",
       "properties": {
         "value": {
-          "$ref": "#/definitions/__schema34"
+          "$ref": "#/definitions/__schema35"
         },
         "unit": {
           "type": "string",
@@ -2511,17 +3355,17 @@
       ],
       "additionalProperties": false
     },
-    "__schema36": {
+    "__schema37": {
       "type": "object",
       "properties": {
         "id": {
           "$ref": "#/definitions/__schema1"
         },
         "semantic_name": {
-          "$ref": "#/definitions/__schema29"
+          "$ref": "#/definitions/__schema30"
         },
         "purpose": {
-          "$ref": "#/definitions/__schema30"
+          "$ref": "#/definitions/__schema31"
         },
         "parent_assembly": {
           "allOf": [
@@ -2546,17 +3390,17 @@
       ],
       "additionalProperties": false
     },
-    "__schema37": {
+    "__schema38": {
       "type": "object",
       "properties": {
         "id": {
           "$ref": "#/definitions/__schema1"
         },
         "semantic_name": {
-          "$ref": "#/definitions/__schema29"
+          "$ref": "#/definitions/__schema30"
         },
         "purpose": {
-          "$ref": "#/definitions/__schema30"
+          "$ref": "#/definitions/__schema31"
         },
         "assembly": {
           "allOf": [
@@ -2598,21 +3442,21 @@
       ],
       "additionalProperties": false
     },
-    "__schema38": {
+    "__schema39": {
       "allOf": [
         {
           "$ref": "#/definitions/__schema1"
         }
       ]
     },
-    "__schema39": {
+    "__schema40": {
       "allOf": [
         {
-          "$ref": "#/definitions/__schema33"
+          "$ref": "#/definitions/__schema34"
         }
       ]
     },
-    "__schema40": {
+    "__schema41": {
       "oneOf": [
         {
           "type": "object",
@@ -2638,10 +3482,10 @@
               "const": "line"
             },
             "start": {
-              "$ref": "#/definitions/__schema33"
+              "$ref": "#/definitions/__schema34"
             },
             "end": {
-              "$ref": "#/definitions/__schema33"
+              "$ref": "#/definitions/__schema34"
             }
           },
           "required": [
@@ -2662,13 +3506,13 @@
               "type": "array",
               "items": [
                 {
-                  "$ref": "#/definitions/__schema33"
+                  "$ref": "#/definitions/__schema34"
                 },
                 {
-                  "$ref": "#/definitions/__schema33"
+                  "$ref": "#/definitions/__schema34"
                 },
                 {
-                  "$ref": "#/definitions/__schema33"
+                  "$ref": "#/definitions/__schema34"
                 }
               ],
               "additionalItems": false,
@@ -2743,7 +3587,14 @@
             "standard": {
               "default": "custom",
               "type": "string",
-              "const": "custom"
+              "enum": [
+                "custom",
+                "iso_metric_basic"
+              ]
+            },
+            "designation": {
+              "type": "string",
+              "pattern": "^M\\d+(\\.\\d+)?(x\\d+(\\.\\d+)?)?$"
             }
           },
           "required": [
@@ -2803,7 +3654,7 @@
               "maxItems": 256,
               "type": "array",
               "items": {
-                "$ref": "#/definitions/__schema33"
+                "$ref": "#/definitions/__schema34"
               }
             }
           },
@@ -2841,7 +3692,7 @@
               "maxItems": 256,
               "type": "array",
               "items": {
-                "$ref": "#/definitions/__schema33"
+                "$ref": "#/definitions/__schema34"
               }
             }
           },
@@ -2863,7 +3714,7 @@
               "maxItems": 256,
               "type": "array",
               "items": {
-                "$ref": "#/definitions/__schema33"
+                "$ref": "#/definitions/__schema34"
               }
             },
             "weights": {
@@ -2871,11 +3722,11 @@
               "maxItems": 256,
               "type": "array",
               "items": {
-                "$ref": "#/definitions/__schema34"
+                "$ref": "#/definitions/__schema35"
               }
             },
             "basis": {
-              "$ref": "#/definitions/__schema41"
+              "$ref": "#/definitions/__schema42"
             }
           },
           "required": [
@@ -2893,10 +3744,151 @@
               "type": "string",
               "enum": [
                 "extrude",
-                "revolve",
-                "loft",
-                "sweep"
+                "revolve"
               ]
+            }
+          },
+          "required": [
+            "operator"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "operator": {
+              "type": "string",
+              "const": "loft"
+            },
+            "ruled": {
+              "type": "boolean"
+            },
+            "check_compatibility": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "operator"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "operator": {
+              "type": "string",
+              "const": "sweep"
+            },
+            "frame": {
+              "type": "string",
+              "enum": [
+                "corrected_frenet",
+                "rotation_minimizing"
+              ]
+            },
+            "self_contact_check": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "operator"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "operator": {
+              "type": "string",
+              "const": "offset_solid"
+            }
+          },
+          "required": [
+            "operator"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "operator": {
+              "type": "string",
+              "const": "mesh_repair"
+            },
+            "remove_degenerate": {
+              "type": "boolean"
+            },
+            "remove_duplicates": {
+              "type": "boolean"
+            },
+            "orient": {
+              "type": "boolean"
+            },
+            "fill_holes_max_edges": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 256
+            }
+          },
+          "required": [
+            "operator"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "operator": {
+              "type": "string",
+              "const": "remesh_region"
+            }
+          },
+          "required": [
+            "operator"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "operator": {
+              "type": "string",
+              "const": "local_mesh_deform"
+            },
+            "handles": {
+              "minItems": 1,
+              "maxItems": 32,
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/__schema44"
+              }
+            }
+          },
+          "required": [
+            "operator",
+            "handles"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "operator": {
+              "type": "string",
+              "const": "tessellate"
+            }
+          },
+          "required": [
+            "operator"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "operator": {
+              "type": "string",
+              "const": "extract_isosurface"
             }
           },
           "required": [
@@ -2992,7 +3984,7 @@
               "const": "pattern"
             },
             "overrides": {
-              "$ref": "#/definitions/__schema43"
+              "$ref": "#/definitions/__schema45"
             }
           },
           "required": [
@@ -3008,13 +4000,13 @@
               "const": "circular_pattern"
             },
             "axis": {
-              "$ref": "#/definitions/__schema33"
+              "$ref": "#/definitions/__schema34"
             },
             "origin": {
-              "$ref": "#/definitions/__schema33"
+              "$ref": "#/definitions/__schema34"
             },
             "overrides": {
-              "$ref": "#/definitions/__schema43"
+              "$ref": "#/definitions/__schema45"
             }
           },
           "required": [
@@ -3032,10 +4024,10 @@
               "const": "affine_transform"
             },
             "matrix": {
-              "$ref": "#/definitions/__schema45"
+              "$ref": "#/definitions/__schema47"
             },
             "translation": {
-              "$ref": "#/definitions/__schema33"
+              "$ref": "#/definitions/__schema34"
             }
           },
           "required": [
@@ -3053,10 +4045,10 @@
               "const": "rotate"
             },
             "axis": {
-              "$ref": "#/definitions/__schema33"
+              "$ref": "#/definitions/__schema34"
             },
             "origin": {
-              "$ref": "#/definitions/__schema33"
+              "$ref": "#/definitions/__schema34"
             }
           },
           "required": [
@@ -3078,7 +4070,7 @@
               "maxItems": 16,
               "type": "array",
               "items": {
-                "$ref": "#/definitions/__schema46"
+                "$ref": "#/definitions/__schema48"
               }
             },
             "weights": {
@@ -3086,20 +4078,20 @@
               "maxItems": 16,
               "type": "array",
               "items": {
-                "$ref": "#/definitions/__schema47"
+                "$ref": "#/definitions/__schema49"
               }
             },
             "u_basis": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/__schema41"
+                  "$ref": "#/definitions/__schema42"
                 }
               ]
             },
             "v_basis": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/__schema41"
+                  "$ref": "#/definitions/__schema42"
                 }
               ]
             }
@@ -3119,16 +4111,16 @@
               "const": "field"
             },
             "expression": {
-              "$ref": "#/definitions/__schema48"
+              "$ref": "#/definitions/__schema50"
             },
             "domain": {
               "type": "object",
               "properties": {
                 "min": {
-                  "$ref": "#/definitions/__schema33"
+                  "$ref": "#/definitions/__schema34"
                 },
                 "max": {
-                  "$ref": "#/definitions/__schema33"
+                  "$ref": "#/definitions/__schema34"
                 }
               },
               "required": [
@@ -3138,7 +4130,33 @@
               "additionalProperties": false
             },
             "cell_size": {
-              "$ref": "#/definitions/__schema35"
+              "$ref": "#/definitions/__schema36"
+            },
+            "extraction": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "default": "marching_tetrahedra",
+                  "type": "string",
+                  "enum": [
+                    "marching_tetrahedra",
+                    "dual_contouring"
+                  ]
+                },
+                "pruning": {
+                  "default": "lipschitz",
+                  "type": "string",
+                  "enum": [
+                    "lipschitz",
+                    "interval"
+                  ]
+                }
+              },
+              "required": [
+                "method",
+                "pruning"
+              ],
+              "additionalProperties": false
             }
           },
           "required": [
@@ -3163,7 +4181,8 @@
               "type": "string",
               "enum": [
                 "step",
-                "stl"
+                "stl",
+                "vdb"
               ]
             },
             "source_unit": {
@@ -3173,6 +4192,16 @@
                 "m",
                 "um"
               ]
+            },
+            "component": {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^0(:[0-9]{1,6}){1,16}$"
+            },
+            "grid": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
             }
           },
           "required": [
@@ -3185,7 +4214,7 @@
         }
       ]
     },
-    "__schema41": {
+    "__schema42": {
       "type": "object",
       "properties": {
         "degree": {
@@ -3198,7 +4227,7 @@
           "maxItems": 256,
           "type": "array",
           "items": {
-            "$ref": "#/definitions/__schema34"
+            "$ref": "#/definitions/__schema35"
           }
         },
         "multiplicities": {
@@ -3206,7 +4235,7 @@
           "maxItems": 256,
           "type": "array",
           "items": {
-            "$ref": "#/definitions/__schema42"
+            "$ref": "#/definitions/__schema43"
           }
         }
       },
@@ -3217,19 +4246,35 @@
       ],
       "additionalProperties": false
     },
-    "__schema42": {
+    "__schema43": {
       "type": "integer",
       "minimum": 1,
       "maximum": 16
     },
-    "__schema43": {
+    "__schema44": {
+      "type": "object",
+      "properties": {
+        "point": {
+          "$ref": "#/definitions/__schema34"
+        },
+        "displacement": {
+          "$ref": "#/definitions/__schema34"
+        }
+      },
+      "required": [
+        "point",
+        "displacement"
+      ],
+      "additionalProperties": false
+    },
+    "__schema45": {
       "maxItems": 128,
       "type": "array",
       "items": {
-        "$ref": "#/definitions/__schema44"
+        "$ref": "#/definitions/__schema46"
       }
     },
-    "__schema44": {
+    "__schema46": {
       "type": "object",
       "properties": {
         "index": {
@@ -3238,10 +4283,10 @@
           "maximum": 9999
         },
         "source": {
-          "$ref": "#/definitions/__schema38"
+          "$ref": "#/definitions/__schema39"
         },
         "translation": {
-          "$ref": "#/definitions/__schema39"
+          "$ref": "#/definitions/__schema40"
         }
       },
       "required": [
@@ -3249,32 +4294,24 @@
       ],
       "additionalProperties": false
     },
-    "__schema45": {
+    "__schema47": {
       "type": "array",
       "items": [
         {
-          "$ref": "#/definitions/__schema33"
+          "$ref": "#/definitions/__schema34"
         },
         {
-          "$ref": "#/definitions/__schema33"
+          "$ref": "#/definitions/__schema34"
         },
         {
-          "$ref": "#/definitions/__schema33"
+          "$ref": "#/definitions/__schema34"
         }
       ],
       "additionalItems": false,
       "minItems": 3,
       "maxItems": 3
     },
-    "__schema46": {
-      "minItems": 2,
-      "maxItems": 16,
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/__schema33"
-      }
-    },
-    "__schema47": {
+    "__schema48": {
       "minItems": 2,
       "maxItems": 16,
       "type": "array",
@@ -3282,7 +4319,15 @@
         "$ref": "#/definitions/__schema34"
       }
     },
-    "__schema48": {
+    "__schema49": {
+      "minItems": 2,
+      "maxItems": 16,
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/__schema35"
+      }
+    },
+    "__schema50": {
       "oneOf": [
         {
           "type": "object",
@@ -3292,13 +4337,13 @@
               "const": "gyroid"
             },
             "period": {
-              "$ref": "#/definitions/__schema34"
+              "$ref": "#/definitions/__schema35"
             },
             "origin": {
-              "$ref": "#/definitions/__schema33"
+              "$ref": "#/definitions/__schema34"
             },
             "threshold": {
-              "$ref": "#/definitions/__schema34"
+              "$ref": "#/definitions/__schema35"
             }
           },
           "required": [
@@ -3317,7 +4362,7 @@
               "const": "convert_field_unit"
             },
             "source": {
-              "$ref": "#/definitions/__schema48"
+              "$ref": "#/definitions/__schema50"
             },
             "to": {
               "type": "string",
@@ -3327,7 +4372,7 @@
               ]
             },
             "reference_length": {
-              "$ref": "#/definitions/__schema35"
+              "$ref": "#/definitions/__schema36"
             }
           },
           "required": [
@@ -3346,10 +4391,10 @@
               "const": "sphere"
             },
             "center": {
-              "$ref": "#/definitions/__schema33"
+              "$ref": "#/definitions/__schema34"
             },
             "radius": {
-              "$ref": "#/definitions/__schema34"
+              "$ref": "#/definitions/__schema35"
             }
           },
           "required": [
@@ -3367,10 +4412,10 @@
               "const": "box"
             },
             "center": {
-              "$ref": "#/definitions/__schema33"
+              "$ref": "#/definitions/__schema34"
             },
             "half_size": {
-              "$ref": "#/definitions/__schema33"
+              "$ref": "#/definitions/__schema34"
             }
           },
           "required": [
@@ -3388,10 +4433,10 @@
               "const": "plane"
             },
             "normal": {
-              "$ref": "#/definitions/__schema33"
+              "$ref": "#/definitions/__schema34"
             },
             "offset": {
-              "$ref": "#/definitions/__schema34"
+              "$ref": "#/definitions/__schema35"
             }
           },
           "required": [
@@ -3409,13 +4454,13 @@
               "const": "cylinder"
             },
             "center": {
-              "$ref": "#/definitions/__schema33"
+              "$ref": "#/definitions/__schema34"
             },
             "radius": {
-              "$ref": "#/definitions/__schema34"
+              "$ref": "#/definitions/__schema35"
             },
             "half_height": {
-              "$ref": "#/definitions/__schema34"
+              "$ref": "#/definitions/__schema35"
             }
           },
           "required": [
@@ -3434,13 +4479,13 @@
               "const": "capsule"
             },
             "start": {
-              "$ref": "#/definitions/__schema33"
+              "$ref": "#/definitions/__schema34"
             },
             "end": {
-              "$ref": "#/definitions/__schema33"
+              "$ref": "#/definitions/__schema34"
             },
             "radius": {
-              "$ref": "#/definitions/__schema34"
+              "$ref": "#/definitions/__schema35"
             }
           },
           "required": [
@@ -3459,13 +4504,13 @@
               "const": "torus"
             },
             "center": {
-              "$ref": "#/definitions/__schema33"
+              "$ref": "#/definitions/__schema34"
             },
             "major": {
-              "$ref": "#/definitions/__schema34"
+              "$ref": "#/definitions/__schema35"
             },
             "minor": {
-              "$ref": "#/definitions/__schema34"
+              "$ref": "#/definitions/__schema35"
             }
           },
           "required": [
@@ -3488,10 +4533,10 @@
               ]
             },
             "a": {
-              "$ref": "#/definitions/__schema48"
+              "$ref": "#/definitions/__schema50"
             },
             "b": {
-              "$ref": "#/definitions/__schema48"
+              "$ref": "#/definitions/__schema50"
             }
           },
           "required": [
@@ -3509,13 +4554,13 @@
               "const": "smooth_union"
             },
             "a": {
-              "$ref": "#/definitions/__schema48"
+              "$ref": "#/definitions/__schema50"
             },
             "b": {
-              "$ref": "#/definitions/__schema48"
+              "$ref": "#/definitions/__schema50"
             },
             "k": {
-              "$ref": "#/definitions/__schema34"
+              "$ref": "#/definitions/__schema35"
             }
           },
           "required": [
@@ -3534,10 +4579,10 @@
               "const": "offset"
             },
             "source": {
-              "$ref": "#/definitions/__schema48"
+              "$ref": "#/definitions/__schema50"
             },
             "distance": {
-              "$ref": "#/definitions/__schema34"
+              "$ref": "#/definitions/__schema35"
             }
           },
           "required": [
@@ -3555,17 +4600,17 @@
               "const": "shell"
             },
             "source": {
-              "$ref": "#/definitions/__schema48"
+              "$ref": "#/definitions/__schema50"
             },
             "thickness": {
-              "$ref": "#/definitions/__schema34"
+              "$ref": "#/definitions/__schema35"
             },
             "variations": {
               "default": [],
               "maxItems": 32,
               "type": "array",
               "items": {
-                "$ref": "#/definitions/__schema49"
+                "$ref": "#/definitions/__schema51"
               }
             }
           },
@@ -3585,13 +4630,13 @@
               "const": "transform"
             },
             "source": {
-              "$ref": "#/definitions/__schema48"
+              "$ref": "#/definitions/__schema50"
             },
             "translation": {
-              "$ref": "#/definitions/__schema33"
+              "$ref": "#/definitions/__schema34"
             },
             "scale": {
-              "$ref": "#/definitions/__schema33"
+              "$ref": "#/definitions/__schema34"
             }
           },
           "required": [
@@ -3610,13 +4655,13 @@
               "const": "affine_transform"
             },
             "source": {
-              "$ref": "#/definitions/__schema48"
+              "$ref": "#/definitions/__schema50"
             },
             "matrix": {
-              "$ref": "#/definitions/__schema45"
+              "$ref": "#/definitions/__schema47"
             },
             "translation": {
-              "$ref": "#/definitions/__schema33"
+              "$ref": "#/definitions/__schema34"
             }
           },
           "required": [
@@ -3635,16 +4680,16 @@
               "const": "rotate"
             },
             "source": {
-              "$ref": "#/definitions/__schema48"
+              "$ref": "#/definitions/__schema50"
             },
             "axis": {
-              "$ref": "#/definitions/__schema33"
+              "$ref": "#/definitions/__schema34"
             },
             "origin": {
-              "$ref": "#/definitions/__schema33"
+              "$ref": "#/definitions/__schema34"
             },
             "angle": {
-              "$ref": "#/definitions/__schema35"
+              "$ref": "#/definitions/__schema36"
             }
           },
           "required": [
@@ -3664,16 +4709,16 @@
               "const": "local_field_delta"
             },
             "source": {
-              "$ref": "#/definitions/__schema48"
+              "$ref": "#/definitions/__schema50"
             },
             "center": {
-              "$ref": "#/definitions/__schema33"
+              "$ref": "#/definitions/__schema34"
             },
             "radius": {
-              "$ref": "#/definitions/__schema34"
+              "$ref": "#/definitions/__schema35"
             },
             "amplitude": {
-              "$ref": "#/definitions/__schema34"
+              "$ref": "#/definitions/__schema35"
             }
           },
           "required": [
@@ -3693,16 +4738,16 @@
               "const": "local_deform"
             },
             "source": {
-              "$ref": "#/definitions/__schema48"
+              "$ref": "#/definitions/__schema50"
             },
             "center": {
-              "$ref": "#/definitions/__schema33"
-            },
-            "radius": {
               "$ref": "#/definitions/__schema34"
             },
+            "radius": {
+              "$ref": "#/definitions/__schema35"
+            },
             "displacement": {
-              "$ref": "#/definitions/__schema33"
+              "$ref": "#/definitions/__schema34"
             }
           },
           "required": [
@@ -3713,20 +4758,71 @@
             "displacement"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "type": "string",
+              "const": "sampled_grid"
+            },
+            "artifact_id": {
+              "$ref": "#/definitions/__schema1"
+            },
+            "grid": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "lipschitz": {
+              "$ref": "#/definitions/__schema35"
+            },
+            "value_unit": {
+              "default": "length",
+              "type": "string",
+              "enum": [
+                "length",
+                "dimensionless"
+              ]
+            },
+            "source_unit": {
+              "default": "mm",
+              "type": "string",
+              "enum": [
+                "mm",
+                "m",
+                "um"
+              ]
+            },
+            "interpolation": {
+              "default": "trilinear",
+              "type": "string",
+              "const": "trilinear"
+            }
+          },
+          "required": [
+            "op",
+            "artifact_id",
+            "lipschitz",
+            "value_unit",
+            "source_unit",
+            "interpolation"
+          ],
+          "additionalProperties": false
         }
       ]
     },
-    "__schema49": {
+    "__schema51": {
       "type": "object",
       "properties": {
         "center": {
-          "$ref": "#/definitions/__schema33"
+          "$ref": "#/definitions/__schema34"
         },
         "radius": {
-          "$ref": "#/definitions/__schema34"
+          "$ref": "#/definitions/__schema35"
         },
         "amplitude": {
-          "$ref": "#/definitions/__schema34"
+          "$ref": "#/definitions/__schema35"
         }
       },
       "required": [
@@ -3736,21 +4832,21 @@
       ],
       "additionalProperties": false
     },
-    "__schema50": {
+    "__schema52": {
       "minItems": 2,
       "maxItems": 16,
       "type": "array",
       "items": {
-        "$ref": "#/definitions/__schema33"
+        "$ref": "#/definitions/__schema34"
       }
     },
-    "__schema51": {
+    "__schema53": {
       "anyOf": [
         {
           "type": "object",
           "properties": {
             "constant": {
-              "$ref": "#/definitions/__schema35"
+              "$ref": "#/definitions/__schema36"
             }
           },
           "required": [
@@ -3799,7 +4895,7 @@
               "maxItems": 3,
               "type": "array",
               "items": {
-                "$ref": "#/definitions/__schema51"
+                "$ref": "#/definitions/__schema53"
               }
             }
           },
@@ -3811,26 +4907,26 @@
         }
       ]
     },
-    "__schema52": {
+    "__schema54": {
       "type": "string",
       "const": "succeeded"
     },
-    "__schema53": {
+    "__schema55": {
       "type": "string",
       "const": "OCCT_native_differential_geometry"
     },
-    "__schema54": {
+    "__schema56": {
       "type": "string",
       "const": "specified_local_parameter_points"
     },
-    "__schema55": {
+    "__schema57": {
       "type": "null"
     },
-    "__schema56": {
+    "__schema58": {
       "type": "string",
       "const": "surface"
     },
-    "__schema57": {
+    "__schema59": {
       "type": "array",
       "items": [
         {
@@ -3847,7 +4943,7 @@
       "minItems": 3,
       "maxItems": 3
     },
-    "__schema58": {
+    "__schema60": {
       "type": "array",
       "items": [
         {
@@ -3861,7 +4957,7 @@
       "minItems": 2,
       "maxItems": 2
     },
-    "__schema59": {
+    "__schema61": {
       "type": "array",
       "items": [
         {
@@ -3881,48 +4977,48 @@
       "minItems": 4,
       "maxItems": 4
     },
-    "__schema60": {
+    "__schema62": {
       "type": "string",
       "const": "oriented_face_normal"
     },
-    "__schema61": {
+    "__schema63": {
       "type": "string",
       "const": "curve"
     },
-    "__schema62": {
+    "__schema64": {
       "type": "number",
       "minimum": 0,
       "maximum": 1
     },
-    "__schema63": {
+    "__schema65": {
       "type": "number"
     },
-    "__schema64": {
+    "__schema66": {
       "type": "string",
       "const": "oriented_curve_tangent"
     },
-    "__schema65": {
+    "__schema67": {
       "anyOf": [
         {
           "type": "object",
           "properties": {
             "kind": {
-              "$ref": "#/definitions/__schema56"
-            },
-            "point_mm": {
-              "$ref": "#/definitions/__schema57"
-            },
-            "uv": {
               "$ref": "#/definitions/__schema58"
             },
-            "uv_bounds": {
+            "point_mm": {
               "$ref": "#/definitions/__schema59"
             },
-            "direction_kind": {
+            "uv": {
               "$ref": "#/definitions/__schema60"
             },
+            "uv_bounds": {
+              "$ref": "#/definitions/__schema61"
+            },
+            "direction_kind": {
+              "$ref": "#/definitions/__schema62"
+            },
             "direction": {
-              "$ref": "#/definitions/__schema57"
+              "$ref": "#/definitions/__schema59"
             }
           },
           "required": [
@@ -3939,22 +5035,22 @@
           "type": "object",
           "properties": {
             "kind": {
-              "$ref": "#/definitions/__schema61"
-            },
-            "point_mm": {
-              "$ref": "#/definitions/__schema57"
-            },
-            "curve_parameter": {
-              "$ref": "#/definitions/__schema62"
-            },
-            "native_parameter": {
               "$ref": "#/definitions/__schema63"
             },
-            "direction_kind": {
+            "point_mm": {
+              "$ref": "#/definitions/__schema59"
+            },
+            "curve_parameter": {
               "$ref": "#/definitions/__schema64"
             },
+            "native_parameter": {
+              "$ref": "#/definitions/__schema65"
+            },
+            "direction_kind": {
+              "$ref": "#/definitions/__schema66"
+            },
             "direction": {
-              "$ref": "#/definitions/__schema57"
+              "$ref": "#/definitions/__schema59"
             }
           },
           "required": [
@@ -3969,18 +5065,18 @@
         }
       ]
     },
-    "__schema66": {
+    "__schema68": {
       "type": "string",
       "const": "succeeded"
     },
-    "__schema67": {
+    "__schema69": {
       "minItems": 1,
       "type": "array",
       "items": {
         "$ref": "#/definitions/__schema12"
       }
     },
-    "__schema68": {
+    "__schema70": {
       "type": "object",
       "properties": {
         "artifact_id": {

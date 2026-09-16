@@ -26,6 +26,7 @@ export const JOB_SCOPES: Record<string, string> = {
   analysis: "model:read",
   render: "model:read",
   export: "model:export",
+  probe: "model:edit",
 };
 export class ProjectAccess {
   onRevoked?: (jobs: string[]) => void;
@@ -146,9 +147,43 @@ export class ProjectAccess {
     requireThat(
       recipient !== model.owner,
       "OUT_OF_SCOPE",
-      "Eigentümerrechte werden nicht durch eine Projektfreigabe geändert.",
+      change.action === "publish"
+        ? "Eigentümer besitzen ihre Exportpakete bereits; Veröffentlichung richtet sich an einen anderen Empfänger."
+        : "Eigentümerrechte werden nicht durch eine Projektfreigabe geändert.",
     );
-    if (change.action === "grant") {
+    if (change.action === "publish") {
+      // Bind the proposal to the exact revision and the exact bytes of the package manifest.
+      const target = this.store.revision(p, model.id, change.revision);
+      requireThat(
+        target.quality === "checks_passed_within_profile",
+        "VALIDATION_REQUIRED",
+        "Nur übernommene, geprüfte Revisionen können veröffentlicht werden.",
+      );
+      const artifact = this.store.getArtifact(p, change.package_artifact_id);
+      requireThat(
+        artifact.model === model.id &&
+          artifact.revision === target.id &&
+          artifact.manifest?.filename === "manifest.json" &&
+          artifact.manifest?.package_schema_version === "1",
+        "OUT_OF_SCOPE",
+        "Veröffentlicht wird ein Exportpaket-Manifest dieser Revision.",
+      );
+      requireThat(
+        artifact.hash === change.package_hash,
+        "INTEGRITY_FAILURE",
+        "Der angegebene Pakethash stimmt nicht mit dem gespeicherten Manifest überein.",
+      );
+      const manifest = JSON.parse(
+        this.store.readBlob(artifact.hash).toString(),
+      );
+      requireThat(
+        manifest.package_kind === "LLcad_revision_export" &&
+          manifest.revision === target.id &&
+          Array.isArray(manifest.components),
+        "INTEGRITY_FAILURE",
+        "Das Manifest gehört nicht zu dieser Revision.",
+      );
+    } else if (change.action === "grant") {
       const expires = Date.parse(change.grant.expires_at);
       requireThat(
         expires > Date.now() && expires <= Date.now() + 365 * 86400000,
@@ -316,6 +351,8 @@ export class ProjectAccess {
       const change = proposal.change,
         recipient =
           change.action === "grant" ? change.grant.recipient : change.recipient;
+      if (change.action === "publish")
+        return this.publish(p, row, request, proposal, claims);
       const old = this.store.get(
         "SELECT * FROM model_grants WHERE model=? AND recipient=?",
         model.id,
@@ -389,6 +426,207 @@ export class ProjectAccess {
       return result;
     });
   }
+  /** Mandatory before_publish gate supplied by the model service; publication is refused without it. */
+  onPublish?: (context: Record<string, unknown>, check: () => void) => void;
+  private publish(
+    p: Principal,
+    row: any,
+    request: string,
+    proposal: AccessProposal,
+    claims: ApprovalClaims,
+  ) {
+    const change = proposal.change;
+    requireThat(
+      change.action === "publish",
+      "NEEDS_APPROVAL",
+      "Kein Veröffentlichungsantrag.",
+    );
+    const { model } = this.context(p, row.model, "model:publish");
+    const target = this.store.revision(p, model.id, change.revision);
+    const artifact = this.store.getArtifact(p, change.package_artifact_id);
+    const manifest = JSON.parse(this.store.readBlob(artifact.hash).toString());
+    const components: {
+      artifact_id: string;
+      sha256: string;
+      filename?: string;
+    }[] = [
+      ...manifest.components,
+      {
+        artifact_id: artifact.id,
+        sha256: artifact.hash,
+        filename: "manifest.json",
+      },
+    ];
+    const gate = this.onPublish;
+    requireThat(
+      gate,
+      "POLICY_GATE_FAILED",
+      "Pflichtprüfung before_publish fehlt.",
+    );
+    gate(
+      {
+        model_id: model.id,
+        revision: target.id,
+        package_hash: artifact.hash,
+        recipient: change.recipient,
+        approval_request_id: request,
+        action_digest: row.digest,
+      },
+      () => {
+        requireThat(
+          target.quality === "checks_passed_within_profile" &&
+            artifact.hash === change.package_hash &&
+            manifest.revision === target.id &&
+            change.recipient !== model.owner &&
+            claims.approval_request_id === request,
+          "NEEDS_APPROVAL",
+          "Veröffentlichung ist nicht mehr an Revision, Paket und Empfänger gebunden.",
+        );
+        for (const c of components) {
+          const item = this.store.getArtifact(p, c.artifact_id);
+          requireThat(
+            item.hash === c.sha256 && item.model === model.id,
+            "INTEGRITY_FAILURE",
+            "Eine Paketkomponente stimmt nicht mehr mit dem Manifest überein.",
+          );
+        }
+      },
+    );
+    const pid = id("pub"),
+      now = new Date().toISOString(),
+      expires = Date.now() + change.validity_days * 86400000;
+    this.store.run(
+      "INSERT INTO publications(id,tenant,owner,model,revision,package_artifact,package_hash,recipient,approval_request,expires,created) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+      pid,
+      p.tenant,
+      p.user,
+      model.id,
+      target.id,
+      artifact.id,
+      artifact.hash,
+      change.recipient,
+      request,
+      expires,
+      now,
+    );
+    for (const c of components)
+      this.store.run(
+        "INSERT OR IGNORE INTO publication_artifacts VALUES(?,?)",
+        pid,
+        c.artifact_id,
+      );
+    const result = {
+      status: "approved" as const,
+      model_id: model.id,
+      approval_request_id: request,
+      action_digest: row.digest,
+      action: "publish" as const,
+      publication_id: pid,
+      revision: target.id,
+      package_hash: artifact.hash,
+      recipient: change.recipient,
+      expires_at: new Date(expires).toISOString(),
+      artifacts: components.map((c) => ({
+        artifact_id: c.artifact_id,
+        filename: c.filename ?? null,
+        sha256: c.sha256,
+        download: "/api/artifacts/" + c.artifact_id,
+        signed_download: null,
+        expires_at: null,
+      })),
+      transfer: "internal_recipient_only_no_external_transmission" as const,
+      approved_at: now,
+    };
+    assertResult(AccessDecision, result, "access_decision");
+    this.store.run(
+      "INSERT INTO approval_consumptions VALUES(?,?,?)",
+      claims.jti,
+      request,
+      claims.exp * 1000,
+    );
+    this.store.run(
+      "UPDATE approval_requests SET state='approved',result=? WHERE id=?",
+      JSON.stringify(result),
+      request,
+    );
+    this.store.audit("package_published_internally", {
+      model_id: model.id,
+      revision: target.id,
+      publication_id: pid,
+      package_hash: artifact.hash,
+      approval_request_id: request,
+      action_digest: row.digest,
+    });
+    return result;
+  }
+  /** Publications visible to the caller as recipient or owner, with optional short-lived links. */
+  publications(
+    p: Principal,
+    offset: number,
+    limit: number,
+    link?: (
+      artifact: string,
+      publication: string,
+    ) => { token: string; expires_at: string } | null,
+  ) {
+    authorize(p, "model:read");
+    const where = "tenant=? AND (recipient=? OR owner=?) AND expires>?";
+    const params = [p.tenant, p.user, p.user, Date.now()];
+    const total = this.store.get(
+      `SELECT COUNT(*) AS n FROM publications WHERE ${where}`,
+      ...params,
+    ).n;
+    const rows = this.store.all(
+      `SELECT * FROM publications WHERE ${where} ORDER BY created DESC,id LIMIT ? OFFSET ?`,
+      ...params,
+      limit,
+      offset,
+    );
+    return {
+      publications: rows.map((r: any) => ({
+        publication_id: r.id,
+        model_id: r.model,
+        revision: r.revision,
+        package_hash: r.package_hash,
+        role: r.owner === p.user ? ("owner" as const) : ("recipient" as const),
+        recipient: r.recipient,
+        expires_at: new Date(r.expires).toISOString(),
+        created: r.created,
+        artifacts: this.store
+          .all(
+            "SELECT a.id,a.hash,a.manifest FROM publication_artifacts pa JOIN artifacts a ON a.id=pa.artifact WHERE pa.publication=? ORDER BY a.id",
+            r.id,
+          )
+          .map((a: any) => {
+            const signed = link?.(a.id, r.id) ?? null;
+            return {
+              artifact_id: a.id,
+              filename: JSON.parse(a.manifest).filename ?? null,
+              sha256: a.hash,
+              download: "/api/artifacts/" + a.id,
+              signed_download: signed
+                ? "/api/artifacts/" + a.id + "?token=" + signed.token
+                : null,
+              expires_at: signed?.expires_at ?? null,
+            };
+          }),
+      })),
+      total,
+      next_offset: offset + limit < total ? offset + limit : null,
+      link_lifetime_seconds: 300,
+      external_transmission: false as const,
+    };
+  }
+  /** Recipients may read exactly the artifacts of a live publication addressed to them. */
+  publishedTo(p: Principal, artifact: string) {
+    return !!this.store.get(
+      "SELECT 1 FROM publication_artifacts pa JOIN publications pub ON pub.id=pa.publication WHERE pa.artifact=? AND pub.tenant=? AND pub.recipient=? AND pub.expires>?",
+      artifact,
+      p.tenant,
+      p.user,
+      Date.now(),
+    );
+  }
   private invalidate(grant: string, version: number) {
     const jobs = this.store.all(
       "SELECT j.id FROM jobs j JOIN job_authorizations a ON a.job=j.id WHERE a.grant_id=? AND a.grant_version=? AND j.state IN ('queued','running')",
@@ -441,11 +679,19 @@ export class ProjectAccess {
         )
         .map((f: any) => f.id),
     ]);
+    const outside = [...dirty].filter((fid) => !allowed.has(fid));
+    const structural =
+      hash({ ...base, features: [] }) !== hash({ ...plan.ir, features: [] });
     requireThat(
-      [...dirty].every((fid) => allowed.has(fid)) &&
-        hash({ ...base, features: [] }) === hash({ ...plan.ir, features: [] }),
+      outside.length === 0 && !structural,
       "NEEDS_APPROVAL",
       "Änderung oder abhängige Geometrie überschreitet die genehmigten Features oder Projektgrenzen.",
+      {
+        features_outside_scope: outside.slice(0, 32),
+        project_level_change: structural,
+        approval_path:
+          "the project owner proposes a replacement grant with the required feature scope through cad_access; MCP cannot approve it",
+      },
     );
   }
   bindTransaction(p: Principal, model: string, tx: string) {

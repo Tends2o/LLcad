@@ -4,8 +4,11 @@ import { BUILD_HASH, IMPLEMENTATION_HASH } from "../packages/compiler/build.js";
 import { POLICY_HASH } from "../packages/policy/index.js";
 import { bytesHash } from "../packages/semantic-ir/hash.js";
 import { auditPlan } from "./plan-audit.js";
+import { RETENTION_POLICY } from "../packages/model-service/maintenance.js";
+import { PIPELINE_POLICY } from "../hooks/server-registry/index.js";
 const read = (path: string) =>
   existsSync(path) ? JSON.parse(readFileSync(path, "utf8")) : null;
+const licenses = read("reports/license-check.json");
 const verification = read("reports/verification.json"),
   benchmark = read("reports/benchmark.json"),
   host = read("reports/target-host.json"),
@@ -50,6 +53,23 @@ if (
   blockers.push(
     "Produktiver HTTPS-Endpunkt und Identitätsanbieter sind nicht konfiguriert.",
   );
+if (licenses?.distribution_review?.status !== "acknowledged")
+  blockers.push(
+    "Lizenz-/Distributionsprüfung fehlt oder verlangt eine Betreiberfreigabe (reports/license-check.json).",
+  );
+// The isolated worker is not an OCI image; its environment digest binds the exact
+// mounted sources, pinned Python lock, native package pins and the checker binary.
+const workerEnvironmentDigest = bytesHash(
+  JSON.stringify({
+    worker_source_digest: BUILD_HASH,
+    requirements_lock: bytesHash(readFileSync("requirements.lock")),
+    native_packages: bytesHash(readFileSync("deployment/native-packages.json")),
+    meshcheck: JSON.parse(
+      readFileSync("workers/cad-occt/.meshcheck-build.json", "utf8"),
+    ).binary_sha256,
+    sandbox: "bubblewrap_ro_usr_venv_worker_single_use",
+  }),
+);
 const manifest = {
   application_version: "0.1.0",
   ir_schema_version: "1",
@@ -59,6 +79,18 @@ const manifest = {
   worker_source_digest: BUILD_HASH,
   implementation_digest: IMPLEMENTATION_HASH,
   worker_image_digests: null,
+  worker_environment_digest: workerEnvironmentDigest,
+  worker_environment_note:
+    "No container image is built; the digest binds mounted worker sources, the Python lock, native package pins and the mesh checker binary.",
+  license_check: licenses
+    ? {
+        report: "reports/license-check.json",
+        status: licenses.distribution_review.status,
+        summary: licenses.summary,
+      }
+    : { status: "missing" },
+  retention_policy: RETENTION_POLICY,
+  pipeline_policy_version: PIPELINE_POLICY.version,
   policy_bundle_hash: POLICY_HASH,
   dependency_lock_hashes: {
     npm: bytesHash(readFileSync("package-lock.json")),

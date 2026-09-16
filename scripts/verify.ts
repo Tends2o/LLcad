@@ -7,6 +7,7 @@ const checks = [];
 let failed = false;
 for (const [name, args] of [
   ["versions", ["run", "versions:check"]],
+  ["licenses", ["run", "licenses"]],
   ["typecheck", ["run", "typecheck"]],
   ["tests", ["test"]],
   ["geometry", ["run", "test:geometry"]],

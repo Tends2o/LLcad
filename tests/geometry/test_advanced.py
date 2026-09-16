@@ -61,4 +61,42 @@ class AdvancedTests(unittest.TestCase):
             histories.append(sorted(x['origins'][0]['key'] for x in records['faces']))
         self.assertEqual(histories[0],histories[1])
 
+    def test_sweep_frames_twist_scale_and_self_contact(self):
+        import advanced
+        circle=make_feature(feature('c','circle',{'radius':1}),[])
+        path=make_feature(feature('p','bspline',points=[['0','0','0'],['0','0','5'],['3','0','10']]),[])
+        plain=make_feature(feature('s','sweep'),[circle,path])
+        self.assertTrue(properties(plain)['valid']); self.assertEqual(advanced.CONSTRUCTION_REPORTS['s']['frame'],'occt_pipe_corrected_frenet')
+        twisted=make_feature(feature('t','sweep',{'twist':math.pi/2,'scale_end':.5,'sections':12},frame='rotation_minimizing'),[circle,path])
+        props=properties(twisted); self.assertTrue(props['valid']); self.assertEqual(props['solids'],1)
+        self.assertEqual(advanced.CONSTRUCTION_REPORTS['t']['frame'],'rotation_minimizing_double_reflection')
+        self.assertLess(props['volume'],properties(plain)['volume'])
+        straight=make_feature(feature('line','line',start=['0','0','0'],end=['0','0','6']),[])
+        rmf=make_feature(feature('r','sweep',{'scale_end':2,'sections':4}),[circle,straight])
+        self.assertAlmostEqual(properties(rmf)['volume'],math.pi*6*(1+2+4)/3,delta=.3)
+        points,tangents,references=advanced.rotation_minimizing_frames(straight,4)
+        for t,r in zip(tangents,references):self.assertAlmostEqual(float(abs(t@r)),0,places=12)
+        tight=make_feature(feature('arc','arc',points=[['0','0','0'],['0.5','0.5','0'],['1','0','0']]),[])
+        big=make_feature(feature('big','circle',{'radius':2}),[])
+        with self.assertRaises(GeometryError) as caught:make_feature(feature('bad','sweep'),[big,tight])
+        self.assertEqual(caught.exception.code,'GEOMETRY_INVALID')
+
+    def test_loft_compatibility_offset_and_iso_thread(self):
+        square=make_feature(feature('sq','profile',points=[['0','0','0'],['2','0','0'],['2','2','0'],['0','2','0']]),[])
+        triangle=make_feature(feature('tri','profile',points=[['0','0','3'],['2','0','3'],['1','2','3']]),[])
+        with self.assertRaises(GeometryError):make_feature(feature('l','loft'),[square,triangle])
+        forced=make_feature(feature('l2','loft',check_compatibility=False),[square,triangle])
+        self.assertTrue(properties(forced)['valid'])
+        box=make_feature(feature('box','box',{'width':4,'depth':4,'height':4}),[])
+        grown=make_feature(feature('off','offset_solid',{'distance':1}),[box])
+        self.assertTrue(properties(grown)['valid']); self.assertGreater(properties(grown)['volume'],64)
+        shrunk=make_feature(feature('in','offset_solid',{'distance':-1}),[box]); self.assertAlmostEqual(properties(shrunk)['volume'],8,places=6)
+        with self.assertRaises(GeometryError):make_feature(feature('collapse','offset_solid',{'distance':-2.5}),[box])
+        iso={'root_radius':(6-1.082532)/2,'pitch':1,'height':6,'tooth_depth':5*math.sqrt(3)/16,'tooth_width':.75,'crest_width':.125,'runout':1}
+        thread=make_feature(feature('m6','thread',iso,mode='external',handedness='right',standard='iso_metric_basic',designation='M6'),[])
+        props=properties(thread); self.assertTrue(props['valid']); self.assertEqual(props['solids'],1)
+        self.assertAlmostEqual(props['bounds'][3]-props['bounds'][0],6,delta=.02)
+        core=math.pi*iso['root_radius']**2*6
+        self.assertGreater(props['volume'],core); self.assertLess(props['volume'],math.pi*9*6)
+
 if __name__=='__main__':unittest.main()

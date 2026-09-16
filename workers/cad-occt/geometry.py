@@ -216,7 +216,9 @@ def make_feature(f, deps):
         return BRepBuilderAPI_MakeFace(surf,1e-7).Shape()
     if op=='imported':
         path='input-'+c['artifact_id']+'.'+c['format']
-        if c['format']=='step':
+        if c['format']=='step' and c.get('component'):
+            import step_structure;shape=step_structure.component_shape(path,c['component'])
+        elif c['format']=='step':
             reader=STEPControl_Reader();require(reader.ReadFile(path)==IFSelect_RetDone,'STEP-Datei ungültig.');reader.TransferRoots();shape=reader.OneShape()
             # OCCT's STEP reader converts declared file units to internal millimetres.
         else:
@@ -265,11 +267,87 @@ def mesh(shape,deflection=0.05,feature_id='output',faces=None):
             a,b,c=tri.Triangle(i).Get()
             if face.Orientation()==TopAbs_REVERSED:b,c=c,b
             triangles.append([base+a-1,base+b-1,base+c-1])
-            require(len(triangles)<=500000,'Dreiecksbudget überschritten.','BUDGET_EXCEEDED')
+            if len(triangles)>500000:
+                raise GeometryError('BUDGET_EXCEEDED','Dreiecksbudget überschritten; gröbere Vorschauabweichung, kleinerer Ausschnitt (region) oder einzelnes Feature wählen.')
         if faces is not None:
             face_ranges.append({'face_id':faces[face_index]['face_id'],'first_triangle':first_triangle,'triangle_count':len(triangles)-first_triangle})
     require(triangles,'Drahtgeometrie benötigt einen eigenen Kurvenviewer.','OUT_OF_SCOPE')
     return dict(vertices=vertices,triangles=triangles,face_ranges=face_ranges,feature_id=feature_id,deflection=deflection,quality='preview_only',certified_bound=None)
+
+def face_curvature_and_feature_size(face):
+    """Sampled maximum principal curvature and the smallest bounding extent / edge length of a face."""
+    from OCP.BRepAdaptor import BRepAdaptor_Surface, BRepAdaptor_Curve
+    from OCP.BRepLProp import BRepLProp_SLProps
+    from OCP.GCPnts import GCPnts_AbscissaPoint
+    adaptor=BRepAdaptor_Surface(TopoDS.Face_s(face),True);u0,u1,v0,v1=BRepTools.UVBounds_s(TopoDS.Face_s(face))
+    kappa=0.;defined=0
+    for i in range(1,4):
+        for j in range(1,4):
+            props=BRepLProp_SLProps(adaptor,u0+(u1-u0)*i/4,v0+(v1-v0)*j/4,2,1e-9)
+            if props.IsCurvatureDefined():
+                kappa=max(kappa,abs(props.MaxCurvature()),abs(props.MinCurvature()));defined+=1
+    b=bounds(face);extents=[b[i+3]-b[i] for i in range(3)];size=min([e for e in extents if e>1e-9] or [max(extents)])
+    for edge in explore(face,TopAbs_EDGE):
+        try:length=GCPnts_AbscissaPoint.Length_s(BRepAdaptor_Curve(TopoDS.Edge_s(edge)))
+        except Exception:continue
+        if length>1e-9:size=min(size,length)
+    return kappa if defined else None,size
+
+def adaptive_mesh(shape,policy,feature_id='output',faces=None):
+    """Per-face deflection h(x) <= min(h_max, alpha d_feature, h_curvature) (Bauplan eq. 55-57).
+
+    The chordal deviation is the registered control; edge lengths from curvature are a
+    heuristic and reported as such. Faces are meshed individually, so shared edges may carry
+    different polygons: this is a preview, not a watertight body.
+    """
+    target=policy['target_error_mm'];alpha=policy.get('feature_factor',0.5);ceiling=policy.get('max_deflection_mm',target)
+    require(target>=1e-5 and ceiling>=target and 0.01<=alpha<=10,'Ungültige adaptive Vorschauvorgabe.','PRECISION_UNSUPPORTED')
+    vertices,triangles,face_ranges=[],[],[];used=[]
+    for face_index,face in enumerate(explore(shape,TopAbs_FACE)):
+        kappa,size=face_curvature_and_feature_size(face)
+        deflection=min(target,ceiling);note=[]
+        if kappa:
+            feature_cap=kappa*(alpha*size)**2/8
+            if feature_cap<deflection:deflection=max(feature_cap,1e-5);note.append('feature_size_cap')
+            if deflection>1/kappa:deflection=1/kappa;note.append('sagitta_bound_clamped_to_radius')
+        BRepTools.Clean_s(face)
+        mesher=BRepMesh_IncrementalMesh(face,deflection,False,0.15,False);mesher.Perform()
+        location=TopLoc_Location();tri=BRep_Tool.Triangulation_s(TopoDS.Face_s(face),location)
+        if tri is None:continue
+        base=len(vertices)
+        for i in range(1,tri.NbNodes()+1):
+            pnt=tri.Node(i).Transformed(location.Transformation());vertices.append([pnt.X(),pnt.Y(),pnt.Z()])
+        first=len(triangles)
+        for i in range(1,tri.NbTriangles()+1):
+            a,b,c=tri.Triangle(i).Get()
+            if face.Orientation()==TopAbs_REVERSED:b,c=c,b
+            triangles.append([base+a-1,base+b-1,base+c-1])
+            require(len(triangles)<=500000,'Dreiecksbudget überschritten.','BUDGET_EXCEEDED')
+        used.append(deflection)
+        entry={'first_triangle':first,'triangle_count':len(triangles)-first,'deflection_mm':deflection,'curvature_max_per_mm':kappa,
+               'feature_size_mm':size,'edge_length_heuristic_mm':(math.sqrt(8*deflection/kappa) if kappa else None),
+               'sagitta_valid':((not kappa) or deflection<=1/kappa),'policy_notes':note}
+        if faces is not None:entry['face_id']=faces[face_index]['face_id']
+        face_ranges.append(entry)
+    require(triangles,'Drahtgeometrie benötigt einen eigenen Kurvenviewer.','OUT_OF_SCOPE')
+    b=bounds(shape)
+    resolution={'method':'per_face_chordal_deflection_with_feature_size_and_sagitta_policy','absolute_resolution_mm':max(used),'finest_deflection_mm':min(used),
+                'reference_scale_mm':math.sqrt(sum((b[i+3]-b[i])**2 for i in range(3))),'minimum_feature_resolved_mm':2*max(used),
+                'policy':{'target_error_mm':target,'feature_factor':alpha,'max_deflection_mm':ceiling},
+                'edge_length_rule':'heuristic_sqrt(8*epsilon/kappa)_not_a_universal_bound','watertight':False,'certified_surface_bound':None}
+    return dict(vertices=vertices,triangles=triangles,face_ranges=face_ranges,feature_id=feature_id,deflection=max(used),quality='preview_only',certified_bound=None,resolution=resolution)
+
+def clip_mesh(mesh_data,center,radius):
+    """Spatial excerpt: keep triangles whose centroid lies inside the sphere; vertices are compacted."""
+    import numpy as np
+    v=np.array(mesh_data['vertices']);keep=[];total=len(mesh_data['triangles'])
+    for t in mesh_data['triangles']:
+        if np.linalg.norm(v[t].mean(axis=0)-np.asarray(center,float))<=radius:keep.append(t)
+    used=sorted({i for t in keep for i in t});remap={old:new for new,old in enumerate(used)}
+    result=dict(mesh_data,vertices=[mesh_data['vertices'][i] for i in used],triangles=[[remap[i] for i in t] for t in keep])
+    result['clip']={'center':list(map(float,center)),'radius':float(radius),'triangles_before':total,'triangles_after':len(keep),'face_ranges_invalidated':True}
+    result.pop('face_ranges',None)
+    return result
 
 def export_shape(shape,fmt,path,deflection):
     if fmt=='brep':write_brep(shape,path);restored=read_brep(path)
