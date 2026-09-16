@@ -109,3 +109,10 @@ npm run screenshots -- --shot hero:"My model":page
 
 Contributor rules are in [AGENTS.md](AGENTS.md). The project status and the open items
 towards a production release are tracked in [implementation status](docs/implementation-status.md).
+
+## License
+
+LLcad is free software under the [GNU General Public License v3.0 or later](LICENSE).
+It builds on Open CASCADE (LGPL-2.1 with exception), CGAL (GPL-3.0), OpenVDB (MPL-2.0) and
+permissively licensed Node and Python packages; the overview is in
+[Licensing](docs/licensing.md).

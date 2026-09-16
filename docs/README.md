@@ -13,6 +13,7 @@
 | [Compatibility](compatibility-matrix.md) | Protocol versions, transports and what has and has not been verified |
 | [Implementation status](implementation-status.md) | What is built and tested, what remains open before a production release |
 | [Strips](strips.md) | The `strip` operator: thick polylines with pads as one solid (traces, ribs, channels) |
+| [Licensing](licensing.md) | The project licence (GPL-3.0-or-later) and the licences of the geometry kernel and other dependencies |
 
 ## Engineering notes (German)
 

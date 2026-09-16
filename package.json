@@ -22,6 +22,7 @@
   "bugs": {
     "url": "https://github.com/Tends2o/LLcad/issues"
   },
+  "license": "GPL-3.0-or-later",
   "private": true,
   "type": "module",
   "bin": {
