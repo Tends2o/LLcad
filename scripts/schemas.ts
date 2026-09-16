@@ -16,6 +16,7 @@ import {
   FailureResponse,
   ValidationReport,
   outputJSONSchema,
+  portableTuples,
 } from "../packages/semantic-ir/results.js";
 mkdirSync("schemas", { recursive: true });
 const schemas: Record<string, unknown> = {
@@ -27,9 +28,9 @@ const schemas: Record<string, unknown> = {
       $ref: name + ".result.schema.json",
     })),
   },
-  "tool-error-v1.schema.json": z.toJSONSchema(FailureResponse, {
-    reused: "ref",
-  }),
+  "tool-error-v1.schema.json": portableTuples(
+    z.toJSONSchema(FailureResponse, { reused: "ref" }),
+  ),
 };
 for (const [name, schema] of Object.entries(ToolSchemas)) {
   schemas[name + ".schema.json"] = inputJSONSchema(

@@ -1,14 +1,14 @@
 [Unit]
-Description=LLcad local CAD tools for LLM clients
+Description=LLcad local CAD server (MCP over HTTP and browser viewer on loopback)
 After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=/root/projekte/LLcad
-ExecStart=/root/.nvm/versions/node/v24.19.0/bin/node /root/projekte/LLcad/dist/packages/mcp-gateway/main.js
-Environment=PATH=/root/.nvm/versions/node/v24.19.0/bin:/usr/local/bin:/usr/bin:/bin
-Environment=MATHFORGE_ROOT=/root/projekte/LLcad
-Environment=MATHFORGE_DATA=/root/projekte/LLcad/data
+# Adjust the paths to your checkout, Node installation and data directory.
+WorkingDirectory=/opt/llcad
+ExecStart=/usr/bin/node /opt/llcad/dist/packages/mcp-gateway/main.js
+Environment=MATHFORGE_ROOT=/opt/llcad
+Environment=MATHFORGE_DATA=/opt/llcad/data
 Environment=MATHFORGE_AUTH=local
 Environment=HOST=127.0.0.1
 Environment=PORT=4310
@@ -20,7 +20,7 @@ UMask=0077
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
-ReadWritePaths=/root/projekte/LLcad/data
+ReadWritePaths=/opt/llcad/data
 # RestrictSUIDSGID's syscall filter blocks this Bubblewrap's mount setup.
 # NoNewPrivileges remains enabled; workers drop all capabilities and UID/GID.
 LockPersonality=true

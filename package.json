@@ -1,8 +1,33 @@
 {
   "name": "mathforge-3d",
   "version": "0.1.0",
+  "description": "Mathematics-first CAD server for MCP clients: versioned constructions, real Open CASCADE geometry, validated commits and an optional browser viewer.",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "cad",
+    "occt",
+    "opencascade",
+    "3d",
+    "geometry",
+    "brep",
+    "step",
+    "parametric"
+  ],
+  "homepage": "https://github.com/Tends2o/LLcad#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tends2o/LLcad.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Tends2o/LLcad/issues"
+  },
   "private": true,
   "type": "module",
+  "bin": {
+    "llcad-mcp": "bin/llcad-mcp.mjs",
+    "llcad-server": "bin/llcad-server.mjs"
+  },
   "engines": {
     "node": ">=24.0.0"
   },
@@ -16,8 +41,6 @@
     "test:geometry": ".venv/bin/python -m unittest discover -s tests/geometry -v",
     "test:browser": "tsx scripts/browser-test.ts",
     "test:mcp": "tsx scripts/mcp-workflow.ts",
-    "test:host": "tsx scripts/codex-host.ts",
-    "test:llm": "tsx scripts/llm-eval.ts",
     "schemas": "tsx scripts/schemas.ts",
     "demo": "tsx scripts/demo.ts",
     "benchmark": "tsx benchmarks/run.ts",
@@ -29,7 +52,8 @@
     "format": "prettier --write packages hooks scripts tests benchmarks public/index.html public/style.css",
     "format:check": "prettier --check packages hooks scripts tests benchmarks public/index.html public/style.css",
     "setup": "bash deployment/setup.sh",
-    "build:native": "python3 scripts/build-native.py"
+    "build:native": "python3 scripts/build-native.py",
+    "screenshots": "tsx scripts/screenshots.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.30.0",

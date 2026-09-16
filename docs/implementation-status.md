@@ -1,47 +1,64 @@
-# Umsetzung und offene Abnahme
+# Implementation status
 
-Diese Zuordnung verhindert, dass die lauffähige lokale Version mit einer vollständigen Freigabe aller Ziele des ursprünglichen Bauplans verwechselt wird.
+This map prevents the working local version from being mistaken for a full acceptance of
+every goal in the original blueprint (`Mathematik_First_3D_MCP_Bauplan.md`).
 
-| Phase | Tatsächlich umgesetzt und geprüft | Noch offen |
+| Phase | Implemented and tested | Still open |
 |---|---|---|
-| 0 – Verträge und Referenzen | Striktes IR, Einheiten, Fehlercodes, Rollen-/Scopegrenze, Capability-Verträge, technische/organische/Instanz-Fixtures | Zielkonto und reale Host-/OAuth-Parameter |
-| 1 – Mathematischer Kern | Native OCCT-Körper, indizierte STL-Netze mit exakter CGAL-Prüfung und watertight_solid-Profil, Profile, Konstruktionen, CSG, sichere gespeicherte skalare und vektorielle Ausdrücke mit Einheitenprüfung, Messungen mit ausgewiesener Beweisstärke (Chamfer-/Hausdorff-Proben, exakte Extrema, IoU, Wandstärke, bewegter Freigang), rigorose Intervallarithmetik mit Gradientenfluss-Zertifikaten, Dual Contouring, implizite Krümmung, exakte Bézier-Orakel, Regularisierungs-/Nullresultat- und Skalierungsregressionen, isolierte Worker, Revisionen und Exporte | Statik, allgemeine numerische Fehlerfortpflanzung über alle Operatoren und eine Fertigungszertifizierung |
-| 2 – MCP und Transaktionen | 23 Werkzeuge mit eigenen versionierten Antwortverträgen, transaktionaler Ausgangsprüfung und einzeln an Kandidat/Engine/Geometrie gebundenen Nachweisen, private Modellsuche, zwei HTTP-Protokolladapter, lokaler stdio-Einstieg, dauerhafter lokaler Codex-Dienst, Build-Neuberechnung, vollständig über MCP geprüfter Modellierablauf, zehn echte LLM-Sprachaufträge im letzten Lauf und zwölf definierte Aufgaben mit feiner Fehlerklassifikation, Deduplizierung, Jobs mit Phasen/Heartbeats/Budgets, Pflichtgates einschließlich on_failure/on_cancel/before_publish, begrenzte Reparaturketten, Digest/CAS, OAuth-Tokenprüfung, Kennzahlen, private Ressourcen | Reale Remote-OAuth-Verknüpfung, erneuter Modellturn der zwölf Aufgaben und breiter unabhängiger LLM-Testsatz |
-| 3 – Verständnis und Details | Versionierte Projekt-/Baugruppen-/Teilstruktur mit einer geometrischen Hoheit pro Teil, hierarchische starre Bezugsrahmen, lokale native Konstruktion und weltbezogene Geometrieausgabe, lokale GPU-/GLB-Netzursprünge, semantische IDs, gespeicherte native Flächenherkunft für registrierte Operatoren, revisionsgebundene Flächenauswahl mit semantischen Ankern und Neuzuordnung, Detailpakete mit Abschnitten, Nachbarflächen und getrenntem Qualitätsstatus je Entität, SVG-Schnitt-/Projektionsansichten, Sensitivitäten, Konditionierungsprüfung, Schutz-/Änderungsregionen, BVH-Suche und Dirty-Graph | Allgemeine OCAF-Historie und Herkunft für nicht registrierte Builder; Split-/Merge-Fälle werden absichtlich abgewiesen |
-| 4 – CAD und inverse Konstruktion | Explizite NURBS-Kurven und Mehrspannenflächen, formtreue Knotenverfeinerung, native Winkel-/Krümmungs-/Freigangsmessung, affine Transformationen, Instanzmuster mit Einzelvarianten, Loft mit Kompatibilitätsprüfung, Sweep mit rotationsminimierenden Rahmen, Twist, Endskalierung und Selbstkontaktprüfung, Offsets, Bohrung/Nut/Tasche, Verrundung/Fase/Schale, ISO-Gewindegrundprofile mit Auslauf und Paarungsvergleich, analytische inverse Volumenlösung, SLSQP mit robusten Verlusten, Rangdiagnostik und KKT-Sensitivität, UV-Trimmung, Vernähen; echte Roundtrips und private Export-Dateisätze mit Fehlerbudget | Globale Lösbarkeits-/Optimalitätsbeweise, freie Trimmschleifen über Mehrflächen-NURBS und Gewindetoleranzklassen |
-| 5 – Organische Details | Feld-AST mit Primitiven und Gyroid, Werteinheiten, variable Schalen, kompakte Stützen, lokale inverse Deformation, sparse Extraktion mit Lipschitz- oder Intervallpruning, Marching Tetrahedra oder Dual Contouring, zertifizierte Oberflächenabweichung zwischen Revisionen, blendfreie Passregionen, Änderungs- und Rechenregionen, implizite Krümmung, Patchanschlüsse mit rationalen Bounds, OpenVDB-Export und -Import als Spline-Feld mit Zertifikat gegen die Quelle, Netzreparatur, Remeshing, ARAP und Primitivhypothesen für maßgebliche Netze | Globale Subzelltopologiezertifizierung und Zertifikate zweiter Ordnung |
-| 6 – Leistung | Begrenzte Instanzen, kompiliertes Feld-AST, Cacheteilbaum-Hashes, Contentcache, inkrementelle Invalidierung, parallele Einweg-Sandboxes mit vorgewärmtem Pool, adaptive Tessellation je Fläche, räumliche Ausschnitte und Pixel-LOD, gzip-Übertragung, Paging, dauerhafte faire Jobverteilung, Benchmarks mit kalten und warmen Starts sowie Export-/Validierungsprofilen, Skalierungsregression | Große Produktionsdatensätze, Mehrkernbenchmark auf Zielhardware, GPU-Profil, breite unabhängige LLM-Evaluation |
-| 7 – Härtung | Projektrollen und Feature-Grenzen, Auftragsbudgets, gebundene Einmalzustimmung, Freigabeersatz/Widerruf, interne Veröffentlichung mit before_publish-Gate und kurzlebigen Ed25519-Links, Aufbewahrungspolitik, Isolation, Rechte-/Fehlertests, JWT-Tests, echter Restore mit Migration bis Speicherstand 6, tatsächlicher Workerabbruch, exklusive Betriebssperre, Mandantenlöschung, Paketprüfungen, SBOM, Lizenz-/Distributionsprüfung, Runbook, Deploymentvorlagen, Release-Manifest | Produktiver Endpunkt/IdP, vertrauliche Teilansichten, externe Veröffentlichung, Löschung externer Backups, externe Hostabnahme, Betreiberfreigabe der CGAL-Distributionsfrage und gegebenenfalls stärkere Parser-VM-Isolation |
+| 0 – Contracts and references | Strict IR, units, error codes, role and scope boundary, capability contracts, technical, organic and instance fixtures | Target account and real host/OAuth parameters |
+| 1 – Mathematical core | Native OCCT solids, indexed STL meshes with exact CGAL checks and the `watertight_solid` profile, profiles, strips, constructions, CSG, safe stored scalar and vector expressions with unit checks, measurements with declared proof strength (Chamfer/Hausdorff samples, exact extrema, IoU, wall thickness, moving clearance), rigorous interval arithmetic with gradient-flow certificates, dual contouring, implicit curvature, exact Bézier oracles, regularisation, null-result and scaling regressions, isolated workers, revisions and exports | Statics, general numerical error propagation across all operators and a manufacturing certification |
+| 2 – MCP and transactions | 25 tools with versioned result contracts, transactional output checks and evidence bound to candidate, engine and geometry, private model discovery, two HTTP protocol adapters, stdio entry point, on-demand viewer, build rebuild, a complete workflow verified through MCP, deduplication, jobs with phases, heartbeats and budgets, mandatory gates including on_failure, on_cancel and before_publish, bounded repair chains, digest and CAS, OAuth token checks, metrics, private resources | Real remote OAuth connection and a broad independent LLM test set |
+| 3 – Understanding and details | Versioned project, assembly and part structure with one geometric authority per part, hierarchical rigid frames, local native construction and world-space output, local GPU and GLB mesh origins, semantic IDs, stored native face provenance for registered operators, revision-bound face selection with semantic anchors and rebinding, detail packages with sections, neighbouring faces and per-entity quality status, SVG section and projection views, sensitivities, conditioning check, protected and change regions, BVH search and dirty graph | General OCAF history and provenance for unregistered builders; split and merge cases are rejected on purpose |
+| 4 – CAD and inverse construction | Explicit NURBS curves and multi-span surfaces, shape-preserving knot refinement, native angle, curvature and clearance measurement, affine transformations, instance patterns with single-occurrence variants, loft with compatibility check, sweep with rotation-minimising frames, twist, end scaling and self-contact check, offsets, hole, groove, pocket, fillet, chamfer, shell, ISO thread profiles with runout and fit comparison, analytic inverse volume solution, SLSQP with robust losses, rank diagnostics and KKT sensitivity, UV trimming, sewing; real round trips and private export packages with error budget | Global solvability and optimality proofs, free trimming loops over multi-face NURBS and thread tolerance classes |
+| 5 – Organic details | Field AST with primitives and gyroid, value units, variable shells, compact supports, local inverse deformation, sparse extraction with Lipschitz or interval pruning, marching tetrahedra or dual contouring, certified surface deviation between revisions, blend-free mating regions, change and compute regions, implicit curvature, patch joins with rational bounds, OpenVDB export and import as a spline field with a certificate against the source, mesh repair, remeshing, ARAP and primitive hypotheses for authoritative meshes | Global sub-cell topology certification and second-order certificates |
+| 6 – Performance | Bounded instances, compiled field AST, cache subtree hashes, content cache, incremental invalidation, parallel disposable sandboxes with a pre-warmed pool, adaptive per-face tessellation, spatial excerpts and pixel LOD, gzip transfer, paging, durable fair job distribution, benchmarks with cold and warm starts and export/validation profiles, scaling regression | Large production data sets, multi-core benchmark on target hardware, GPU profile, broad independent LLM evaluation |
+| 7 – Hardening | Project roles and feature scopes, job budgets, bound one-time consent, grant replacement and revocation, internal publication with a before_publish gate and short-lived Ed25519 links, retention policy, isolation, permission and error tests, JWT tests, real restore with migration up to store version 6, real worker cancellation, exclusive operating lock, tenant erasure, package checks, SBOM, licence and distribution check, runbook, deployment templates, release manifest | Production endpoint and identity provider, confidential partial views, external publication, erasure of external backups, external host acceptance, operator approval of the CGAL distribution question and possibly stronger parser VM isolation |
 
-## Vollständiger Anforderungsabgleich
+## Requirement audit
 
-`docs/plan-audit.json` bindet alle 162 Abschnitte an den unveränderten Originaltext. Für jeden Abschnitt sind konkrete Kriterien und eine Einordnung vorhanden. Der Abgleich hält fehlende bzw. zu schwache Nachweise offen. `npm run plan:check` und `release:check` dürfen bei offenen Anforderungen keine vollständige Abnahme melden. Mathematische Teilnachweise sind keine Freigabe der gesamten Anwendung. Neu belegte Bausteine sind in [completion-work.md](completion-work.md) zusammengefasst; ihre Verträge stehen in [intervals-and-certificates.md](intervals-and-certificates.md), [measures.md](measures.md), [imports.md](imports.md), [threads.md](threads.md), [mesh-operators.md](mesh-operators.md), [diagnostic-views.md](diagnostic-views.md), [publication-and-retention.md](publication-and-retention.md) und [viewer.md](viewer.md).
+`docs/plan-audit.json` binds all 162 sections to the unchanged original text with concrete
+criteria and a classification. The audit keeps missing or weak evidence open;
+`npm run plan:check` and `npm run release:check` must not report full acceptance while
+requirements are open. Partial mathematical proofs are not an approval of the whole
+application. Newly proven building blocks are summarised in
+[completion-work.md](completion-work.md); their contracts are in
+[intervals-and-certificates.md](intervals-and-certificates.md), [measures.md](measures.md),
+[imports.md](imports.md), [threads.md](threads.md), [mesh-operators.md](mesh-operators.md),
+[diagnostic-views.md](diagnostic-views.md),
+[publication-and-retention.md](publication-and-retention.md) and [viewer.md](viewer.md).
 
-Ausdrücklich nicht lokal nachweisbar und deshalb offen: reale Remote-OAuth-/ChatGPT-Zielhostabnahme, Produktionsfreigabe, externe Veröffentlichung, ein 16-Kern-Benchmarkrechner und eine breite unabhängige LLM-Evaluation.
+Explicitly not provable locally and therefore open: real remote OAuth acceptance with a
+target host, production approval, external publication, a 16-core benchmark machine and a
+broad independent LLM evaluation.
 
-## Nachweise
+## Evidence kept in the repository
 
-- `reports/deployment-mesh-quality.json` belegt die aktuelle Übernahme mit 14 Modell-Neuberechnungen, 17 aktuellen Modellköpfen und unveränderten 231 alten Revisionen, 108 Prüfnachweisen, 231 Jobergebnissen sowie 328 Blobdateien. `reports/codex-host-mesh.json` belegt den zusätzlichen tatsächlichen Upload-/Mesh-/STL-/GLB-Pfad im installierten Host ohne Modellturn.
-- `reports/deployment-project-access.json` belegt die private Sicherung, Speicherstandmigration 4 → 5, unveränderte Historie und erfolgreiche Übernahme in den lokalen Dienst. `reports/project-access-live-heads.json` prüft alle aktuellen Modellköpfe über den tatsächlich installierten Host.
-- `reports/verification.json` und die zugehörigen Logs dokumentieren den tatsächlich ausgeführten Testlauf.
-- `reports/benchmark.json` enthält Laufzeiten, Rechnerdaten, Buildhash, Stichprobenzahlen und Messgrenzen.
-- `reports/browser.json`, `viewer.png` und `viewer-candidate.png` stammen aus einem ausgeführten Chromium-Ablauf.
-- `reports/mcp-workflow.json` und `mcp-model.step` belegen den vollständigen Werkzeugablauf mit null Browserinteraktionen. Dies ist kein erfundener LLM-/Zielhosttest.
-- `reports/llm-eval.json` belegt zehn tatsächliche Modellturns im installierten Codex-Host für den aktuellen Build: Nut, Durchmesser, Mehrdeutigkeit, einzelne Instanz, vorhandene lokale Feldkorrektur, Tasche im gedrehten Bauteil, räumliche Auswahl eines Kreismustervorkommens und Auflösung gleichnamiger Gehäuse über die Baugruppenstruktur und eine Feature-begrenzt berechtigte Änderung an einem fremden Projekt sowie Prüfung und tatsächlichen STL-/GLB-Export eines unveränderten importierten Netzkörpers. Der Grader prüft gespeicherte Geometrie und Werkzeugaufrufe. Alle 164 Werkzeugaufrufe dieses Laufs waren CAD-Aufrufe. `reports/llm-eval-project-access.json` erhält den vorherigen Neun-Aufgaben-Lauf mit 150 CAD-Aufrufen. `reports/llm-eval-output-contracts.json` erhält den davor ausgeführten Acht-Aufgaben-Lauf mit strikten Antwortverträgen. `reports/llm-eval-preview.json` erhält den früheren Lauf mit lokalen Vorschauursprüngen und dessen eigenen Buildhashes. `reports/llm-eval-structure.json` erhält den früheren Acht-Aufgaben-Nachweis vor der Vorschaukorrektur. `reports/llm-eval-circular-patterns.json` erhält den früheren Sieben-Aufgaben-Nachweis. `reports/llm-eval-compiled-fields.json` erhält den früheren Sechs-Aufgaben-Nachweis mit dessen eigenen Buildhashes; `reports/llm-eval-initial.json` dokumentiert den anfänglichen Konfigurationsfehler.
-- `reports/codex-host.json` und `codex-host-model.step` belegen den ausgeführten Modellierablauf im tatsächlich installierten Codex-App-Server. Der Test startet keinen Modellturn und ersetzt keine LLM-Reasoning-Abnahme.
-- `reports/rebuild-existing-plan.json` und `rebuild-existing-applied.json` dokumentieren die letzte Geometrieaktualisierung mit unveränderten Konstruktionen, Messvergleich, Prüfdigests und erhaltenen alten Revisionen. Weitere Geometrieaktualisierungen erhalten ebenfalls alle alten Revisionen.
-- `reports/deployment-output-contracts.json` dokumentiert die damalige Übernahme der versionierten Werkzeugantworten und Einzelprüfnachweise: zwölf Modell-Neuberechnungen mit identischer Konstruktion, bestandener Host-Transporttest, 14 geprüfte aktuelle Modellköpfe und unveränderte 171 alte Revisionen, 79 Prüfnachweise, 171 Jobergebnisse sowie 241 Blobdateien. `reports/output-legacy-compatibility.json` belegt die Leseprüfung der vorhandenen Nachweise und älteren Exportjobs.
-- `reports/deployment-structure.json` dokumentiert die vorherige Übernahme von Hierarchie, lokalen Rahmen und präziseren Vorschaukoordinaten: elf geprüfte Modell-Rebuilds, 144 unveränderte alte Revisionsdatensätze und unveränderte alte Blobdateien.
-- `reports/storage-migration.json` belegt die tatsächliche Umstellung des laufenden Speichers von Version 3 auf 4: alle neun zuvor vorhandenen Modellköpfe, 91 Revisionsdatensätze und 118 Blobinhalte blieben unverändert. Die neue Hostprüfung folgt danach gesondert.
-- `reports/demo/report.json` und `reports/demo/model.step` stammen aus der ausgeführten 20-µm-Detailkorrektur.
-- `reports/npm-audit.json`, `python-audit.json`, `license-inventory.json` und die SBOM-Dateien einschließlich nativer OpenVDB-Abhängigkeiten dokumentieren die geprüften Abhängigkeiten.
+- `reports/verification.json` documents the last executed gate run (type check, tests,
+  native geometry, MCP workflow, build, Chromium) with the registry and implementation hashes
+  it belongs to.
+- `reports/benchmark.json` contains run times, machine data, build hash, sample counts and
+  measurement limits.
+- `reports/browser.json` comes from an executed Chromium workflow.
+- `reports/mcp-workflow.json` proves the complete tool workflow with zero browser
+  interactions.
+- `reports/demo/report.json` comes from the executed 20 µm detail correction.
+- `reports/npm-audit.json`, `python-audit.json`, `license-check.json`,
+  `license-inventory.json` and the SBOM files document the checked dependencies.
 
-## Definition of Done
+Machine-specific acceptance runs (model rebuilds after build changes, migrations of a live
+store, screenshots and logs) are produced by the gate scripts but not versioned; every
+rebuild keeps all old revisions readable.
 
-Das LLM steuert die Werkzeuge; der lokale CAD-Dienst berechnet ihre mathematischen Baupläne deterministisch, erhält unveränderliche Revisionen und erzwingt ihre registrierten Prüfgates. **Die vollständige Definition of Done aus Abschnitt 28 des Bauplans ist noch nicht erreicht.** Die lokale Codex-Anbindung und zehn tatsächliche LLM-Sprachaufträge sind geprüft. Das ersetzt keine breite allgemeine LLM- oder Remote-OAuth-Abnahme; darüber hinaus bleiben die oben genannten Erweiterungen des Gesamtkatalogs offen. `release:check` darf deshalb keine Produktionsfreigabe melden.
+## Definition of done
 
-Es wurde keine öffentliche Veröffentlichung, kein externer Modellversand und keine Maschinenanbindung ausgeführt.
+The agent drives the tools; the local CAD service computes their mathematical constructions
+deterministically, keeps immutable revisions and enforces its registered check gates. **The
+complete definition of done from section 28 of the blueprint is not reached yet.** Local
+transports and the complete workflow are verified; that does not replace a broad general LLM
+evaluation or a remote OAuth acceptance, and the extensions listed above remain open.
+`release:check` therefore must not report production readiness.
 
-Projektfreigaben und ihre Grenzen sind in [project-access.md](project-access.md) beschrieben. Grants werden ausschließlich mit synthetischen Akteuren getestet; bestehende reale Modelle erhalten durch die Migration keine Mitglieder.
-
-Die neue Mesh-Prüfung mit `watertight_solid`, ihren Grenzen und tatsächlichen Export-Roundtrips ist in [mesh-quality.md](mesh-quality.md) beschrieben. Die Änderungen sind nach vollständiger lokaler Abnahme in den laufenden Dienst übernommen.
+No public deployment, no external model shipment and no machine connection has been carried
+out. Project sharing and its limits are described in [project-access.md](project-access.md);
+grants are tested only with synthetic actors. Mesh validation with `watertight_solid`, its
+limits and real export round trips are described in [mesh-quality.md](mesh-quality.md).

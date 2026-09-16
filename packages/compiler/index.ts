@@ -70,6 +70,7 @@ const ANALYTIC_DERIVATIVES = new Set([
   "cylinder",
   "cone",
   "torus",
+  "strip",
   "extrude",
   "revolve",
   "point",
@@ -187,6 +188,7 @@ export const OPERATORS = {
     [0, 0],
   ),
   profile: one({}, [0, 0]),
+  strip: one({ width: length, height: length }, [0, 0]),
   circle: one({ radius: length, ...position }, [0, 0]),
   bezier: one({}, [0, 0]),
   bspline: one({}, [0, 0]),
@@ -310,7 +312,7 @@ export const OPERATORS = {
   extract_isosurface: one({}, [1, 1], "mesh", "implicit"),
 } as const;
 export const LIMITS = {
-  features: 256,
+  features: 512,
   ast_nodes: 4096,
   ast_depth: 32,
   instances: 10000,
@@ -752,6 +754,39 @@ export function compile(input: unknown) {
         "GEOMETRY_INVALID",
         "Nutbreite überschreitet den Innenradius.",
       );
+    if (f.construction.operator === "strip") {
+      const c = f.construction;
+      const pts = [
+        ...c.paths.flat(),
+        ...(c.pads ?? []).map((pad) => pad.center),
+      ].map((pt) => pt.map(Number));
+      requireThat(
+        pts.every((pt) => Math.abs(pt[2] - pts[0][2]) <= 1e-9),
+        "GEOMETRY_INVALID",
+        "Streifenpfade und Pads müssen in einer gemeinsamen z-Ebene liegen.",
+      );
+      requireThat(
+        c.paths.every((path) =>
+          path.every(
+            (pt, i) =>
+              i === 0 ||
+              Math.hypot(
+                Number(pt[0]) - Number(path[i - 1][0]),
+                Number(pt[1]) - Number(path[i - 1][1]),
+              ) > 1e-9,
+          ),
+        ),
+        "GEOMETRY_INVALID",
+        "Streifenpfade enthalten ein Segment ohne Länge.",
+      );
+      requireThat(
+        (c.pads ?? []).every(
+          (pad) => Number(pad.width) > 0 && Number(pad.depth) > 0,
+        ),
+        "GEOMETRY_INVALID",
+        "Streifenpads benötigen positive Breite und Tiefe.",
+      );
+    }
     let occurrences = Math.max(
       1,
       f.depends_on.reduce((sum, dep) => sum + expanded.get(dep)!, 0),
@@ -1269,6 +1304,7 @@ const DIMENSION_SOURCES: Record<string, Record<string, [string, number][]>> = {
   },
   sphere: { radius: [["radius", 1]] },
   cylinder: { radius: [["radius", 1]], height: [["height", 1]] },
+  strip: { height: [["height", 1]] },
   groove: {
     depth: [["depth", 1]],
     width: [["width", 1]],

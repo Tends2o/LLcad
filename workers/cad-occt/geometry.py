@@ -5,6 +5,7 @@ from OCP.gp import gp_Pnt, gp_Vec, gp_Dir, gp_Ax1, gp_Ax2, gp_Trsf, gp_Circ
 from OCP.BRepPrimAPI import BRepPrimAPI_MakeBox, BRepPrimAPI_MakeSphere, BRepPrimAPI_MakeCylinder, BRepPrimAPI_MakeCone, BRepPrimAPI_MakeTorus, BRepPrimAPI_MakePrism, BRepPrimAPI_MakeRevol
 from OCP.BRepBuilderAPI import BRepBuilderAPI_MakePolygon, BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeFace, BRepBuilderAPI_Transform
 from OCP.BRepAlgoAPI import BRepAlgoAPI_Fuse, BRepAlgoAPI_Cut, BRepAlgoAPI_Common
+from OCP.ShapeUpgrade import ShapeUpgrade_UnifySameDomain
 from OCP.BRepCheck import BRepCheck_Analyzer
 from OCP.BRepGProp import BRepGProp
 from OCP.GProp import GProp_GProps
@@ -161,6 +162,52 @@ def spline_basis(definition,count):
         k.SetValue(i,float(knot));m.SetValue(i,multiplicity)
     return k,m,b['degree']
 
+def strip_solid(c, width, height):
+    """Strip (thick polyline): one rectangle per path segment, a round joint of radius width/2 at
+    every path vertex and optional rectangular pads, fused in their common z plane and extruded
+    along +z by height. The fused region must be one connected face; loops are allowed."""
+    require(width > 0 and height > 0, 'Streifen benötigt positive Breite und Höhe.')
+    r = width / 2
+    faces = []
+    z = float(c['paths'][0][0][2])
+    def quad(points):
+        # Counter-clockwise order gives every face the +z normal; only equally oriented
+        # coplanar faces are merged by UnifySameDomain after the fuse.
+        signed = sum(x1 * y2 - x2 * y1 for (x1, y1), (x2, y2) in zip(points, points[1:] + points[:1]))
+        if signed < 0: points = points[::-1]
+        poly = BRepBuilderAPI_MakePolygon()
+        for x, y in points: poly.Add(gp_Pnt(x, y, z))
+        poly.Close(); require(poly.IsDone(), 'Streifenrechteck ist degeneriert.')
+        return BRepBuilderAPI_MakeFace(poly.Wire()).Face()
+    for path in c['paths']:
+        points = [(float(pt[0]), float(pt[1])) for pt in path]
+        for (x1, y1), (x2, y2) in zip(points, points[1:]):
+            dx, dy = x2 - x1, y2 - y1; length = math.hypot(dx, dy)
+            require(length > 1e-9, 'Streifensegment ohne Länge.')
+            nx, ny = -dy / length * r, dx / length * r
+            faces.append(quad([(x1 + nx, y1 + ny), (x2 + nx, y2 + ny), (x2 - nx, y2 - ny), (x1 - nx, y1 - ny)]))
+        for x, y in points:
+            circle = BRepBuilderAPI_MakeEdge(gp_Circ(gp_Ax2(gp_Pnt(x, y, z), gp_Dir(0, 0, 1)), r)).Edge()
+            faces.append(BRepBuilderAPI_MakeFace(BRepBuilderAPI_MakeWire(circle).Wire()).Face())
+    for pad in c.get('pads', []):
+        x, y = float(pad['center'][0]), float(pad['center'][1]); w, d = float(pad['width']) / 2, float(pad['depth']) / 2
+        require(w > 0 and d > 0, 'Streifenpad ohne Fläche.')
+        faces.append(quad([(x - w, y - d), (x + w, y - d), (x + w, y + d), (x - w, y + d)]))
+    region = faces[0]
+    if len(faces) > 1:
+        arguments, tools = TopTools_ListOfShape(), TopTools_ListOfShape()
+        arguments.Append(faces[0])
+        for face in faces[1:]: tools.Append(face)
+        fuse = BRepAlgoAPI_Fuse(); fuse.SetArguments(arguments); fuse.SetTools(tools); fuse.SetRunParallel(False); fuse.Build()
+        require(fuse.IsDone(), 'Streifenvereinigung fehlgeschlagen.')
+        unify = ShapeUpgrade_UnifySameDomain(fuse.Shape(), True, True, False); unify.Build()
+        region = unify.Shape()
+    parts = list(explore(region, TopAbs_FACE))
+    require(len(parts) == 1, 'Streifen zerfällt in %d getrennte Flächen; Pfade und Pads müssen zusammenhängen.' % len(parts))
+    prism = BRepPrimAPI_MakePrism(TopoDS.Face_s(parts[0]), gp_Vec(0, 0, height))
+    require(prism.IsDone(), 'Streifenextrusion fehlgeschlagen.')
+    return prism.Shape()
+
 def make_feature(f, deps):
     p, c = f['values'], f['construction']; op=c['operator']
     from advanced import TRACKED, build
@@ -176,6 +223,7 @@ def make_feature(f, deps):
         poly=BRepBuilderAPI_MakePolygon()
         for point in c['points']: poly.Add(gp_Pnt(*map(float,point)))
         poly.Close();require(poly.IsDone(),'Profil ist degeneriert.');return poly.Wire()
+    if op=='strip': return strip_solid(c, p['width'], p['height'])
     if op=='circle': return BRepBuilderAPI_MakeWire(BRepBuilderAPI_MakeEdge(gp_Circ(gp_Ax2(origin,gp_Dir(0,0,1)),p['radius'])).Edge()).Wire()
     if op in ('bezier','bspline'):
         pts=TColgp_Array1OfPnt(1,len(c['points']))
@@ -233,7 +281,7 @@ def dimensions(f, shape, deps):
     b=bounds(shape)
     if op=='box': result.update(width=b[3]-b[0],depth=b[4]-b[1],height=b[5]-b[2])
     if op in ('sphere','cylinder'):result['radius']=(b[3]-b[0])/2
-    if op=='cylinder':result['height']=b[5]-b[2]
+    if op in ('cylinder','strip'):result['height']=b[5]-b[2]
     if op in ('hole','groove','pocket'):
         removed=boolean('difference',deps[0],shape);rb=bounds(removed)
         require(rb,'Keine messbare Schnittregion.')

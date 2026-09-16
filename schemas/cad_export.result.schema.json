@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "anyOf": [
     {
       "anyOf": [
@@ -7,19 +7,19 @@
           "type": "object",
           "properties": {
             "result_schema_version": {
-              "$ref": "#/definitions/__schema0"
+              "$ref": "#/$defs/__schema0"
             },
             "status": {
               "type": "string",
               "const": "queued"
             },
             "trace_id": {
-              "$ref": "#/definitions/__schema1"
+              "$ref": "#/$defs/__schema1"
             },
             "model_id": {
               "anyOf": [
                 {
-                  "$ref": "#/definitions/__schema1"
+                  "$ref": "#/$defs/__schema1"
                 },
                 {
                   "type": "null"
@@ -27,15 +27,15 @@
               ]
             },
             "revision": {
-              "$ref": "#/definitions/__schema2"
+              "$ref": "#/$defs/__schema2"
             },
             "candidate_revision": {
-              "$ref": "#/definitions/__schema3"
+              "$ref": "#/$defs/__schema3"
             },
             "transaction_id": {
               "anyOf": [
                 {
-                  "$ref": "#/definitions/__schema1"
+                  "$ref": "#/$defs/__schema1"
                 },
                 {
                   "type": "null"
@@ -43,28 +43,28 @@
               ]
             },
             "job_id": {
-              "$ref": "#/definitions/__schema1"
+              "$ref": "#/$defs/__schema1"
             },
             "measurements": {
-              "$ref": "#/definitions/__schema4"
+              "$ref": "#/$defs/__schema4"
             },
             "checks": {
-              "$ref": "#/definitions/__schema5"
+              "$ref": "#/$defs/__schema5"
             },
             "warnings": {
-              "$ref": "#/definitions/__schema6"
+              "$ref": "#/$defs/__schema6"
             },
             "errors": {
-              "$ref": "#/definitions/__schema8"
+              "$ref": "#/$defs/__schema8"
             },
             "assumptions": {
-              "$ref": "#/definitions/__schema6"
+              "$ref": "#/$defs/__schema6"
             },
             "artifacts": {
-              "$ref": "#/definitions/__schema12"
+              "$ref": "#/$defs/__schema12"
             },
             "recommended_next_actions": {
-              "$ref": "#/definitions/__schema6"
+              "$ref": "#/$defs/__schema6"
             },
             "committed": {
               "type": "boolean",
@@ -95,69 +95,69 @@
           "type": "object",
           "properties": {
             "result_schema_version": {
-              "$ref": "#/definitions/__schema0"
+              "$ref": "#/$defs/__schema0"
             },
             "status": {
               "type": "string",
               "const": "succeeded"
             },
             "trace_id": {
-              "$ref": "#/definitions/__schema1"
+              "$ref": "#/$defs/__schema1"
             },
             "model_id": {
-              "$ref": "#/definitions/__schema17"
+              "$ref": "#/$defs/__schema17"
             },
             "revision": {
-              "$ref": "#/definitions/__schema2"
+              "$ref": "#/$defs/__schema2"
             },
             "candidate_revision": {
-              "$ref": "#/definitions/__schema3"
+              "$ref": "#/$defs/__schema3"
             },
             "transaction_id": {
-              "$ref": "#/definitions/__schema18"
+              "$ref": "#/$defs/__schema18"
             },
             "job_id": {
-              "$ref": "#/definitions/__schema19"
+              "$ref": "#/$defs/__schema19"
             },
             "measurements": {
-              "$ref": "#/definitions/__schema4"
+              "$ref": "#/$defs/__schema4"
             },
             "checks": {
-              "$ref": "#/definitions/__schema5"
+              "$ref": "#/$defs/__schema5"
             },
             "warnings": {
-              "$ref": "#/definitions/__schema6"
+              "$ref": "#/$defs/__schema6"
             },
             "errors": {
-              "$ref": "#/definitions/__schema8"
+              "$ref": "#/$defs/__schema8"
             },
             "assumptions": {
-              "$ref": "#/definitions/__schema6"
+              "$ref": "#/$defs/__schema6"
             },
             "artifacts": {
               "minItems": 1,
               "type": "array",
               "items": {
-                "$ref": "#/definitions/__schema13"
+                "$ref": "#/$defs/__schema13"
               }
             },
             "recommended_next_actions": {
-              "$ref": "#/definitions/__schema6"
+              "$ref": "#/$defs/__schema6"
             },
             "package_manifest": {
               "type": "object",
               "properties": {
                 "artifact_id": {
-                  "$ref": "#/definitions/__schema1"
+                  "$ref": "#/$defs/__schema1"
                 },
                 "uri": {
-                  "$ref": "#/definitions/__schema14"
+                  "$ref": "#/$defs/__schema14"
                 },
                 "download": {
-                  "$ref": "#/definitions/__schema15"
+                  "$ref": "#/$defs/__schema15"
                 },
                 "hash": {
-                  "$ref": "#/definitions/__schema16"
+                  "$ref": "#/$defs/__schema16"
                 }
               },
               "required": [
@@ -195,54 +195,54 @@
       "type": "object",
       "properties": {
         "result_schema_version": {
-          "$ref": "#/definitions/__schema0"
+          "$ref": "#/$defs/__schema0"
         },
         "status": {
           "type": "string",
           "const": "failed"
         },
         "trace_id": {
-          "$ref": "#/definitions/__schema1"
+          "$ref": "#/$defs/__schema1"
         },
         "model_id": {
-          "$ref": "#/definitions/__schema17"
+          "$ref": "#/$defs/__schema17"
         },
         "revision": {
-          "$ref": "#/definitions/__schema2"
+          "$ref": "#/$defs/__schema2"
         },
         "candidate_revision": {
-          "$ref": "#/definitions/__schema3"
+          "$ref": "#/$defs/__schema3"
         },
         "transaction_id": {
-          "$ref": "#/definitions/__schema18"
+          "$ref": "#/$defs/__schema18"
         },
         "job_id": {
-          "$ref": "#/definitions/__schema19"
+          "$ref": "#/$defs/__schema19"
         },
         "measurements": {
-          "$ref": "#/definitions/__schema4"
+          "$ref": "#/$defs/__schema4"
         },
         "checks": {
-          "$ref": "#/definitions/__schema5"
+          "$ref": "#/$defs/__schema5"
         },
         "warnings": {
-          "$ref": "#/definitions/__schema6"
+          "$ref": "#/$defs/__schema6"
         },
         "errors": {
           "minItems": 1,
           "type": "array",
           "items": {
-            "$ref": "#/definitions/__schema9"
+            "$ref": "#/$defs/__schema9"
           }
         },
         "assumptions": {
-          "$ref": "#/definitions/__schema6"
+          "$ref": "#/$defs/__schema6"
         },
         "artifacts": {
-          "$ref": "#/definitions/__schema12"
+          "$ref": "#/$defs/__schema12"
         },
         "recommended_next_actions": {
-          "$ref": "#/definitions/__schema6"
+          "$ref": "#/$defs/__schema6"
         },
         "committed": {
           "type": "boolean",
@@ -270,7 +270,7 @@
       "additionalProperties": false
     }
   ],
-  "definitions": {
+  "$defs": {
     "__schema0": {
       "type": "string",
       "const": "1"
@@ -290,14 +290,13 @@
     },
     "__schema5": {
       "type": "array",
-      "items": [],
-      "additionalItems": false,
+      "items": false,
       "maxItems": 0
     },
     "__schema6": {
       "type": "array",
       "items": {
-        "$ref": "#/definitions/__schema7"
+        "$ref": "#/$defs/__schema7"
       }
     },
     "__schema7": {
@@ -306,7 +305,7 @@
     "__schema8": {
       "type": "array",
       "items": {
-        "$ref": "#/definitions/__schema9"
+        "$ref": "#/$defs/__schema9"
       }
     },
     "__schema9": {
@@ -314,17 +313,13 @@
       "properties": {
         "code": {
           "minLength": 1,
-          "allOf": [
-            {
-              "$ref": "#/definitions/__schema7"
-            }
-          ]
+          "$ref": "#/$defs/__schema7"
         },
         "message": {
-          "$ref": "#/definitions/__schema7"
+          "$ref": "#/$defs/__schema7"
         },
         "details": {
-          "$ref": "#/definitions/__schema10"
+          "$ref": "#/$defs/__schema10"
         }
       },
       "required": [
@@ -337,10 +332,10 @@
     "__schema10": {
       "type": "object",
       "propertyNames": {
-        "$ref": "#/definitions/__schema7"
+        "$ref": "#/$defs/__schema7"
       },
       "additionalProperties": {
-        "$ref": "#/definitions/__schema11"
+        "$ref": "#/$defs/__schema11"
       }
     },
     "__schema11": {
@@ -360,7 +355,7 @@
         {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/__schema11"
+            "$ref": "#/$defs/__schema11"
           }
         },
         {
@@ -369,7 +364,7 @@
             "type": "string"
           },
           "additionalProperties": {
-            "$ref": "#/definitions/__schema11"
+            "$ref": "#/$defs/__schema11"
           }
         }
       ]
@@ -377,26 +372,26 @@
     "__schema12": {
       "type": "array",
       "items": {
-        "$ref": "#/definitions/__schema13"
+        "$ref": "#/$defs/__schema13"
       }
     },
     "__schema13": {
       "type": "object",
       "properties": {
         "artifact_id": {
-          "$ref": "#/definitions/__schema1"
+          "$ref": "#/$defs/__schema1"
         },
         "uri": {
-          "$ref": "#/definitions/__schema14"
+          "$ref": "#/$defs/__schema14"
         },
         "download": {
-          "$ref": "#/definitions/__schema15"
+          "$ref": "#/$defs/__schema15"
         },
         "hash": {
-          "$ref": "#/definitions/__schema16"
+          "$ref": "#/$defs/__schema16"
         },
         "mime": {
-          "$ref": "#/definitions/__schema7"
+          "$ref": "#/$defs/__schema7"
         },
         "size": {
           "type": "integer",
@@ -404,7 +399,7 @@
           "maximum": 9007199254740991
         },
         "manifest": {
-          "$ref": "#/definitions/__schema10"
+          "$ref": "#/$defs/__schema10"
         }
       },
       "required": [
@@ -420,27 +415,15 @@
     },
     "__schema14": {
       "pattern": "^cad:\\/\\/artifacts\\/[a-zA-Z0-9_-]+\\/manifest$",
-      "allOf": [
-        {
-          "$ref": "#/definitions/__schema7"
-        }
-      ]
+      "$ref": "#/$defs/__schema7"
     },
     "__schema15": {
       "pattern": "^\\/api\\/artifacts\\/[a-zA-Z0-9_-]+$",
-      "allOf": [
-        {
-          "$ref": "#/definitions/__schema7"
-        }
-      ]
+      "$ref": "#/$defs/__schema7"
     },
     "__schema16": {
       "pattern": "^[a-f0-9]{64}$",
-      "allOf": [
-        {
-          "$ref": "#/definitions/__schema7"
-        }
-      ]
+      "$ref": "#/$defs/__schema7"
     },
     "__schema17": {
       "type": "null"

@@ -143,6 +143,7 @@ export function validate(
       box: ["width", "depth", "height"],
       sphere: ["radius"],
       cylinder: ["radius", "height"],
+      strip: ["height"],
       groove: ["depth", "width"],
       hole: ["radius", "depth"],
       pocket: ["width", "length", "depth"],

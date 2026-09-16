@@ -1,9 +1,0 @@
-
-> mathforge-3d@0.1.0 build
-> python3 scripts/build-native.py && tsc && esbuild packages/viewer/app.ts --bundle --format=esm --minify --outfile=public/app.js
-
-Pinned native mesh checker is current.
-
-  public/app.js  577.0kb
-
-⚡ Done in 51ms

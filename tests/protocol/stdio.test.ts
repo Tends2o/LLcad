@@ -24,6 +24,7 @@ test("local MCP starts without an HTTP service, browser login or token prompt an
             ),
           ),
           MATHFORGE_DATA: directory,
+          MATHFORGE_VIEWER_PORT: "0",
         },
         stderr: "pipe",
       });
@@ -37,8 +38,29 @@ test("local MCP starts without an HTTP service, browser login or token prompt an
           client.getInstructions() ?? "",
           /never require the user to click/i,
         );
-        assert.equal((await client.listTools()).tools.length, 23);
+        assert.equal((await client.listTools()).tools.length, 25);
         if (pass === 0) {
+          // The viewer is optional and starts on demand on the loopback interface.
+          const opened = (
+            await client.callTool({
+              name: "cad_viewer_open",
+              arguments: { launch_browser: false },
+            })
+          ).structuredContent as any;
+          assert.equal(opened.status, "ok");
+          assert.equal(opened.transport, "stdio");
+          assert.equal(opened.running, true);
+          assert.match(opened.url, /^http:\/\/127\.0\.0\.1:\d+\/#code=/);
+          const health = await fetch(new URL("/healthz", opened.url));
+          assert.equal(health.status, 200);
+          const closed = (
+            await client.callTool({ name: "cad_viewer_close", arguments: {} })
+          ).structuredContent as any;
+          assert.equal(closed.running, false);
+          const gone = await fetch(new URL("/healthz", opened.url)).catch(
+            () => null,
+          );
+          assert.equal(gone, null, "the viewer listener is closed");
           const created = await client.callTool({
             name: "cad_create_model",
             arguments: {

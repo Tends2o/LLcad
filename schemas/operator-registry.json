@@ -1,5 +1,5 @@
 {
-  "hash": "eb4a00f528e505fe50a343f094d0065a77b34664aef2d23672ece69b3e33c10d",
+  "hash": "1bcc9fc834d3838db3418f5190391e50208031d8d731d6142403710012f09d0c",
   "operators": {
     "point": {
       "version": 1,
@@ -1028,6 +1028,66 @@
       "contract": {
         "effect_region": "entire_new_feature",
         "derivatives": "expression_finite_difference_only",
+        "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
+        "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
+        "resource_model": {
+          "time_budget_seconds": 45,
+          "memory_mib": 1536,
+          "output_bytes": 33554432,
+          "triangles": 500000,
+          "active_cells": 250000
+        },
+        "determinism": "deterministic_given_registry_hash_and_kernel_version",
+        "cancellation": "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+        "error_codes": [
+          "INVALID_SCHEMA",
+          "UNIT_MISMATCH",
+          "GEOMETRY_INVALID",
+          "PRECISION_UNSUPPORTED",
+          "BUDGET_EXCEEDED",
+          "OUT_OF_SCOPE",
+          "KERNEL_FAILURE",
+          "CANCELLED"
+        ],
+        "tests": [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts"
+        ],
+        "authorization": "model:edit_scope_of_the_candidate_transaction",
+        "quality_after_evaluation": "preview_only_until_validated_within_profile"
+      }
+    },
+    "strip": {
+      "version": 1,
+      "params": {
+        "width": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        },
+        "height": {
+          "dimension": "length",
+          "min": 0.00001,
+          "max": 100000
+        }
+      },
+      "refs": [
+        0,
+        0
+      ],
+      "output": "brep",
+      "inputs": "brep",
+      "required_validators": [
+        "structure",
+        "finite",
+        "geometry",
+        "constraints"
+      ],
+      "engine": "OCCT-7.9.3.1.1",
+      "contract": {
+        "effect_region": "entire_new_feature",
+        "derivatives": "registered_analytic_dimension_derivatives",
         "invalidation": "feature_hash_change_invalidates_all_transitive_dependents",
         "preconditions": "typed_parameter_ranges_dependency_arity_and_representation_match",
         "resource_model": {

@@ -33,6 +33,21 @@ class NativeGeometryTests(unittest.TestCase):
         base=make('box',{'width':40,'depth':40,'height':3,'x':-20,'y':-20})
         f=feature('groove',{'radius':10,'width':1.2,'depth':.82,'z':3});f['base_operator']='box'
         result=make_feature(f,[base]);d=dimensions(f,result,[base]);self.assertAlmostEqual(d['depth'],.82,places=7);self.assertAlmostEqual(d['width'],1.2,places=7);self.assertAlmostEqual(d['remaining_wall'],2.18,places=7)
+    def test_strip_union_with_round_joints_and_pads(self):
+        extra={'paths':[[['0','0','2'],['10','0','2']],[['5','-3','2'],['5','3','2']]],'pads':[{'center':['0','0','2'],'width':'2','depth':'2'}]}
+        s=make('strip',{'width':1,'height':0.5},extra=extra)
+        props=properties(s);self.assertTrue(props['valid']);self.assertEqual(props['solids'],1)
+        # Fläche: Streifen 10×1 und 6×1 minus Überlappung 1×1, vier Halbkreise r 0,5 außerhalb der Rechtecke,
+        # Pad 2×2 abzüglich des überdeckten Streifenstücks (1×1) und des schon gezählten Halbkreises
+        area=15+4*math.pi*0.125+(4-1-math.pi*0.125)
+        self.assertAlmostEqual(props['volume'],area*0.5,places=6)
+        b=bounds(s);self.assertAlmostEqual(b[2],2);self.assertAlmostEqual(b[5],2.5)
+        d=dimensions(feature('strip',{'width':1,'height':0.5},extra),s,[]);self.assertAlmostEqual(d['height'],0.5,places=9)
+        loop=make('strip',{'width':0.4,'height':0.1},extra={'paths':[[['0','0','0'],['5','0','0'],['5','5','0'],['0','5','0'],['0','0','0']]]})
+        # Vier Rechtecke 5×0,4 mit 0,2×0,2 Eckenüberlappung, je Ecke ein Viertelkreis r 0,2 außen; innen bleibt ein Loch
+        self.assertEqual(properties(loop)['solids'],1);self.assertAlmostEqual(properties(loop)['volume'],0.1*(4*5*0.4-4*0.04+math.pi*0.04),places=6)
+        with self.assertRaises(GeometryError):
+            make('strip',{'width':1,'height':0.5},extra={'paths':[[['0','0','0'],['4','0','0']],[['0','5','0'],['4','5','0']]]})
     def test_fillet_chamfer_shell(self):
         base=make('box',{'width':10,'depth':10,'height':10})
         for op,p,c in [('fillet',{'radius':1},{'edge_selector':'vertical'}),('chamfer',{'distance':1},{'edge_selector':'vertical'}),('shell',{'thickness':1},{'opening':'top'})]:

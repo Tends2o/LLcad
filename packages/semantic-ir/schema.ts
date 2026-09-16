@@ -214,6 +214,20 @@ export const Construction = z.discriminatedUnion("operator", [
     operator: z.literal("profile"),
     points: z.array(Point).min(3).max(256),
   }),
+  z.strictObject({
+    operator: z.literal("strip"),
+    paths: z.array(z.array(Point).min(2).max(256)).min(1).max(64),
+    pads: z
+      .array(
+        z.strictObject({
+          center: Point,
+          width: DecimalString,
+          depth: DecimalString,
+        }),
+      )
+      .max(256)
+      .optional(),
+  }),
   z.strictObject({ operator: z.literal("circle") }),
   z.strictObject({
     operator: z.enum(["bezier", "bspline"]),
@@ -515,7 +529,7 @@ export const ModelIR = z.strictObject({
   schema_version: z.literal("1"),
   unit: z.literal("mm"),
   structure: ModelStructure.optional(),
-  features: z.array(Feature).max(256),
+  features: z.array(Feature).max(512),
   outputs: z.array(Id).max(128),
   constraints: z.array(Constraint).max(256).default([]),
   assumptions: z.array(z.string().max(1000)).max(64).default([]),
@@ -840,6 +854,11 @@ export const ToolSchemas = {
     job_id: Id,
     idempotency_key: z.string().min(16).max(128),
   }),
+  cad_viewer_open: z.strictObject({
+    launch_browser: z.boolean().default(true),
+    model_id: Id.optional(),
+  }),
+  cad_viewer_close: z.strictObject({}),
 };
 export type ToolName = keyof typeof ToolSchemas;
 /** MCP requires an explicit object root even for unions of object modes. */

@@ -43,6 +43,65 @@ export const CORPUS: {
   expect: Expectation;
 }[] = [
   {
+    name: "strip with crossing paths, round joints and a pad is one solid",
+    class: "strip_union_connected",
+    ir: model(
+      [
+        feature(
+          "trace",
+          "strip",
+          { width: q("1"), height: q("0.5") },
+          [],
+          {
+            paths: [
+              [
+                ["0", "0", "2"],
+                ["10", "0", "2"],
+              ],
+              [
+                ["5", "-3", "2"],
+                ["5", "3", "2"],
+              ],
+            ],
+            pads: [{ center: ["0", "0", "2"], width: "2", depth: "2" }],
+          },
+        ),
+      ],
+      ["trace"],
+    ),
+    expect: {
+      outcome: "validated",
+      facts: (f) =>
+        f.trace.valid &&
+        f.trace.solids === 1 &&
+        Math.abs(f.trace.volume - (18 + (3 * Math.PI) / 8) * 0.5) < 1e-6 &&
+        Math.abs(f.trace.dimensions.height - 0.5) < 1e-9,
+      roundtrip: true,
+    },
+  },
+  {
+    name: "strip whose paths do not touch is refused",
+    class: "strip_union_disconnected",
+    ir: model(
+      [
+        feature("trace", "strip", { width: q("1"), height: q("0.5") }, [], {
+          paths: [
+            [
+              ["0", "0", "0"],
+              ["4", "0", "0"],
+            ],
+            [
+              ["0", "5", "0"],
+              ["4", "5", "0"],
+            ],
+          ],
+        }),
+      ],
+      ["trace"],
+    ),
+    expect: { outcome: "error", code: "GEOMETRY_INVALID" },
+  },
+  {
     name: "coplanar cut leaves a valid solid",
     class: "tangential_coplanar_intersection",
     ir: model(

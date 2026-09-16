@@ -14,9 +14,27 @@ import { AccessPayload } from "../semantic-ir/access.js";
 import { assertResult } from "../model-service/result-contracts.js";
 import { DownloadTokens } from "../policy/downloads.js";
 import { gzipSync } from "node:zlib";
+import { randomBytes } from "node:crypto";
 export function createApp(service: ModelService, config: AuthConfig) {
   const app = express(),
     auth = new Auth(config);
+  // Single-use login codes let cad_viewer_open hand the browser a ready session
+  // without exposing the long-lived local key in tool results or URLs.
+  const bootstrapCodes = new Map<string, number>();
+  const issueBootstrapCode = () => {
+    const now = Date.now();
+    for (const [code, expires] of bootstrapCodes)
+      if (expires < now) bootstrapCodes.delete(code);
+    const code = randomBytes(24).toString("base64url");
+    bootstrapCodes.set(code, now + 300000);
+    return code;
+  };
+  const redeemBootstrapCode = (code: unknown) => {
+    if (typeof code !== "string" || !bootstrapCodes.has(code)) return false;
+    const expires = bootstrapCodes.get(code)!;
+    bootstrapCodes.delete(code);
+    return expires >= Date.now();
+  };
   const approvals = new ApprovalVerifier(
     config.dataRoot,
     new URL("/api/policy/approvals", config.publicURL).toString(),
@@ -124,8 +142,9 @@ export function createApp(service: ModelService, config: AuthConfig) {
   app.post("/api/session", (req, res) => {
     requireThat(
       config.mode === "local" &&
-        typeof req.body?.token === "string" &&
-        auth.checkLocal(req.body.token),
+        ((typeof req.body?.token === "string" &&
+          auth.checkLocal(req.body.token)) ||
+          redeemBootstrapCode(req.body?.code)),
       "AUTH_REQUIRED",
       "Zugangsschlüssel ungültig.",
     );
@@ -150,7 +169,7 @@ export function createApp(service: ModelService, config: AuthConfig) {
         (!version && req.body?.method === "initialize")
       ) {
         await legacy(service, res.locals.principal, req, res);
-      } else modern(service, res.locals.principal, req, res);
+      } else await modern(service, res.locals.principal, req, res);
     } catch (error) {
       next(error);
     }
@@ -158,11 +177,19 @@ export function createApp(service: ModelService, config: AuthConfig) {
   app.all("/mcp", authenticate, (_req, res) =>
     res.status(405).set("Allow", "POST").end(),
   );
-  app.post("/api/tools/:name", authenticate, rate, (req, res) =>
-    res.json(
-      service.call(res.locals.principal, req.params.name as ToolName, req.body),
-    ),
-  );
+  app.post("/api/tools/:name", authenticate, rate, async (req, res, next) => {
+    try {
+      res.json(
+        await service.call(
+          res.locals.principal,
+          req.params.name as ToolName,
+          req.body,
+        ),
+      );
+    } catch (error) {
+      next(error);
+    }
+  });
   app.get("/api/policy/requests/:id", authenticate, rate, (req, res) => {
     const row = service.store.get(
       "SELECT model FROM approval_requests WHERE id=?",
@@ -321,5 +348,5 @@ export function createApp(service: ModelService, config: AuthConfig) {
         : { error: safeError(error) },
     );
   });
-  return { app, auth };
+  return { app, auth, issueBootstrapCode };
 }

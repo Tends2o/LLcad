@@ -2,6 +2,7 @@ import { resolve } from "node:path";
 import { ModelService } from "../model-service/index.js";
 import { createApp } from "./app.js";
 import { requireThat } from "../semantic-ir/errors.js";
+import { SharedViewer } from "./viewer-host.js";
 const port = Number(process.env.PORT ?? 4310),
   mode = process.env.MATHFORGE_AUTH === "oauth" ? "oauth" : "local";
 const host = process.env.HOST ?? "127.0.0.1";
@@ -20,11 +21,12 @@ const config = {
   jwksURL: process.env.MATHFORGE_JWKS_URL,
   audience: process.env.MATHFORGE_AUDIENCE,
 } as const;
-const { app } = createApp(service, config);
+const { app, issueBootstrapCode } = createApp(service, config);
+service.viewer = new SharedViewer(config.publicURL, issueBootstrapCode);
 const server = app.listen(port, host, () => {
   console.log(`MathForge 3D: ${config.publicURL}`);
   if (mode === "local")
-    console.log(`Lokaler Zugangsschlüssel: ${dataRoot}/local-token`);
+    console.log(`Local access key: ${dataRoot}/local-token`);
 });
 let stopping = false;
 async function stop() {

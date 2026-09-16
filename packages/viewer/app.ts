@@ -8,22 +8,22 @@ const text = (id: string, value: string) => {
 };
 const key = () => crypto.randomUUID();
 const labels: Record<string, string> = {
-  width: "Breite",
-  depth: "Tiefe",
-  height: "Höhe",
+  width: "Width",
+  depth: "Depth",
+  height: "Height",
   radius: "Radius",
-  major_radius: "Ringradius",
-  minor_radius: "Rohradius",
+  major_radius: "Major radius",
+  minor_radius: "Minor radius",
   x: "Position X",
   y: "Position Y",
   z: "Position Z",
-  count: "Anzahl",
-  dx: "Abstand X",
-  dy: "Abstand Y",
-  dz: "Abstand Z",
-  remaining_wall: "Restwand (lokal)",
-  volume: "Volumen",
-  area: "Oberfläche",
+  count: "Count",
+  dx: "Spacing X",
+  dy: "Spacing Y",
+  dz: "Spacing Z",
+  remaining_wall: "Remaining wall (local)",
+  volume: "Volume",
+  area: "Surface area",
 };
 let current: any = null,
   selected: any = null,
@@ -47,14 +47,14 @@ async function api(path: string, options: RequestInit = {}) {
   });
   if (response.status === 401) {
     showLogin();
-    throw new Error("Bitte anmelden.");
+    throw new Error("Please sign in.");
   }
   const result = await response.json();
   if (!response.ok || result.status === "failed")
     throw new Error(
       result.errors?.map((e: any) => `${e.code}: ${e.message}`).join("; ") ||
         result.error?.message ||
-        "Anfrage fehlgeschlagen.",
+        "Request failed.",
     );
   return result;
 }
@@ -98,12 +98,12 @@ async function job(response: any) {
       throw new Error(
         result.error
           ? `${result.error.code}: ${result.error.message}`
-          : "Job abgebrochen.",
+          : "Job cancelled.",
       );
     await new Promise((r) => setTimeout(r, delay));
     delay = Math.min(700, delay + 30);
   }
-  throw new Error("Job läuft weiter. Status kann erneut abgerufen werden.");
+  throw new Error("The job is still running; poll its status again.");
 }
 function activity(title: string, detail: string) {
   text("activity-title", title);
@@ -203,11 +203,110 @@ let wireframe = false,
   exploded = false,
   meshData: any = null,
   beforeData: any = null;
-type OverlayMode = "lit" | "unlit" | "normals" | "curvature";
-let overlayMode: OverlayMode = "lit",
+type OverlayMode = "parts" | "lit" | "unlit" | "normals" | "curvature";
+const OVERLAY_MODES: OverlayMode[] = [
+  "parts",
+  "lit",
+  "unlit",
+  "normals",
+  "curvature",
+];
+let overlayMode: OverlayMode = "parts",
   lodTarget = 0.02,
   currentMmPerPixel = 0.1,
   lastScalePx = -1;
+/** Part colours (Bauplan 19.3): parts with the same name share one colour, so identical
+ *  components read alike. A role after " · " (e.g. "Resistor 0603 · gate") is ignored for
+ *  grouping. Colours come from a fixed palette by name hash, resolved collision-free per model. */
+const PART_PALETTE = [
+  "#5b8def",
+  "#e08a3c",
+  "#5aa469",
+  "#d15b5b",
+  "#8b6bc4",
+  "#3fb0a8",
+  "#b28457",
+  "#e07aa8",
+  "#9aa53a",
+  "#4f7fa8",
+  "#d9a93a",
+  "#6d6d6d",
+  "#c2c95a",
+  "#a85a4a",
+  "#3ea3d1",
+  "#c9a27e",
+  "#7a9bd6",
+  "#f0a26b",
+  "#8cc48f",
+  "#e28b8b",
+  "#b19ad9",
+  "#79cbc5",
+  "#cba98a",
+  "#f0a3c5",
+  "#bfc86a",
+  "#7fa0c6",
+  "#efc76b",
+  "#9a9a9a",
+  "#dade8a",
+  "#c88a7d",
+  "#7cc0e0",
+  "#ddc3a5",
+];
+const partNames = new Map<string, string>();
+const groupColours = new Map<string, string>();
+const groupKey = (name: string) => name.split(" · ")[0].trim() || name;
+/** Material colours by name prefix: copper layers and plated vias of a PCB read as metal
+ *  instead of taking an arbitrary palette slot. */
+const FIXED_COLOURS: [RegExp, string][] = [
+  [/^Kupferlage Oberseite/i, "#c9793a"],
+  [/^Kupferlage Unterseite/i, "#8d5a2e"],
+  [/^Durchkontaktierung/i, "#b9bcc0"],
+];
+function assignGroupColours() {
+  groupColours.clear();
+  const keys = [...new Set([...partNames.values()].map(groupKey))].sort(
+    (a, b) => a.localeCompare(b, "de"),
+  );
+  const used = new Set<number>();
+  for (const k of keys) {
+    const fixed = FIXED_COLOURS.find(([re]) => re.test(k));
+    if (fixed) {
+      groupColours.set(k, fixed[1]);
+      continue;
+    }
+    let hash = 7;
+    for (const ch of k) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+    let i = hash % PART_PALETTE.length;
+    while (used.has(i) && used.size < PART_PALETTE.length)
+      i = (i + 1) % PART_PALETTE.length;
+    used.add(i);
+    groupColours.set(k, PART_PALETTE[i]);
+  }
+}
+function partColour(featureID: string | undefined): string {
+  const part = current?.features?.find(
+    (f: any) => f.id === featureID,
+  )?.owner_part;
+  const name = part ? partNames.get(part) : undefined;
+  return (name && groupColours.get(groupKey(name))) || "#91a58b";
+}
+function renderLegend() {
+  const legend = el("legend");
+  legend.replaceChildren();
+  legend.hidden = overlayMode !== "parts" || groupColours.size === 0;
+  const counts = new Map<string, number>();
+  for (const name of partNames.values())
+    counts.set(groupKey(name), (counts.get(groupKey(name)) ?? 0) + 1);
+  for (const [k, colour] of groupColours) {
+    const row = document.createElement("span");
+    row.className = "legend-entry";
+    const swatch = document.createElement("i");
+    swatch.style.background = colour;
+    const n = counts.get(k) ?? 1;
+    row.append(swatch, n > 1 ? `${k} (${n} parts)` : k);
+    legend.append(row);
+  }
+}
 const regionGroup = new THREE.Group(),
   markerGroup = new THREE.Group();
 scene.add(regionGroup, markerGroup);
@@ -300,11 +399,11 @@ renderer.domElement.addEventListener("pointerup", (event) => {
     drawMarkers();
     el("measurement").hidden = false;
     if (measurementPoints.length === 1)
-      text("measurement", "Zweiten Oberflächenpunkt auswählen …");
+      text("measurement", "Select the second surface point …");
     else
       text(
         "measurement",
-        `${measurementPoints[0].distanceTo(measurementPoints[1]).toFixed(4)} mm · Abstand auf der Vorschau`,
+        `${measurementPoints[0].distanceTo(measurementPoints[1]).toFixed(4)} mm · distance on the preview`,
       );
   } else if (hit.object.userData.feature_id) {
     const face = hit.object.userData.face_ranges?.find(
@@ -325,7 +424,7 @@ renderer.domElement.addEventListener("pointerup", (event) => {
     );
     if (feature?.depends_on.length)
       toast(
-        "Für eine eindeutige Detailauswahl das Merkmal im Konstruktionsbaum wählen.",
+        "For an unambiguous selection pick the feature in the construction tree.",
       );
     else
       void action(async () => selectFeature(hit.object.userData.feature_id))();
@@ -357,6 +456,13 @@ function materialFor(
     wireframe,
     clippingPlanes: section ? [clipping] : [],
   };
+  if (!ghost && overlayMode === "parts")
+    return new THREE.MeshStandardMaterial({
+      color: new THREE.Color(partColour(m.feature_id)),
+      roughness: 0.48,
+      metalness: 0.18,
+      ...common,
+    });
   if (ghost || overlayMode === "lit")
     return new THREE.MeshStandardMaterial({
       color: ghost ? 0x769281 : candidate ? 0xd38a63 : 0x91a58b,
@@ -431,14 +537,14 @@ function draw(data: any, group = mainGroup, ghost = false) {
     el("empty-state").hidden = true;
     text(
       "triangle-count",
-      `${data.meshes.reduce((n: number, m: any) => n + m.triangles.length, 0).toLocaleString("de-DE")} Dreiecke${data.clip ? " · Ausschnitt" : ""}`,
+      `${data.meshes.reduce((n: number, m: any) => n + m.triangles.length, 0).toLocaleString("en-US")} triangles${data.clip ? " · excerpt" : ""}`,
     );
     const r = data.resolution;
     text(
       "resolution",
       r
-        ? `Vorschau · Auflösung ≤ ${r.absolute_resolution_mm.toPrecision(2)} mm · kleinstes aufgelöstes Merkmal ≈ ${r.minimum_feature_resolved_mm.toPrecision(2)} mm · kein Flächennachweis`
-        : `Vorschau · angeforderte Abweichung ${data.meshes[0]?.deflection?.toPrecision(3) ?? "?"} mm · kein Flächennachweis`,
+        ? `Preview · resolution ≤ ${r.absolute_resolution_mm.toPrecision(2)} mm · smallest resolved feature ≈ ${r.minimum_feature_resolved_mm.toPrecision(2)} mm · no surface proof`
+        : `Preview · requested deviation ${data.meshes[0]?.deflection?.toPrecision(3) ?? "?"} mm · no surface proof`,
     );
   }
 }
@@ -518,12 +624,12 @@ function drawRegions() {
       lines.position.copy(center);
       regionGroup.add(lines);
       notes.push(
-        `⌑ Schutzregion (Box im Rahmen ${selected.local_frame}): ${(max[0] - min[0]).toPrecision(3)} × ${(max[1] - min[1]).toPrecision(3)} × ${(max[2] - min[2]).toPrecision(3)} mm`,
+        `⌑ Protected region (box in frame ${selected.local_frame}): ${(max[0] - min[0]).toPrecision(3)} × ${(max[1] - min[1]).toPrecision(3)} × ${(max[2] - min[2]).toPrecision(3)} mm`,
       );
     } else if (c.kind === "change_region") {
       if (c.local_frame && c.local_frame !== selected.local_frame) {
         notes.push(
-          `◌ Änderungsregion in anderem Rahmen (${c.local_frame}), nicht eingezeichnet`,
+          `◌ Change region in another frame (${c.local_frame}), not drawn`,
         );
         continue;
       }
@@ -540,7 +646,7 @@ function drawRegions() {
       sphere.position.copy(toWorld(c.center.map(Number)));
       regionGroup.add(sphere);
       notes.push(
-        `◌ Änderungsregion: Kugel r = ${radius.toPrecision(3)} mm${c.compute_margin ? ` · Rechenrand ${Number(c.compute_margin).toPrecision(3)} mm` : ""}`,
+        `◌ Change region: sphere r = ${radius.toPrecision(3)} mm${c.compute_margin ? ` · compute margin ${Number(c.compute_margin).toPrecision(3)} mm` : ""}`,
       );
     }
   }
@@ -590,7 +696,7 @@ el("ortho").onclick = () => {
   el("ortho").classList.toggle("active", activeCamera === orthoCamera);
   text(
     "view-label",
-    activeCamera === orthoCamera ? "ORTHOGRAFISCH · Z ↑" : "PERSPEKTIVE · Z ↑",
+    activeCamera === orthoCamera ? "ORTHOGRAPHIC · Z ↑" : "PERSPECTIVE · Z ↑",
   );
   resize();
 };
@@ -622,7 +728,7 @@ el("measure").onclick = () => {
   clearGroup(markerGroup);
   el("measure").classList.toggle("active", measuring);
   el("measurement").hidden = !measuring;
-  text("measurement", "Zwei Punkte auf der Oberfläche auswählen.");
+  text("measurement", "Select two points on the surface.");
 };
 /** Pixel-size LOD (Bauplan 19.4): the target deflection follows the current screen resolution and,
  *  for models larger than the view, only the region around the view target is refined. */
@@ -643,7 +749,7 @@ async function lodRender() {
           radius: Math.max(visible, 1e-3).toFixed(3),
         }
       : undefined;
-  busy(`Vorschau wird auf ${lodTarget.toPrecision(2)} mm verfeinert …`);
+  busy(`Refining the preview to ${lodTarget.toPrecision(2)} mm …`);
   try {
     await preview(displayRevision, undefined, false, {
       adaptive: true,
@@ -653,23 +759,38 @@ async function lodRender() {
     busy("", false);
   }
   activity(
-    "Pixel-LOD",
-    `Zielabweichung ${lodTarget.toPrecision(2)} mm aus ${currentMmPerPixel.toPrecision(2)} mm/px${region ? " · Ausschnitt um den Blickpunkt" : ""} · kein Flächennachweis.`,
+    "Pixel LOD",
+    `Target deviation ${lodTarget.toPrecision(2)} mm from ${currentMmPerPixel.toPrecision(2)} mm/px${region ? " · excerpt around the view centre" : ""} · no surface proof.`,
   );
 }
 el("lod").onclick = action(lodRender);
 el<HTMLSelectElement>("overlay").onchange = action(async () => {
   overlayMode = el<HTMLSelectElement>("overlay").value as OverlayMode;
+  try {
+    localStorage.setItem("mathforge.overlay", overlayMode);
+  } catch {
+    // Browserspeicher blockiert: die Wahl gilt nur für diese Sitzung.
+  }
+  renderLegend();
   const hasCurvature = meshData?.meshes.some((m: any) =>
     m.face_ranges?.some((r: any) => r.curvature_max_per_mm != null),
   );
   if (overlayMode === "curvature" && meshData && !hasCurvature) {
     toast(
-      "Der Krümmungskanal zeigt die native Flächenkrümmung der adaptiven Vorschau; sie wird jetzt berechnet.",
+      "The curvature channel shows the native face curvature of the adaptive preview; it is being computed now.",
     );
     await lodRender();
   } else redraw();
 });
+try {
+  const stored = localStorage.getItem(
+    "mathforge.overlay",
+  ) as OverlayMode | null;
+  if (stored && OVERLAY_MODES.includes(stored)) overlayMode = stored;
+} catch {
+  // Browserspeicher blockiert: Standardkanal bleibt "Bauteile".
+}
+el<HTMLSelectElement>("overlay").value = overlayMode;
 el("explode").onclick = () => {
   exploded = !exploded;
   el("explode").classList.toggle("active", exploded);
@@ -678,7 +799,7 @@ el("explode").onclick = () => {
   });
   if (mainGroup.children.length < 2)
     toast(
-      "Dieses Modell besitzt ein Ausgabeobjekt. Mehrere Ausgabeteile lassen sich auseinanderziehen.",
+      "This model has a single output object; only several output parts can be exploded.",
     );
 };
 async function preview(
@@ -710,7 +831,7 @@ async function preview(
   const a = result.artifacts.find(
     (a: any) => a.manifest.filename === "preview.json",
   );
-  if (!a) throw new Error("Vorschauartefakt fehlt.");
+  if (!a) throw new Error("Preview artifact missing.");
   const data = await api(a.download);
   draw(data, ghost ? beforeGroup : mainGroup, ghost);
 }
@@ -722,7 +843,7 @@ function resetCandidate() {
   el("discard").hidden = true;
   for (const step of ["candidate", "validation", "commit"])
     el("step-" + step).classList.remove("done");
-  text("validation-summary", "Noch keine ausstehende Änderung.");
+  text("validation-summary", "No pending change.");
   clearGroup(beforeGroup);
   beforeData = null;
 }
@@ -744,7 +865,7 @@ async function selectPart(part: any) {
     part.definition.outputs?.[0] ??
     current?.features.find((f: any) => f.owner_part === part.entity_id)?.id;
   if (first) await selectFeature(first);
-  else toast("Dieses Teil besitzt noch keine Merkmale.");
+  else toast("This part has no features yet.");
 }
 /** Part and assembly tree from cad_structure (Bauplan 19.2). */
 async function structureTree() {
@@ -770,9 +891,13 @@ async function structureTree() {
     fetchAll("assembly"),
     fetchAll("part"),
   ]);
+  partNames.clear();
+  for (const p of parts) partNames.set(p.entity_id, p.semantic_name);
+  assignGroupColours();
+  renderLegend();
   text(
     "structure-count",
-    `${assemblies.length} Baugruppen · ${parts.length} Teile`,
+    `${assemblies.length} assemblies · ${parts.length} parts`,
   );
   const children = new Map<string | undefined, any[]>();
   for (const a of assemblies) {
@@ -786,7 +911,7 @@ async function structureTree() {
       const summary = document.createElement("summary");
       summary.textContent = a.semantic_name;
       const small = document.createElement("small");
-      small.textContent = `${a.part_count} Teile · ${a.definition.local_frame}`;
+      small.textContent = `${a.part_count} parts · ${a.definition.local_frame}`;
       summary.append(small);
       details.append(summary, ...render(a.entity_id, depth + 1));
       return details;
@@ -799,17 +924,17 @@ async function structureTree() {
         button.dataset.part = p.entity_id;
         button.textContent = p.semantic_name;
         const small = document.createElement("small");
-        small.textContent = `${p.definition.authoritative_representation} · ${p.feature_count} Merkmale`;
+        small.textContent = `${p.definition.authoritative_representation} · ${p.feature_count} features`;
         button.append(small);
         button.onclick = action(async () => selectPart(p));
         return button;
       }),
   ];
   container.append(...render(undefined, 0));
-  if (!container.children.length) container.textContent = "Keine Struktur.";
+  if (!container.children.length) container.textContent = "No structure.";
 }
 async function openModel(modelID: string, fitView = true) {
-  busy("Modell und Geometrie werden geladen …");
+  busy("Loading model and geometry …");
   try {
     current = await tool("cad_get_model", { model_id: modelID, limit: 64 });
     displayRevision = current.revision;
@@ -817,11 +942,11 @@ async function openModel(modelID: string, fitView = true) {
     resetCandidate();
     text("model-title", current.name);
     text("breadcrumb-model", current.name);
-    text("model-meta", `${current.feature_count} Merkmale · Millimeter`);
+    text("model-meta", `${current.feature_count} features · millimetres`);
     text(
       "quality",
       current.quality === "checks_passed_within_profile"
-        ? "Geprüfte Revision"
+        ? "Verified revision"
         : "Entwurf",
     );
     el("quality").classList.toggle(
@@ -882,7 +1007,7 @@ async function openModel(modelID: string, fitView = true) {
       );
     } else clearGroup(mainGroup);
     await models();
-    activity("Revision geladen", current.revision);
+    activity("Revision loaded", current.revision);
   } finally {
     busy("", false);
   }
@@ -904,7 +1029,7 @@ async function selectFeature(
   text(
     "anchor",
     a
-      ? `Anker: (${a.point_mm.map((v: number) => v.toFixed(3)).join(", ")}) mm · Fläche ${a.face_id.slice(0, 13)} · Rahmen ${a.local_frame}${a.barycentric ? ` · baryzentrisch (${a.barycentric.map((v: number) => v.toFixed(2)).join(", ")})` : ""}${a.view_relative?.facing_camera != null ? (a.view_relative.facing_camera ? " · der Kamera zugewandt" : " · von der Kamera abgewandt") : ""}`
+      ? `Anchor: (${a.point_mm.map((v: number) => v.toFixed(3)).join(", ")}) mm · face ${a.face_id.slice(0, 13)} · frame ${a.local_frame}${a.barycentric ? ` · baryzentrisch (${a.barycentric.map((v: number) => v.toFixed(2)).join(", ")})` : ""}${a.view_relative?.facing_camera != null ? (a.view_relative.facing_camera ? " · facing the camera" : " · facing away from the camera") : ""}`
       : "",
   );
   featureID = selected.selected_entities[0];
@@ -924,9 +1049,9 @@ async function selectFeature(
   text(
     "detail-purpose",
     selected.selected_face
-      ? `Fläche: ${selected.selected_face.origins.map((o: any) => o.role).join(", ")} · ${selected.selected_face.area.toLocaleString("de-DE", { maximumFractionDigits: 3 })} mm² · Herkunft geprüft`
+      ? `Face: ${selected.selected_face.origins.map((o: any) => o.role).join(", ")} · ${selected.selected_face.area.toLocaleString("en-US", { maximumFractionDigits: 3 })} mm² · provenance verified`
       : (selected.purpose?.value ??
-          `${selected.construction_summary.operator} · ${selected.local_frame} · stabile Feature-ID`),
+          `${selected.construction_summary.operator} · ${selected.local_frame} · stable feature ID`),
   );
   el("detail-body").hidden = false;
   el("parameters").replaceChildren();
@@ -961,7 +1086,7 @@ async function selectFeature(
     caption.textContent = labels[name] ?? name;
     const v = document.createElement("strong");
     v.textContent =
-      Number(value).toLocaleString("de-DE", { maximumFractionDigits: 5 }) +
+      Number(value).toLocaleString("en-US", { maximumFractionDigits: 5 }) +
       (name === "volume" ? " mm³" : " mm");
     row.append(caption, v);
     el("measurements").append(row);
@@ -973,11 +1098,11 @@ async function selectFeature(
           selected.protected_constraints
             .map((c: any) =>
               c.kind === "protected_parameter"
-                ? `${labels[c.parameter] ?? c.parameter} geschützt`
+                ? `${labels[c.parameter] ?? c.parameter} protected`
                 : c.kind === "minimum"
-                  ? `Restwand ≥ ${c.target.value} mm`
+                  ? `Remaining wall ≥ ${c.target.value} mm`
                   : c.kind === "protected_region"
-                    ? "Fernregion geschützt"
+                    ? "Remote region protected"
                     : c.id,
             )
             .join(" · ")
@@ -990,7 +1115,7 @@ el<HTMLSelectElement>("model-select").onchange = action(async () =>
 );
 el("isolate").onclick = action(async () => {
   if (!selected) return;
-  busy("Merkmal wird isoliert …");
+  busy("Isolating the feature …");
   await preview(displayRevision!, selected.selected_entities[0]);
   fit();
   busy("", false);
@@ -1006,16 +1131,16 @@ async function readyDraft(draft: any) {
   el("discard").hidden = false;
   text(
     "validation-summary",
-    "Kandidat berechnet. Pflichtprüfungen stehen aus.",
+    "Candidate computed; mandatory checks pending.",
   );
-  text("quality", "Kandidat · ungeprüft");
+  text("quality", "Candidate · unchecked");
   el("quality").classList.add("preview");
   await preview(current.revision, undefined, true);
   await preview(displayRevision!);
   if (selected) await selectFeature(selected.selected_entities[0]);
   activity(
-    "Kandidat bereit",
-    "Orange: Kandidat · transparente Überlagerung: Basisrevision.",
+    "Candidate ready",
+    "Orange: candidate · transparent overlay: base revision.",
   );
 }
 el("stage-edit").onclick = action(async () => {
@@ -1038,10 +1163,10 @@ el("stage-edit").onclick = action(async () => {
       });
   }
   if (!operations.length) {
-    toast("Ändere zuerst einen freigegebenen Parameter.");
+    toast("Change an editable parameter first.");
     return;
   }
-  busy("Lokale Änderung wird berechnet …");
+  busy("Computing the local change …");
   const binding = {
     model_id: current.model_id,
     base_revision: current.revision,
@@ -1056,7 +1181,7 @@ el("stage-edit").onclick = action(async () => {
 });
 el("validate").onclick = action(async () => {
   if (!candidate) return;
-  busy("Maße, Geometrie und Schutzregeln werden geprüft …");
+  busy("Checking dimensions, geometry and protections …");
   const result = await job(
     await tool("cad_validate", {
       model_id: current.model_id,
@@ -1071,12 +1196,12 @@ el("validate").onclick = action(async () => {
     el<HTMLButtonElement>("commit").disabled = false;
     text(
       "validation-summary",
-      `${result.check_count ?? result.checks.length} Pflichtprüfungen bestanden. Der Kandidat kann übernommen werden.`,
+      `${result.check_count ?? result.checks.length} mandatory checks passed; the candidate can be committed.`,
     );
   } else {
     text(
       "validation-summary",
-      "Prüfung fehlgeschlagen: " +
+      "Validation failed: " +
         result.checks.map((c: any) => c.check_id).join(", "),
     );
     el<HTMLButtonElement>("commit").disabled = true;
@@ -1085,7 +1210,7 @@ el("validate").onclick = action(async () => {
 });
 el("commit").onclick = action(async () => {
   if (!validation || !candidate) return;
-  busy("Geprüfte Revision wird übernommen …");
+  busy("Committing the verified revision …");
   const result = await tool("cad_commit", {
     model_id: current.model_id,
     base_revision: candidate.base_revision,
@@ -1096,10 +1221,10 @@ el("commit").onclick = action(async () => {
   await openModel(current.model_id, false);
   el("step-commit").classList.add("done");
   activity(
-    "Änderung übernommen",
-    `Neue Revision ${result.revision.slice(0, 16)} · Nachweise im Modell gespeichert.`,
+    "Change committed",
+    `New revision ${result.revision.slice(0, 16)} · evidence stored in the model.`,
   );
-  toast("Die geprüfte Änderung wurde übernommen.");
+  toast("The verified change has been committed.");
   busy("", false);
 });
 el("discard").onclick = action(async () => {
@@ -1139,15 +1264,15 @@ el("new-form").addEventListener("submit", (event) => {
   })();
 });
 async function loadExample(name: string) {
-  busy("Beispielmodell wird konstruiert …");
+  busy("Building the example model …");
   const ir = await api("/api/examples/" + name);
   const title =
     {
-      housing: "Dichtungsgehäuse",
-      organic: "Impliziter Körper",
-      assembly: "Stiftreihe",
-    }[name] ?? "Beispiel";
-  const m = await create(title, "Mathematisches Referenzmodell", ir.profile);
+      housing: "Seal housing",
+      organic: "Implicit body",
+      assembly: "Pin row",
+    }[name] ?? "Example";
+  const m = await create(title, "Mathematical reference model", ir.profile);
   const uploaded = await api("/api/uploads", {
     method: "POST",
     headers: { "Content-Type": "application/octet-stream" },
@@ -1171,7 +1296,7 @@ async function loadExample(name: string) {
     }),
   );
   if (v.status !== "checks_passed_within_profile")
-    throw new Error("Beispielprüfung fehlgeschlagen.");
+    throw new Error("Example validation failed.");
   await tool("cad_commit", {
     model_id: m.model_id,
     base_revision: m.revision,
@@ -1214,7 +1339,7 @@ el("add-feature").onclick = () => {
     return;
   }
   if (candidate) {
-    toast("Übernimm oder verwirf zuerst den offenen Kandidaten.");
+    toast("Commit or discard the open candidate first.");
     return;
   }
   primitiveForm();
@@ -1237,7 +1362,7 @@ el("primitive-form").addEventListener("submit", (event) => {
       );
     const fid = "feat-" + key();
     el<HTMLDialogElement>("primitive-dialog").close();
-    busy("Grundkörper wird konstruiert …");
+    busy("Building the primitive …");
     await readyDraft(
       await tool("cad_apply_patch", {
         model_id: current.model_id,
@@ -1266,7 +1391,7 @@ el("primitive-form").addEventListener("submit", (event) => {
 });
 el("export").onclick = action(async () => {
   if (!current) return;
-  busy("Export und erneute Geometrieprüfung …");
+  busy("Exporting and re-checking the geometry …");
   const result = await job(
     await tool("cad_export", {
       model_id: current.model_id,
@@ -1302,8 +1427,8 @@ el("export").onclick = action(async () => {
   }
   busy("", false);
   activity(
-    "Export geprüft",
-    "Datei, Maßeinheiten und Roundtrip-Bericht sind verfügbar.",
+    "Export verified",
+    "File, units and round-trip report are available.",
   );
 });
 el<HTMLInputElement>("upload").onchange = action(async () => {
@@ -1312,12 +1437,12 @@ el<HTMLInputElement>("upload").onchange = action(async () => {
   if (!current || current.feature_count)
     await create(
       file.name,
-      "Importierte Geometrie",
+      "Imported geometry",
       file.name.toLowerCase().endsWith(".stl")
         ? "render_surface"
         : "precision_cad",
     );
-  busy("Datei wird isoliert importiert …");
+  busy("Importing the file in isolation …");
   const uploaded = await api("/api/uploads", {
     method: "POST",
     headers: { "Content-Type": "application/octet-stream" },
@@ -1350,15 +1475,40 @@ void action(async () => {
   authMode = config.auth_mode;
   text(
     "connection",
-    authMode === "local" ? "● Lokal · privat" : "● OAuth · privat",
+    authMode === "local" ? "● Local · private" : "● OAuth · private",
   );
   if (authMode === "oauth") {
     el("login-form").querySelector("p")!.textContent =
-      "Gib ein gültiges Zugriffstoken deines Identitätsanbieters ein. Das Token bleibt nur für diesen Tab im Arbeitsspeicher.";
+      "Enter a valid access token from your identity provider. It stays in memory for this tab only.";
+  }
+  // cad_viewer_open hands over a single-use login code and optionally a model in the
+  // URL fragment; the fragment never reaches the server log and is removed at once.
+  const handover = new URLSearchParams(location.hash.replace(/^#/, ""));
+  const code = handover.get("code"),
+    preselect = handover.get("model");
+  if (code || preselect)
+    history.replaceState(null, "", location.pathname + location.search);
+  if (code && authMode === "local") {
+    try {
+      await api("/api/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+    } catch {
+      /* an expired code falls back to the login dialog below */
+    }
   }
   try {
     await initialize();
   } catch {
     showLogin();
+    return;
   }
+  if (preselect)
+    try {
+      await openModel(preselect);
+    } catch {
+      /* unknown or foreign model: keep the first model open */
+    }
 })();

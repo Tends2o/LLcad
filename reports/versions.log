@@ -1,5 +1,0 @@
-
-> mathforge-3d@0.1.0 versions:check
-> tsx scripts/versions.ts
-
-Runtime, npm-, Python- und native Paketversionen stimmen mit ihren Locks überein.

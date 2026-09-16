@@ -49,7 +49,7 @@ function decoded(value: string | undefined) {
     ? value
     : undefined;
 }
-export function modern(
+export async function modern(
   service: ModelService,
   p: Principal,
   req: Request,
@@ -132,7 +132,11 @@ export function modern(
         if (typeof params.name !== "string")
           return error(400, -32602, "Tool name required");
         result = toolResult(
-          service.call(p, params.name as ToolName, params.arguments ?? {}),
+          await service.call(
+            p,
+            params.name as ToolName,
+            params.arguments ?? {},
+          ),
         );
         break;
       case "resources/list":

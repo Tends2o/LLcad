@@ -8,6 +8,7 @@ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/
 import { setup, principal, importFixture } from "../helpers.js";
 import { sphere } from "../../scripts/fixtures.js";
 import { createApp } from "../../packages/mcp-gateway/app.js";
+import { SharedViewer } from "../../packages/mcp-gateway/viewer-host.js";
 const TOKEN = "protocol-test-" + "x".repeat(32);
 async function server() {
   const env = setup();
@@ -17,7 +18,7 @@ async function server() {
   const port = (probe.address() as any).port;
   await new Promise<void>((r) => probe.close(() => r()));
   const url = `http://127.0.0.1:${port}`;
-  const { app } = createApp(env.service, {
+  const { app, issueBootstrapCode } = createApp(env.service, {
     mode: "local",
     publicURL: url,
     dataRoot: env.dir,
@@ -27,6 +28,7 @@ async function server() {
   return {
     ...env,
     url,
+    issueBootstrapCode,
     async stop() {
       http.closeAllConnections();
       await new Promise<void>((r) => http.close(() => r()));
@@ -88,7 +90,7 @@ test("2026 discovery, tools, metadata, header mismatch, unknown version and unkn
     );
     response = await rpc(env.url, "tools/list");
     json = await response.json();
-    assert.equal(json.result.tools.length, 23);
+    assert.equal(json.result.tools.length, 25);
     assert.equal(
       json.result.tools.find((t: any) => t.name === "cad_render").annotations
         .readOnlyHint,
@@ -138,7 +140,7 @@ test("official legacy SDK initialization, tool schemas and structured result", a
       }),
     );
     const tools = await client.listTools();
-    assert.equal(tools.tools.length, 23);
+    assert.equal(tools.tools.length, 25);
     const result = await client.callTool({
       name: "cad_capabilities",
       arguments: {},
@@ -173,7 +175,42 @@ test("official legacy SDK initialization, tool schemas and structured result", a
     await env.stop();
   }
 });
-test("HTTP negotiates supported Codex versions and offers a tested fallback", async () => {
+test("viewer tools mint a single-use login code and report the shared HTTP service", async () => {
+  const env = await server();
+  try {
+    env.service.viewer = new SharedViewer(env.url, env.issueBootstrapCode);
+    const opened = await env.service.call(principal, "cad_viewer_open", {
+      launch_browser: false,
+    });
+    assert.equal(opened.status, "ok");
+    assert.equal(opened.running, true);
+    assert.equal(opened.transport, "http");
+    assert.equal(opened.browser_launched, false);
+    const code = /code=([^&]+)/.exec(new URL(opened.url).hash)?.[1];
+    assert.ok(code);
+    const login = () =>
+      fetch(env.url + "/api/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Origin: env.url },
+        body: JSON.stringify({ code }),
+      });
+    const first = await login();
+    assert.equal(first.status, 200);
+    assert.match(first.headers.get("set-cookie") ?? "", /mathforge_session=/);
+    assert.equal((await login()).status, 401, "a code is single-use");
+    const closed = await env.service.call(principal, "cad_viewer_close", {});
+    assert.equal(closed.status, "ok");
+    assert.equal(closed.running, true);
+    const unknown = await env.service.call(principal, "cad_viewer_open", {
+      model_id: "model-does-not-exist",
+      launch_browser: false,
+    });
+    assert.equal(unknown.status, "failed");
+  } finally {
+    await env.stop();
+  }
+});
+test("HTTP negotiates supported protocol versions and offers a tested fallback", async () => {
   const env = await server();
   try {
     for (const requested of [

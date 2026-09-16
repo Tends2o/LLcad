@@ -1,11 +1,32 @@
-# LLcad
+# Working on LLcad
 
-- Die Modellierung soll vollständig über das LLM erfolgen. Nutzer beschreiben ihre Absicht im Gespräch; keine manuellen CAD-/Viewer-Klicks, Suche nach IDs oder Ausführung von Befehlen voraussetzen. Der Viewer ist optional.
-- Vorhandene Modelle über `cad_list_models` entdecken, Merkmale mit `cad_find` und `cad_inspect` eingrenzen. Reale Mehrdeutigkeit durch Werkzeugabfragen oder eine kurze inhaltliche Rückfrage klären.
-- Änderungen bleiben im Ablauf Plan → Kandidat → Prüfung → Commit. Nur echte Messwerte und serverseitige Prüfdigests verwenden. Keine Schutzbedingungen oder Toleranzen still abschwächen.
-- Native Flächenhandles sind revisionsgebunden. Nur mit ausdrücklicher Zielrevision neu binden; Split-/Merge-Fehler nicht durch eine geometrisch ähnliche Fläche umgehen.
-- Vor paralleler Umsetzung prüfen, ob ein anderer Prozess tatsächlich an LLcad arbeitet. Einen nachweislich aktiven Bearbeiter fertigarbeiten lassen; ein lediglich vorhandener oder wartender Prozess ist kein solcher Nachweis.
-- Hier läuft `llcad.service` auf Loopback; der lokale Codex-Eintrag `llcad` nutzt diesen gemeinsamen HTTP-Dienst mit automatischem Header-Helper. `deployment/start-mcp.sh` bleibt der alternative stdio-Einstieg für ein separates oder freies Datenverzeichnis. Für ein Datenverzeichnis darf genau ein Dienst laufen; vorhandene Betriebssperren respektieren. Eine globale Hostkonfiguration nicht durch Beispielwerte ersetzen.
-- Bei `build_compatibility.status=rebuild_required` zuerst `cad_rebuild` im Planmodus mit dem aktuellen Registry-Hash lesen. Eine ausdrückliche Kandidatenberechnung muss wieder geprüft und übernommen werden; alte Revisionen nicht überschreiben und Schutzbedingungen nicht lockern.
-- Nach Quellcodeänderungen `npm run verify` ausführen. Bei Änderungen an Geometrie, Cache oder Ressourcenverhalten auch `npm run benchmark`. Berichte in `reports/` müssen zum aktuellen Implementierungsstand gehören.
-- `npm run test:host` prüft den tatsächlich installierten Codex-App-Server ohne Modellturn. Vorher den Dienst auf den geprüften Build neu starten. Der Bericht `reports/codex-host.json` ist ein Host-Transportnachweis, kein LLM-Reasoning-Test. Offene LLM-/Remote-OAuth-Abnahme und die Grenzen in `docs/implementation-status.md` ausdrücklich erhalten.
+Guidance for people and coding agents that change this repository.
+
+## Using the server
+
+- Model entirely through the MCP tools. Discover existing models with `cad_list_models`, narrow
+  features with `cad_find` and `cad_inspect`, and resolve real ambiguity with further tool
+  queries or one short question. Never ask the person to click in the viewer or look up IDs.
+- Every change follows plan → candidate → validate → commit. Use only measured values and the
+  server-generated validation digest. Do not weaken tolerances or protected constraints quietly.
+- Native face handles are bound to a revision. Rebind only with an explicit target revision;
+  never substitute a geometrically similar face after a split or merge error.
+- When `cad_get_model` reports `build_compatibility.status = rebuild_required`, run `cad_rebuild`
+  in plan mode with the current registry hash first, then compute an explicit candidate,
+  validate it and commit it as a new revision. Old revisions stay untouched.
+- The viewer is optional. `cad_viewer_open` and `cad_viewer_close` start and stop it on demand.
+
+## Changing the code
+
+- Run `npm run verify` after every source change (type check, integration tests, native
+  geometry tests, MCP workflow, build, browser workflow). Changes to geometry, caching or
+  resource behaviour also need `npm run benchmark`. Reports under `reports/` must belong to
+  the current build hashes; `npm run release:check` enforces this.
+- A change to the operator registry alters the registry hash. Rebuild and re-validate
+  existing models afterwards (see `docs/api.md`, "Moving to a new build").
+- Keep `npm run schemas` output committed: JSON schemas and the operator registry are derived
+  from the Zod contracts in `packages/semantic-ir`.
+- Only one process may open a data directory at a time; stop the service before running the
+  demo, benchmarks or maintenance commands against the same directory.
+- Never execute shell, Python or JavaScript code taken from model data. Workers run in
+  Bubblewrap sandboxes without network access; do not add an unsandboxed fallback.

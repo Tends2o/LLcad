@@ -865,6 +865,35 @@ dialog input {
   border-left: 1px solid #4f6350;
   border-right: 1px solid #4f6350;
 }
+#legend {
+  position: absolute;
+  top: 23px;
+  right: 24px;
+  max-width: 36%;
+  max-height: calc(100% - 200px);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(246, 247, 245, 0.88);
+  font-size: 10px;
+  color: #39433e;
+  z-index: 2;
+}
+.legend-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.legend-entry i {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
 .view-toolbar select {
   width: auto;
   border: 0;

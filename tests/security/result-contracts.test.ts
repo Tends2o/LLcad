@@ -47,7 +47,7 @@ function intercept(
     s.dispatch = original;
   };
 }
-test("all 23 advertised output schemas match generated artifacts and reject incomplete successes", async () => {
+test("all 25 advertised output schemas match generated artifacts and reject incomplete successes", async () => {
   const env = setup();
   const validator = new AjvJsonSchemaValidator();
   try {

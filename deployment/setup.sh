@@ -11,4 +11,4 @@ python3 -m venv .venv
 npm ci
 npm run schemas
 npm run build
-printf 'MathForge ist gebaut. Start: npm start\n'
+printf "LLcad is built. Start the HTTP server with: npm start\n"

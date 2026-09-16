@@ -70,6 +70,12 @@
     },
     {
       "$ref": "cad_job_cancel.result.schema.json"
+    },
+    {
+      "$ref": "cad_viewer_open.result.schema.json"
+    },
+    {
+      "$ref": "cad_viewer_close.result.schema.json"
     }
   ]
 }

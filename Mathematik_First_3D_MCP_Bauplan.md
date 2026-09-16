@@ -134,7 +134,7 @@ In 2026-07-28 liegen Tasks in einer optionalen Erweiterung; Benachrichtigungen u
 
 **A. ChatGPT mit Remote-MCP:** Der Server ist über den unterstützten Verbindungsweg erreichbar. Private Modellberechnungen laufen hinter dem Gateway. Zugriff auf Modelle erfolgt nutzerbezogen, nicht anonym.
 
-**B. Unterstützter lokaler Work-/Codex-Host:** Derselbe Server beziehungsweise ein lokaler Adapter kann zusätzlich verfügbare Host-Hooks nutzen. Deren Verfügbarkeit muss für die konkrete Oberfläche geprüft werden. Eine Datei im Repository wirkt nicht automatisch in jedem ChatGPT-Webchat. [Q08]
+**B. Unterstützter lokaler Work-/MCP-Host:** Derselbe Server beziehungsweise ein lokaler Adapter kann zusätzlich verfügbare Host-Hooks nutzen. Deren Verfügbarkeit muss für die konkrete Oberfläche geprüft werden. Eine Datei im Repository wirkt nicht automatisch in jedem ChatGPT-Webchat. [Q08]
 
 **C. Eigene Anwendung mit LLM-API:** Die Anwendung kontrolliert Orchestrierung und Nutzeroberfläche selbst. Dieser Weg ist eine spätere Option, keine Voraussetzung des Geometriekerns. API-Aufrufe, Kosten und Datentransfers erhalten eigene Berechtigungen.
 

@@ -146,9 +146,9 @@
       "evidence": [
         "docs/compatibility-matrix.md",
         "tests/protocol/http.test.ts",
-        "scripts/codex-host.ts"
+        "tests/protocol/stdio.test.ts"
       ],
-      "notes": "Lokaler Codex und Protokolladapter geprüft. Reale Remote-HTTPS-/Zielkontoabnahme offen."
+      "notes": "Lokaler stdio-Host und Protokolladapter geprüft. Reale Remote-HTTPS-/Zielkontoabnahme offen."
     },
     {
       "id": "3.2",
@@ -160,12 +160,12 @@
       "status": "partial",
       "requirements": [
         "Remote-MCP für nutzerbezogenen Zugriff auf private Modelle bereitstellen und prüfen.",
-        "Lokale Codex-Anbindung im tatsächlich vorhandenen Host prüfen.",
+        "Lokale stdio-Anbindung in einem tatsächlichen MCP-Host prüfen.",
         "Eigene LLM-API-Anwendung als ausdrücklich spätere Option behandeln."
       ],
       "evidence": [
         "docs/compatibility-matrix.md",
-        "scripts/codex-host.ts",
+        "tests/protocol/stdio.test.ts",
         "scripts/llm-eval.ts"
       ],
       "notes": "Route B lokal vorhanden. Route A noch ohne realen IdP-/Webhostnachweis. Route C laut Original eine spätere Option."
@@ -3168,7 +3168,7 @@
         "scripts/verify.ts",
         "scripts/release.ts"
       ],
-      "notes": "Lokaler Codex und vollständiger Transaktionspfad sind geprüft. Werkzeugspezifische Ausgabeschemata und reale Remote-OAuth-Zielhostabnahme fehlen."
+      "notes": "Lokaler stdio-Transport und vollständiger Transaktionspfad sind geprüft. Werkzeugspezifische Ausgabeschemata und reale Remote-OAuth-Zielhostabnahme fehlen."
     },
     {
       "id": "phase-3",
@@ -3395,10 +3395,10 @@
       "evidence": [
         "tests/protocol/http.test.ts",
         "tests/protocol/stdio.test.ts",
-        "scripts/codex-host.ts",
+        "tests/protocol/stdio.test.ts",
         "docs/compatibility-matrix.md"
       ],
-      "notes": "Lokale Protokolle und installierter Codex sind geprüft. Eine tatsächliche externe ChatGPT-/HTTPS-/OAuth-Zielhostabnahme fehlt."
+      "notes": "Lokale Protokolle und stdio-Transport sind geprüft. Eine tatsächliche externe HTTPS-/OAuth-Zielhostabnahme fehlt."
     },
     {
       "id": "24.6",

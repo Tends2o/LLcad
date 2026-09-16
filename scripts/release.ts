@@ -12,8 +12,6 @@ const licenses = read("reports/license-check.json");
 const verification = read("reports/verification.json"),
   benchmark = read("reports/benchmark.json"),
   host = read("reports/target-host.json"),
-  localHost = read("reports/codex-host.json"),
-  llm = read("reports/llm-eval.json"),
   audit = read("reports/npm-audit.json"),
   pythonAudit = read("reports/python-audit.json");
 const blockers = [];
@@ -39,9 +37,7 @@ if (
   host.registry_hash !== REGISTRY_HASH ||
   host.implementation_hash !== IMPLEMENTATION_HASH
 )
-  blockers.push(
-    "Vollständige LLM-/Remote-Zielhostabnahme fehlt; der lokale Codex-Transporttest ist gesondert dokumentiert.",
-  );
+  blockers.push("Vollständige LLM-/Remote-Zielhostabnahme fehlt.");
 if ((audit?.metadata?.vulnerabilities?.total ?? 1) > 0)
   blockers.push("JavaScript-Schwachstellenprüfung fehlt oder enthält Befunde.");
 if (!pythonAudit || pythonAudit.dependencies?.some((d: any) => d.vulns?.length))
@@ -103,27 +99,6 @@ const manifest = {
   ],
   protocol_compatibility_tests: "reports/tests.log",
   target_host_tests: host ?? { status: "not_run" },
-  local_llm_tests: {
-    report: "reports/llm-eval.json",
-    status:
-      llm?.status === "passed" &&
-      llm.registry_hash === REGISTRY_HASH &&
-      llm.implementation_hash === IMPLEMENTATION_HASH
-        ? "passed"
-        : "missing_failed_or_stale",
-    model_turns: llm?.model_turns ?? 0,
-    scope: llm?.scope ?? null,
-  },
-  local_codex_transport_tests: {
-    report: "reports/codex-host.json",
-    status:
-      localHost?.status === "passed" &&
-      localHost.registry_hash === REGISTRY_HASH &&
-      localHost.implementation_hash === IMPLEMENTATION_HASH
-        ? "passed"
-        : "missing_or_stale",
-    model_turns: localHost?.model_turns ?? null,
-  },
   benchmark_report: "reports/benchmark.json",
   security_test_report: "reports/tests.log",
   restore_test_report: "reports/tests.log",

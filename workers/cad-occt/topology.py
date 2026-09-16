@@ -64,7 +64,7 @@ def primitive(shape, fid, operator, roles=None):
         role = next((name for name, named in (roles or {}).items() if face.IsSame(named)), None)
         if role is None and operator in ('sphere', 'torus', 'nurbs_surface'):
             role = 'surface'
-        if role is None and operator in ('cylinder', 'cone'):
+        if role is None and operator in ('cylinder', 'cone', 'strip'):
             adaptor = BRepAdaptor_Surface(TopoDS.Face_s(face))
             if adaptor.GetType() == GeomAbs_Plane:
                 fb, sb = bounds(face), bounds(shape)
@@ -72,6 +72,8 @@ def primitive(shape, fid, operator, roles=None):
                     role = 'bottom'
                 elif abs(fb[2] - sb[5]) < 1e-7 and abs(fb[5] - sb[5]) < 1e-7:
                     role = 'top'
+                elif operator == 'strip':
+                    role = 'wall'
             else:
                 role = 'wall'
         result.append({'shape': face, 'origins': [origin(fid, operator, role)] if role else []})
@@ -179,7 +181,7 @@ def evaluate_feature(f, deps, traces):
             'bottom': 'BottomFace', 'top': 'TopFace', 'x_min': 'BackFace',
             'x_max': 'FrontFace', 'y_min': 'LeftFace', 'y_max': 'RightFace'}.items()}
         return shape, primitive(shape, fid, op, roles)
-    if op in ('sphere', 'cylinder', 'cone', 'torus', 'nurbs_surface'):
+    if op in ('sphere', 'cylinder', 'cone', 'torus', 'nurbs_surface', 'strip'):
         shape = make_feature(f, deps)
         return shape, primitive(shape, fid, op)
     if op in ('union', 'difference', 'intersection'):

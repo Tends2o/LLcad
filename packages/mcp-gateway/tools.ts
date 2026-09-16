@@ -18,7 +18,7 @@ export const descriptions: Record<ToolName, string> = {
   cad_create_model:
     "Create an empty, private mathematical model. Add geometry with a candidate patch.",
   cad_get_model:
-    "Read a revision summary, feature page, quality status and geometric measurements.",
+    "Read a revision summary, feature page (id, kind, operator, dependencies, owner part, frame and the declared parameters of every feature), quality status, build compatibility and geometric measurements. Use it to read many feature parameters at once; cad_inspect adds faces, facts and hashes for one feature.",
   cad_structure:
     "Discover versioned project, assembly, part and frame summaries. Page by kind, optionally filter by entity_id or query. Includes structural definitions, their shared structure_hash, world bounds and provenance. Use cad_find with owner_part to locate that part's features. Edit structure through a normal set_structure candidate patch using the returned hash; feature ownership/frame changes use set_feature_context and the context_hash from cad_inspect.",
   cad_find:
@@ -34,11 +34,11 @@ export const descriptions: Record<ToolName, string> = {
   cad_apply_patch:
     "Build an isolated candidate from strict registered operations. Returns a durable job; does not commit.",
   cad_validate:
-    "Run all required profile checks on one candidate. Poll the job for its server-generated validation digest.",
+    "Run all required profile checks on one candidate. Returns a job; poll cad_job_get until status succeeded. The job result carries result.status (checks_passed_within_profile or failed), result.check_count, result.checks (only failed checks are listed, with check_id, measured and requested) and result.digest, the server-generated validation digest that cad_commit needs as validation_digest.",
   cad_compare:
     "Compare two exact revisions, changed features and measured dimensions.",
   cad_commit:
-    "Atomically commit the exact validated candidate and proof digest if its base is still current.",
+    "Atomically commit the exact validated candidate and proof digest if its base is still current. validation_digest is result.digest of the cad_validate job. Success answers status committed with the new revision; a stale base or mismatched digest answers status failed with errors.",
   cad_discard:
     "Discard an uncommitted candidate and cancel its remaining jobs.",
   cad_revert:
@@ -50,10 +50,14 @@ export const descriptions: Record<ToolName, string> = {
   cad_import:
     "Decode an uploaded, authorized artifact into a new candidate. Units must be explicit.",
   cad_export:
-    "Export a committed revision, re-read the file and report actual losses and roundtrip checks.",
+    "Export a committed revision, re-read the file and report actual losses and roundtrip checks. Geometry formats (step, stl, glb, brep, vdb) return a job whose result lists the artifacts; format ir answers synchronously with status succeeded, job_id null and the artifacts (IR document, structure, manifest) directly. Download any artifact via GET /api/artifacts/{artifact_id}.",
   cad_job_get: "Read status, diagnostics and results of an authorized job.",
   cad_job_cancel:
     "Cancel an authorized unfinished job. Committed revisions remain immutable.",
+  cad_viewer_open:
+    "Open the optional browser viewer for the person you are working with. Over stdio this starts a loopback-only HTTP viewer on demand; over HTTP it points at the running service. Returns a URL with a single-use login code (valid five minutes) so the browser needs no manual token entry, optionally preselecting model_id. launch_browser (default true) tries to start the default browser on this machine when a graphical session exists. Modelling never requires the viewer.",
+  cad_viewer_close:
+    "Close the viewer started by cad_viewer_open. Over stdio this stops the on-demand HTTP viewer and its browser sessions; over HTTP the viewer is part of the running service and stays available, which the result reports.",
 };
 export function toolDefinitions() {
   return Object.entries(ToolSchemas).map(([name, schema]) => ({

@@ -56,6 +56,21 @@ import {
 } from "./selections.js";
 import { revisionIndex } from "./spatial.js";
 
+/** Arguments of cad_viewer_open after schema validation. */
+export type ViewerArguments = { launch_browser: boolean; model_id?: string };
+/** Payload of cad_viewer_open and cad_viewer_close (see results.ts `viewer`). */
+export type ViewerState = {
+  running: boolean;
+  transport: "stdio" | "http";
+  url: string | null;
+  browser_launched: boolean;
+  message: string;
+};
+/** Implemented by the transport that owns the optional browser viewer. */
+export interface ViewerHost {
+  open(args: ViewerArguments): Promise<ViewerState>;
+  close(): Promise<ViewerState>;
+}
 export class ModelService {
   store: Store;
   gates: Gates;
@@ -72,6 +87,8 @@ export class ModelService {
   }
   /** Set by the HTTP gateway; without it publications list plain authenticated links only. */
   downloads: DownloadTokens | null = null;
+  /** Set by the transport that owns the optional browser viewer (cad_viewer_open/close). */
+  viewer: ViewerHost | null = null;
   async close() {
     await this.jobs.close();
     this.store.close();
@@ -128,6 +145,8 @@ export class ModelService {
       this.gates.run("before_request", { trace_id: trace, tool });
       const args: any = parse(ToolSchemas[tool], input);
       if (args.model_id) this.store.model(p, args.model_id, scopeFor(tool));
+      if (tool === "cad_viewer_open" || tool === "cad_viewer_close")
+        return this.viewerCall(tool, args, trace);
       if (
         tool === "cad_access" &&
         !["inspect", "publications"].includes(args.mode)
@@ -177,6 +196,24 @@ export class ModelService {
         this.store.dedupe(p, args.idempotency_key, { tool, args }, run, check);
       else this.store.atomic(() => check(run()));
       return response;
+    } catch (error) {
+      return failureResponse(error, trace);
+    }
+  }
+  /** Viewer tools are the only asynchronous tools: starting or stopping a loopback
+   *  HTTP listener cannot complete inside a synchronous call. Callers await call(). */
+  private async viewerCall(tool: ToolName, args: any, trace: string) {
+    try {
+      requireThat(
+        this.viewer,
+        "OUT_OF_SCOPE",
+        "Dieser Dienst wurde ohne Viewer gestartet.",
+      );
+      const state =
+        tool === "cad_viewer_open"
+          ? await this.viewer!.open(args)
+          : await this.viewer!.close();
+      return checkedToolResponse(tool, state, trace);
     } catch (error) {
       return failureResponse(error, trace);
     }
@@ -698,6 +735,7 @@ export class ModelService {
               "cylinder",
               "cone",
               "torus",
+              "strip",
               "nurbs_surface",
               "union",
               "difference",
@@ -833,6 +871,7 @@ export class ModelService {
               owner_part: f.owner_part,
               local_frame: f.local_frame,
               representation: f.authoritative_representation,
+              parameters: f.parameters,
             })),
           next_offset:
             a.offset + a.limit < r.ir.features.length

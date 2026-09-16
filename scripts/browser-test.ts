@@ -59,14 +59,14 @@ try {
     .waitFor();
   assert.match(
     await page.locator("#detail-purpose").innerText(),
-    /Herkunft geprüft/,
+    /provenance verified/,
   );
   await page.locator('[data-feature="feat-groove-07"]').click();
   await page
     .locator("#detail-name")
     .filter({ hasText: "innere Dichtungsnut" })
     .waitFor();
-  await page.getByRole("textbox", { name: "Tiefe", exact: true }).fill("0.82");
+  await page.getByRole("textbox", { name: "Depth", exact: true }).fill("0.82");
   await page.locator("#stage-edit").click();
   await page.locator("#step-candidate.done").waitFor({ timeout: 60000 });
   await page.locator("#busy").waitFor({ state: "hidden", timeout: 60000 });
@@ -81,13 +81,13 @@ try {
   await page.locator("#step-commit.done").waitFor({ timeout: 60000 });
   assert.equal(
     await page
-      .getByRole("textbox", { name: "Tiefe", exact: true })
+      .getByRole("textbox", { name: "Depth", exact: true })
       .inputValue(),
     "0.82",
   );
   assert.equal(
     await page
-      .getByRole("textbox", { name: "Breite", exact: true })
+      .getByRole("textbox", { name: "Width", exact: true })
       .isDisabled(),
     true,
   );
@@ -162,7 +162,7 @@ try {
     .locator("#detail-name")
     .filter({ hasText: "innere Dichtungsnut" })
     .waitFor();
-  await page.getByRole("textbox", { name: "Tiefe", exact: true }).fill("0.82");
+  await page.getByRole("textbox", { name: "Depth", exact: true }).fill("0.82");
   await page.locator("#stage-edit").click();
   await page.locator("#step-candidate.done").waitFor({ timeout: 60000 });
   await page.locator("#busy").waitFor({ state: "hidden", timeout: 60000 });
@@ -173,10 +173,10 @@ try {
   await page.locator("#overlay").selectOption("normals");
   await page.locator("#overlay").selectOption("curvature");
   await page.locator("#busy").waitFor({ state: "hidden", timeout: 60000 });
-  assert.match(await page.locator("#resolution").innerText(), /Auflösung/);
+  assert.match(await page.locator("#resolution").innerText(), /resolution/);
   await page.locator("#lod").click();
   await page.locator("#busy").waitFor({ state: "hidden", timeout: 60000 });
-  assert.match(await page.locator("#activity-title").innerText(), /Pixel-LOD/);
+  assert.match(await page.locator("#activity-title").innerText(), /Pixel LOD/);
   await page.locator("#overlay").selectOption("unlit");
   await page.locator("#overlay").selectOption("lit");
   await canvas.click({
@@ -188,7 +188,7 @@ try {
     .waitFor();
   assert.match(
     await page.locator("#anchor").innerText(),
-    /Anker: \(.*\) mm · Fläche face_/,
+    /Anchor: \(.*\) mm · face face_/,
   );
   await page.locator('[data-feature="feat-groove-07"]').click();
   await page
@@ -197,7 +197,7 @@ try {
     .waitFor();
   assert.match(
     await page.locator("#regions").innerText(),
-    /Schutzregion|Änderungsregion|^$/,
+    /Protected region|Change region|^$/,
   );
   await page.locator("#measure").click();
   await canvas.click({
@@ -220,7 +220,7 @@ try {
   await page.locator("#step-commit.done").waitFor({ timeout: 60000 });
   assert.equal(
     await page
-      .getByRole("textbox", { name: "Tiefe", exact: true })
+      .getByRole("textbox", { name: "Depth", exact: true })
       .inputValue(),
     "0.82",
   );

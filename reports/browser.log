@@ -1,5 +1,0 @@
-
-> mathforge-3d@0.1.0 test:browser
-> tsx scripts/browser-test.ts
-
-Browser workflow passed; screenshots saved in reports/.

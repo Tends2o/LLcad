@@ -646,12 +646,24 @@ const summary = z.strictObject({
       owner_part: Id,
       local_frame: Id,
       representation: z.enum(["brep", "implicit", "mesh"]),
+      parameters: z.record(
+        text,
+        z.strictObject({ value: text, unit: text }),
+      ),
     }),
   ),
   next_offset: pageOffset,
   outputs: z.array(Id),
   measurements: facts.nullable(),
   assumptions: strings,
+});
+/** State of the optional browser viewer after cad_viewer_open / cad_viewer_close. */
+const viewer = z.strictObject({
+  running: z.boolean(),
+  transport: z.enum(["stdio", "http"]),
+  url: text.nullable(),
+  browser_launched: z.boolean(),
+  message: text,
 });
 const capabilities = z.strictObject({
   application_version: text,
@@ -879,6 +891,8 @@ export const ToolPayloadSchemas = {
   ]),
   cad_job_get: JobView,
   cad_job_cancel: JobView,
+  cad_viewer_open: viewer,
+  cad_viewer_close: viewer,
 } satisfies Record<ToolName, z.ZodType>;
 const envelope = {
   result_schema_version: z.literal("1"),
@@ -922,12 +936,65 @@ export const ToolOutputSchemas = Object.fromEntries(
     z.union([enveloped(schema), FailureResponse]),
   ]),
 ) as unknown as Record<ToolName, z.ZodType>;
+/**
+ * Rewrite tuple schemas into a form that draft-07 and draft 2020-12 validators
+ * read the same way. Zod emits `prefixItems` with `items: false` (2020-12) or
+ * `items` as a list with `additionalItems` (draft-07). A draft-07 validator
+ * ignores `prefixItems` and would then reject every element; a 2020-12
+ * validator such as Ajv 2020 rejects `items` as a list as an invalid schema.
+ * The portable form keeps `prefixItems` for positional checks, validates every
+ * element against the union of the tuple members and pins the length with
+ * `minItems`/`maxItems`. An empty tuple becomes `items: false` with
+ * `maxItems: 0`. Nodes already in this form are left unchanged.
+ */
+export function portableTuples<T>(schema: T): T {
+  const same = (a: unknown, b: unknown) =>
+    JSON.stringify(a) === JSON.stringify(b);
+  const walk = (node: unknown): void => {
+    if (Array.isArray(node)) {
+      node.forEach(walk);
+      return;
+    }
+    if (!node || typeof node !== "object") return;
+    const s = node as Record<string, unknown>;
+    const legacyList = Array.isArray(s.items) ? (s.items as unknown[]) : null;
+    const prefix = Array.isArray(s.prefixItems)
+      ? (s.prefixItems as unknown[])
+      : legacyList;
+    if (prefix) {
+      const rest = legacyList ? s.additionalItems : s.items;
+      const portable =
+        !legacyList &&
+        rest !== false &&
+        typeof rest === "object" &&
+        s.maxItems === prefix.length;
+      delete s.additionalItems;
+      if (prefix.length === 0) {
+        delete s.prefixItems;
+        s.items = false;
+        s.maxItems = 0;
+      } else if (!portable) {
+        const open = rest !== false && rest && typeof rest === "object";
+        const members = [...prefix, ...(open ? [rest] : [])];
+        const unique = members.filter(
+          (m, i) => members.findIndex((o) => same(o, m)) === i,
+        );
+        s.prefixItems = prefix;
+        s.items = unique.length === 1 ? unique[0] : { anyOf: unique };
+        if (s.minItems === undefined) s.minItems = prefix.length;
+        if (!open) s.maxItems = prefix.length;
+      }
+    }
+    for (const value of Object.values(s)) walk(value);
+  };
+  walk(schema);
+  return schema;
+}
 export function outputJSONSchema(name: ToolName) {
   return {
-    ...z.toJSONSchema(ToolOutputSchemas[name], {
-      reused: "ref",
-      target: "draft-7",
-    }),
+    ...portableTuples(
+      z.toJSONSchema(ToolOutputSchemas[name], { reused: "ref" }),
+    ),
     type: "object" as const,
   };
 }

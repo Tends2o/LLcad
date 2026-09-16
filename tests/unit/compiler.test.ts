@@ -66,6 +66,85 @@ test("DAG compilation rejects cycles, absent refs, wrong dimensions and degenera
   s.features[0].parameters.radius = { value: "0", unit: "mm" };
   assert.throws(() => compile(s), failure("GEOMETRY_INVALID"));
 });
+test("strip compilation accepts coplanar paths with pads and rejects tilted, empty or degenerate input", () => {
+  const strip = (paths: string[][][], pads: any[] = []) => {
+    const s = structuredClone(sphere);
+    s.features = [
+      {
+        id: "trace",
+        semantic_name: "trace",
+        kind: "strip",
+        owner_part: "part-main",
+        local_frame: "world",
+        authoritative_representation: "brep",
+        parameters: {
+          width: { value: "0.3", unit: "mm" },
+          height: { value: "0.035", unit: "mm" },
+        },
+        expressions: {},
+        parameter_sources: {},
+        construction: { operator: "strip", paths, pads },
+        depends_on: [],
+        protected_relations: [],
+      } as any,
+    ];
+    s.outputs = ["trace"];
+    return s;
+  };
+  const plan = compile(
+    strip(
+      [
+        [
+          ["0", "0", "1.565"],
+          ["5", "0", "1.565"],
+          ["5", "4", "1.565"],
+        ],
+      ],
+      [{ center: ["0", "0", "1.565"], width: "0.8", depth: "0.9" }],
+    ),
+  );
+  assert.equal(plan.features[0].values.width, 0.3);
+  assert.equal(plan.features[0].values.height, 0.035);
+  assert.throws(
+    () =>
+      compile(
+        strip([
+          [
+            ["0", "0", "0"],
+            ["5", "0", "0.5"],
+          ],
+        ]),
+      ),
+    failure("GEOMETRY_INVALID"),
+  );
+  assert.throws(
+    () =>
+      compile(
+        strip([
+          [
+            ["0", "0", "0"],
+            ["0", "0", "0"],
+          ],
+        ]),
+      ),
+    failure("GEOMETRY_INVALID"),
+  );
+  assert.throws(
+    () =>
+      compile(
+        strip(
+          [
+            [
+              ["0", "0", "0"],
+              ["5", "0", "0"],
+            ],
+          ],
+          [{ center: ["0", "0", "0"], width: "0", depth: "1" }],
+        ),
+      ),
+    failure("GEOMETRY_INVALID"),
+  );
+});
 test("dirty subgraph is local and protected widths reject changes", () => {
   const p = Patch.parse({
     model_id: "m",

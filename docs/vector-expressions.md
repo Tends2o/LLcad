@@ -12,4 +12,4 @@ Der SLSQP-Pfad unterstützt diese Vektorausdrücke mit analytischen Vorwärtsabl
 
 Diese Rechnungen sind begrenzte numerische Auswertungen. Sie liefern keinen zusätzlichen universellen Rundungs- oder globalen Geometriefehlernachweis.
 
-Der geprüfte Vektor-Build wurde am 14. September 2026 in den lokalen Dienst übernommen. Der tatsächlich installierte Codex-Host hat den Transport geprüft; neun ältere, nichtleere Modelle wurden mit unveränderter Konstruktion neu berechnet, validiert und als zusätzliche Revisionen übernommen. Die alten Revisionen und ihre Messwerte bleiben erhalten. Dieser Hostlauf verwendet keinen Modellturn.
+Der geprüfte Vektor-Build wurde am 14. September 2026 in den lokalen Dienst übernommen. Ein tatsächlicher MCP-Host hat den Transport geprüft; neun ältere, nichtleere Modelle wurden mit unveränderter Konstruktion neu berechnet, validiert und als zusätzliche Revisionen übernommen. Die alten Revisionen und ihre Messwerte bleiben erhalten. Dieser Hostlauf verwendet keinen Modellturn.

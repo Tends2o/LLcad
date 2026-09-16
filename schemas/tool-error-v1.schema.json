@@ -33,7 +33,6 @@
     },
     "checks": {
       "type": "array",
-      "prefixItems": [],
       "items": false,
       "maxItems": 0
     },

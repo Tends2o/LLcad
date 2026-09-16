@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="de">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>MathForge 3D · Präzision beginnt im Bauplan</title>
+    <title>LLcad · MathForge 3D viewer</title>
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
@@ -12,212 +12,207 @@
         ><span class="brand-symbol">M<span>∕</span></span
         ><strong>MathForge <em>3D</em></strong></a
       ><span class="header-divider"></span
-      ><span class="workspace-label">MODELLWERKSTATT</span>
+      ><span class="workspace-label">MODEL WORKSHOP</span>
       <div class="header-actions">
-        <span id="connection" class="connection">● Lokal</span
-        ><button id="new-model">+ Neues Modell</button
-        ><button id="logout" class="quiet">Abmelden</button>
+        <span id="connection" class="connection">● Local</span
+        ><button id="new-model">+ New model</button
+        ><button id="logout" class="quiet">Sign out</button>
       </div>
     </header>
     <main>
       <aside class="left">
-        <div class="section-label">ARBEITSBEREICH <span>01</span></div>
-        <label class="visually-hidden" for="model-select">Modell</label
+        <div class="section-label">WORKSPACE <span>01</span></div>
+        <label class="visually-hidden" for="model-select">Model</label
         ><select id="model-select">
-          <option>Modell auswählen</option>
+          <option>Select a model</option>
         </select>
         <div class="model-card">
           <div class="part-icon">◈</div>
           <div>
-            <strong id="model-title">Dein nächstes Bauteil</strong>
-            <p id="model-meta">Parametrisch. Nachvollziehbar.</p>
+            <strong id="model-title">Your next part</strong>
+            <p id="model-meta">Parametric. Traceable.</p>
           </div>
         </div>
         <div class="section-heading">
-          <h2>Struktur</h2>
+          <h2>Structure</h2>
           <span id="structure-count">—</span>
         </div>
         <div id="structure" class="structure">
-          <p class="muted empty-tree">Teile und Baugruppen erscheinen hier.</p>
+          <p class="muted empty-tree">Parts and assemblies appear here.</p>
         </div>
         <div class="section-heading">
-          <h2>Konstruktionsbaum</h2>
+          <h2>Construction tree</h2>
           <span id="feature-count">0</span>
         </div>
         <div id="features" class="features">
           <p class="muted empty-tree">
-            Hier entsteht der mathematische Bauplan deines Modells.
+            The mathematical construction of your model grows here.
           </p>
         </div>
-        <button id="add-feature" class="add-feature">
-          + Grundkörper hinzufügen
-        </button>
+        <button id="add-feature" class="add-feature">+ Add primitive</button>
         <div class="sidebar-bottom">
-          <div class="section-label">BEISPIELMODELLE</div>
+          <div class="section-label">EXAMPLE MODELS</div>
           <button class="example" data-example="housing">
             <span>◉</span>
-            <div>
-              Dichtungsgehäuse<small>CAD · Detailänderung um 20 µm</small>
-            </div>
+            <div>Seal housing<small>CAD · detail change of 20 µm</small></div>
             <span>↗</span></button
           ><button class="example" data-example="organic">
             <span>∿</span>
-            <div>Impliziter Körper<small>Feld · Lokale Stützregion</small></div>
+            <div>Implicit body<small>Field · local support region</small></div>
             <span>↗</span></button
           ><button class="example" data-example="assembly">
             <span>▦</span>
             <div>
-              Parametrische Stiftreihe<small>Baugruppe · 100 Instanzen</small>
+              Parametric pin row<small>Assembly · 100 instances</small>
             </div>
             <span>↗</span>
           </button>
           <p class="sidebar-note">
-            Die Parameter sind das Original.<br />Die Ansicht macht sie
-            sichtbar.
+            The parameters are the original.<br />The view makes them visible.
           </p>
         </div>
       </aside>
       <section class="stage">
         <div class="stage-heading">
           <div class="breadcrumbs">
-            Arbeitsbereich <span>/</span>
-            <strong id="breadcrumb-model">Neues Modell</strong>
+            Workspace <span>/</span>
+            <strong id="breadcrumb-model">New model</strong>
           </div>
           <div class="revision-line">
-            <span id="quality" class="badge">Kein Modell</span
+            <span id="quality" class="badge">No model</span
             ><span id="revision">—</span>
           </div>
         </div>
         <div id="viewport">
           <div id="empty-state">
-            <span class="eyebrow">VON DER GLEICHUNG ZUR GEOMETRIE</span>
-            <h1>Form folgt<br /><i>Mathematik.</i></h1>
+            <span class="eyebrow">FROM EQUATION TO GEOMETRY</span>
+            <h1>Form follows<br /><i>mathematics.</i></h1>
             <p>
-              Baue präzise Körper. Ändere einzelne Details.<br />Prüfe jeden
-              Schritt, bevor er Teil des Modells wird.
+              Build precise solids. Change single details.<br />Verify every
+              step before it becomes part of the model.
             </p>
             <button id="start-demo" class="primary">
-              Dichtungsgehäuse öffnen <span>↗</span>
+              Open the seal housing <span>↗</span>
             </button>
           </div>
-          <div id="view-label">PERSPEKTIVE <span>·</span> Z ↑</div>
+          <div id="view-label">PERSPECTIVE <span>·</span> Z ↑</div>
           <div class="view-toolbar">
-            <button id="fit" title="Modell einpassen">
-              ⊞ <span>Einpassen</span></button
-            ><button id="ortho" title="Orthografische Ansicht">
-              ◫ <span>Orthogonal</span></button
-            ><button id="wireframe" title="Drahtgitter">
-              ◇ <span>Drahtgitter</span></button
-            ><button id="section" title="Schnittebene">
-              ◧ <span>Schnitt</span></button
-            ><button id="measure" title="Zwei Oberflächenpunkte messen">
-              ↔ <span>Messen</span></button
-            ><button id="explode" title="Ausgabeteile auseinanderziehen">
-              ⤢ <span>Teile</span></button
-            ><button id="lod" title="Vorschau an die Pixelgröße anpassen">
-              ◍ <span>Pixel-LOD</span></button
-            ><select id="overlay" aria-label="Darstellungskanal">
-              <option value="lit">Beleuchtet</option>
-              <option value="unlit">Unbeleuchtet</option>
-              <option value="normals">Normalen</option>
-              <option value="curvature">Krümmung</option>
+            <button id="fit" title="Fit the model">⊞ <span>Fit</span></button
+            ><button id="ortho" title="Orthographic view">
+              ◫ <span>Orthographic</span></button
+            ><button id="wireframe" title="Wireframe">
+              ◇ <span>Wireframe</span></button
+            ><button id="section" title="Section plane">
+              ◧ <span>Section</span></button
+            ><button id="measure" title="Measure between two surface points">
+              ↔ <span>Measure</span></button
+            ><button id="explode" title="Explode the output parts">
+              ⤢ <span>Explode</span></button
+            ><button id="lod" title="Adapt the preview to the pixel size">
+              ◍ <span>Pixel LOD</span></button
+            ><select id="overlay" aria-label="Display channel">
+              <option value="parts">Parts</option>
+              <option value="lit">Lit</option>
+              <option value="unlit">Unlit</option>
+              <option value="normals">Normals</option>
+              <option value="curvature">Curvature</option>
             </select>
           </div>
           <div id="scale-bar">
             <span id="scale-bar-line"></span><span id="scale-bar-text">—</span>
           </div>
+          <div id="legend" aria-label="Part colours" hidden></div>
           <div id="measurement" hidden></div>
           <div class="axis-widget">
             <span class="axis-z">Z</span><span class="axis-y">Y</span
             ><span class="axis-x">X</span><span class="axis-origin">●</span>
           </div>
           <div class="viewport-footer">
-            <span id="resolution">Geometrische Vorschau</span
+            <span id="resolution">Geometric preview</span
             ><span id="triangle-count">—</span>
           </div>
           <div id="busy" hidden>
             <span class="spinner"></span
-            ><span id="busy-text">Geometrie wird berechnet …</span>
+            ><span id="busy-text">Computing geometry …</span>
           </div>
         </div>
         <div class="timeline">
           <span class="timeline-dot"></span>
           <div>
-            <strong id="activity-title">Bereit für deinen Bauplan</strong>
+            <strong id="activity-title">Ready for your construction</strong>
             <p id="activity-detail">
-              Alle Änderungen bleiben bis zur geprüften Übernahme ein Kandidat.
+              Every change stays a candidate until it has been verified and
+              committed.
             </p>
           </div>
           <span class="timeline-end">mm</span>
         </div>
       </section>
       <aside class="right">
-        <div class="section-label">DETAILINSPEKTION <span>↗</span></div>
-        <h2 id="detail-name">Ein Merkmal auswählen</h2>
+        <div class="section-label">DETAIL INSPECTION <span>↗</span></div>
+        <h2 id="detail-name">Select a feature</h2>
         <p id="detail-purpose" class="muted">
-          Wähle ein Merkmal im Konstruktionsbaum, um seine Parameter und
-          Nachweise zu sehen.
+          Pick a feature in the construction tree to see its parameters and
+          evidence.
         </p>
         <div id="detail-body" hidden>
           <div class="section-heading">
-            <h3>Parameter</h3>
-            <span class="mini-label">DEZIMAL</span>
+            <h3>Parameters</h3>
+            <span class="mini-label">DECIMAL</span>
           </div>
           <form id="parameters"></form>
           <div class="section-heading">
-            <h3>Gemessene Geometrie</h3>
+            <h3>Measured geometry</h3>
             <span class="mini-label">mm</span>
           </div>
           <div id="measurements" class="measurements"></div>
           <div id="protections" class="protections"></div>
           <div id="regions" class="regions"></div>
           <div id="anchor" class="anchor"></div>
-          <button id="isolate" class="full">Merkmal isoliert ansehen</button
+          <button id="isolate" class="full">View feature in isolation</button
           ><button id="stage-edit" class="primary full">
-            Änderung vorbereiten <span>→</span>
+            Prepare a change <span>→</span>
           </button>
         </div>
         <div class="change-panel">
-          <div class="section-label">ÄNDERUNGSPRÜFUNG</div>
+          <div class="section-label">CHANGE VERIFICATION</div>
           <ol class="steps">
-            <li id="step-candidate"><span>1</span>Kandidat berechnen</li>
+            <li id="step-candidate"><span>1</span>Compute candidate</li>
             <li id="step-validation">
-              <span>2</span>Maße & Schutzregeln prüfen
+              <span>2</span>Check dimensions &amp; protections
             </li>
-            <li id="step-commit"><span>3</span>Neue Revision übernehmen</li>
+            <li id="step-commit"><span>3</span>Commit new revision</li>
           </ol>
-          <div id="validation-summary" class="muted">
-            Noch keine ausstehende Änderung.
-          </div>
+          <div id="validation-summary" class="muted">No pending change.</div>
           <div class="change-actions">
-            <button id="validate" disabled>Prüfen</button
-            ><button id="commit" class="primary" disabled>Übernehmen</button>
+            <button id="validate" disabled>Validate</button
+            ><button id="commit" class="primary" disabled>Commit</button>
           </div>
           <button id="discard" class="quiet full" hidden>
-            Kandidat verwerfen
+            Discard candidate
           </button>
         </div>
         <div class="export-area">
-          <label for="export-format">Geprüfte Revision exportieren</label>
+          <label for="export-format">Export the verified revision</label>
           <div>
             <select id="export-format">
               <option value="step">STEP · CAD</option>
-              <option value="ir">JSON · Bauplan</option>
-              <option value="stl">STL · Dreiecke</option>
-              <option value="glb">GLB · Ansicht</option>
-              <option value="brep">B-Rep · Nativ</option></select
-            ><button id="export" title="Exportieren">↓</button>
+              <option value="ir">JSON · construction</option>
+              <option value="stl">STL · triangles</option>
+              <option value="glb">GLB · view</option>
+              <option value="brep">B-Rep · native</option></select
+            ><button id="export" title="Export">↓</button>
           </div>
           <div id="downloads"></div>
           <label class="upload-label"
-            >Datei importieren<input
+            >Import a file<input
               id="upload"
               type="file"
               accept=".json,.step,.stp,.stl" /></label
-          ><select id="import-unit" aria-label="Einheit des Imports">
-            <option value="mm">Importeinheit: mm</option>
-            <option value="m">Importeinheit: m</option>
-            <option value="um">Importeinheit: µm</option>
+          ><select id="import-unit" aria-label="Import unit">
+            <option value="mm">Import unit: mm</option>
+            <option value="m">Import unit: m</option>
+            <option value="um">Import unit: µm</option>
           </select>
         </div>
       </aside>
@@ -225,61 +220,60 @@
     <div id="toast" role="alert" hidden></div>
     <dialog id="login-dialog">
       <form id="login-form">
-        <span class="eyebrow">DEINE PRIVATE MODELLWERKSTATT</span>
-        <h2>Willkommen bei MathForge.</h2>
+        <span class="eyebrow">YOUR PRIVATE MODEL WORKSHOP</span>
+        <h2>Welcome to MathForge.</h2>
         <p>
-          Gib deinen lokalen Zugangsschlüssel ein.<br />Er liegt in
+          Enter your local access key.<br />It is stored in
           <code>data/local-token</code>.
         </p>
-        <label for="token">Zugangsschlüssel</label
+        <label for="token">Access key</label
         ><input
           type="password"
           id="token"
           required
           autocomplete="current-password"
-        /><button class="primary full" type="submit">Werkstatt öffnen →</button>
+        /><button class="primary full" type="submit">Open the workshop →</button>
         <p id="login-error" role="alert"></p>
       </form>
     </dialog>
     <dialog id="new-dialog">
       <form id="new-form">
-        <h2>Ein neuer Bauplan</h2>
-        <label for="new-name">Modellname</label
+        <h2>A new construction</h2>
+        <label for="new-name">Model name</label
         ><input
           id="new-name"
-          placeholder="z. B. Sensorgehäuse"
+          placeholder="e.g. sensor housing"
           required
           maxlength="200"
-        /><label for="new-purpose">Zweck</label
+        /><label for="new-purpose">Purpose</label
         ><input
           id="new-purpose"
-          placeholder="Was soll das Bauteil leisten?"
+          placeholder="What should the part do?"
           maxlength="1000"
         />
         <div class="dialog-actions">
-          <button type="button" data-close="new-dialog">Abbrechen</button
-          ><button class="primary">Modell anlegen</button>
+          <button type="button" data-close="new-dialog">Cancel</button
+          ><button class="primary">Create model</button>
         </div>
       </form>
     </dialog>
     <dialog id="primitive-dialog">
       <form id="primitive-form">
-        <h2>Mathematischer Grundkörper</h2>
-        <label for="primitive-type">Konstruktion</label
+        <h2>Mathematical primitive</h2>
+        <label for="primitive-type">Construction</label
         ><select id="primitive-type">
-          <option value="box">Quader</option>
-          <option value="sphere">Kugel</option>
-          <option value="cylinder">Zylinder</option>
+          <option value="box">Box</option>
+          <option value="sphere">Sphere</option>
+          <option value="cylinder">Cylinder</option>
           <option value="torus">Torus</option>
         </select>
         <div id="primitive-parameters"></div>
         <p class="muted">
-          Längen in Millimetern. Der Körper wird zunächst als Kandidat
-          berechnet.
+          Lengths in millimetres. The solid is first computed as a candidate.
         </p>
         <div class="dialog-actions">
-          <button type="button" data-close="primitive-dialog">Abbrechen</button
-          ><button class="primary">Kandidat berechnen</button>
+          <button type="button" data-close="primitive-dialog">Cancel</button
+          ><button class="primary">Compute candidate</button>
         </div>
       </form>
     </dialog>

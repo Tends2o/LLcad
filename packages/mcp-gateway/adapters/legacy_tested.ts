@@ -34,7 +34,11 @@ function registerTools(server: Server, service: ModelService, p: Principal) {
   }));
   server.setRequestHandler(CallToolRequestSchema, async (r) =>
     toolResult(
-      service.call(p, r.params.name as ToolName, r.params.arguments ?? {}),
+      await service.call(
+        p,
+        r.params.name as ToolName,
+        r.params.arguments ?? {},
+      ),
     ),
   );
   server.setRequestHandler(ListResourcesRequestSchema, async () => ({
