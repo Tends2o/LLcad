@@ -164,6 +164,58 @@
             "additionalProperties": false
           }
         },
+        "objectives": {
+          "default": [],
+          "maxItems": 32,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+              },
+              "expression": {
+                "$ref": "#/$defs/__schema0"
+              },
+              "weight": {
+                "default": "1",
+                "type": "string",
+                "maxLength": 48,
+                "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+              },
+              "scale": {
+                "default": "1",
+                "type": "string",
+                "maxLength": 48,
+                "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+              },
+              "loss": {
+                "default": "none",
+                "type": "string",
+                "enum": [
+                  "none",
+                  "huber",
+                  "cauchy"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "expression",
+              "weight",
+              "scale",
+              "loss"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "regularization": {
+          "default": "1",
+          "type": "string",
+          "maxLength": 48,
+          "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+        },
         "max_iterations": {
           "default": 100,
           "type": "integer",
@@ -174,6 +226,8 @@
       "required": [
         "variables",
         "equations",
+        "objectives",
+        "regularization",
         "max_iterations"
       ],
       "additionalProperties": false

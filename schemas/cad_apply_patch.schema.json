@@ -716,7 +716,14 @@
                       "standard": {
                         "default": "custom",
                         "type": "string",
-                        "const": "custom"
+                        "enum": [
+                          "custom",
+                          "iso_metric_basic"
+                        ]
+                      },
+                      "designation": {
+                        "type": "string",
+                        "pattern": "^M\\d+(\\.\\d+)?(x\\d+(\\.\\d+)?)?$"
                       }
                     },
                     "required": [
@@ -961,10 +968,204 @@
                         "type": "string",
                         "enum": [
                           "extrude",
-                          "revolve",
-                          "loft",
-                          "sweep"
+                          "revolve"
                         ]
+                      }
+                    },
+                    "required": [
+                      "operator"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "operator": {
+                        "type": "string",
+                        "const": "loft"
+                      },
+                      "ruled": {
+                        "type": "boolean"
+                      },
+                      "check_compatibility": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "operator"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "operator": {
+                        "type": "string",
+                        "const": "sweep"
+                      },
+                      "frame": {
+                        "type": "string",
+                        "enum": [
+                          "corrected_frenet",
+                          "rotation_minimizing"
+                        ]
+                      },
+                      "self_contact_check": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "operator"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "operator": {
+                        "type": "string",
+                        "const": "offset_solid"
+                      }
+                    },
+                    "required": [
+                      "operator"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "operator": {
+                        "type": "string",
+                        "const": "mesh_repair"
+                      },
+                      "remove_degenerate": {
+                        "type": "boolean"
+                      },
+                      "remove_duplicates": {
+                        "type": "boolean"
+                      },
+                      "orient": {
+                        "type": "boolean"
+                      },
+                      "fill_holes_max_edges": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 256
+                      }
+                    },
+                    "required": [
+                      "operator"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "operator": {
+                        "type": "string",
+                        "const": "remesh_region"
+                      }
+                    },
+                    "required": [
+                      "operator"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "operator": {
+                        "type": "string",
+                        "const": "local_mesh_deform"
+                      },
+                      "handles": {
+                        "minItems": 1,
+                        "maxItems": 32,
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "point": {
+                              "type": "array",
+                              "prefixItems": [
+                                {
+                                  "type": "string",
+                                  "maxLength": 48,
+                                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                                },
+                                {
+                                  "type": "string",
+                                  "maxLength": 48,
+                                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                                },
+                                {
+                                  "type": "string",
+                                  "maxLength": 48,
+                                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                                }
+                              ],
+                              "items": false,
+                              "minItems": 3,
+                              "maxItems": 3
+                            },
+                            "displacement": {
+                              "type": "array",
+                              "prefixItems": [
+                                {
+                                  "type": "string",
+                                  "maxLength": 48,
+                                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                                },
+                                {
+                                  "type": "string",
+                                  "maxLength": 48,
+                                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                                },
+                                {
+                                  "type": "string",
+                                  "maxLength": 48,
+                                  "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                                }
+                              ],
+                              "items": false,
+                              "minItems": 3,
+                              "maxItems": 3
+                            }
+                          },
+                          "required": [
+                            "point",
+                            "displacement"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": [
+                      "operator",
+                      "handles"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "operator": {
+                        "type": "string",
+                        "const": "tessellate"
+                      }
+                    },
+                    "required": [
+                      "operator"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "operator": {
+                        "type": "string",
+                        "const": "extract_isosurface"
                       }
                     },
                     "required": [
@@ -1618,6 +1819,32 @@
                           "unit"
                         ],
                         "additionalProperties": false
+                      },
+                      "extraction": {
+                        "type": "object",
+                        "properties": {
+                          "method": {
+                            "default": "marching_tetrahedra",
+                            "type": "string",
+                            "enum": [
+                              "marching_tetrahedra",
+                              "dual_contouring"
+                            ]
+                          },
+                          "pruning": {
+                            "default": "lipschitz",
+                            "type": "string",
+                            "enum": [
+                              "lipschitz",
+                              "interval"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "method",
+                          "pruning"
+                        ],
+                        "additionalProperties": false
                       }
                     },
                     "required": [
@@ -1643,7 +1870,8 @@
                         "type": "string",
                         "enum": [
                           "step",
-                          "stl"
+                          "stl",
+                          "vdb"
                         ]
                       },
                       "source_unit": {
@@ -1653,6 +1881,16 @@
                           "m",
                           "um"
                         ]
+                      },
+                      "component": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "pattern": "^0(:[0-9]{1,6}){1,16}$"
+                      },
+                      "grid": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
                       }
                     },
                     "required": [
@@ -2404,7 +2642,14 @@
                           "standard": {
                             "default": "custom",
                             "type": "string",
-                            "const": "custom"
+                            "enum": [
+                              "custom",
+                              "iso_metric_basic"
+                            ]
+                          },
+                          "designation": {
+                            "type": "string",
+                            "pattern": "^M\\d+(\\.\\d+)?(x\\d+(\\.\\d+)?)?$"
                           }
                         },
                         "required": [
@@ -2649,10 +2894,204 @@
                             "type": "string",
                             "enum": [
                               "extrude",
-                              "revolve",
-                              "loft",
-                              "sweep"
+                              "revolve"
                             ]
+                          }
+                        },
+                        "required": [
+                          "operator"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "operator": {
+                            "type": "string",
+                            "const": "loft"
+                          },
+                          "ruled": {
+                            "type": "boolean"
+                          },
+                          "check_compatibility": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "operator"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "operator": {
+                            "type": "string",
+                            "const": "sweep"
+                          },
+                          "frame": {
+                            "type": "string",
+                            "enum": [
+                              "corrected_frenet",
+                              "rotation_minimizing"
+                            ]
+                          },
+                          "self_contact_check": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "operator"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "operator": {
+                            "type": "string",
+                            "const": "offset_solid"
+                          }
+                        },
+                        "required": [
+                          "operator"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "operator": {
+                            "type": "string",
+                            "const": "mesh_repair"
+                          },
+                          "remove_degenerate": {
+                            "type": "boolean"
+                          },
+                          "remove_duplicates": {
+                            "type": "boolean"
+                          },
+                          "orient": {
+                            "type": "boolean"
+                          },
+                          "fill_holes_max_edges": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 256
+                          }
+                        },
+                        "required": [
+                          "operator"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "operator": {
+                            "type": "string",
+                            "const": "remesh_region"
+                          }
+                        },
+                        "required": [
+                          "operator"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "operator": {
+                            "type": "string",
+                            "const": "local_mesh_deform"
+                          },
+                          "handles": {
+                            "minItems": 1,
+                            "maxItems": 32,
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "point": {
+                                  "type": "array",
+                                  "prefixItems": [
+                                    {
+                                      "type": "string",
+                                      "maxLength": 48,
+                                      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                                    },
+                                    {
+                                      "type": "string",
+                                      "maxLength": 48,
+                                      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                                    },
+                                    {
+                                      "type": "string",
+                                      "maxLength": 48,
+                                      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                                    }
+                                  ],
+                                  "items": false,
+                                  "minItems": 3,
+                                  "maxItems": 3
+                                },
+                                "displacement": {
+                                  "type": "array",
+                                  "prefixItems": [
+                                    {
+                                      "type": "string",
+                                      "maxLength": 48,
+                                      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                                    },
+                                    {
+                                      "type": "string",
+                                      "maxLength": 48,
+                                      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                                    },
+                                    {
+                                      "type": "string",
+                                      "maxLength": 48,
+                                      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                                    }
+                                  ],
+                                  "items": false,
+                                  "minItems": 3,
+                                  "maxItems": 3
+                                }
+                              },
+                              "required": [
+                                "point",
+                                "displacement"
+                              ],
+                              "additionalProperties": false
+                            }
+                          }
+                        },
+                        "required": [
+                          "operator",
+                          "handles"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "operator": {
+                            "type": "string",
+                            "const": "tessellate"
+                          }
+                        },
+                        "required": [
+                          "operator"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "operator": {
+                            "type": "string",
+                            "const": "extract_isosurface"
                           }
                         },
                         "required": [
@@ -3306,6 +3745,32 @@
                               "unit"
                             ],
                             "additionalProperties": false
+                          },
+                          "extraction": {
+                            "type": "object",
+                            "properties": {
+                              "method": {
+                                "default": "marching_tetrahedra",
+                                "type": "string",
+                                "enum": [
+                                  "marching_tetrahedra",
+                                  "dual_contouring"
+                                ]
+                              },
+                              "pruning": {
+                                "default": "lipschitz",
+                                "type": "string",
+                                "enum": [
+                                  "lipschitz",
+                                  "interval"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "method",
+                              "pruning"
+                            ],
+                            "additionalProperties": false
                           }
                         },
                         "required": [
@@ -3331,7 +3796,8 @@
                             "type": "string",
                             "enum": [
                               "step",
-                              "stl"
+                              "stl",
+                              "vdb"
                             ]
                           },
                           "source_unit": {
@@ -3341,6 +3807,16 @@
                               "m",
                               "um"
                             ]
+                          },
+                          "component": {
+                            "type": "string",
+                            "maxLength": 64,
+                            "pattern": "^0(:[0-9]{1,6}){1,16}$"
+                          },
+                          "grid": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
                           }
                         },
                         "required": [
@@ -4034,6 +4510,189 @@
                       "max"
                     ],
                     "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+                      },
+                      "kind": {
+                        "type": "string",
+                        "const": "surface_deviation"
+                      },
+                      "feature_id": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+                      },
+                      "maximum": {
+                        "type": "object",
+                        "properties": {
+                          "value": {
+                            "type": "string",
+                            "maxLength": 48,
+                            "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                          },
+                          "unit": {
+                            "type": "string",
+                            "enum": [
+                              "1",
+                              "m",
+                              "mm",
+                              "um",
+                              "rad",
+                              "deg"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "value",
+                          "unit"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "kind",
+                      "feature_id",
+                      "maximum"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+                      },
+                      "kind": {
+                        "type": "string",
+                        "const": "change_region"
+                      },
+                      "feature_id": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+                      },
+                      "local_frame": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+                      },
+                      "center": {
+                        "type": "array",
+                        "prefixItems": [
+                          {
+                            "type": "string",
+                            "maxLength": 48,
+                            "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                          },
+                          {
+                            "type": "string",
+                            "maxLength": 48,
+                            "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                          },
+                          {
+                            "type": "string",
+                            "maxLength": 48,
+                            "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                          }
+                        ],
+                        "items": false,
+                        "minItems": 3,
+                        "maxItems": 3
+                      },
+                      "radius": {
+                        "type": "string",
+                        "maxLength": 48,
+                        "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                      },
+                      "compute_margin": {
+                        "type": "string",
+                        "maxLength": 48,
+                        "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "kind",
+                      "feature_id",
+                      "center",
+                      "radius"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+                      },
+                      "kind": {
+                        "type": "string",
+                        "const": "blend_free_region"
+                      },
+                      "feature_id": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+                      },
+                      "min": {
+                        "type": "array",
+                        "prefixItems": [
+                          {
+                            "type": "string",
+                            "maxLength": 48,
+                            "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                          },
+                          {
+                            "type": "string",
+                            "maxLength": 48,
+                            "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                          },
+                          {
+                            "type": "string",
+                            "maxLength": 48,
+                            "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                          }
+                        ],
+                        "items": false,
+                        "minItems": 3,
+                        "maxItems": 3
+                      },
+                      "max": {
+                        "type": "array",
+                        "prefixItems": [
+                          {
+                            "type": "string",
+                            "maxLength": 48,
+                            "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                          },
+                          {
+                            "type": "string",
+                            "maxLength": 48,
+                            "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                          },
+                          {
+                            "type": "string",
+                            "maxLength": 48,
+                            "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+                          }
+                        ],
+                        "items": false,
+                        "minItems": 3,
+                        "maxItems": 3
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "kind",
+                      "feature_id",
+                      "min",
+                      "max"
+                    ],
+                    "additionalProperties": false
                   }
                 ]
               }
@@ -4077,6 +4736,25 @@
     "selection_handle": {
       "type": "string",
       "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+    },
+    "repair": {
+      "type": "object",
+      "properties": {
+        "of_transaction": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+        },
+        "cause": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "of_transaction",
+        "cause"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [
@@ -5047,6 +5725,60 @@
             "center",
             "radius",
             "displacement"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "type": "string",
+              "const": "sampled_grid"
+            },
+            "artifact_id": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+            },
+            "grid": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "lipschitz": {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            },
+            "value_unit": {
+              "default": "length",
+              "type": "string",
+              "enum": [
+                "length",
+                "dimensionless"
+              ]
+            },
+            "source_unit": {
+              "default": "mm",
+              "type": "string",
+              "enum": [
+                "mm",
+                "m",
+                "um"
+              ]
+            },
+            "interpolation": {
+              "default": "trilinear",
+              "type": "string",
+              "const": "trilinear"
+            }
+          },
+          "required": [
+            "op",
+            "artifact_id",
+            "lipschitz",
+            "value_unit",
+            "source_unit",
+            "interpolation"
           ],
           "additionalProperties": false
         }

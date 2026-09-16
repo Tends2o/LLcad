@@ -56,6 +56,16 @@
         "ambiguity": {
           "type": "boolean"
         },
+        "spatial_filter": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/__schema8"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "total_matches": {
           "$ref": "#/definitions/__schema13"
         },
@@ -104,6 +114,7 @@
         "artifacts",
         "recommended_next_actions",
         "ambiguity",
+        "spatial_filter",
         "total_matches",
         "matches"
       ],

@@ -1,0 +1,64 @@
+{
+  "version": 2,
+  "mandatory_gates": [
+    "before_request",
+    "before_import",
+    "before_compile",
+    "after_compile",
+    "before_resolve",
+    "after_resolve",
+    "before_execute",
+    "after_execute",
+    "before_validate",
+    "after_validate",
+    "before_commit",
+    "after_commit",
+    "before_export",
+    "after_export",
+    "before_publish",
+    "on_failure",
+    "on_cancel"
+  ],
+  "gate_contexts": {
+    "before_request": ["trace_id", "tool"],
+    "before_import": ["model_id", "artifact_id"],
+    "before_compile": ["model_id"],
+    "after_compile": ["model_id", "registry_hash"],
+    "before_resolve": ["model_id", "revision"],
+    "after_resolve": ["feature_id", "revision"],
+    "before_execute": ["job_id", "input_hash"],
+    "after_execute": ["job_id", "engine_build"],
+    "before_validate": ["transaction_id"],
+    "after_validate": ["transaction_id", "digest"],
+    "before_commit": ["transaction_id"],
+    "after_commit": ["model_id", "revision"],
+    "before_export": ["model_id", "revision", "format"],
+    "after_export": ["artifact_id", "job_id", "artifact_count"],
+    "before_publish": [
+      "model_id",
+      "revision",
+      "package_hash",
+      "recipient",
+      "approval_request_id",
+      "action_digest"
+    ],
+    "on_failure": ["job_id", "code", "transaction_id"],
+    "on_cancel": ["job_id", "transaction_id"]
+  },
+  "defaults": {
+    "mandatory_gate_failure": "deny",
+    "unknown_operator": "deny",
+    "ambiguous_selection": "deny",
+    "silent_tolerance_increase": "deny",
+    "arbitrary_code_execution": "deny",
+    "dynamic_hook_loading": "deny",
+    "external_publication_without_bound_approval": "deny"
+  },
+  "repair_policy": {
+    "max_candidate_retries": 3,
+    "preserve_required_dimensions": true,
+    "require_new_candidate_hash": true,
+    "allowed_automatic_repairs": ["re_tessellation_of_derived_previews"]
+  },
+  "gate_time_budget_ms": 1000
+}

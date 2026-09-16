@@ -41,6 +41,8 @@ Der automatisierte Restore-Test erstellt eine echte zweite Datenbank, liest dara
 
 ## Ausfälle
 
+Mit `MATHFORGE_DEBUG_ERRORS=1` schreibt der Dienst bei fehlgeschlagenen Jobs die interne Ausnahme und die letzten 2000 Zeichen des nativen Worker-stderr nach stderr. Diese Diagnose wird nie gespeichert und nie an Clients zurückgegeben, weil sie importierte Daten enthalten kann; sie ist nur für die Betreiberanalyse gedacht. `MATHFORGE_WORKERS` (1–4) begrenzt parallele Sandboxes, `MATHFORGE_WARM_WORKERS` (0–2) den vorgewärmten Pool.
+
 - **Worker beendet:** Jobstatus enthält eine sichere Diagnose; die maßgebliche Revision bleibt erhalten. Jeder Worker besitzt eine eigene Prozessgruppe, die bei Abbruch, Timeout und Prozessende bereinigt wird. Auch ein Absturz während des Bubblewrap-Starts darf keinen geerbten stderr-Kanal offen halten und die Queue blockieren. Bei verlorenem Prozess mit gültigem Lease erfolgt der Wiederanlauf nach dessen Ablauf.
 - **Job dauert zu lange:** `cad_job_cancel` stoppt den Prozess. Ein Budgetfehler verändert keine Toleranz. Kleinere Domäne oder weniger Instanzen explizit wählen.
 - **Stale Revision:** Aktuelle Revision erneut lesen, Änderung neu planen und neuen Kandidaten prüfen. Kein stilles Rebase.

@@ -799,6 +799,91 @@ dialog input {
   height: 1px;
   overflow: hidden;
 }
+.structure {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 6px;
+}
+.structure details {
+  border-left: 1px solid #e4eadd;
+  margin-left: 5px;
+  padding-left: 8px;
+}
+.structure summary {
+  cursor: pointer;
+  font-size: 11px;
+  color: #4f6350;
+  padding: 5px 0;
+  list-style: none;
+}
+.structure summary::before {
+  content: "▸ ";
+  color: #9da497;
+}
+.structure details[open] > summary::before {
+  content: "▾ ";
+}
+.structure summary small,
+.structure .part small {
+  color: #9da497;
+  margin-left: 6px;
+  font-size: 9px;
+}
+.structure .part {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  font-size: 10px;
+  color: #5b675c;
+  padding: 4px 0;
+}
+.structure .part.selected {
+  color: #345b42;
+  font-weight: 600;
+}
+#scale-bar {
+  position: absolute;
+  left: 27px;
+  bottom: 36px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font:
+    9px ui-monospace,
+    monospace;
+  color: #6c7a62;
+  z-index: 2;
+}
+#scale-bar-line {
+  display: block;
+  height: 3px;
+  width: 80px;
+  background: #4f6350;
+  border-left: 1px solid #4f6350;
+  border-right: 1px solid #4f6350;
+}
+.view-toolbar select {
+  width: auto;
+  border: 0;
+  font-size: 10px;
+  padding: 6px;
+  background: transparent;
+  color: #39433e;
+}
+.anchor,
+.regions {
+  font-size: 9px;
+  color: #6e7a64;
+  margin-top: 12px;
+  line-height: 1.7;
+}
+.anchor:empty,
+.regions:empty {
+  display: none;
+}
 #measurement {
   position: absolute;
   top: 65px;

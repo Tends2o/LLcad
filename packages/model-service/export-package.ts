@@ -4,8 +4,42 @@ import { hash } from "../semantic-ir/hash.js";
 import { requireThat } from "../semantic-ir/errors.js";
 import { IMPLEMENTATION_HASH } from "../compiler/build.js";
 import { assertValidation } from "./result-contracts.js";
+import { errorBudget, type Loss } from "../compiler/error-budget.js";
 
 type Artifact = ReturnType<Store["artifact"]>;
+/** Export stage losses as ledger entries: quantization bounds are certified per corresponding vertex, roundtrip extents are sampled. */
+function exportLoss(manifest: any): Loss[] {
+  const rt = manifest.roundtrip;
+  if (!rt || typeof manifest.filename !== "string") return [];
+  if (typeof rt.measured_vertex_error_bound_mm === "number")
+    return [
+      {
+        stage: "export_quantization",
+        object: manifest.filename,
+        bound_mm: rt.measured_vertex_error_bound_mm,
+        guarantee: "bounded",
+      },
+    ];
+  if (typeof rt.max_coordinate_error_mm === "number")
+    return [
+      {
+        stage: "export_quantization",
+        object: manifest.filename,
+        bound_mm: rt.max_coordinate_error_mm,
+        guarantee: "bounded",
+      },
+    ];
+  if (typeof rt.measured_bounds_error === "number")
+    return [
+      {
+        stage: "export_roundtrip_extents",
+        object: manifest.filename,
+        bound_mm: rt.measured_bounds_error,
+        guarantee: "sampled",
+      },
+    ];
+  return [];
+}
 /** Private, revision-bound components. Data in sidecars is never executable. */
 export function exportPackage(
   store: Store,
@@ -117,14 +151,15 @@ export function exportPackage(
       certified_surface_error_bound_mm: null,
     },
     error_budget: {
-      requested_model_tolerance: revision.ir.tolerance,
-      parameter_to_kernel_certified_bound_mm: null,
-      kernel_certified_bound_mm: null,
-      tessellation_certified_bound_mm: null,
-      combined_certified_bound_mm: null,
+      ...errorBudget(
+        revision.ir,
+        revision.geometry.facts,
+        JSON.parse(row.plan).refinement_reports ?? [],
+        geometry.flatMap((a) => exportLoss(a.manifest)),
+      ),
       measured_export_losses: "validation.json:roundtrips",
       interpretation:
-        "A requested tolerance or sampled roundtrip error is not a certified combined surface bound.",
+        "A requested tolerance or sampled roundtrip error is not a certified combined surface bound; only summable certified stages form the chain.",
     },
     quality: geometry[0]?.manifest.quality ?? revision.quality,
     validation_digest: digest,

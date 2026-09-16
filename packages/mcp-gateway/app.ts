@@ -12,6 +12,8 @@ import { LEGACY_VERSIONS } from "./versions.js";
 import { ApprovalVerifier } from "../policy/approvals.js";
 import { AccessPayload } from "../semantic-ir/access.js";
 import { assertResult } from "../model-service/result-contracts.js";
+import { DownloadTokens } from "../policy/downloads.js";
+import { gzipSync } from "node:zlib";
 export function createApp(service: ModelService, config: AuthConfig) {
   const app = express(),
     auth = new Auth(config);
@@ -214,7 +216,50 @@ export function createApp(service: ModelService, config: AuthConfig) {
       ),
     });
   });
-  app.get("/api/artifacts/:id", authenticate, rate, (req, res) => {
+  const downloads = new DownloadTokens(
+    config.dataRoot,
+    new URL("/api/artifacts", config.publicURL).toString(),
+  );
+  service.downloads = downloads;
+  const tokenOrSession = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    if (typeof req.query.token !== "string")
+      return authenticate(req, res, next);
+    try {
+      const claims = await downloads.verify(req.query.token);
+      requireThat(
+        claims.artifact_id === String(req.params.id),
+        "AUTH_REQUIRED",
+        "Downloadtoken gilt für ein anderes Artefakt.",
+      );
+      res.locals.principal = {
+        tenant: claims.tenant_id,
+        user: claims.sub,
+        scopes: ["model:read"],
+      } satisfies Principal;
+      next();
+    } catch (error) {
+      res.status(401).json({ error: safeError(error) });
+    }
+  };
+  const sendCompressed = (req: Request, res: Response, body: Buffer) => {
+    if (
+      body.length > 1024 &&
+      /\bgzip\b/.test(req.header("accept-encoding") ?? "") &&
+      /^(application\/json|model\/|text\/)/.test(
+        String(res.getHeader("content-type") ?? ""),
+      )
+    ) {
+      res.setHeader("Content-Encoding", "gzip");
+      res.setHeader("Vary", "Accept-Encoding");
+      return res.send(gzipSync(body));
+    }
+    res.send(body);
+  };
+  app.get("/api/artifacts/:id", tokenOrSession, rate, (req, res) => {
     const a = service.store.getArtifact(
       res.locals.principal,
       String(req.params.id),
@@ -224,7 +269,11 @@ export function createApp(service: ModelService, config: AuthConfig) {
       "Content-Disposition",
       `inline; filename="${a.manifest.filename ?? a.id}"`,
     );
-    res.send(service.store.readBlob(a.hash));
+    sendCompressed(req, res, service.store.readBlob(a.hash));
+  });
+  app.get("/api/metrics", authenticate, rate, (req, res) => {
+    authorize(res.locals.principal, "model:read");
+    res.json(service.jobs.metrics.snapshot());
   });
   app.get("/api/resources", authenticate, rate, (req, res) => {
     requireThat(

@@ -189,6 +189,20 @@ def mesh_facts(mesh, feature, quality=None):
             'mesh_quality':report,'source_conversion':mesh.get('source_conversion'),
             'coverage':'entire_authoritative_indexed_mesh','manufacturing_status':'not_certified'}
 
+def index_exact(mesh):
+    """Merge mathematically identical decoded coordinates only; nearby points stay distinct."""
+    indexed={};vertices=[];triangles=[]
+    for t in mesh['triangles']:
+        face=[]
+        for i in t:
+            point=tuple(float(x) for x in mesh['vertices'][i])
+            if point not in indexed:indexed[point]=len(vertices);vertices.append(list(point))
+            face.append(indexed[point])
+        if len(set(face))==3:triangles.append(face)
+    result=dict(mesh,vertices=vertices,triangles=triangles);validate_data(result)
+    result['coincident_corners_indexed']=sum(len(t) for t in mesh['triangles'])-len(vertices)
+    return result
+
 def combine(meshes):
     vertices=[];triangles=[]
     for mesh in meshes:

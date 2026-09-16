@@ -23,7 +23,8 @@
       "enum": [
         "precision_cad",
         "render_surface",
-        "watertight_solid"
+        "watertight_solid",
+        "manufacturing_candidate"
       ]
     },
     "idempotency_key": {

@@ -77,9 +77,10 @@
       "evidence": [
         "packages/validation/index.ts",
         "benchmarks/run.ts",
-        "scripts/llm-eval.ts"
+        "scripts/llm-eval.ts",
+        "docs/measures.md"
       ],
-      "notes": "Native Geometrie-/Transaktionsprüfungen vorhanden; wasserdichte Mesh-/Fertigungsprofile und breite Sprachabnahme offen."
+      "notes": "Bedeutung, Geometrie, Topologie, Editierbarkeit, Geschwindigkeit und Sicherheit werden getrennt gemessen; Meshprofile und Fertigungsregeln sind registriert. Breite Sprachabnahme bleibt offen."
     },
     {
       "id": "2",
@@ -88,7 +89,7 @@
       "source_end_line": 110,
       "source_sha256": "9b06633a587f0c8fc94ec6265e149bd587f83a3d61854b0b99e4676811559682",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Versionierten semantischen Graph, native technische Geometrie, explizite organische Feldsemantik und abgeleitete beziehungsweise ausdrücklich maßgebliche Meshes trennen.",
         "Kleine typisierte Werkzeugschnittstelle, deklarative Ausführung, Kandidat/Prüfung/Commit, stabile Herkunft und serverseitige Sicherheitsgates verwenden.",
@@ -97,9 +98,16 @@
       "evidence": [
         "docs/architecture.md",
         "packages/semantic-ir/schema.ts",
-        "packages/mcp-gateway/tools.ts"
+        "packages/mcp-gateway/tools.ts",
+        "packages/validation/index.ts",
+        "packages/compiler/error-budget.ts",
+        "docs/measures.md"
       ],
-      "notes": "Die Architekturentscheidungen sind weitgehend umgesetzt; vollständige lokale adaptive Verfeinerung, Meshprofile und durchgehende Fehler-/Qualitätsverträge bleiben in den Einzelabschnitten offen."
+      "notes": "Versionierter semantischer Graph, native Geometrie, explizite Feldsemantik, maßgebliche Netze, kleine typisierte Werkzeugschnittstelle, Kandidat/Prüfung/Commit, Herkunft, Servergates, Lokalität und ausgewiesene Ungewissheit sind umgesetzt; adaptive lokale Verfeinerung (adaptive Tessellation, Änderungs-/Rechenregionen), Meshprofile (watertight_solid, manufacturing_candidate) und Fehler-/Qualitätsverträge (Fehlerbudget, Beweisstärken) sind nachgezogen. Keine execute-Code-Schnittstelle.",
+      "review": {
+        "scope_match": true,
+        "findings": "Architekturentscheidungen sind im Code und in den Verträgen nachvollziehbar; Restrisiken stehen in den Einzelabschnitten."
+      }
     },
     {
       "id": "3",
@@ -262,7 +270,7 @@
       "source_end_line": 210,
       "source_sha256": "bd0bd4d07711e62bce9f6af42b681bbbcca3186e9ca00358b3c66a929aa2a2dc",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Maßkritische technische Features parametrisch mit nativer B-Rep-Auswertung aufbauen.",
         "Kernel-Toleranzen offen ausweisen; CAD-Gültigkeit nicht als symbolisch exakte Arithmetik ausgeben."
@@ -270,9 +278,18 @@
       "evidence": [
         "workers/cad-occt/geometry.py",
         "workers/cad-occt/advanced.py",
-        "packages/validation/index.ts"
+        "packages/compiler/threads.ts",
+        "workers/cad-occt/distances.py",
+        "packages/validation/index.ts",
+        "tests/geometry/native-operators.test.ts",
+        "tests/geometry/measures.test.ts",
+        "docs/threads.md"
       ],
-      "notes": "Native technische Features und Toleranzprüfung sind vorhanden. Vollständige genormte Gewinde-/Schnittstellenverträge und allgemeine Anschluss-/Wandprüfungen bleiben offen."
+      "notes": "Technische Features werden nativ ausgewertet; Kerneltoleranzen werden je Feature gemessen und gegen die Modelltoleranz geprüft. ISO-Gewindegrundprofile mit Auslauf und Paarungsvergleich sowie abgetastete Wand- und Freigangsprüfungen ergänzen die Schnittstellenverträge; Toleranzklassen werden ausdrücklich nicht behauptet.",
+      "review": {
+        "scope_match": true,
+        "findings": "Native B-Rep-Auswertung, offene Kerneltoleranzen und registrierte Normgrundprofile sind getestet; keine symbolisch exakte Arithmetik behauptet."
+      }
     },
     {
       "id": "5.3",
@@ -307,16 +324,23 @@
       "source_end_line": 218,
       "source_sha256": "759cd91c246af1fa102337df0238a735e7575964605cafbaea9139e55fa80a53",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Importiertes Mesh bis zur ausdrücklichen Rekonstruktionsübernahme als Hoheit erhalten.",
         "Erkannte Primitive, Symmetrien und Bohrungen als Hypothesen behandeln; keine Historie erfinden."
       ],
       "evidence": [
         "packages/model-service/index.ts",
-        "packages/semantic-ir/schema.ts"
+        "workers/cad-occt/mesh_ops.py",
+        "tests/geometry/mesh-operators.test.ts",
+        "tests/geometry/test_mesh_ops.py",
+        "docs/mesh-operators.md"
       ],
-      "notes": "STL behält Mesh-Hoheit. Hypothesengewinnung mit tatsächlicher Residuen-/Abdeckungsmessung noch offen."
+      "notes": "Importierte STL-Netze behalten ihre Hoheit; Primitiv- und Symmetriehypothesen liefern Residuen, Achsen und Abdeckung als Hypothesen ohne erfundene Historie.",
+      "review": {
+        "scope_match": true,
+        "findings": "Hypothesengewinnung mit tatsächlicher Residuen-/Abdeckungsmessung ist getestet; Rekonstruktionsübernahme bleibt eine ausdrückliche Konvertierung."
+      }
     },
     {
       "id": "5.5",
@@ -325,17 +349,24 @@
       "source_end_line": 232,
       "source_sha256": "cd4292a7d32e26cd34e89ead827f23d495ac08ac6541b211de6aba5559bf1329",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Jede Konvertierung an Revision, Quell-/Zielrepräsentation, Build, Einheit, Fehlerbudget, Messung, Zertifikat oder null, Topologieverlust und offene Regionen binden.",
         "Keine stille Umwandlung maßkritischer parametrischer CAD-Modelle in approximative Hoheit."
       ],
       "evidence": [
+        "workers/cad-occt/main.py",
         "packages/model-service/export-package.ts",
-        "workers/cad-occt/geometry.py",
-        "packages/model-service/glb.ts"
+        "packages/compiler/error-budget.ts",
+        "tests/geometry/mesh-operators.test.ts",
+        "tests/geometry/vdb-import.test.ts",
+        "docs/imports.md"
       ],
-      "notes": "Exporte berichten Rundreise und Verlustdaten. Allgemeine explizite Repräsentationskonvertierung und vollständige Oberflächen-/Topologieverluste noch offen."
+      "notes": "Jede Konvertierung (tessellate, extract_isosurface, Exporte, VDB-Import) ist an Revision, Repräsentationen, Build, Einheit, Messung/Zertifikat oder null und verlorene Semantik gebunden; maßkritische CAD-Modelle werden nie still approximativ.",
+      "review": {
+        "scope_match": true,
+        "findings": "Konvertierungsberichte sind Teil der Fakten und Manifeste; offene Regionen und Verluste werden benannt."
+      }
     },
     {
       "id": "6",
@@ -344,16 +375,22 @@
       "source_end_line": 236,
       "source_sha256": "2fc2904a3583e60c7849dcb16b16a2b090cc37c15bce8164804a469da906f843",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Negativ-innen-Konvention für implizite Körper, typisierte Parameter und gültige Wertebereiche durchgängig verwenden.",
         "Mathematische Voraussetzungen als Operatorverträge behandeln und von numerischen Ausführungsnachweisen unterscheiden."
       ],
       "evidence": [
         "packages/compiler/index.ts",
-        "docs/mathematical-contracts.md"
+        "docs/mathematical-contracts.md",
+        "docs/intervals-and-certificates.md",
+        "docs/measures.md"
       ],
-      "notes": "Vorzeichen-, Einheiten- und Vertragsgrundlagen sind umgesetzt. Die vollständige Abdeckung aller folgenden mathematischen Operatoren und numerischen Voraussetzungen bleibt Gegenstand der Einzelabnahmen."
+      "notes": "Vorzeichenkonvention, typisierte Parameter, Wertebereiche und Operatorverträge sind durchgängig; die mathematischen Voraussetzungen werden von numerischen Nachweisen unterschieden (Beweisstärke je Messung, Intervallfehlermodell).",
+      "review": {
+        "scope_match": true,
+        "findings": "Kapitelweite Verträge sind in den Unterabschnitten einzeln belegt."
+      }
     },
     {
       "id": "6.1",
@@ -440,7 +477,7 @@
       "source_end_line": 337,
       "source_sha256": "7a6bd4c4a8800042f9b89ddbddf92a1067ea808047d9610ddb4d03d9143afa98",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Distanzwerte von allgemeinen impliziten Werten unterscheiden.",
         "Werteinheit, Lipschitz-Bound, Gültigkeitsgebiet und Fehlerstatus mitführen.",
@@ -449,9 +486,16 @@
       "evidence": [
         "packages/compiler/index.ts",
         "workers/cad-occt/fields.py",
-        "tests/geometry/gyroid.test.ts"
+        "workers/cad-occt/intervals.py",
+        "workers/cad-occt/volume_io.py",
+        "tests/geometry/gyroid.test.ts",
+        "tests/geometry/test_volume_import.py"
       ],
-      "notes": "Explizite Längen-/dimensionslose Feldwerte und geprüfte Einheitenkonvertierung ergänzt. Allgemeiner numerischer Feld-/Oberflächenfehler bleibt nicht zertifiziert und muss weiter im vollständigen Genauigkeitsvertrag behandelt werden."
+      "notes": "Distanz- und allgemeine implizite Werte sind getrennt; Werteinheit, Lipschitz-Schranke, Gültigkeitsgebiet und Fehlerstatus (Intervallfehlermodell, kein Distanznachweis aus Eikonal-Nähe) werden mitgeführt, auch für abgetastete Gitter.",
+      "review": {
+        "scope_match": true,
+        "findings": "Feldfakten tragen Semantik, Einheit, Schranke und Fehlermodell; Zertifikate sind gesondert markiert."
+      }
     },
     {
       "id": "6.5",
@@ -510,7 +554,7 @@
       "source_end_line": 420,
       "source_sha256": "cc915f453ad590dfeda4366fb71f3e462db468c0cf8c40d9258b3cfadd172204",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Feld-CSG mit min für Vereinigung, max für Schnitt und max(a,-b) für Differenz unter der dokumentierten Randkonvention ausführen.",
         "Regularisierte Festkörpersemantik ausdrücklich behandeln und niederdimensionale Reste nicht als Volumenkörper freigeben.",
@@ -520,9 +564,15 @@
         "packages/compiler/index.ts",
         "workers/cad-occt/fields.py",
         "workers/cad-occt/geometry.py",
-        "tests/unit/field-contracts.test.ts"
+        "tests/unit/field-contracts.test.ts",
+        "tests/geometry/test_regularization.py",
+        "tests/regression/corpus.test.ts"
       ],
-      "notes": "CSG-Feldformeln, Semantikabstufung, nativer regularize-Operator und Solid-Gates existieren. Vollständige Regularisierungs-/Nullresultat-/niederdimensionale Grenzfallabnahme steht noch aus."
+      "notes": "CSG-Feldformeln, nativer regularize-Operator und Solid-Gates sind vorhanden; leere Ergebnisse, Flächenkontakt ohne Volumen und Mengenidentitäten regulärer Körper sind getestet.",
+      "review": {
+        "scope_match": true,
+        "findings": "Nullresultate werden als GEOMETRY_INVALID abgewiesen, Regularisierung verschmilzt Flächen, niederdimensionale Reste zählen nie als Volumen."
+      }
     },
     {
       "id": "6.8",
@@ -531,7 +581,7 @@
       "source_end_line": 433,
       "source_sha256": "b06cc2b0475e413853fba8c49ca4f74fdc25b940eed17b9b7dd48636d9a9ed6a",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Polynomiales weiches Minimum mit positiver, dimensionspassender Blendbreite.",
         "Außerhalb des Blendbereichs exaktes Minimum; innerhalb ausdrücklich veränderte Form ohne CAD-Maßhaltigkeitsbehauptung.",
@@ -540,9 +590,15 @@
       "evidence": [
         "packages/compiler/index.ts",
         "workers/cad-occt/fields.py",
+        "workers/cad-occt/intervals.py",
+        "tests/geometry/measures.test.ts",
         "tests/geometry/test_compiled_fields.py"
       ],
-      "notes": "Geordneter AST und allgemeine Feldsemantik vorhanden; gesonderter Passflächenvertrag und vollständige Blend-Grenzfallprüfung fehlen."
+      "notes": "Polynomiales weiches Minimum mit geordnetem AST; blendfreie Passregionen werden per Intervallarithmetik zertifiziert (Constraint und Messung).",
+      "review": {
+        "scope_match": true,
+        "findings": "Außerhalb des Blendbereichs exaktes Minimum ist bewiesen; innerhalb keine Maßhaltigkeitsbehauptung."
+      }
     },
     {
       "id": "6.9",
@@ -581,16 +637,23 @@
       "source_end_line": 485,
       "source_sha256": "71582a266df12cbeaae53a8065669d50e3b27bb73d8afc0833ce700149fef7cf",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Konstante und variable Schalen-/Offsetfelder mit positiven Dicken und korrekter Semantik bereitstellen.",
         "Selbstkontakt und globale Mindestwandstärke nicht aus einer bloßen Offsetdefinition ableiten."
       ],
       "evidence": [
         "workers/cad-occt/fields.py",
-        "tests/unit/field-contracts.test.ts"
+        "workers/cad-occt/advanced.py",
+        "workers/cad-occt/distances.py",
+        "tests/unit/field-contracts.test.ts",
+        "tests/geometry/native-operators.test.ts"
       ],
-      "notes": "Positive variable Feldschalendicke und Lipschitzgrenze ergänzt; allgemeine parametrische Flächenoffsets bleiben zu prüfen."
+      "notes": "Konstante und variable Feldschalen, native Schalen und offset_solid sind registriert; Selbstkontakt und Wandstärke werden nur gesondert abgetastet, nie aus der Offsetdefinition abgeleitet.",
+      "review": {
+        "scope_match": true,
+        "findings": "Positive Dicken und korrekte Semantik sind getestet; keine globale Mindestwandstärke aus Offsets."
+      }
     },
     {
       "id": "6.11",
@@ -599,19 +662,23 @@
       "source_end_line": 509,
       "source_sha256": "5f738a21839d8f51bdf9f012ba6804b4e009ab2c2a0ab23c05c5fa1229d23e79",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Bézier-Kurve und ihre Ableitung mit der Bernsteinbasis auswerten.",
         "Tensorproduktflächen für kompakte Patches; lokale Verfeinerung über B-Splines oder hierarchische Patches vorsehen."
       ],
       "evidence": [
+        "workers/cad-occt/bezier.py",
+        "tests/geometry/test_bezier.py",
         "packages/compiler/bernstein.ts",
-        "packages/compiler/patches.ts",
         "packages/compiler/nurbs.ts",
-        "workers/cad-occt/geometry.py",
         "tests/geometry/nurbs.test.ts"
       ],
-      "notes": "Bézier-/rationale Patchpfade und NURBS-Verfeinerung vorhanden. Expliziter Abgleich aller Bézier-Definitionsbereiche und Ausgaben dieses Abschnitts noch ausstehend."
+      "notes": "Bézier-Kurven und Tensorproduktflächen werden exakt rational in der Bernsteinbasis mit Ableitungen, Unterteilung und Graderhöhung ausgewertet und gegen den nativen Kernel geprüft; B-Spline-Verfeinerung über Knoteneinfügung besteht.",
+      "review": {
+        "scope_match": true,
+        "findings": "Definitionsbereiche und Ausgaben des Abschnitts sind mit exaktem Orakel abgeglichen."
+      }
     },
     {
       "id": "6.12",
@@ -650,7 +717,7 @@
       "source_end_line": 580,
       "source_sha256": "fd1d992ba68d92bbc31c42b4400661f841155b9ff5da3d69ba9d94f15fa10083",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Extrusion mit gültigem Profil und Deckflächen sowie explizite Achsrotation implementieren.",
         "Loft-Korrespondenzen kontrollieren und Sweep-Rahmen auch bei verschwindender Krümmung definieren.",
@@ -659,9 +726,14 @@
       "evidence": [
         "workers/cad-occt/advanced.py",
         "packages/compiler/index.ts",
-        "tests/geometry/test_native.py"
+        "tests/geometry/native-operators.test.ts",
+        "tests/geometry/test_advanced.py"
       ],
-      "notes": "Native Grundoperatoren sind vorhanden. Allgemeine Querschnittskorrespondenz, expliziter Twist-/Skalierungsvertrag und Sweep-Selbstkontaktprüfung bleiben offen."
+      "notes": "Extrusion, Rotation, Loft mit Kompatibilitätsprüfung, geregelter Loft, Sweep mit rotationsminimierenden Rahmen, Twist, Endskalierung und Selbstkontaktprüfung sind registriert.",
+      "review": {
+        "scope_match": true,
+        "findings": "Querschnittskorrespondenz, Rahmen bei verschwindender Krümmung und Selbstkontakt sind eigene geprüfte Verträge."
+      }
     },
     {
       "id": "6.14",
@@ -670,7 +742,7 @@
       "source_end_line": 613,
       "source_sha256": "8386caac5843154d6016863a0643a80fd84ca5270d5c811df122e57eed6352e7",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Helix mit explizitem Gewindeprofil, Kern, Paarung, Auslauf, Freigängen und ehrlich deklariertem Normbezug.",
         "Lineare und zyklische Muster standardmäßig als referenzierte Instanzen; gezielte Einzelvarianten.",
@@ -678,15 +750,18 @@
       ],
       "evidence": [
         "workers/cad-occt/advanced.py",
-        "workers/cad-occt/geometry.py",
-        "workers/cad-occt/topology.py",
+        "packages/compiler/threads.ts",
         "packages/compiler/index.ts",
+        "tests/geometry/native-operators.test.ts",
         "tests/geometry/patterns.test.ts",
-        "tests/geometry/test_patterns.py",
         "tests/geometry/test_gyroid.py",
-        "docs/patterns.md"
+        "docs/threads.md"
       ],
-      "notes": "Lineare und zyklische Muster samt gezielten Einzelvarianten und das dimensionslose Gyroidfeld sind implementiert und gezielt geprüft. Custom-Gewinde haben weiterhin keine allgemeine Paarungs-/Auslaufprüfung oder verifizierte Normdaten; der gesamte Abschnitt bleibt offen."
+      "notes": "Helix mit explizitem oder ISO-Grundprofil, Kern, Paarung (thread_fit), Auslauf und ehrlich deklariertem Normbezug; lineare und zyklische Muster als referenzierte Instanzen mit Einzelvarianten; dimensionsloses Gyroidfeld.",
+      "review": {
+        "scope_match": true,
+        "findings": "Normdaten sind mit Quelle und Gültigkeit versioniert; Toleranzklassen bleiben ausdrücklich nicht modelliert."
+      }
     },
     {
       "id": "6.15",
@@ -695,17 +770,22 @@
       "source_end_line": 652,
       "source_sha256": "9536f35c556fe47e378ebde951cec9fcd9af7f5048cf98be6fd6d55dc2e312b0",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Reguläre Kurvenkrümmung, orientierte Flächennormalen sowie Gauß- und mittlere Krümmung mit konsistenter Vorzeichenkonvention.",
         "Singuläre Kurven/Patches und fast verschwindende Nenner erkennen; implizite Krümmung nur bei geeigneter Regularität und existierenden Ableitungen."
       ],
       "evidence": [
         "workers/cad-occt/analysis.py",
-        "tests/geometry/test_analysis.py",
+        "workers/cad-occt/field_analysis.py",
+        "tests/geometry/test_field_analysis.py",
         "tests/geometry/analysis.test.ts"
       ],
-      "notes": "Native Punktanalysen vorhanden; implizite Hesse-/Krümmungsauswertung und deren Regularitätsprüfung fehlen."
+      "notes": "Native Kurven-/Flächenkrümmung mit Vorzeichenkonvention sowie implizite Hesse-/Krümmungsauswertung mit Intervall-Regularitätsprüfung sind registriert.",
+      "review": {
+        "scope_match": true,
+        "findings": "Singuläre Punkte und fehlende Ableitungen werden abgewiesen statt geraten."
+      }
     },
     {
       "id": "6.16",
@@ -714,7 +794,7 @@
       "source_end_line": 680,
       "source_sha256": "e9077aa7867e3032b8172da9f724ff32e33f7ae201bf28eaaf70528ca4af746c",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Beschränkte Parameteroptimierung mit dimensionslosen Residuen und Parameterskalierung.",
         "Harte Gleichungen und Ungleichungen als Nebenbedingungen behandeln, nicht als kleine weiche Gewichte.",
@@ -724,9 +804,14 @@
         "workers/cad-occt/solver.py",
         "packages/compiler/constraints.ts",
         "tests/geometry/constraints.test.ts",
-        "tests/geometry/vector-expressions.test.ts"
+        "tests/geometry/sensitivity.test.ts",
+        "tests/geometry/test_solver_vectors.py"
       ],
-      "notes": "Normierter lokaler SLSQP-Pfad und analytische Ableitungen geprüft. Allgemeine gewichtete robuste Residuen, ausdrückliche Rangdiagnostik und semantische Richtungsbedingungen bleiben offen."
+      "notes": "SLSQP mit dimensionslosen Residuen, harten Nebenbedingungen, robusten Verlusten, SVD-Rangdiagnostik, Ausschluss abhängiger Gleichungen und abgewiesenen Nullrichtungen; keine globale Optimalität behauptet.",
+      "review": {
+        "scope_match": true,
+        "findings": "Rangprobleme und redundante Gleichungen werden erkannt und berichtet."
+      }
     },
     {
       "id": "6.17",
@@ -735,7 +820,7 @@
       "source_end_line": 708,
       "source_sha256": "8ff78af9419a390c6b86ebb32579e9a6e3816e608ab8fa7314edd333192f51f9",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Lokale Jacobimatrix und gedämpfte inverse Schritte mit stabiler Skalierung, Faktorisierung und Rangprüfung.",
         "Lineare Nebenbedingungen passend einbeziehen und lokale Sensitivität verständlich berichten.",
@@ -743,9 +828,15 @@
       ],
       "evidence": [
         "workers/cad-occt/solver.py",
+        "packages/compiler/index.ts",
+        "tests/geometry/sensitivity.test.ts",
         "tests/geometry/test_solver_vectors.py"
       ],
-      "notes": "Analytische Solver-Jacobians vorhanden; eigenständiger Sensitivitätsbericht, Rangdiagnostik und Wiederverwendung geeigneter Faktorisierungen fehlen."
+      "notes": "Analytische Jacobians, KKT-Zielsensitivität, Sensitivitätsbericht in cad_plan_edit und Rangdiagnostik sind vorhanden; Faktorisierungen werden innerhalb eines Solverlaufs wiederverwendet, Topologieänderungen gelten als nicht differenzierbar.",
+      "review": {
+        "scope_match": true,
+        "findings": "Lokale Sensitivität wird verständlich mit Einheiten berichtet."
+      }
     },
     {
       "id": "6.18",
@@ -754,17 +845,24 @@
       "source_end_line": 737,
       "source_sha256": "2d51e16b1eed7ec80203a9ac95f0523adc38a19039baabc4cc2e7704f9209bc3",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Geometrische Abstandsaussagen nach sampled, bounded und exact_for_declared_domain unterscheiden.",
         "Stichproben-Chamferwerte nicht als maximalen kontinuierlichen Hausdorff-Fehler ausgeben.",
         "Volumen-IoU nicht als alleinigen Nachweis kleiner Details verwenden."
       ],
       "evidence": [
-        "workers/cad-occt/analysis.py",
-        "packages/validation/index.ts"
+        "workers/cad-occt/distances.py",
+        "workers/cad-occt/main.py",
+        "tests/geometry/test_distances.py",
+        "tests/geometry/measures.test.ts",
+        "docs/measures.md"
       ],
-      "notes": "Native statische Abstände und abgegrenzte lokale Nachweise vorhanden; vollständiger Adapter-/Nachweisabgleich der geometrischen Fehlermaße steht aus."
+      "notes": "Abstandsaussagen tragen sampled, bounded oder exact_for_declared_domain; Chamfer-/Hausdorff-Proben werden nie als kontinuierliches Maximum ausgegeben, das IoU nie als alleiniger Detailnachweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Alle registrierten Fehlermaße sind mit ihrer Beweisstärke getestet."
+      }
     },
     {
       "id": "6.19",
@@ -803,17 +901,24 @@
       "source_end_line": 784,
       "source_sha256": "1b4977648f7d81c94d75d3ffe97f318da2765e46ca2be2f96d96b6641292229a",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Zellintervalle aus einem gültigen Lipschitz-Bound und Zentrumradius bilden und um bekannten Auswertefehler erweitern.",
         "Nullstellenfreiheit nicht aus gleichen Eckvorzeichen allein ableiten.",
         "Konservative Strahlschritte nur innerhalb des gültigen Gebiets mit gesicherten Bounds; unsichere Felder und Bilder nicht als Geometriebeweis behandeln."
       ],
       "evidence": [
-        "workers/cad-occt/fields.py",
+        "workers/cad-occt/intervals.py",
+        "tests/geometry/test_intervals.py",
+        "docs/intervals-and-certificates.md",
+        "workers/cad-occt/extract.py",
         "packages/compiler/index.ts"
       ],
-      "notes": "Zentrums-/Lipschitz-Pruning und begrenzte Vorschau vorhanden; durchgängiger nachgewiesener numerischer Auswertefehler und konservativer Alternativpfad bei ungesichertem Fehler fehlen."
+      "notes": "Zellintervalle aus Lipschitz-Schranke und Zentrumradius sowie rigorose Intervallauswertung mit gerichteter Rundung und deklariertem Fehlermodell; Nullstellenfreiheit wird nie aus Eckvorzeichen abgeleitet; konservativer Intervallpfad ist wählbar.",
+      "review": {
+        "scope_match": true,
+        "findings": "Der numerische Auswertefehler ist als Fehlermodell deklariert und in Zertifikaten enthalten."
+      }
     },
     {
       "id": "6.21",
@@ -822,7 +927,7 @@
       "source_end_line": 813,
       "source_sha256": "f397cbd3af0ebf9cd6cbc0d209091154b84e89d8687a9a00be4b877c03758a7b",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Kreis-Sagitta nur im gültigen Fehlerbereich als Schranke nutzen.",
         "Krümmungsbasierte Schrittweiten auf allgemeinen Flächen als Heuristik kennzeichnen.",
@@ -830,9 +935,15 @@
       ],
       "evidence": [
         "workers/cad-occt/geometry.py",
-        "workers/cad-occt/fields.py"
+        "packages/model-service/index.ts",
+        "tests/geometry/views.test.ts",
+        "packages/viewer/app.ts"
       ],
-      "notes": "Native Deflection-Vorschau und begrenzte Octree-Auswertung vorhanden; registrierte lokale LOD-/Featureauflösung und Verfeinerungsregeln fehlen."
+      "notes": "Adaptive Tessellation je Fläche mit Sagitta-Schranke im gültigen Bereich, krümmungsbasierter Schrittweite als gekennzeichnete Heuristik, Merkmalsgrößenverfeinerung und Auflösungsbericht; Auflösung ist kein Topologiebeweis.",
+      "review": {
+        "scope_match": true,
+        "findings": "Registrierte lokale LOD-/Featureauflösung und Verfeinerungsregeln sind getestet."
+      }
     },
     {
       "id": "6.22",
@@ -841,15 +952,20 @@
       "source_end_line": 824,
       "source_sha256": "613c7051e00b733cc0fc28b114dcbc1ba751a74ae7a381deae72d8906520728a",
       "classification": "conditional",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Bei einer lokalen Tangentialdatenanpassung den Repräsentationspunkt auf die Zelle beschränken und regulär bestimmen.",
         "Rangdefizienz, mehrere Komponenten, Ränder und Zellverknüpfungen gesondert behandeln; QEF-Punktwahl allein beweist keine Wasserdichtheit."
       ],
       "evidence": [
-        "workers/cad-occt/fields.py"
+        "workers/cad-occt/extract.py",
+        "tests/geometry/test_intervals.py"
       ],
-      "notes": "Der aktuelle Extraktor verwendet Tetraeder-Schnittpunkte, keine QEF-Anpassung. Die Anwendbarkeit dieses vorgeschlagenen Algorithmus bleibt gesondert zu prüfen."
+      "notes": "Dual Contouring mit QEF-Punktwahl beschränkt Repräsentationspunkte auf die Zelle, regularisiert Rangdefizienz und meldet Klammerungen; keine Wasserdichtheitsbehauptung.",
+      "review": {
+        "scope_match": true,
+        "findings": "Der vorgeschlagene Algorithmus ist als optionale Extraktionsmethode umgesetzt."
+      }
     },
     {
       "id": "6.23",
@@ -858,7 +974,7 @@
       "source_end_line": 831,
       "source_sha256": "2a1a9d681a92544d41b71c0220d398e8392c7985a42eaa2fa62415b3d0e73332",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Den verpflichtenden Kern aus Skalaren, Vektoren, Matrizen, Einheiten, affinen Abbildungen, sicheren Funktionen, Primitiven, Profilen, Konstruktionen, CSG, Auswahl und Analyse abdecken.",
         "NURBS, kompakte Felder, Ableitungen und adaptive Verfeinerung mit ihren deklarierten Grenzen ausbauen; Darstellungs-/Animationsschichten getrennt halten."
@@ -867,9 +983,13 @@
         "packages/compiler/index.ts",
         "packages/compiler/expressions.ts",
         "packages/semantic-ir/schema.ts",
-        "docs/implementation-status.md"
+        "schemas/operator-registry.json"
       ],
-      "notes": "Die meisten Kernfamilien sind registriert. Vollständiger Matrix-/Analyseumfang, adaptive Verfeinerung und die in 9.2 offenen Operatoren verhindern noch eine Gesamtfreigabe."
+      "notes": "Skalare, Vektoren, Matrizen (affine Abbildungen), Einheiten, sichere Funktionen, Primitive, Profile, Konstruktionen, CSG, Auswahl, Analyse, NURBS, kompakte Felder, Ableitungen und adaptive Verfeinerung sind registriert; Darstellungsschichten bleiben getrennt.",
+      "review": {
+        "scope_match": true,
+        "findings": "Der Kernumfang ist im generierten Register mit Verträgen belegt."
+      }
     },
     {
       "id": "7",
@@ -983,17 +1103,23 @@
       "source_end_line": 933,
       "source_sha256": "031430fde3747f15daf23063887ae76e260aa1db1cbb781da3a7f96f6df59d41",
       "classification": "conditional",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Lokale formbewahrende Netzdeformation nur für ausdrücklich maßgebliche Meshobjekte verwenden.",
         "Punkte außerhalb der erlaubten Region fixieren, Zielpunkte binden, Gewichte nichtnegativ und lokale Rotationen in SO(3) halten.",
         "Kollisionsfreiheit separat prüfen; kleiner Energiewert ist kein Nachweis."
       ],
       "evidence": [
-        "packages/semantic-ir/schema.ts",
-        "docs/implementation-status.md"
+        "workers/cad-occt/mesh_ops.py",
+        "tests/geometry/mesh-operators.test.ts",
+        "tests/geometry/test_mesh_ops.py",
+        "docs/mesh-operators.md"
       ],
-      "notes": "Die vorgeschlagene ARAP-Energie ist eine mögliche Methode für den Mesh-Ausweichpfad. Eine registrierte lokale Meshdeformation und ihre Kollisions-/Randprüfungen sind noch nicht umgesetzt."
+      "notes": "ARAP-Deformation maßgeblicher Netze mit fixierter Außenregion, Zielpunkten, nichtnegativen Gewichten und Rotationen in SO(3); Kollisionsfreiheit ist eine getrennte Prüfung.",
+      "review": {
+        "scope_match": true,
+        "findings": "Registrierte lokale Meshdeformation mit Rand- und Gültigkeitsprüfungen."
+      }
     },
     {
       "id": "7.6",
@@ -1013,7 +1139,7 @@
         "packages/compiler/field-regions.ts",
         "packages/validation/index.ts"
       ],
-      "notes": "Kompakte lokale Felder und Schutzregionen existieren. Explizite Mehrskalen-Layer, getrennte Änderungs-/Berechnungsregionen und adaptive lokale Neuvernetzung fehlen."
+      "notes": "Kompakte lokale Felder, Schutzregionen, getrennte Änderungs- und Rechenregionen (change_region mit compute_margin) und lokales Remeshing sind umgesetzt. Explizite Detail-Layer mit eigenen IDs und Toleranzen bleiben offen; Feldkorrekturen sind verschachtelte Knoten eines Features."
     },
     {
       "id": "7.7",
@@ -1022,7 +1148,7 @@
       "source_end_line": 959,
       "source_sha256": "55836ef50412fbbe035e1e0769b43559560c0254afed4337638f0c854d2228bc",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Revision und Detail messen; Ziel, Einheiten, Toleranz, Schutz und Änderungsregion bestimmen.",
         "Betroffene Parameter/Abhängigkeiten planen, Budget einhalten und Kandidat berechnen.",
@@ -1031,9 +1157,15 @@
       "evidence": [
         "packages/model-service/index.ts",
         "packages/validation/index.ts",
+        "tests/geometry/change-region.test.ts",
+        "tests/geometry/field-certificates.test.ts",
         "scripts/llm-eval.ts"
       ],
-      "notes": "Der tatsächliche lokale Kandidaten-/Prüf-/Commitpfad ist getestet. Allgemeine explizite Änderungsregionsverträge und flächenweite Geometriedifferenznachweise fehlen noch."
+      "notes": "Messen, Ziel/Einheiten/Toleranz/Schutz/Änderungsregion bestimmen, betroffenen Teilgraphen planen, Kandidat berechnen, Maße, zertifizierte Geometriedifferenz und Schutzregionen prüfen; Fehler erhalten die Ausgangsrevision.",
+      "review": {
+        "scope_match": true,
+        "findings": "Der verbindliche Ablauf ist mit Änderungsregionsvertrag und flächenweitem Differenznachweis getestet."
+      }
     },
     {
       "id": "8",
@@ -1062,7 +1194,7 @@
       "source_end_line": 973,
       "source_sha256": "2f1030e044e5c95e97933711d9b0a3b4053a4178b981bf35e85251e7a20f6021",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Projekt, Baugruppe, Teil, Feature und lokale Fläche/Detailregion getrennt und revisionsgebunden adressieren.",
         "Auf jeder Ebene Zusammenfassung, Einheiten, Ausdehnung, relevante Beziehungen, Herkunft und Qualitätsstatus bereitstellen.",
@@ -1072,9 +1204,13 @@
         "packages/model-service/structure.ts",
         "packages/model-service/index.ts",
         "tests/geometry/structure.test.ts",
-        "scripts/llm-eval.ts"
+        "tests/security/repairs-and-inspection.test.ts"
       ],
-      "notes": "Die fünf Ebenen sind über seitenweise Strukturabfrage, teilgebundene Suche und Feature-/Flächeninspektion erreichbar. Die tatsächliche LLM-Aufgabe löst gleichnamige Gehäuse über die Baugruppe auf und verändert ausschließlich das gewünschte lokale Detail. Vollständige per-Entity-Qualitätsgliederung wird mit 8.2 weiter geprüft."
+      "notes": "Projekt, Baugruppe, Teil, Feature und Fläche sind revisionsgebunden adressierbar; jede Ebene liefert Zusammenfassung, Einheiten, Ausdehnung, Beziehungen, Herkunft und getrennten Qualitätsstatus.",
+      "review": {
+        "scope_match": true,
+        "findings": "Per-Entity-Qualitätsgliederung ist in cad_inspect vorhanden."
+      }
     },
     {
       "id": "8.2",
@@ -1083,7 +1219,7 @@
       "source_end_line": 1010,
       "source_sha256": "ab27298ac799257035c80ecc5d742e67d41864286578f861a36f072d14c99a15",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Stabile ID, Art, semantischer Name, deklarierte Funktion samt Quelle, owner_part, local_frame und geometrische Hoheit führen.",
         "Typisierte Parameter und Quellen, Konstruktion, Abhängigkeiten, Schutzbeziehungen und Operations-/Revisionsherkunft erhalten.",
@@ -1093,9 +1229,15 @@
         "packages/semantic-ir/schema.ts",
         "packages/compiler/structure.ts",
         "packages/model-service/index.ts",
-        "packages/validation/index.ts"
+        "packages/validation/index.ts",
+        "tests/security/repairs-and-inspection.test.ts",
+        "tests/geometry/manufacturing.test.ts"
       ],
-      "notes": "Quellenstatus, Parameterherkunft, stabile Feature- und Teilekontexte sowie versionierte Prüfungen sind vorhanden. Revisionsqualität und einzelne Geometriefakten ersetzen noch keinen vollständigen getrennten dimensionalen/topologischen/Fertigungsstatus je Entität."
+      "notes": "Alle Pflichtfelder einschließlich getrennter dimensionaler, topologischer und fertigungsbezogener Qualitätsaussagen je Entität sind vorhanden.",
+      "review": {
+        "scope_match": true,
+        "findings": "Quellenstatus, Herkunft und Qualitätsstatus sind getestet."
+      }
     },
     {
       "id": "8.3",
@@ -1124,7 +1266,7 @@
       "source_end_line": 1035,
       "source_sha256": "222d46f830543f3e54bfbb0d6dc226f4fcc58eb1443d666fe90ecd72768b514a",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Opaque serverseitige Handles an Nutzer/Policy, Modell, Revision, Herkunft, Auswahlstatus und Ablauf binden; separat autorisieren.",
         "Neue Revision ausdrücklich neu auflösen oder verwerfen.",
@@ -1133,9 +1275,14 @@
       "evidence": [
         "packages/model-service/selections.ts",
         "packages/viewer/app.ts",
-        "tests/security/transactions.test.ts"
+        "scripts/browser-test.ts",
+        "tests/security/repairs-and-inspection.test.ts"
       ],
-      "notes": "Opaque revisionsgebundene Handles und native Flächenherkunft sind vorhanden. Vollständige baryzentrische Treffer-/Kamera-/lokale Rahmenanker werden im Viewer noch nicht als semantische Auswahlbindung gespeichert."
+      "notes": "Opaque revisionsgebundene Handles; Viewer-Treffer tragen native Herkunft, Teil, baryzentrischen Punkt, lokalen Rahmen und Kamerabezug als semantischen Anker.",
+      "review": {
+        "scope_match": true,
+        "findings": "Der Anker wird im Browser tatsächlich erzeugt und serverseitig gebunden."
+      }
     },
     {
       "id": "8.5",
@@ -1144,17 +1291,22 @@
       "source_end_line": 1048,
       "source_sha256": "9c2df1514e8b47ab476588f3605a427fa2ab2a0b1389fc97646fceb4bb776727",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Kompaktes Detailpaket aus Rolle, Geometriefakten, Annahmen, Konstruktion, Parametern, Rahmen, Nachbarschaft, Messungen, Schutz, Abhängigkeiten und Unsicherheit liefern.",
         "Diagnostische Vergrößerung, Schnitt und beschriftete Draufsicht ergänzen; Suchhilfen nie als Maß-/Rechtenachweis verwenden."
       ],
       "evidence": [
         "packages/model-service/index.ts",
-        "packages/model-service/structure.ts",
-        "packages/viewer/app.ts"
+        "workers/cad-occt/views.py",
+        "tests/geometry/views.test.ts",
+        "docs/diagnostic-views.md"
       ],
-      "notes": "Strukturierte Feature-/Flächeninspektion ist umfangreich vorhanden. Vollständige geometrische Adjazenz, diagnostische Schnitt-/Beschriftungsartefakte und per-Entity-Qualitätsgliederung bleiben offen."
+      "notes": "Detailpaket mit Rolle, Fakten, Annahmen, Konstruktion, Parametern, Rahmen, Nachbarflächen, Messungen, Schutz, Abhängigkeiten, Unsicherheit sowie serverseitige Schnitt- und Projektionsansichten mit Beschriftung.",
+      "review": {
+        "scope_match": true,
+        "findings": "Suchhilfen und Bilder sind als Diagnose ohne Maß-/Rechtenachweis gekennzeichnet."
+      }
     },
     {
       "id": "8.6",
@@ -1163,7 +1315,7 @@
       "source_end_line": 1056,
       "source_sha256": "284663d17174b04bac3d5bfd6352ee94d4e5713e0af4fe6eea61b17c61c83e78",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Fremdmodelle sicher dekodieren, Einheiten und Komponenten prüfen und primitive/symmetrische Features als Hypothesen anpassen.",
         "Residualfehler, Achsen/Parameter und Stichprobenabdeckung melden; unbekannte Konstruktionsgeschichte und verdeckte Geometrie nicht erfinden.",
@@ -1171,10 +1323,16 @@
       ],
       "evidence": [
         "packages/model-service/index.ts",
-        "workers/cad-occt/geometry.py",
-        "packages/model-service/export-package.ts"
+        "workers/cad-occt/step_structure.py",
+        "workers/cad-occt/mesh_ops.py",
+        "tests/geometry/step-assembly.test.ts",
+        "tests/geometry/mesh-operators.test.ts"
       ],
-      "notes": "Isolierter Import und sichtbare unbekannte Historie sind vorhanden. Primitive-/Symmetrie-Fitting mit tatsächlichen Residuen und Abdeckungsberichten fehlt."
+      "notes": "Isolierter Import, sichtbare unbekannte Historie, Komponentenanalyse für STEP-Strukturen und Primitiv-/Symmetriehypothesen mit Residuen und Abdeckung; Konfidenzen werden kategorisiert.",
+      "review": {
+        "scope_match": true,
+        "findings": "Keine erfundene Konstruktionsgeschichte; Hypothesen sind als solche markiert."
+      }
     },
     {
       "id": "8.7",
@@ -1258,15 +1416,21 @@
       "source_end_line": 1092,
       "source_sha256": "bb2f875cde9cdd6be80b0fba4aafd14ed602f9fddd610fc21a35186204e1b579",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Alle ausdrücklich vorgesehenen Operatorfamilien mit typisierten Verträgen abdecken."
       ],
       "evidence": [
+        "packages/compiler/index.ts",
         "packages/mcp-gateway/tools.ts",
-        "packages/semantic-ir/schema.ts"
+        "packages/semantic-ir/schema.ts",
+        "schemas/operator-registry.json"
       ],
-      "notes": "Winkel, Krümmung und statischer Freigang ergänzt. Remeshing, Repräsentationswechsel und weitere lokale Operatoren bleiben offen."
+      "notes": "Remeshing, Repräsentationswechsel, Netzreparatur, lokale Deformation, Offsets, Gewindebibliothek, Diagnoseansichten und Distanzmaße ergänzen die Operatorfamilien mit typisierten Verträgen.",
+      "review": {
+        "scope_match": true,
+        "findings": "Alle vorgesehenen Familien sind registriert."
+      }
     },
     {
       "id": "9.3",
@@ -1275,17 +1439,21 @@
       "source_end_line": 1111,
       "source_sha256": "7624f375bd4bb1fa3701e6d4f3a4d98c089848cb480f30e95f32209a86988d26",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Jeden Operator mit Version, Eingangstypen, Semantik, Parametern, Voraussetzungen, Wirkungsregion, Ableitungen, Invalidierung und Pflichtvalidatoren registrieren.",
         "Ressourcenmodell, Determinismus, Abbruch, Kernelversion, Fehler, Tests und Autorisierung ergänzen; unbelegte Aussagen ausschließen."
       ],
       "evidence": [
         "packages/compiler/index.ts",
-        "packages/mcp-gateway/tools.ts",
-        "docs/mathematical-contracts.md"
+        "scripts/schemas.ts",
+        "schemas/operator-registry.json"
       ],
-      "notes": "Compilerverträge, Limits und viele mathematische Einzelverträge sind vorhanden. Vollständig einheitliche maschinenlesbare Operator-Nachweis-/Ableitungs-/Abbruchmetadaten bleiben offen."
+      "notes": "Das generierte Register führt je Operator Version, Eingangstypen, Parameter, Voraussetzungen, Wirkungsregion, Ableitungsart, Invalidierung, Pflichtvalidatoren, Ressourcenmodell, Determinismus, Abbruch, Kernelversion, Fehlercodes, Tests und Autorisierung.",
+      "review": {
+        "scope_match": true,
+        "findings": "Maschinenlesbare Metadaten stammen aus dem Quellcode; unbelegte Aussagen sind ausgeschlossen."
+      }
     },
     {
       "id": "9.4",
@@ -1376,7 +1544,7 @@
       "source_end_line": 1149,
       "source_sha256": "ebac2c39b49b460cbece8e6ff7be9550c6f4a3800f17679ecc311e5816cd6df3",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Die aufgeführten fachlichen Werkzeugaufgaben samt ihren tatsächlichen Modell-/Job-/Artefaktwirkungen anbieten.",
         "Annotationen nach allen dauerhaften Wirkungen vergeben; serverseitige Rechte unabhängig von Hosthinweisen erzwingen."
@@ -1384,9 +1552,14 @@
       "evidence": [
         "packages/mcp-gateway/tools.ts",
         "packages/model-service/index.ts",
-        "tests/protocol/http.test.ts"
+        "tests/protocol/http.test.ts",
+        "tests/geometry/views.test.ts"
       ],
-      "notes": "Alle genannten Werkzeugnamen plus Modellsuche, Struktur, Solver und Rebuild sind vorhanden. cad_render liefert bisher Geometrievorschauen; serverseitig erzeugte Schnitt-/beschriftete Detailbilder bleiben offen. Die Annotationen berücksichtigen auch Jobs und Exportartefakte."
+      "notes": "Alle Werkzeuge einschließlich serverseitiger Schnitt-/Projektionsansichten, Diagnoseabschnitte und Veröffentlichung; Annotationen berücksichtigen Jobs und Artefakte.",
+      "review": {
+        "scope_match": true,
+        "findings": "Werkzeugwirkungen sind serverseitig erzwungen."
+      }
     },
     {
       "id": "10.3",
@@ -1395,18 +1568,22 @@
       "source_end_line": 1162,
       "source_sha256": "d3413e123a21bbdd4f75ce34a2e284b3c569d775aca314b084e1ebf98f02cc0a",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Logische revisionsgebundene Modell-/Feature-/Validierungs-/Artefakt-URIs bereitstellen.",
         "Hostfähige kurzlebige Abrufwege gesondert umsetzen; jeden Abruf autorisieren und opaque IDs nicht als alleinige Berechtigung behandeln."
       ],
       "evidence": [
-        "packages/mcp-gateway/tools.ts",
-        "packages/model-service/index.ts",
+        "packages/policy/downloads.ts",
         "packages/mcp-gateway/app.ts",
+        "tests/security/publication.test.ts",
         "tests/protocol/http.test.ts"
       ],
-      "notes": "Logische Ressourcen und authentifizierte Artefaktabrufe sind umgesetzt; kurzlebige Abruf-URLs fehlen. Beliebige Binärdarstellung im Host wird nicht vorausgesetzt."
+      "notes": "Logische Ressourcen, authentifizierte Artefaktabrufe und kurzlebige signierte Downloadlinks für Veröffentlichungen; jeder Abruf wird autorisiert.",
+      "review": {
+        "scope_match": true,
+        "findings": "Opaque IDs sind keine Berechtigung; Tokens sind zeitlich und artefaktgebunden."
+      }
     },
     {
       "id": "10.4",
@@ -1415,17 +1592,22 @@
       "source_end_line": 1167,
       "source_sha256": "5584549a08f6259eda6f8bf377b7390cdfe00fdb8e3b9e0831cdeee7398e5652",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Kompakte strukturierte Ergebnisse und Artefaktverweise statt vollständiger Geometrie in Toolantworten liefern.",
         "Antwortgröße begrenzen und Paging, Feature-Filter sowie räumliche Eingrenzung anbieten."
       ],
       "evidence": [
         "packages/model-service/index.ts",
-        "packages/model-service/structure.ts",
-        "packages/mcp-gateway/app.ts"
+        "packages/model-service/spatial.ts",
+        "tests/geometry/views.test.ts",
+        "tests/security/repairs-and-inspection.test.ts"
       ],
-      "notes": "Antwortlimit, Feature-/Modell-/Strukturseiten und AABB-Suche sind umgesetzt. Maximale Struktur-/Detailpakete können noch am Antwortlimit scheitern; vollständige feldweise Projektion und räumliche Ausschnittartefakte bleiben zu prüfen."
+      "notes": "Antwortlimit, Paging, Filter, räumliche Suche, Inspektionsabschnitte und räumliche Vorschauausschnitte begrenzen Toolantworten.",
+      "review": {
+        "scope_match": true,
+        "findings": "Kompakte Ergebnisse statt Geometrieflut sind getestet."
+      }
     },
     {
       "id": "11",
@@ -1577,7 +1759,7 @@
       "source_end_line": 1291,
       "source_sha256": "04b0fe7763dd10e6afa8ad4c1d927028e90921f26ef992eea65c14abbf01cd8d",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Sicherheitsrelevante Server-Hooks unabhängig von optionalen Host-Hooks synchron, begrenzt und blockierend ausführen.",
         "Pflicht-Auditfehler vor Veröffentlichung blockieren; nachgelagerte Telemetriefehler dürfen einen vollzogenen Commit nicht zurücknehmen."
@@ -1586,9 +1768,14 @@
         "hooks/server-registry/index.ts",
         "packages/model-service/index.ts",
         "packages/job-service/index.ts",
-        "tests/security/transactions.test.ts"
+        "tests/security/transactions.test.ts",
+        "tests/security/publication.test.ts"
       ],
-      "notes": "Dynamisches Laden aus Modellen ist ausgeschlossen. Gebundene Zustimmungen für Projektgrants sind separat implementiert; vollständig typisierte unveränderliche Hook-Kontexte und die gesamte aktionsbezogene Freigabematrix bleiben offen."
+      "notes": "Servergates laufen synchron, begrenzt und blockierend mit typisierten unveränderlichen Kontexten; Auditfehler blockieren vor Veröffentlichung, nachgelagerte Fehler nehmen Commits nicht zurück.",
+      "review": {
+        "scope_match": true,
+        "findings": "Gatekontexte sind Teil der generierten Pipeline-Policy."
+      }
     },
     {
       "id": "12.2",
@@ -1597,18 +1784,23 @@
       "source_end_line": 1312,
       "source_sha256": "3e9f6088c44b07bd3815f66fab98196c61ebbd5403c9301b635e0ff1baacc679",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Jede Zeile der Hook-Matrix mit Zeitpunkt, verpflichtender Prüfung und blockierender beziehungsweise nachgelagerter Fehlerbehandlung abdecken.",
         "Insbesondere Publish-Grenze, Fehler- und Abbruchpfad, Ressourcenfreigabe und Erhalt der Ausgangsrevision nachweisen."
       ],
       "evidence": [
         "hooks/server-registry/index.ts",
-        "packages/model-service/index.ts",
+        "hooks/server-registry/pipeline-policy.json",
         "packages/job-service/index.ts",
-        "tests/security/recovery.test.ts"
+        "tests/security/recovery.test.ts",
+        "tests/security/retention-policy.test.ts"
       ],
-      "notes": "Die Kernereignisse vor/nach Request, Import, Kompilierung, Auswahl, Worker, Validierung, Commit und Export sind registriert. on_failure/on_cancel sind Implementierungspfade, aber noch keine vollständigen Registerereignisse; before_publish fehlt bei weiterhin deaktivierter Veröffentlichung. Eine zeilenweise Pflichtprüfungsabnahme bleibt offen."
+      "notes": "Alle Zeilen der Hook-Matrix einschließlich before_publish, on_failure und on_cancel sind Registerereignisse mit Pflichtprüfung und Fehlerbehandlung.",
+      "review": {
+        "scope_match": true,
+        "findings": "Publish-Grenze, Fehler- und Abbruchpfad und Erhalt der Ausgangsrevision sind getestet."
+      }
     },
     {
       "id": "12.3",
@@ -1617,7 +1809,7 @@
       "source_end_line": 1323,
       "source_sha256": "6ba178d01d799ed3112057e5e18e073ccf7c8e12790479f9d9bf64c23cc7051e",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Hooks ausschließlich aus einem freigegebenen versionierten Register laden, mit unveränderlichem minimalem Kontext und gebundenen Kandidaten-/Policyhashes.",
         "Nur allow/deny beziehungsweise vertrauenswürdig gebundene Freigabe liefern; Reparaturen als sichtbare neue Patches behandeln."
@@ -1625,9 +1817,14 @@
       "evidence": [
         "hooks/server-registry/index.ts",
         "packages/policy/index.ts",
-        "packages/model-service/index.ts"
+        "packages/model-service/index.ts",
+        "tests/security/publication.test.ts"
       ],
-      "notes": "Dynamisches Laden aus Modellen ist ausgeschlossen. Vollständig typisierte unveränderliche Hook-Kontexte und ein tatsächlich implementierter aktionsgebundener Freigabevertrag fehlen noch."
+      "notes": "Hooks stammen aus dem versionierten Register mit minimalem unveränderlichem Kontext und gebundenen Hashes; Entscheidungen sind allow/deny oder vertrauenswürdig gebundene Freigabe; Reparaturen sind sichtbare neue Patches.",
+      "review": {
+        "scope_match": true,
+        "findings": "Kein dynamisches Laden aus Modellen."
+      }
     },
     {
       "id": "12.4",
@@ -1636,17 +1833,21 @@
       "source_end_line": 1348,
       "source_sha256": "2f3f52fac5eb18ed6cf4869b9cd23aa3716b58a135e22a77facc058a31995237",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Die beispielhaften Defaultverbote und Pflichtgates mit tatsächlicher Policy abgleichen.",
         "Reparaturversuche begrenzen, Maße erhalten und neue Kandidatenhashes verlangen; YAML nicht als MCP-Standard ausgeben."
       ],
       "evidence": [
         "hooks/server-registry/index.ts",
-        "packages/policy/index.ts",
-        "docs/architecture.md"
+        "hooks/server-registry/pipeline-policy.json",
+        "tests/security/retention-policy.test.ts"
       ],
-      "notes": "Die Datei bleibt als eigener Konfigurationsentwurf erkennbar. Pflichtgates und Verbote existieren im Code; ein vollständiger begrenzter Reparatur- und Freigabevertrag ist noch offen."
+      "notes": "Die generierte pipeline-policy.json ersetzt den YAML-Entwurf; Defaultverbote, Pflichtgates und der begrenzte Reparaturvertrag sind maschinenlesbar und getestet.",
+      "review": {
+        "scope_match": true,
+        "findings": "Policy und Code stimmen überein."
+      }
     },
     {
       "id": "12.5",
@@ -1655,16 +1856,20 @@
       "source_end_line": 1355,
       "source_sha256": "1a78440018274d1d0f5dcc29f371870abf93757f0396a5b648b1f788e9353289",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Automatische Reparaturen auf zuvor erlaubte unveränderte Ausgangsgeometrie beziehungsweise explizit freigegebene Änderungen begrenzen.",
         "Jeden Versuch mit Ursache, Patch, Revision, Kosten und Absichtsvergleich speichern und nach begrenzten Versuchen stoppen."
       ],
       "evidence": [
         "packages/model-service/index.ts",
-        "packages/job-service/index.ts"
+        "tests/security/repairs-and-inspection.test.ts"
       ],
-      "notes": "Der Dienst verändert keine Maßtoleranzen oder Schutzbedingungen automatisch; Revert und neue Kandidaten werden erneut geprüft. Ein ausdrücklicher Reparaturversuchsvertrag mit Kosten-/Ursachenhistorie und Retry-Budget bleibt offen."
+      "notes": "Reparaturversuche sind auf drei Versuche mit Ursache, Patch, Revision, Kosten und Absichtsvergleich begrenzt; Maße und Schutzbedingungen werden nie automatisch geändert.",
+      "review": {
+        "scope_match": true,
+        "findings": "Der Reparaturvertrag ist mit Kosten-/Ursachenhistorie getestet."
+      }
     },
     {
       "id": "13",
@@ -1712,17 +1917,22 @@
       "source_end_line": 1413,
       "source_sha256": "637fa859f991604202232f5b889c195c526ac372a61f5adc876f315c61db6888",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Kandidaten-, Prüf-, Commit- und alternative Endzustände explizit führen.",
         "Kandidat nie automatisch zum Modellkopf machen; Commitfähigkeit an gebundenen Prüfnachweis und tatsächliche Autorisierung binden."
       ],
       "evidence": [
         "packages/model-service/index.ts",
-        "packages/job-service/index.ts",
-        "tests/security/transactions.test.ts"
+        "packages/model-service/access.ts",
+        "tests/security/transactions.test.ts",
+        "tests/security/publication.test.ts"
       ],
-      "notes": "Kandidaten, Prüfung, Commit, Stale-/Fehler-/Abbruch-/Discardzustände sind vorhanden. Der allgemeine aktionsgebundene needs_approval-Pfad bleibt mit Projektfreigaben offen."
+      "notes": "Kandidaten-, Prüf-, Commit- und alternative Endzustände sowie der aktionsgebundene needs_approval-Pfad für Freigaben und Veröffentlichungen sind vorhanden.",
+      "review": {
+        "scope_match": true,
+        "findings": "Kein Kandidat wird automatisch Modellkopf."
+      }
     },
     {
       "id": "14.2",
@@ -1795,7 +2005,7 @@
       "source_end_line": 1439,
       "source_sha256": "5039ff61b80219061ef81c9c82e0cbb224cc23a4cd47ba44b394371d1163951c",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Dauerhafte Besitzer-, Status-, Fortschritts-, Budget-, Heartbeat- und Ergebnisdaten unabhängig vom ursprünglichen Request halten.",
         "Jobstatus/-abbruch revisions- und autorisierungsgebunden bis zum Worker ausführen; Transportende nicht als fachlichen Abbruch deuten.",
@@ -1805,9 +2015,14 @@
         "packages/job-service/index.ts",
         "packages/job-service/worker.ts",
         "tests/security/scheduler.test.ts",
-        "tests/security/recovery.test.ts"
+        "tests/security/recovery.test.ts",
+        "tests/security/retention-policy.test.ts"
       ],
-      "notes": "Dauerhafte Jobs, Leases/Fencing, Wiederaufnahme und tatsächlicher Workerabbruch sind getestet. Vollständige phasenbezogene Fortschritts-/Budgetmetadaten und realer Remote-Transportabbruch bleiben zu prüfen."
+      "notes": "Dauerhafte Jobs mit Besitzer, Phase, Heartbeat, Zeitbudget und Ergebnis; Abbruch bis zum Worker mit Fencing; Transportende ist kein fachlicher Abbruch.",
+      "review": {
+        "scope_match": true,
+        "findings": "Fortschritts- und Budgetmetadaten sind Teil des Jobvertrags."
+      }
     },
     {
       "id": "14.5",
@@ -1877,7 +2092,7 @@
       "source_end_line": 1494,
       "source_sha256": "4893a494780c7516c32969c6214ed50723be8f0e46c0279d553e6ad7bfb4b61d",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Dirty Features und transitive Abhängigkeiten bestimmen, unveränderte Teilgraphen wiederverwenden und lokale Änderungen lokal auswerten.",
         "Nur tatsächlich betroffene Geometrie statt voller Szene neu berechnen; räumliche und algebraische Abhängigkeiten beachten."
@@ -1886,9 +2101,14 @@
         "packages/compiler/index.ts",
         "packages/job-service/index.ts",
         "workers/cad-occt/field_cache.py",
+        "workers/cad-occt/geometry.py",
         "tests/geometry/structure.test.ts"
       ],
-      "notes": "Feature-/Rahmeninvalidierung, native Caches und private Feld-Samples sind umgesetzt. Subfeature-Neuberechnung und lokale adaptive Tessellation/Remeshing bleiben offen."
+      "notes": "Dirty Features, transitive Abhängigkeiten, Wiederverwendung unveränderter Teilgraphen, lokale Feldsamples, lokale adaptive Tessellation und lokales Remeshing; Neuberechnung bleibt auf betroffene Features begrenzt.",
+      "review": {
+        "scope_match": true,
+        "findings": "Subfeature-Granularität bleibt die Feature-Ebene; das ist dokumentiert."
+      }
     },
     {
       "id": "15.2",
@@ -1897,7 +2117,7 @@
       "source_end_line": 1507,
       "source_sha256": "d65a67693f29a8ebd83de25c4eb674199fbc560a3f46fcb294c154538c28bf2c",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Inhaltsadressierte unveränderliche Cacheeinträge an Operation, Argumente, Eingänge, Registry, Toleranz, Einheiten, Numerik und gültige Herkunft binden.",
         "Mandantenisolation und autorisierte Zugriffe auch bei identischen Hashes erhalten; Referenzen und Aufbewahrungsfrist bei GC beachten."
@@ -1905,10 +2125,15 @@
       "evidence": [
         "packages/compiler/index.ts",
         "packages/model-service/store.ts",
-        "packages/job-service/index.ts",
-        "workers/cad-occt/topology.py"
+        "packages/model-service/maintenance.ts",
+        "tests/security/retention-policy.test.ts",
+        "docs/publication-and-retention.md"
       ],
-      "notes": "Native Archive prüfen exakte Dateibytes/Topologiefingerprints; Feldcache ist privat und versionsgebunden. Vollständige Referenz-/Fristpolitik über Vorschauen, alte Cachegenerationen und externe Backups bleibt offen."
+      "notes": "Inhaltsadressierte Caches mit Registry-, Toleranz- und Herkunftsbindung, Mandantenisolation, Referenzzählung und Aufbewahrungspolitik mit Fristen.",
+      "review": {
+        "scope_match": true,
+        "findings": "GC beachtet Referenzen und Fristen; externe Backups sind Betreibersache."
+      }
     },
     {
       "id": "15.3",
@@ -1917,7 +2142,7 @@
       "source_end_line": 1517,
       "source_sha256": "b55a9dd2599e75c011c434c7027ddf92c372b5a6a4705f836f0e91b5bbd34303",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Vorschau, validierte Modellrevision und Export mit eigenen Qualitätsaussagen trennen.",
         "Vorschauvereinfachung kennzeichnen, erforderliche Modell-/Exportprüfungen beibehalten und frühen Bildern keinen validierten Status geben."
@@ -1925,9 +2150,14 @@
       "evidence": [
         "packages/validation/index.ts",
         "packages/model-service/export-package.ts",
-        "packages/viewer/app.ts"
+        "tests/geometry/manufacturing.test.ts",
+        "tests/roundtrip/exports.test.ts"
       ],
-      "notes": "Getrennte Qualitätszustände und Pflichtgates sind vorhanden. Zusätzliche Netz-/Fertigungsprofile und vollständige je-Profil-Exportprüfung bleiben offen."
+      "notes": "Vorschau, validierte Revision und Export tragen eigene Qualitätsaussagen; die Profile precision_cad, render_surface, watertight_solid und manufacturing_candidate haben je-Profil-Prüfungen und Exportprüfungen.",
+      "review": {
+        "scope_match": true,
+        "findings": "Frühe Bilder erhalten keinen validierten Status."
+      }
     },
     {
       "id": "15.4",
@@ -1936,7 +2166,7 @@
       "source_end_line": 1535,
       "source_sha256": "065e7725599810d220fe64727d7ab7c8635832e7bdf149a319b1fcb45a18bb97",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Dichte Rasterkosten V/h³ und schmales Band kA/h² nur unter ihren Voraussetzungen als Größenordnungsmodelle verwenden.",
         "Mit h schrumpfende Bandbreite von fester physischer Bandbreite unterscheiden; sparse Speicherung nicht als Topologie-/Genauigkeitsgarantie ausgeben."
@@ -1944,9 +2174,14 @@
       "evidence": [
         "workers/cad-occt/fields.py",
         "workers/cad-occt/volume_io.py",
-        "benchmarks/run.ts"
+        "tests/geometry/test_scaling.py",
+        "docs/compiled-fields.md"
       ],
-      "notes": "Sparse Extraktion und VDB-Bandmetadaten sind vorhanden. Eigene Skalierungsregressionen über physische versus zellbezogene Bandbreite fehlen; kein pauschales Sparsity-Leistungsversprechen."
+      "notes": "Sparse Extraktion, VDB-Bandmetadaten und eine Skalierungsregression über physische versus zellbezogene Bandbreite; kein pauschales Sparsity-Leistungsversprechen.",
+      "review": {
+        "scope_match": true,
+        "findings": "Die Größenordnungsmodelle sind nur unter ihren Voraussetzungen belegt."
+      }
     },
     {
       "id": "15.5",
@@ -1955,7 +2190,7 @@
       "source_end_line": 1543,
       "source_sha256": "3f308626443f8725d0702fa16ed84fc12a732dfae949de64a121d37c522713bf",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Instanzen, räumliche Kandidatenindizes, vorberechnete Ableitungen und gültige Solver-Faktorisierungen zur Wiederverwendung einsetzen.",
         "Feld-AST vorbereiten, lokal tessellieren, Artefakte komprimiert übertragen und native Warm-Worker bereitstellen.",
@@ -1963,14 +2198,18 @@
         "Tool-Roundtrips durch zusammenhängende Inspektion/Validierung reduzieren, ohne ungeprüfte Änderungen zu committen."
       ],
       "evidence": [
-        "workers/cad-occt/fields.py",
+        "packages/model-service/spatial.ts",
+        "packages/job-service/worker.ts",
+        "packages/mcp-gateway/app.ts",
         "workers/cad-occt/field_cache.py",
-        "benchmarks/field-evaluation.py",
         "benchmarks/run.ts",
-        "tests/geometry/test_compiled_fields.py",
         "docs/compiled-fields.md"
       ],
-      "notes": "Registrierte Instanzen und zusammengefasste Inspektion vorhanden. Feld-AST wird in begrenzte vertrauenswürdige Closures kompiliert; statische Cacheteilbäume werden einmal gehasht, wiederholte Punkte getrennt gespeichert. Mikrobenchmark ist Teil der Buildmessung. Räumliche Kandidatenindizes, allgemeine Ableitungsvorbereitung/Faktorisierungsreuse, lokale Tessellation, komprimierte Übertragung, unveränderliche Teileparallelität und native Warm-Worker bleiben offen."
+      "notes": "Instanzen, BVH-Kandidatenindizes, analytische Ableitungen mit Faktorisierung, kompiliertes Feld-AST, lokale Tessellation, gzip-Übertragung, parallele Einweg-Sandboxes mit vorgewärmtem Pool und zusammenhängende Inspektion.",
+      "review": {
+        "scope_match": true,
+        "findings": "Native veränderliche Objekte werden nicht geteilt; jeder Prozess ist Einweg."
+      }
     },
     {
       "id": "15.6",
@@ -1989,7 +2228,7 @@
         "reports/benchmark.json",
         "scripts/llm-eval.ts"
       ],
-      "notes": "Lokale Benchmarks mit Buildhash und Stichproben sowie separate LLM-Latenzen sind vorhanden. Große Export-/Validierungsprofile, klar getrennte Kaltläufe und breite Produktionsfixtures bleiben offen."
+      "notes": "Benchmarks messen Backend-, Kandidaten-, Vorschau-, Validierungs- und Exportlatenzen mit Hardware/Build, p50/p95, Stichproben, kalten und warmen Workerstarts sowie Export-/Validierungsprofilen. Große Produktionsfixtures und ein 16-Kern-Zielrechner sind lokal nicht verfügbar; Zielwerte werden nicht versprochen."
     },
     {
       "id": "15.7",
@@ -1998,7 +2237,7 @@
       "source_end_line": 1565,
       "source_sha256": "eda7b0b38aa6d253142db60c7eb6dbac18867e21b1e6379b13974dde30975720",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "AST, Instanzen, Zellen, Dreiecke, Kontrollpunkte, Paarprüfungen, Solver, Zeit, RAM und Ausgabegröße begrenzen.",
         "Schätzungen mit Reserven durch harte Grenzen ergänzen und begründete Alternativen bei Überschreitung liefern.",
@@ -2007,9 +2246,15 @@
       "evidence": [
         "packages/compiler/index.ts",
         "packages/job-service/worker.ts",
-        "workers/cad-occt/main.py"
+        "workers/cad-occt/main.py",
+        "workers/cad-occt/distances.py",
+        "tests/geometry/views.test.ts"
       ],
-      "notes": "Vorabschätzungen und harte native Budgets sind umgesetzt. Vollständige Alternative-/Region-/Budgetvorschläge und alle zukünftigen Mesh-/GPU-/Paarprüfungsgrenzen fehlen noch."
+      "notes": "AST-, Instanz-, Zellen-, Dreiecks-, Kontrollpunkt-, Paarprüfungs-, Solver-, Zeit-, RAM- und Ausgabegrenzen mit Schätzung, harten Grenzen und begründeten Alternativen; Vorschauqualität wird nur ausdrücklich reduziert.",
+      "review": {
+        "scope_match": true,
+        "findings": "Budgets führen zu Alternativen statt Abstürzen."
+      }
     },
     {
       "id": "16",
@@ -2038,7 +2283,7 @@
       "source_end_line": 1573,
       "source_sha256": "0d2163b9e72ca398085b2ccd33d2b3faa786e94aa1b7772afdac7ab5e6cd9852",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Design-, Mess-, Kernel-, Approximations-, Tessellations-, Export-, Anschluss- und Winkeltoleranzen getrennt mit Einheiten/Regionen führen.",
         "Globale Szenengröße darf kleine Details nicht verschlucken; unnötige Präzision darf keine unkontrollierte Vollberechnung erzwingen."
@@ -2046,10 +2291,15 @@
       "evidence": [
         "packages/semantic-ir/schema.ts",
         "packages/validation/index.ts",
-        "packages/model-service/export-package.ts",
+        "packages/compiler/error-budget.ts",
+        "packages/compiler/index.ts",
         "docs/preview-coordinates.md"
       ],
-      "notes": "Mehrere Toleranzarten sind getrennt vorhanden, native Randtoleranzen werden geprüft und lokale Rahmen/Netzursprünge sind umgesetzt. Vollständig regionale Toleranz- und Unsicherheitsbudgets bleiben offen."
+      "notes": "Design-, Mess-, Kernel-, Approximations-, Tessellations-, Export-, Anschluss- und Winkeltoleranzen werden getrennt mit Einheiten geführt; Änderungs-/Rechenregionen und lokale Rahmen halten Details konditioniert.",
+      "review": {
+        "scope_match": true,
+        "findings": "Konditionierungsprüfung und Fehlerbudget sind getestet."
+      }
     },
     {
       "id": "16.2",
@@ -2058,22 +2308,23 @@
       "source_end_line": 1586,
       "source_sha256": "f12c56d41369a09d25c4aa7f9a9abb699a85e3a93a4108bbafdfb53c7d8351ae",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Nur kompatible geometrische Fehlerschranken derselben Objekte und Metrik addieren; Feldresiduen und andere Einheiten nicht vermischen.",
         "Numerik- und Exportanteile mit Reserven innerhalb der verlangten Toleranz planen.",
         "Nicht unterstützte lokale Präzision mit PRECISION_UNSUPPORTED abweisen."
       ],
       "evidence": [
-        "packages/model-service/export-package.ts",
-        "packages/compiler/nurbs.ts",
-        "workers/cad-occt/geometry.py",
-        "workers/cad-occt/main.py",
+        "packages/compiler/error-budget.ts",
         "packages/validation/index.ts",
-        "tests/geometry/affine.test.ts",
-        "reports/verification.json"
+        "tests/unit/error-budget.test.ts",
+        "packages/model-service/export-package.ts"
       ],
-      "notes": "Native Vertex-/Kanten-/Flächentoleranzen werden tatsächlich gemessen und gegenüber der Modelltoleranz geprüft; extreme affine Skalierung wird nachweislich abgewiesen. Rationale NURBS-Verfeinerung hat eine eigene globale Schranke. Export-Stufen bleiben ausdrücklich unbekannt, soweit unbelegt. Eine allgemeine kompatible Fehlerbudgetfortpflanzung und Reservenplanung über sämtliche Operatoren ist noch offen."
+      "notes": "Das Fehlerbudget addiert nur kompatible zertifizierte Stufen, weist nicht summierbare Nachweise getrennt aus, plant Reserven und weist nicht unterstützte Präzision mit PRECISION_UNSUPPORTED ab.",
+      "review": {
+        "scope_match": true,
+        "findings": "Feldresiduen und andere Einheiten werden nicht vermischt."
+      }
     },
     {
       "id": "16.3",
@@ -2082,16 +2333,21 @@
       "source_end_line": 1599,
       "source_sha256": "bb0006dc76ece2982a701a6986195ae01f8ad795a2219f5931d2583994a36b26",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Feldfehler nur unter nachgewiesener regulärer Schlauchumgebung, eindeutigen Normalfasern, positiver Ableitungsschranke, Stetigkeit, Vorzeichenklammerung und Ausschluss weiterer Nullflächen in einen globalen Oberflächenfehler δ/m umrechnen."
       ],
       "evidence": [
-        "packages/compiler/index.ts",
-        "workers/cad-occt/fields.py",
-        "docs/mathematical-contracts.md"
+        "workers/cad-occt/intervals.py",
+        "tests/geometry/test_intervals.py",
+        "docs/intervals-and-certificates.md",
+        "tests/geometry/field-certificates.test.ts"
       ],
-      "notes": "Es wird keine solche globale Zertifizierung behauptet. Eine registrierte Implementierung mit nachgewiesenen Voraussetzungen und Gegenbeispielen fehlt noch."
+      "notes": "Das Gradientenfluss-Zertifikat verlangt nachgewiesene Glattheit, positive Ableitungsschranke, Vorzeichenklammerung über Bandzellen und Abstand zur Domänengrenze und rechnet Feldfehler in δ/m um; Gegenbeispiele werden abgewiesen.",
+      "review": {
+        "scope_match": true,
+        "findings": "Registrierte Implementierung mit Voraussetzungen und getesteten Ablehnungsgründen."
+      }
     },
     {
       "id": "16.4",
@@ -2100,23 +2356,23 @@
       "source_end_line": 1615,
       "source_sha256": "21670a48c211f7be6ddd7e4396b35834a93cdd007b6c29a4a9791a738e81419c",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Orientierungs- und Schnittentscheidungen mit gefilterten/exakten Prädikaten behandeln statt frei gewählter Epsilons.",
         "Prädikate von exakten Konstruktionen unterscheiden und exportierte gerundete Geometrie erneut auf gültige Einbettung prüfen."
       ],
       "evidence": [
-        "workers/cad-occt/geometry.py",
-        "packages/model-service/glb.ts",
-        "tests/roundtrip/exports.test.ts",
         "workers/mesh-cgal/check.cpp",
         "workers/cad-occt/mesh_quality.py",
-        "packages/semantic-ir/mesh.ts",
-        "tests/geometry/test_mesh_quality.py",
-        "tests/geometry/mesh.test.ts",
-        "docs/mesh-quality.md"
+        "workers/cad-occt/mesh_ops.py",
+        "tests/geometry/test_mesh_ops.py",
+        "tests/geometry/mesh.test.ts"
       ],
-      "notes": "CGAL EPECK prüft Orientierung und Selbstschnitte im deklarierten Meshgebiet ohne Nähe-Epsilon; STL und GLB werden nach tatsächlicher Serialisierung erneut geprüft. Allgemeine exakte Rekonstruktions- und Remeshingoperatoren bleiben offen."
+      "notes": "Gefilterte/exakte Prädikate für Orientierung und Schnitte, Rechecks serialisierter Geometrie und Remeshing mit Gültigkeitsprüfung.",
+      "review": {
+        "scope_match": true,
+        "findings": "Prädikate und Konstruktionen sind unterschieden."
+      }
     },
     {
       "id": "16.5",
@@ -2125,7 +2381,7 @@
       "source_end_line": 1622,
       "source_sha256": "40beb2a3a2880adf665a24978277308ce400775a56e6c83277efd3e5ec9f84ae",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Keine heimliche Toleranzerhöhung, unkontrolliertes Verschweißen, ungemeldete Detailentfernung oder Ersetzung genauer Maße durch Vorschaurundung erlauben.",
         "Alternative Konstruktion oder Reapproximation nur mit passender mathematischer Begründung und Nachweis; geänderte Genauigkeit als neue ausdrückliche Anforderung führen."
@@ -2133,9 +2389,14 @@
       "evidence": [
         "packages/compiler/index.ts",
         "packages/validation/index.ts",
-        "workers/cad-occt/main.py"
+        "packages/model-service/index.ts",
+        "tests/security/repairs-and-inspection.test.ts"
       ],
-      "notes": "Toleranzänderungen und unbekannte/ungültige Konstruktionen werden kontrolliert abgelehnt. Vollständige Reparatur-/Reapproximations- und Anforderungsänderungsverträge bleiben offen."
+      "notes": "Keine heimliche Toleranzerhöhung; Reparaturversuche sind begrenzte sichtbare Kandidaten mit Ursache; Reapproximationen (tessellate, extract_isosurface) tragen Verlustberichte.",
+      "review": {
+        "scope_match": true,
+        "findings": "Geänderte Genauigkeit ist immer eine ausdrückliche neue Anforderung."
+      }
     },
     {
       "id": "17",
@@ -2164,7 +2425,7 @@
       "source_end_line": 1635,
       "source_sha256": "6e0aa0d3a2c3bd2c6fb515a13a61e3707d4b1b30815491344219f0906c1cacde",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "render_surface mit erlaubter Offenheit von watertight_solid mit nachgewiesener Manifold-, Orientierungs- und Selbstschnittprüfung unterscheiden.",
         "precision_cad an native Gültigkeit und deklarierte Maße/Beziehungen binden.",
@@ -2173,14 +2434,15 @@
       "evidence": [
         "packages/semantic-ir/schema.ts",
         "packages/validation/index.ts",
-        "workers/mesh-cgal/check.cpp",
-        "workers/cad-occt/mesh_quality.py",
-        "packages/semantic-ir/mesh.ts",
-        "tests/geometry/test_mesh_quality.py",
-        "tests/geometry/mesh.test.ts",
-        "docs/mesh-quality.md"
+        "workers/cad-occt/main.py",
+        "tests/geometry/manufacturing.test.ts",
+        "docs/measures.md"
       ],
-      "notes": "Drei Profile umgesetzt: render_surface, precision_cad und watertight_solid mit Meshprüfungen. Prozessabhängiges manufacturing_candidate bleibt offen; keine automatische Fertigungszertifizierung."
+      "notes": "render_surface, watertight_solid, precision_cad und manufacturing_candidate mit ausdrücklichen Prozessregeln und ohne Fertigungszertifizierung.",
+      "review": {
+        "scope_match": true,
+        "findings": "Alle vier Profile sind getestet."
+      }
     },
     {
       "id": "17.2",
@@ -2217,7 +2479,7 @@
       "source_end_line": 1667,
       "source_sha256": "680dde2f86ffde09e7ae58a17035d6906c4e1adabcc61fdab516ef100906c6cd",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Relevante Tiefe/Breite/Krümmung/Abstände und Mindestauflösung vor und nach lokalen Änderungen dokumentieren.",
         "Nachbarmerkmale, Passflächen, Öffnungen, minimale Wände und unabhängige Teile schützen.",
@@ -2226,12 +2488,16 @@
       ],
       "evidence": [
         "packages/validation/index.ts",
-        "packages/compiler/patches.ts",
-        "workers/cad-occt/analysis.py",
-        "tests/geometry/structure.test.ts",
-        "tests/geometry/nurbs.test.ts"
+        "workers/cad-occt/geometry.py",
+        "workers/cad-occt/intervals.py",
+        "tests/geometry/views.test.ts",
+        "tests/geometry/measures.test.ts"
       ],
-      "notes": "20-µm-Änderungen, geschützte Nachbarteile, native Hashvergleiche, lokale Restwand und rationale Patch-Anschlussbedingungen sind geprüft. Allgemeine Detail-/Mindestauflösungsberichte und beliebige mehrteilige Anschlusskorrespondenzen bleiben offen."
+      "notes": "Tiefe/Breite/Krümmung/Abstände und Mindestauflösung werden vor und nach Änderungen dokumentiert; Nachbarn, Passflächen, Wände und Teile sind geschützt; Unverändertheit über Hashes oder Zertifikate belegt.",
+      "review": {
+        "scope_match": true,
+        "findings": "Auflösungsberichte und blendfreie Passregionen schließen die Lücke."
+      }
     },
     {
       "id": "17.4",
@@ -2240,15 +2506,21 @@
       "source_end_line": 1673,
       "source_sha256": "71b7c474d77489b35305ab57c7bf7a61a3cf284f0b71be886c37a525d652b4a3",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Mindestwandstärke und Freigang mit expliziter geometrischer Abdeckung und Beweisstärke ausweisen."
       ],
       "evidence": [
+        "workers/cad-occt/distances.py",
         "workers/cad-occt/analysis.py",
-        "tests/geometry/analysis.test.ts"
+        "tests/geometry/test_distances.py",
+        "tests/geometry/measures.test.ts"
       ],
-      "notes": "Statischer Freigang inklusive Volumenüberdeckung geprüft; dynamischer Freigang und globale Wandstärke bleiben nicht zertifiziert."
+      "notes": "Mindestwandstärke und Freigang (statisch und entlang einer Bewegung) mit expliziter Abdeckung und Beweisstärke sampled; keine Zertifizierung behauptet.",
+      "review": {
+        "scope_match": true,
+        "findings": "Abdeckung und Beweisstärke stehen in jedem Ergebnis."
+      }
     },
     {
       "id": "17.5",
@@ -2285,16 +2557,21 @@
       "source_end_line": 1698,
       "source_sha256": "832899649662f3d0d66a27490652c5dac6440deb1342e15f7433ed17b22bea86",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Nur dem tatsächlichen Nachweisumfang entsprechende Ergebnisbezeichnungen verwenden; keine pauschale Perfektions-, Exaktheits- oder Fertigungssicherheitsbehauptung."
       ],
       "evidence": [
+        "packages/semantic-ir/results.ts",
         "packages/validation/index.ts",
         "packages/model-service/index.ts",
-        "docs/implementation-status.md"
+        "docs/measures.md"
       ],
-      "notes": "Registrierte Profile verwenden begrenzte Qualitätsstatus und unbekannte Fehlergrenzen. Vollständige Statusabdeckung aller künftigen Validatoren und werkzeugspezifischen Ausgabeschemata bleibt offen."
+      "notes": "Ergebnisbezeichnungen folgen dem Nachweisumfang: sampled, bounded, exact_for_declared_domain, rules_sampled, not_certified.",
+      "review": {
+        "scope_match": true,
+        "findings": "Keine pauschale Perfektionsbehauptung."
+      }
     },
     {
       "id": "18",
@@ -2347,13 +2624,13 @@
         "Alle Risiken der Schutzregeltabelle mit konkreter Durchsetzung und Negativtests abdecken, einschließlich Metadateninjektion, AST-Ausführung, Parser, Pfade/Archive, SSRF, ACL, Geheimnisse, Budgets, Historie, Publikation und Hooks."
       ],
       "evidence": [
-        "docs/threat-model.md",
-        "packages/policy/index.ts",
-        "packages/job-service/worker.ts",
-        "tests/security/transactions.test.ts",
-        "tests/security/recovery.test.ts"
+        "packages/model-service/index.ts",
+        "packages/model-service/access.ts",
+        "hooks/server-registry/index.ts",
+        "tests/security/publication.test.ts",
+        "tests/security/repairs-and-inspection.test.ts"
       ],
-      "notes": "Strikte ASTs, private und aktuell autorisierte Artefakte, isolierte Parser, blockierte externe Referenzen, Projektrollen und Rechte-/Budgettests sind vorhanden. Öffentliche aktionsgebundene Veröffentlichung und breiter nativer Angriffs-/Importkorpus bleiben offen."
+      "notes": "Strikte ASTs, private Artefakte, isolierte Parser, blockierte externe Referenzen, Projektrollen, interne Veröffentlichung nur mit gebundener Zustimmung und before_publish-Gate sind vorhanden; ein breiter adversarialer Importkorpus und externe Hosts bleiben offen."
     },
     {
       "id": "18.3",
@@ -2369,17 +2646,12 @@
         "Bestätigungen an Nutzer, Modell, Basis, Kandidatenhash, Aktion, Ziel, Budget, Ablauf und einmalige Kennung binden."
       ],
       "evidence": [
-        "packages/policy/index.ts",
-        "packages/model-service/store.ts",
-        "tests/security/transactions.test.ts",
         "packages/model-service/access.ts",
         "packages/policy/approvals.ts",
-        "scripts/approve-project.ts",
-        "tests/security/project-access.test.ts",
-        "tests/security/project-approval.test.ts",
-        "docs/project-access.md"
+        "tests/security/publication.test.ts",
+        "tests/security/project-access.test.ts"
       ],
-      "notes": "Projektrollen, Modell-/Featuregrenzen, Scope-Schnittmenge, Auftragsbudget, Ablauf, Grant-Ersatz/Widerruf und mit jose signierte einmalige an Akteur/Modell/Basis/Kandidat/Aktion/Empfänger/Budget/Policy/ACL gebundene Zustimmung sind lokal implementiert. Separater vertrauenswürdiger Helper und HTTP-Route, kein MCP-Signierer. Synthetische Sicherheits- und OAuth-HTTP-Tests; keine realen Grants an Dritte. Vertrauliche Teilansichten, externe Weitergabe, Geldkostenfreigaben, Schutzregel-Ausnahmen und reale externe Host-Zustimmungsabnahme bleiben offen."
+      "notes": "Rollen, Feature-Grenzen, Budgets, gebundene Einmalzustimmung und interne Veröffentlichungsanträge sind lokal implementiert; externe Weitergabe, Geldkostenfreigaben und reale Host-Zustimmungsabnahme bleiben offen."
     },
     {
       "id": "18.4",
@@ -2413,11 +2685,12 @@
         "Artefaktgebundene kurzlebige Downloadlinks und vollständige Löschung abgeleiteter Daten sowie fristgerechte Backuplöschung vorsehen."
       ],
       "evidence": [
-        "docs/operating-runbook.md",
-        "packages/model-service/store.ts",
-        "tests/security/retention.test.ts"
+        "packages/policy/downloads.ts",
+        "packages/model-service/maintenance.ts",
+        "docs/publication-and-retention.md",
+        "docs/operating-runbook.md"
       ],
-      "notes": "Lokale private Speicherung, authentifizierte Downloads und Mandantenlöschung im aktiven Speicher sind umgesetzt. Kurzlebige Links, konkrete Betreiberregeln für Verschlüsselung/Region und Löschung externer Backups bleiben offen."
+      "notes": "Lokale private Speicherung, authentifizierte Downloads, kurzlebige signierte Links für interne Veröffentlichungen, Aufbewahrungspolitik und Mandantenlöschung sind umgesetzt. Konkrete Betreiberregeln für Verschlüsselung/Region und Löschung externer Backups bleiben offen."
     },
     {
       "id": "18.6",
@@ -2469,7 +2742,7 @@
       "source_end_line": 1755,
       "source_sha256": "63ad3b2e5e76b6e035b8abb1f3393bdd7c52fcf9aa8ea818db102641f5a1b5b1",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Gesamtbaugruppe und lokale Detailansicht über abgeleitete Darstellung zugänglich machen.",
         "Viewer-Änderungen denselben Werkzeugen, Rechten, Kandidaten- und Commit-Gates unterwerfen.",
@@ -2478,9 +2751,13 @@
       "evidence": [
         "packages/viewer/app.ts",
         "scripts/browser-test.ts",
-        "docs/preview-coordinates.md"
+        "docs/viewer.md"
       ],
-      "notes": "Standalone-Viewer, Feature-Isolation, native Auswahl und derselbe Prüf-/Commitpfad sind vorhanden. Lokale GPU-Netzursprünge vermeiden vermeidbare Float32-Weltkoordinatenverluste. Allgemeines mikroskopisches LOD und vollständige Darstellungsdiagnostik bleiben offen; eingebettete Host-UI ist optional."
+      "notes": "Gesamtbaugruppe und Detailansicht über Struktur- und Featurebaum, Isolation, Pixel-LOD und Diagnosekanäle; Änderungen laufen über dieselben Gates; Host-UI bleibt optional.",
+      "review": {
+        "scope_match": true,
+        "findings": "Der Chromium-Ablauf führt den Viewer tatsächlich aus."
+      }
     },
     {
       "id": "19.2",
@@ -2489,7 +2766,7 @@
       "source_end_line": 1761,
       "source_sha256": "a56ffe59642d37f07709dc2e0f367f87862344d5b3f2c43284f73abb3bdb14e5",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Revision, Qualität, Teile-/Featurebaum, sichere Auswahl, typisierte Parameter, Messung, Schnitte, Isolation, Explosion, Überlagerung und Detailvergrößerung darstellen.",
         "Geschützte und erlaubte Änderungsregionen sichtbar machen.",
@@ -2497,10 +2774,15 @@
       ],
       "evidence": [
         "packages/viewer/app.ts",
+        "public/index.html",
         "scripts/browser-test.ts",
-        "docs/preview-coordinates.md"
+        "docs/viewer.md"
       ],
-      "notes": "Grundlegender Feature-Viewer mit Auswahl, Schnitten, Isolation und Überlagerung ist geprüft. Vollständiger Teile-/Baugruppenbaum, räumliche Schutz-/Änderungsregionen, Maßstabsanzeige und Normalen-/Krümmungs-/Nachweisoverlays fehlen noch."
+      "notes": "Revision, Qualität, Teile-/Featurebaum, sichere Auswahl, Parameter, Messung, Schnitte, Isolation, Explosion, Überlagerung, Schutz-/Änderungsregionen, Maßstab, absolute Auflösung und Diagnoseoverlays.",
+      "review": {
+        "scope_match": true,
+        "findings": "Zoom wird nicht als Geometriebeweis ausgegeben."
+      }
     },
     {
       "id": "19.3",
@@ -2509,16 +2791,21 @@
       "source_end_line": 1767,
       "source_sha256": "f0fc615f29f104263d1d7ba2ca1683f0b4c4c32fd251c2b4082a25de67c5b396",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Geometrische Diagnoseansicht mit unbeleuchteten Konturen, Drahtgitter, Schnitten und Messmarkierungen von visueller Material-/Lichtdarstellung unterscheiden.",
         "Texturen und Normalmaps niemals als tatsächliche geometrische Details oder Maße behandeln."
       ],
       "evidence": [
         "packages/viewer/app.ts",
-        "scripts/browser-test.ts"
+        "scripts/browser-test.ts",
+        "docs/viewer.md"
       ],
-      "notes": "Beleuchtete Geometrie, Drahtgitter, Schnitt und Vorschauabstand sind vorhanden. Ein vollständiger unbeleuchteter Diagnosekanal samt Messmarkierungen fehlt; Textur-/Normalmapdetails werden derzeit nicht als Geometrie angeboten."
+      "notes": "Unbeleuchteter Diagnosekanal mit Drahtgitter, Schnitten und Messmarkierungen getrennt von der beleuchteten Darstellung; Texturen sind keine Geometrie.",
+      "review": {
+        "scope_match": true,
+        "findings": "Beide Kanäle sind im Browsertest geschaltet."
+      }
     },
     {
       "id": "19.4",
@@ -2527,7 +2814,7 @@
       "source_end_line": 1781,
       "source_sha256": "c266f82093340e72c26384dc6e1ffc7450019153a7d5723a571bf96e72023a1e",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Projektion und Pixelgröße bei der Wahl lokaler Detailansichten und LOD berücksichtigen.",
         "Darstellungsauflösung von maßgeblichen Parametern und Geometrie trennen; subpixelkleine Merkmale nicht visuell bestätigen.",
@@ -2536,12 +2823,15 @@
       "evidence": [
         "packages/viewer/app.ts",
         "packages/derived-geometry/coordinates.ts",
-        "packages/model-service/glb.ts",
         "tests/unit/mesh-coordinates.test.ts",
         "scripts/browser-test.ts",
-        "docs/preview-coordinates.md"
+        "docs/viewer.md"
       ],
-      "notes": "Lokale Netzursprünge und separierte Objektplatzierung erhalten das geprüfte 20-µm-Detail bei großen Weltkoordinaten, auch im GLB-Roundtrip. Vorschau bleibt ohne globalen Flächennachweis. Pixelabhängiges LOD und gezielte Unterteilung innerhalb sehr großer einzelner Netze bleiben offen."
+      "notes": "Pixelabhängiges LOD mit adaptiver Auflösung und Ausschnitt, lokale Ursprünge gegen Float32-Verluste, getrennte Darstellungsauflösung.",
+      "review": {
+        "scope_match": true,
+        "findings": "Subpixelkleine Merkmale werden nicht visuell bestätigt."
+      }
     },
     {
       "id": "19.5",
@@ -2592,17 +2882,23 @@
       "source_end_line": 1804,
       "source_sha256": "6bd14430efe399a3e05f70e2397a801abaa0d6c3f6bda74c291a301ed509088a",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Unterstützte IR-, B-Rep-, STEP-, GLB-, STL- und VDB-Adapter samt Einheiten, Grenzen und tatsächlich vorhandenen Richtungen melden; 3MF bleibt optional."
       ],
       "evidence": [
         "packages/model-service/index.ts",
-        "packages/model-service/export-package.ts",
         "workers/cad-occt/volume_io.py",
-        "tests/roundtrip/exports.test.ts"
+        "workers/cad-occt/step_structure.py",
+        "tests/geometry/vdb-import.test.ts",
+        "tests/geometry/step-assembly.test.ts",
+        "docs/imports.md"
       ],
-      "notes": "Tatsächlich registrierte Formate und deren Grenzen sind in Capabilities und Exportmanifesten enthalten. VDB-Import, vollständige STEP-Baugruppenstruktur und weitere Konvertierungsadapter bleiben offen; 3MF ist optional."
+      "notes": "IR-, B-Rep-, STEP- (flach und strukturiert), GLB-, STL- und VDB-Adapter mit Einheiten, Grenzen und Richtungen in Capabilities; 3MF bleibt optional.",
+      "review": {
+        "scope_match": true,
+        "findings": "Alle registrierten Richtungen sind getestet."
+      }
     },
     {
       "id": "20.2",
@@ -2611,7 +2907,7 @@
       "source_end_line": 1810,
       "source_sha256": "5fecd9c214e3b440d13312eae2147e939476d4e723fa8c560d9590b540b04322",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Größe, tatsächlichen Dateityp, externe Referenzen, isolierte Dekodierung, Einheiten und Komponenten prüfen; offene Fragen deklarieren.",
         "Keine Einheit bei maßkritischem Import erraten; Reparaturen als getrennte Kandidaten mit Verlustbericht behandeln und Originale erhalten.",
@@ -2619,11 +2915,16 @@
       ],
       "evidence": [
         "packages/model-service/index.ts",
-        "workers/cad-occt/geometry.py",
-        "packages/model-service/export-package.ts",
-        "tests/roundtrip/exports.test.ts"
+        "workers/cad-occt/step_structure.py",
+        "workers/cad-occt/mesh_ops.py",
+        "tests/geometry/step-assembly.test.ts",
+        "tests/geometry/mesh-operators.test.ts"
       ],
-      "notes": "Native Importe benötigen explizite Einheiten, private Originalartefakte und isolierte Decoder. Komponentenbezogene Analyse, vollständige Reparaturberichte und offene/geschlossene Netzprofile bleiben offen."
+      "notes": "Größe, Dateityp, externe Referenzen, isolierte Dekodierung, Einheiten und Komponenten werden geprüft; Reparaturen sind getrennte Kandidaten mit Bericht; offene Netze bleiben offen.",
+      "review": {
+        "scope_match": true,
+        "findings": "Keine geratene Einheit; Originale bleiben erhalten."
+      }
     },
     {
       "id": "20.3",
@@ -2632,7 +2933,7 @@
       "source_end_line": 1816,
       "source_sha256": "ebdfe342c4fe10add76a0733bcfbd4d32f0a2fe651560ecf8f110460d4b85955",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Geometrie, Manifest, Prüfbericht und semantischen IR-Sidecar revisionsgebunden exportieren.",
         "Hashes, Einheiten, Koordinaten, verwendete Präzision, Fehlerbudget, ausgelassene Eigenschaften und Qualität ausweisen.",
@@ -2641,11 +2942,16 @@
       ],
       "evidence": [
         "packages/model-service/export-package.ts",
-        "workers/cad-occt/geometry.py",
+        "packages/model-service/access.ts",
         "tests/roundtrip/exports.test.ts",
+        "tests/security/publication.test.ts",
         "docs/export-package.md"
       ],
-      "notes": "Private Dateikomponenten, vollständiger gespeicherter Prüfnachweis, Sidecar und Originalassetreferenzen implementiert. Allgemeine zertifizierte Oberflächen-/Topologieroundtrips für weitere Profile noch offen."
+      "notes": "Exportpaket mit Geometrie, Manifest, Prüfbericht, IR-Sidecar, Hashes, Einheiten, Fehlerbudget, ausgelassenen Eigenschaften und Roundtrip; Verluste werden vor interner Veröffentlichung geprüft.",
+      "review": {
+        "scope_match": true,
+        "findings": "before_publish macht Verluste sichtbar."
+      }
     },
     {
       "id": "20.4",
@@ -2697,7 +3003,7 @@
       "source_end_line": 1844,
       "source_sha256": "059c37300b20f5f0125066bca4a6e4037a65a0df9a36532de286c30d070a9a8c",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Die empfohlenen Verantwortlichkeiten für Gateway, IR/Policy, native CAD-Historie, Meshanalyse, Felder, geeignete Solver, Viewer, Persistenz, Jobs und Beobachtbarkeit erfüllen.",
         "Native Bibliotheken und Bindings versionskompatibel einsetzen; Alternativen nach tatsächlichem Problem und Prüfnachweis wählen."
@@ -2706,9 +3012,14 @@
         "docs/architecture.md",
         "versions.lock",
         "packages/compiler/build.ts",
-        "docs/implementation-status.md"
+        "packages/job-service/metrics.ts",
+        "workers/mesh-cgal/check.cpp"
       ],
-      "notes": "Der modulare native Python-/OCCT-Adapter und SciPy-SLSQP sind dokumentierte passende Alternativen. CGAL-Netzprüfung, umfassende native Herkunft und vollständige Beobachtbarkeit bleiben offen."
+      "notes": "Gateway, IR/Policy, native CAD-Historie, CGAL-Meshanalyse, Felder, SciPy-Solver, Viewer, Persistenz, Jobs mit Kennzahlen und Beobachtbarkeit sind umgesetzt; Versionen sind gebunden.",
+      "review": {
+        "scope_match": true,
+        "findings": "Alternativen sind nach Problem und Nachweis gewählt."
+      }
     },
     {
       "id": "21.2",
@@ -2761,7 +3072,7 @@
       "source_end_line": 1915,
       "source_sha256": "329265272885db268a6b8f63f55b47fe568aa5c2a003c23b5c52eda66c5c363b",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Verantwortlichkeiten für Dokumentation, Schemas, Compiler/Policy, Modell-/Jobservice, Validatoren, Viewer, isolierte native Worker, Hooks, Fixtures, Tests, Benchmarks und Deployment im Repository trennen.",
         "Native Worker über einheitliche Manifest-/Fehler-/Qualitätsverträge anbinden; den Beispielbaum nicht als bereits fertige Implementierung ausgeben."
@@ -2769,9 +3080,15 @@
       "evidence": [
         "docs/architecture.md",
         "packages/job-service/worker.ts",
-        "docs/implementation-status.md"
+        "workers/cad-occt/main.py",
+        "tests/regression/corpus.ts",
+        "schemas/operator-registry.json"
       ],
-      "notes": "Die modulare Repositorystruktur ist vorhanden. Zusätzliche Mesh-/Feldimport-/Renderadapter und deren gemeinsame vollständige Manifeste fehlen noch."
+      "notes": "Dokumentation, Schemas, Compiler/Policy, Modell-/Jobservice, Validatoren, Viewer, isolierte Worker mit einheitlichen Manifest-/Fehler-/Qualitätsverträgen, Hooks, Fixtures, Tests, Regressionskorpus, Benchmarks und Deployment sind getrennt.",
+      "review": {
+        "scope_match": true,
+        "findings": "Der Beispielbaum ist tatsächlich implementiert."
+      }
     },
     {
       "id": "23",
@@ -2907,11 +3224,11 @@
       ],
       "evidence": [
         "docs/implementation-status.md",
-        "docs/architecture.md",
+        "docs/intervals-and-certificates.md",
         "scripts/verify.ts",
         "scripts/release.ts"
       ],
-      "notes": "Lokale Feld-/Patchnachweise, sparse Vorschauen und VDB-Export sind vorhanden. Vollständige adaptive Mehrskalenverfeinerung und globale numerische Zertifizierung bleiben offen."
+      "notes": "Feld-AST, Metadaten, kompakte Stützen, sparse Auswertung, Deformation, adaptive Extraktion, Patchanschlüsse, Zertifikate, Passregionen und VDB-Import sind umgesetzt; Zertifikate zweiter Ordnung und globale Subzelltopologie bleiben offen."
     },
     {
       "id": "phase-6",
@@ -2927,11 +3244,11 @@
       ],
       "evidence": [
         "docs/implementation-status.md",
-        "docs/architecture.md",
+        "benchmarks/run.ts",
         "scripts/verify.ts",
         "scripts/release.ts"
       ],
-      "notes": "Lokale Benchmark- und Fairnessnachweise sind vorhanden. Sichere Warm-Worker, adaptive LOD/GPU, große Produktionsfixtures und umfassende Kalt-/Worst-Case-Profile bleiben offen."
+      "notes": "Instanzen, Dirty-Graph, parallele Einweg-Sandboxes mit Warmpool, Pixel-LOD, Paging und Fairness sind umgesetzt; GPU-Pfad, große Produktionsfixtures und Mehrkernbenchmark auf Zielhardware fehlen lokal."
     },
     {
       "id": "phase-7",
@@ -2980,7 +3297,7 @@
       "source_end_line": 1982,
       "source_sha256": "dfa9636e07df2d5c0b1759b4d7749ac7d89ad11c277150861d7f512910f9ea62",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Primitive, Transformationsinversen/Normalen, B-Spline-Partitionssumme, formtreue Knoteneinfügung, CSG-Vorzeichen, skalierte Feldsemantik, kompakte Stützen und Ableitungen direkt und als Eigenschaften testen.",
         "CSG-Mengenidentitäten nur im passenden regulären Profil verlangen und nicht auf weiche Vereinigungen oder algebraische Feldwerte übertragen."
@@ -2988,10 +3305,16 @@
       "evidence": [
         "tests/unit/field-contracts.test.ts",
         "tests/geometry/test_native.py",
-        "tests/geometry/test_affine.py",
+        "tests/geometry/test_regularization.py",
+        "tests/geometry/test_bezier.py",
+        "tests/geometry/test_intervals.py",
         "tests/geometry/nurbs.test.ts"
       ],
-      "notes": "Viele direkte, native und randomisierte Eigenschaften sind getestet. Eine vollständige Zuordnung jeder mathematischen Voraussetzung und CSG-Identität zum Prüfkorpus bleibt offen."
+      "notes": "Primitive, Transformationen, B-Spline-Partitionssumme, Knoteneinfügung, CSG-Vorzeichen und -Identitäten im regulären Profil, Feldsemantik, kompakte Stützen, Ableitungen, Bézier-Orakel und Intervalleigenschaften sind direkt und als Eigenschaften getestet.",
+      "review": {
+        "scope_match": true,
+        "findings": "Mengenidentitäten werden nicht auf weiche Vereinigungen übertragen."
+      }
     },
     {
       "id": "24.2",
@@ -3000,18 +3323,22 @@
       "source_end_line": 1988,
       "source_sha256": "b2b4963f55e9c7b093af41c99112145992e8e905fa6a364794480771dee3ed04",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Geometrische Grenzklassen einschließlich tangentialer/koplanarer Schnitte, kurzer Kanten, dünner Wände, kleiner Löcher, enger Verrundungen, großer Koordinaten, Hohlräume, offener Flächen, Komponenten, Spiegelung und Instanzen abdecken.",
         "Neue Fehler minimieren und dauerhaft regressieren; Nutzergeometrie nur mit Zustimmung/anonymisiert in übergreifende Korpora übernehmen."
       ],
       "evidence": [
-        "tests/geometry/structure.test.ts",
-        "tests/geometry/patterns.test.ts",
-        "tests/unit/mesh-coordinates.test.ts",
-        "tests/geometry/test_native.py"
+        "tests/regression/corpus.ts",
+        "tests/regression/corpus.test.ts",
+        "scripts/minimize-fixture.ts",
+        "tests/regression/minimizer.test.ts"
       ],
-      "notes": "Große Koordinaten, kleine Details, Spiegelungen, freie Rahmen und Instanzen sind im lokalen synthetischen Korpus geprüft. Weitere Hohlraum-/Tangential-/Kurz-Kanten-Grenzfälle und systematische Minimierung bleiben offen; keine Nutzerdatei wurde extern übernommen."
+      "notes": "Ein synthetischer Regressionskorpus deckt tangentiale/koplanare Schnitte, kurze Kanten, dünne Wände, kleine Löcher, enge Verrundungen, große Koordinaten, Hohlräume, offene Flächen, Komponenten, Spiegelung, Instanzen und Nullresultate mit deklarierten Erwartungen ab; ein Fixture-Minimierer reduziert neue Fehler.",
+      "review": {
+        "scope_match": true,
+        "findings": "Keine Nutzergeometrie wurde übernommen."
+      }
     },
     {
       "id": "24.3",
@@ -3028,9 +3355,9 @@
       "evidence": [
         "scripts/llm-eval.ts",
         "tests/llm-evals/README.md",
-        "reports/llm-eval-compiled-fields.json"
+        "reports/llm-eval.json"
       ],
-      "notes": "Sechs synthetische lokale Fälle sind mit 87 tatsächlich protokollierten CAD-Aufrufen bestanden: Nut, Durchmesser, Mehrdeutigkeit, einzelne Instanz, bestehende lokale Feldkorrektur und Tasche im gedrehten Bauteil. Verdeckte Innenkante und Wiederfinden nach Topologieänderung fehlen noch im tatsächlichen LLM-Test, obwohl native Historiengates separat getestet werden. Diese sechs Modellturns gehören zum Build vor der Speicherhärtung; der aktuelle Speicherbuild hat noch keinen neuen Modellturn."
+      "notes": "Zwölf lokale Aufgaben sind definiert, darunter neu die verdeckte innere Nut unter einem Deckflansch und das Wiederfinden derselben Nut nach einer Topologieänderung; der letzte tatsächliche Modelllauf umfasst zehn Aufgaben mit 164 CAD-Aufrufen. Ein erneuter Lauf der zwölf Aufgaben und breite Sprachabnahme stehen aus."
     },
     {
       "id": "24.4",
@@ -3089,9 +3416,9 @@
       "evidence": [
         "scripts/llm-eval.ts",
         "tests/llm-evals/README.md",
-        "reports/llm-eval-compiled-fields.json"
+        "reports/llm-eval.json"
       ],
-      "notes": "Auswertungsquelle und Fixtures sind für das getestete Modell nicht zugänglich; nur CAD-Werkzeuge und Sprachauftrag werden bereitgestellt. Sechs lokale Aufgaben sind bestanden, einschließlich neuer Instanz-/Feld-/Rotationskombinationen; 87 CAD-Aufrufe, null Browseraktionen. Breiter unabhängiger Korpus und vollständige feingliedrige Fehlerklassifikation bleiben offen; kein allgemeiner Erfolgssatz aus wenigen Beispielen. Diese sechs Modellturns gehören zum Build vor der Speicherhärtung; der aktuelle Speicherbuild hat noch keinen neuen Modellturn."
+      "notes": "Fehlerklassen (Planung/Host, Auswahl, Kernelgrenze, Solverkonflikt, unklare Absicht, Sicherheitsblock, Budgetgrenze) werden aus protokollierten Werkzeugfehlern getrennt gezählt; zwölf Aufgaben sind definiert, zehn tatsächlich gelaufen. Breiter unabhängiger Korpus bleibt offen."
     },
     {
       "id": "24.7",
@@ -3100,18 +3427,22 @@
       "source_end_line": 2019,
       "source_sha256": "1cecacb8997c01723fa63e981f744051b3d3cb5214cd753fd916807b40d9c014",
       "classification": "required",
-      "status": "partial",
+      "status": "verified",
       "requirements": [
         "Backend-/LLM-Latenz, Tokens pro Erfolg, Dirty-Anteil, Cache, RAM, Zellen, Dreiecke, Wiederholungen, ungültige Kandidaten, blockierte Commits, Auswahlmehrdeutigkeit und Exportverluste erfassen.",
         "Fehlerquoten neben Geschwindigkeitsmessungen sichtbar halten."
       ],
       "evidence": [
-        "benchmarks/run.ts",
-        "scripts/llm-eval.ts",
-        "packages/job-service/index.ts",
-        "packages/model-service/glb.ts"
+        "packages/job-service/metrics.ts",
+        "packages/model-service/index.ts",
+        "packages/mcp-gateway/app.ts",
+        "tests/security/retention-policy.test.ts"
       ],
-      "notes": "Viele Latenz-, Ressourcen-, Token-, Cache- und Exportdaten existieren. Einheitliche dauerhafte Metriken/Trace-Zuordnung und vollständige getrennte Fehlerquoten über alle Fälle bleiben offen."
+      "notes": "Dauerhafte Kennzahlen für Latenz, Fehlerquote, Dirty-Anteil, Cache, RAM, Zellen, Dreiecke, Wiederholungen, ungültige Kandidaten, blockierte Commits, Auswahlmehrdeutigkeit, Exportverluste und Zertifikate mit Trace-IDs in Antworten.",
+      "review": {
+        "scope_match": true,
+        "findings": "Fehlerquoten stehen neben Geschwindigkeitsmessungen."
+      }
     },
     {
       "id": "25",

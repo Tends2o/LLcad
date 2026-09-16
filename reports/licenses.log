@@ -1,0 +1,5 @@
+
+> mathforge-3d@0.1.0 licenses
+> tsx scripts/licenses.ts
+
+{"components":145,"permissive":139,"weak_copyleft":5,"strong_copyleft":1,"unknown":0,"review":"requires_operator_review"}

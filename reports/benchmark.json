@@ -1,6 +1,6 @@
 {
   "status": "measured",
-  "created": "2026-09-14T23:43:26.250Z",
+  "created": "2026-09-16T01:32:35.461Z",
   "environment": {
     "platform": "linux",
     "release": "6.12.101+deb13-amd64",
@@ -8,50 +8,74 @@
     "cpu": "AMD EPYC-Milan Processor",
     "logical_cpus": 4,
     "memory_bytes": 4042137600,
-    "worker_processes": 1
+    "worker_processes": 2,
+    "warm_worker_pool": 1
   },
-  "registry_hash": "3f2946e25a737d1a88f874b696dbef7069d41bdfa5693adddc4a1e03956478d2",
-  "implementation_hash": "19bc858290cbf8e44e1d9864a6e7d85580f84e14891bffe086414ca7ee0ea74e",
-  "cold_fixture_pipeline_ms": 1048.938709,
+  "registry_hash": "398e6e99951de340a7db5b9eda8cd4fd9a8e860fd96c726e1364ee2f474efbdd",
+  "implementation_hash": "f020c865e018125e20e97177c10ed626caa0cbda4b92ed45fee18a625f1655ff",
+  "cold_fixture_pipeline_ms": 1089.742023,
   "read": {
     "samples": 100,
-    "p50_ms": 0.7007810000000063,
-    "p95_ms": 1.372323999999935,
-    "min_ms": 0.4532320000000709,
-    "max_ms": 17.32814099999996
+    "p50_ms": 0.6576320000001488,
+    "p95_ms": 1.0698869999998806,
+    "min_ms": 0.5423130000001493,
+    "max_ms": 20.514523000000054
   },
   "patch_acceptance": {
     "samples": 12,
-    "p50_ms": 2.1177650000008725,
-    "p95_ms": 14.168457999999873,
-    "min_ms": 1.6623900000013236,
-    "max_ms": 14.168457999999873
+    "p50_ms": 2.146030999998402,
+    "p95_ms": 16.171417999999903,
+    "min_ms": 1.7658320000009553,
+    "max_ms": 16.171417999999903
   },
   "candidate": {
     "samples": 12,
-    "p50_ms": 886.9109580000004,
-    "p95_ms": 990.4581599999999,
-    "min_ms": 823.5376700000015,
-    "max_ms": 990.4581599999999
+    "p50_ms": 857.4476269999996,
+    "p95_ms": 1011.2561190000006,
+    "min_ms": 746.1417629999999,
+    "max_ms": 1011.2561190000006
   },
   "validation": {
     "samples": 12,
-    "p50_ms": 33.29066000000057,
-    "p95_ms": 34.41270900000018,
-    "min_ms": 32.35714900000312,
-    "max_ms": 34.41270900000018
+    "p50_ms": 34.524648000000525,
+    "p95_ms": 35.638394000001426,
+    "min_ms": 33.21625500000118,
+    "max_ms": 35.638394000001426
   },
   "preview": {
     "samples": 5,
-    "p50_ms": 933.8959239999999,
-    "p95_ms": 1008.23092,
-    "min_ms": 888.4333800000004,
-    "max_ms": 1008.23092
+    "p50_ms": 912.9532960000001,
+    "p95_ms": 949.9954120000002,
+    "min_ms": 827.78791,
+    "max_ms": 949.9954120000002
   },
-  "assembly_100_instances_full_pipeline_ms": 1070.0622250000015,
+  "worker_start": {
+    "cold_render_ms": 947.6464109999979,
+    "cold_confirmed": true,
+    "warm_render_ms": 820.4059540000017,
+    "warm_confirmed": true,
+    "idle_wait_seconds": 0.000007160007953643799
+  },
+  "export_profiles": {
+    "step": {
+      "duration_ms": 802.0336669999997,
+      "roundtrip_status": "checks_passed_within_profile"
+    }
+  },
+  "validation_profiles": {
+    "precision_cad": {
+      "samples": 12,
+      "p50_ms": 34.524648000000525,
+      "p95_ms": 35.638394000001426,
+      "min_ms": 33.21625500000118,
+      "max_ms": 35.638394000001426
+    },
+    "watertight_solid_import_validate_commit_ms": 316.28461700000116
+  },
+  "assembly_100_instances_full_pipeline_ms": 1051.3787470000025,
   "stress_at_instance_limit": {
     "instances": 10000,
-    "duration_ms": 5559.467301000001,
+    "duration_ms": 5405.695662000002,
     "status": "failed",
     "metrics": null,
     "error": {
@@ -62,7 +86,7 @@
     "authoritative_revision_retained": true,
     "note": "Cold candidate at configured instance limit; no automatic commit or relaxed budget."
   },
-  "organic_full_pipeline_with_preview_ms": 2442.259102,
+  "organic_full_pipeline_with_preview_ms": 2449.2429379999994,
   "field_evaluation": {
     "python": "3.13.5",
     "numpy": "2.4.3",
@@ -71,42 +95,42 @@
         "name": "sphere",
         "points_per_batch": 2048,
         "compiled_nodes": 1,
-        "compile_ms": 0.043138163164258,
+        "compile_ms": 0.04249787889420986,
         "recursive_evaluation": {
           "samples": 5,
-          "p50_ms": 3.8673148956149817,
-          "p95_ms": 4.024651134386659,
-          "min_ms": 3.617923939600587,
-          "max_ms": 4.024651134386659
+          "p50_ms": 3.898974973708391,
+          "p95_ms": 5.066275130957365,
+          "min_ms": 3.823020961135626,
+          "max_ms": 5.066275130957365
         },
         "compiled_evaluation": {
           "samples": 5,
-          "p50_ms": 2.879651030525565,
-          "p95_ms": 3.188434988260269,
-          "min_ms": 2.7874941006302834,
-          "max_ms": 3.188434988260269
+          "p50_ms": 2.94915190897882,
+          "p95_ms": 4.465912934392691,
+          "min_ms": 2.8642958495765924,
+          "max_ms": 4.465912934392691
         },
-        "compiled_p50_speedup": 1.3429804009651676,
+        "compiled_p50_speedup": 1.3220665106594862,
         "sampler_cold_values": {
           "samples": 5,
-          "p50_ms": 7.106539094820619,
-          "p95_ms": 9.36988415196538,
-          "min_ms": 6.928694900125265,
-          "max_ms": 9.36988415196538
+          "p50_ms": 7.392043946310878,
+          "p95_ms": 14.665564987808466,
+          "min_ms": 7.272308925166726,
+          "max_ms": 14.665564987808466
         },
         "sampler_same_worker_repeated_points": {
           "samples": 5,
-          "p50_ms": 2.272156998515129,
-          "p95_ms": 2.3873350583016872,
-          "min_ms": 2.230999991297722,
-          "max_ms": 2.3873350583016872
+          "p50_ms": 2.4103838950395584,
+          "p95_ms": 3.2006169203668833,
+          "min_ms": 2.314463956281543,
+          "max_ms": 3.2006169203668833
         },
         "sampler_restored_private_cache": {
           "samples": 5,
-          "p50_ms": 3.975172992795706,
-          "p95_ms": 4.171193111687899,
-          "min_ms": 3.9007607847452164,
-          "max_ms": 4.171193111687899
+          "p50_ms": 4.226994933560491,
+          "p95_ms": 4.757731920108199,
+          "min_ms": 4.0668160654604435,
+          "max_ms": 4.757731920108199
         },
         "max_reference_difference": 0
       },
@@ -114,42 +138,42 @@
         "name": "mixed_fields",
         "points_per_batch": 2048,
         "compiled_nodes": 6,
-        "compile_ms": 0.17713289707899094,
+        "compile_ms": 0.17587188631296158,
         "recursive_evaluation": {
           "samples": 5,
-          "p50_ms": 17.937206896021962,
-          "p95_ms": 20.03488503396511,
-          "min_ms": 17.839212203398347,
-          "max_ms": 20.03488503396511
+          "p50_ms": 18.30555498600006,
+          "p95_ms": 18.78966693766415,
+          "min_ms": 18.22110917419195,
+          "max_ms": 18.78966693766415
         },
         "compiled_evaluation": {
           "samples": 5,
-          "p50_ms": 11.304469080641866,
-          "p95_ms": 13.634334085509181,
-          "min_ms": 11.115749133750796,
-          "max_ms": 13.634334085509181
+          "p50_ms": 11.679701041430235,
+          "p95_ms": 11.85554196126759,
+          "min_ms": 11.512742843478918,
+          "max_ms": 11.85554196126759
         },
-        "compiled_p50_speedup": 1.5867358978174577,
+        "compiled_p50_speedup": 1.5672965361927156,
         "sampler_cold_values": {
           "samples": 5,
-          "p50_ms": 22.914865985512733,
-          "p95_ms": 24.040821008384228,
-          "min_ms": 22.598701994866133,
-          "max_ms": 24.040821008384228
+          "p50_ms": 23.59840995632112,
+          "p95_ms": 24.14001291617751,
+          "min_ms": 23.08064908720553,
+          "max_ms": 24.14001291617751
         },
         "sampler_same_worker_repeated_points": {
           "samples": 5,
-          "p50_ms": 2.288991119712591,
-          "p95_ms": 2.3305867798626423,
-          "min_ms": 2.2557538468390703,
-          "max_ms": 2.3305867798626423
+          "p50_ms": 2.3000629153102636,
+          "p95_ms": 2.3911891039460897,
+          "min_ms": 2.294174861162901,
+          "max_ms": 2.3911891039460897
         },
         "sampler_restored_private_cache": {
           "samples": 5,
-          "p50_ms": 10.94102906063199,
-          "p95_ms": 11.482893023639917,
-          "min_ms": 10.81340410746634,
-          "max_ms": 11.482893023639917
+          "p50_ms": 11.327858781442046,
+          "p95_ms": 11.552395997568965,
+          "min_ms": 11.089692125096917,
+          "max_ms": 11.552395997568965
         },
         "max_reference_difference": 0
       },
@@ -157,42 +181,42 @@
         "name": "local_deformation",
         "points_per_batch": 2048,
         "compiled_nodes": 7,
-        "compile_ms": 0.04310905933380127,
+        "compile_ms": 0.03999518230557442,
         "recursive_evaluation": {
           "samples": 5,
-          "p50_ms": 30.654613161459565,
-          "p95_ms": 31.30349493585527,
-          "min_ms": 30.060688965022564,
-          "max_ms": 31.30349493585527
+          "p50_ms": 30.38674616254866,
+          "p95_ms": 31.05095704086125,
+          "min_ms": 30.310280853882432,
+          "max_ms": 31.05095704086125
         },
         "compiled_evaluation": {
           "samples": 5,
-          "p50_ms": 21.785736083984375,
-          "p95_ms": 22.751851938664913,
-          "min_ms": 21.433544112369418,
-          "max_ms": 22.751851938664913
+          "p50_ms": 21.741745062172413,
+          "p95_ms": 22.311306092888117,
+          "min_ms": 21.25560911372304,
+          "max_ms": 22.311306092888117
         },
-        "compiled_p50_speedup": 1.4070955896686492,
+        "compiled_p50_speedup": 1.3976222274548393,
         "sampler_cold_values": {
           "samples": 5,
-          "p50_ms": 35.71711899712682,
-          "p95_ms": 73.71743791736662,
-          "min_ms": 34.86338700167835,
-          "max_ms": 73.71743791736662
+          "p50_ms": 38.98428287357092,
+          "p95_ms": 80.74888703413308,
+          "min_ms": 37.227294873446226,
+          "max_ms": 80.74888703413308
         },
         "sampler_same_worker_repeated_points": {
           "samples": 5,
-          "p50_ms": 2.413660055026412,
-          "p95_ms": 2.5221500545740128,
-          "min_ms": 2.283321926370263,
-          "max_ms": 2.5221500545740128
+          "p50_ms": 2.5125439278781414,
+          "p95_ms": 3.340219845995307,
+          "min_ms": 2.3643102031201124,
+          "max_ms": 3.340219845995307
         },
         "sampler_restored_private_cache": {
           "samples": 5,
-          "p50_ms": 12.865930097177625,
-          "p95_ms": 13.420270988717675,
-          "min_ms": 12.711908901110291,
-          "max_ms": 13.420270988717675
+          "p50_ms": 14.435818884521723,
+          "p95_ms": 17.99915498122573,
+          "min_ms": 13.26648611575365,
+          "max_ms": 17.99915498122573
         },
         "max_reference_difference": 0
       }
@@ -205,14 +229,14 @@
   },
   "budget_rejection_verified": true,
   "mesh_pipeline": {
-    "import_validate_commit_ms": 798.9365109999999,
+    "import_validate_commit_ms": 316.28461700000116,
     "exports": {
       "stl": {
-        "duration_ms": 809.4970900000008,
+        "duration_ms": 823.364501,
         "triangle_count": 12
       },
       "glb": {
-        "duration_ms": 1613.0551689999993,
+        "duration_ms": 1553.9764319999995,
         "triangle_count": 12
       }
     },
@@ -220,94 +244,131 @@
   },
   "worker_metrics": [
     {
-      "seconds": 0.06470447592437267,
-      "peak_rss_kib": 334368,
+      "seconds": 0.06292492104694247,
+      "peak_rss_kib": 335736,
       "cache_hits": 1,
       "total_features": 3,
-      "field_samples": {}
+      "field_samples": {},
+      "warm_start": true,
+      "idle_wait_seconds": 0.000006969086825847626,
+      "gateway_wall_seconds": 0.698
     },
     {
-      "seconds": 0.06027542892843485,
-      "peak_rss_kib": 334324,
+      "seconds": 0.06608086614869535,
+      "peak_rss_kib": 335764,
       "cache_hits": 1,
       "total_features": 3,
-      "field_samples": {}
+      "field_samples": {},
+      "warm_start": true,
+      "idle_wait_seconds": 0.000007740920409560204,
+      "gateway_wall_seconds": 0.909
     },
     {
-      "seconds": 0.06019891402684152,
-      "peak_rss_kib": 334440,
+      "seconds": 0.06473478092812002,
+      "peak_rss_kib": 335548,
       "cache_hits": 1,
       "total_features": 3,
-      "field_samples": {}
+      "field_samples": {},
+      "warm_start": true,
+      "idle_wait_seconds": 0.000008011003956198692,
+      "gateway_wall_seconds": 0.882
     },
     {
-      "seconds": 0.06094891391694546,
-      "peak_rss_kib": 334524,
+      "seconds": 0.06708784797228873,
+      "peak_rss_kib": 335744,
       "cache_hits": 1,
       "total_features": 3,
-      "field_samples": {}
+      "field_samples": {},
+      "warm_start": true,
+      "idle_wait_seconds": 0.000008902978152036667,
+      "gateway_wall_seconds": 0.982
     },
     {
-      "seconds": 0.06644558417610824,
-      "peak_rss_kib": 334560,
+      "seconds": 0.06145483488216996,
+      "peak_rss_kib": 335744,
       "cache_hits": 1,
       "total_features": 3,
-      "field_samples": {}
+      "field_samples": {},
+      "warm_start": true,
+      "idle_wait_seconds": 0.000007400056347250938,
+      "gateway_wall_seconds": 0.872
     },
     {
-      "seconds": 0.058006746927276254,
-      "peak_rss_kib": 334396,
+      "seconds": 0.06256117299199104,
+      "peak_rss_kib": 335640,
       "cache_hits": 1,
       "total_features": 3,
-      "field_samples": {}
+      "field_samples": {},
+      "warm_start": true,
+      "idle_wait_seconds": 0.000007068971171975136,
+      "gateway_wall_seconds": 0.937
     },
     {
-      "seconds": 0.06834141607396305,
-      "peak_rss_kib": 333964,
+      "seconds": 0.06195340002886951,
+      "peak_rss_kib": 336040,
       "cache_hits": 1,
       "total_features": 3,
-      "field_samples": {}
+      "field_samples": {},
+      "warm_start": true,
+      "idle_wait_seconds": 0.000007319962605834007,
+      "gateway_wall_seconds": 0.845
     },
     {
-      "seconds": 0.061935527017340064,
-      "peak_rss_kib": 334496,
+      "seconds": 0.06519217905588448,
+      "peak_rss_kib": 335652,
       "cache_hits": 1,
       "total_features": 3,
-      "field_samples": {}
+      "field_samples": {},
+      "warm_start": true,
+      "idle_wait_seconds": 0.000006579095497727394,
+      "gateway_wall_seconds": 0.817
     },
     {
-      "seconds": 0.05802931799553335,
-      "peak_rss_kib": 334380,
+      "seconds": 0.05966533301398158,
+      "peak_rss_kib": 335724,
       "cache_hits": 1,
       "total_features": 3,
-      "field_samples": {}
+      "field_samples": {},
+      "warm_start": true,
+      "idle_wait_seconds": 0.000007539987564086914,
+      "gateway_wall_seconds": 0.815
     },
     {
-      "seconds": 0.0696084639057517,
-      "peak_rss_kib": 334268,
+      "seconds": 0.05713431304320693,
+      "peak_rss_kib": 335960,
       "cache_hits": 1,
       "total_features": 3,
-      "field_samples": {}
+      "field_samples": {},
+      "warm_start": true,
+      "idle_wait_seconds": 0.0000068498775362968445,
+      "gateway_wall_seconds": 0.755
     },
     {
-      "seconds": 0.060767184011638165,
-      "peak_rss_kib": 334560,
+      "seconds": 0.061315473867580295,
+      "peak_rss_kib": 335732,
       "cache_hits": 1,
       "total_features": 3,
-      "field_samples": {}
+      "field_samples": {},
+      "warm_start": true,
+      "idle_wait_seconds": 0.000007309950888156891,
+      "gateway_wall_seconds": 0.76
     },
     {
-      "seconds": 0.061192637076601386,
-      "peak_rss_kib": 334244,
+      "seconds": 0.061660557985305786,
+      "peak_rss_kib": 335552,
       "cache_hits": 1,
       "total_features": 3,
-      "field_samples": {}
+      "field_samples": {},
+      "warm_start": true,
+      "idle_wait_seconds": 0.000008102040737867355,
+      "gateway_wall_seconds": 0.828
     }
   ],
   "error_rate": 0,
   "limitations": [
     "12 warm CAD samples and 5 preview samples; not a production SLO study.",
-    "Worker processes are cold; the content-addressed geometry cache is warm.",
+    "Cold and warm worker starts are measured once each; the content-addressed geometry cache is warm for repeated edits.",
+    "Export and validation profiles cover the synthetic housing and one mesh cube; no large production fixtures.",
     "LLM, external network and real target host latency are not included."
   ]
 }

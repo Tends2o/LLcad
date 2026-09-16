@@ -37,6 +37,127 @@
       "type": "integer",
       "minimum": 1,
       "maximum": 16
+    },
+    "sections": {
+      "maxItems": 6,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "faces",
+          "constraints",
+          "facts",
+          "contracts",
+          "quality",
+          "adjacency"
+        ]
+      }
+    },
+    "anchor": {
+      "type": "object",
+      "properties": {
+        "point": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            },
+            {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            },
+            {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "normal": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            },
+            {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            },
+            {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "barycentric": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            },
+            {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            },
+            {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "triangle_index": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000000
+        },
+        "view_direction": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            },
+            {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            },
+            {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        }
+      },
+      "required": [
+        "point"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [

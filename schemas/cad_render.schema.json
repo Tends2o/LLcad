@@ -48,6 +48,226 @@
         "unit"
       ],
       "additionalProperties": false
+    },
+    "adaptive": {
+      "type": "object",
+      "properties": {
+        "target_error": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            },
+            "unit": {
+              "type": "string",
+              "enum": [
+                "1",
+                "m",
+                "mm",
+                "um",
+                "rad",
+                "deg"
+              ]
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        },
+        "feature_factor": {
+          "default": "0.5",
+          "type": "string",
+          "maxLength": 48,
+          "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+        },
+        "max_deflection": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            },
+            "unit": {
+              "type": "string",
+              "enum": [
+                "1",
+                "m",
+                "mm",
+                "um",
+                "rad",
+                "deg"
+              ]
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "target_error",
+        "feature_factor"
+      ],
+      "additionalProperties": false
+    },
+    "region": {
+      "type": "object",
+      "properties": {
+        "center": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            },
+            {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            },
+            {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "radius": {
+          "type": "string",
+          "maxLength": 48,
+          "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+        }
+      },
+      "required": [
+        "center",
+        "radius"
+      ],
+      "additionalProperties": false
+    },
+    "view": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "section",
+            "orthographic"
+          ]
+        },
+        "origin": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            },
+            {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            },
+            {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "normal": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            },
+            {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            },
+            {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "direction": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            },
+            {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            },
+            {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "hidden_lines": {
+          "type": "boolean"
+        },
+        "discretization": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "string",
+              "maxLength": 48,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            },
+            "unit": {
+              "type": "string",
+              "enum": [
+                "1",
+                "m",
+                "mm",
+                "um",
+                "rad",
+                "deg"
+              ]
+            }
+          },
+          "required": [
+            "value",
+            "unit"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [

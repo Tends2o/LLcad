@@ -10,6 +10,7 @@ import { validateBasis, validateSurface, refineSurface } from "./nurbs.js";
 import * as Rational from "./bernstein.js";
 import { affineContract } from "./affine.js";
 import { compileStructure, contextHash } from "./structure.js";
+import { isoBasicProfile } from "./threads.js";
 type Param = {
   dimension: "length" | "angle" | "scalar";
   min?: number;
@@ -35,14 +36,101 @@ const one = (
   params: Record<string, Param>,
   refs: [number, number],
   output = "brep",
+  inputs: "brep" | "mesh" | "implicit" = "brep",
 ) => ({
   version: 1,
   params,
   refs,
   output,
+  inputs,
   required_validators: ["structure", "finite", "geometry", "constraints"],
-  engine: "OCCT-7.9.3.1.1",
+  engine:
+    output === "mesh" && inputs !== "brep"
+      ? "mathforge-mesh-1/CGAL-6.0.1"
+      : "OCCT-7.9.3.1.1",
 });
+/** Machine-readable per-operator contract metadata (Bauplan 9.3); merged into the registry. */
+const LOCAL_EFFECT = new Set([
+  "hole",
+  "pocket",
+  "groove",
+  "fillet",
+  "chamfer",
+  "shell",
+  "thread",
+  "offset_solid",
+  "remesh_region",
+  "local_mesh_deform",
+  "mesh_repair",
+  "trim_surface",
+]);
+const ANALYTIC_DERIVATIVES = new Set([
+  "box",
+  "sphere",
+  "cylinder",
+  "cone",
+  "torus",
+  "extrude",
+  "revolve",
+  "point",
+  "circle",
+  "plane",
+]);
+export function operatorContract(
+  name: string,
+  contract: { output: string; inputs: string; refs: [number, number] },
+) {
+  const mesh = contract.output === "mesh";
+  return {
+    effect_region: LOCAL_EFFECT.has(name)
+      ? "local_to_declared_parameters_within_input_geometry"
+      : contract.refs[1] === 0
+        ? "entire_new_feature"
+        : "entire_dependent_feature",
+    derivatives: ANALYTIC_DERIVATIVES.has(name)
+      ? "registered_analytic_dimension_derivatives"
+      : name === "field"
+        ? "interval_forward_mode_and_finite_differences"
+        : "expression_finite_difference_only",
+    invalidation: "feature_hash_change_invalidates_all_transitive_dependents",
+    preconditions:
+      "typed_parameter_ranges_dependency_arity_and_representation_match",
+    resource_model: {
+      time_budget_seconds: LIMITS.job_seconds,
+      memory_mib: 1536,
+      output_bytes: LIMITS.max_artifact_bytes,
+      triangles: LIMITS.triangles,
+      active_cells: LIMITS.active_cells,
+    },
+    determinism: mesh
+      ? "deterministic_given_registry_hash_native_mesh_source_and_indexed_input"
+      : "deterministic_given_registry_hash_and_kernel_version",
+    cancellation:
+      "process_group_kill_with_lease_fencing_and_untouched_base_revision",
+    error_codes: [
+      "INVALID_SCHEMA",
+      "UNIT_MISMATCH",
+      "GEOMETRY_INVALID",
+      "PRECISION_UNSUPPORTED",
+      "BUDGET_EXCEEDED",
+      "OUT_OF_SCOPE",
+      "KERNEL_FAILURE",
+      "CANCELLED",
+    ],
+    tests: mesh
+      ? [
+          "tests/geometry/mesh-operators.test.ts",
+          "tests/geometry/test_mesh_ops.py",
+        ]
+      : [
+          "tests/geometry/test_native.py",
+          "tests/geometry/native-operators.test.ts",
+          "tests/regression/corpus.test.ts",
+        ],
+    authorization: "model:edit_scope_of_the_candidate_transaction",
+    quality_after_evaluation: "preview_only_until_validated_within_profile",
+  };
+}
 export const OPERATORS = {
   point: one(position, [0, 0]),
   line: one({}, [0, 0]),
@@ -65,13 +153,19 @@ export const OPERATORS = {
   regularize: one({}, [1, 1]),
   thread: one(
     {
-      root_radius: length,
-      pitch: length,
+      root_radius: { ...length, optional: true },
+      pitch: { ...length, optional: true },
       height: length,
-      tooth_depth: length,
-      tooth_width: length,
+      tooth_depth: { ...length, optional: true },
+      tooth_width: { ...length, optional: true },
+      crest_width: { ...length, min: 0, optional: true },
+      runout: { ...length, min: 0, optional: true },
     },
     [0, 1],
+  ),
+  offset_solid: one(
+    { distance: { dimension: "length", min: -1000, max: 1000 } },
+    [1, 1],
   ),
   box: one(
     { width: length, depth: length, height: length, ...position },
@@ -101,7 +195,20 @@ export const OPERATORS = {
   extrude: one({ height: length }, [1, 1]),
   revolve: one({ angle }, [1, 1]),
   loft: one({}, [2, 16]),
-  sweep: one({}, [2, 2]),
+  sweep: one(
+    {
+      twist: { ...angle, optional: true },
+      scale_end: { dimension: "scalar", min: 0.05, max: 20, optional: true },
+      sections: {
+        dimension: "scalar",
+        min: 2,
+        max: 256,
+        integer: true,
+        optional: true,
+      },
+    },
+    [2, 2],
+  ),
   union: one({}, [2, 16]),
   intersection: one({}, [2, 16]),
   difference: one({}, [2, 16]),
@@ -148,6 +255,59 @@ export const OPERATORS = {
   assembly: one({}, [1, 128]),
   field: one({}, [0, 0], "implicit"),
   imported: one({}, [0, 0], "source"),
+  mesh_repair: one(
+    {
+      weld_tolerance: {
+        dimension: "length",
+        min: 1e-6,
+        max: 1,
+        optional: true,
+      },
+    },
+    [1, 1],
+    "mesh",
+    "mesh",
+  ),
+  remesh_region: one(
+    {
+      radius: length,
+      target_edge: length,
+      iterations: {
+        dimension: "scalar",
+        min: 1,
+        max: 20,
+        integer: true,
+        optional: true,
+      },
+      ...position,
+    },
+    [1, 1],
+    "mesh",
+    "mesh",
+  ),
+  local_mesh_deform: one(
+    {
+      radius: length,
+      iterations: {
+        dimension: "scalar",
+        min: 1,
+        max: 50,
+        integer: true,
+        optional: true,
+      },
+      ...position,
+    },
+    [1, 1],
+    "mesh",
+    "mesh",
+  ),
+  tessellate: one(
+    { deflection: { dimension: "length", min: 1e-5, max: 10 } },
+    [1, 1],
+    "mesh",
+    "brep",
+  ),
+  extract_isosurface: one({}, [1, 1], "mesh", "implicit"),
 } as const;
 export const LIMITS = {
   features: 256,
@@ -179,6 +339,7 @@ export function fieldValueUnit(
     "Feld-Einheitenbaum ist zu tief.",
   );
   if (node.op === "gyroid") return "dimensionless";
+  if (node.op === "sampled_grid") return node.value_unit ?? "length";
   if (node.a) {
     const a = fieldValueUnit(node.a, depth + 1),
       b = fieldValueUnit(node.b, depth + 1);
@@ -222,6 +383,33 @@ export function checkDepth(input: unknown) {
     if (value && typeof value === "object")
       for (const child of Object.values(value)) stack.push([child, depth + 1]);
   }
+}
+/** Every uploaded artifact a plan reads: imported features and sampled grids inside field expressions. */
+export function referencedArtifacts(
+  features: any[],
+): { artifact_id: string; format: string }[] {
+  const found = new Map<string, { artifact_id: string; format: string }>();
+  const walk = (node: any, depth: number) => {
+    if (!node || typeof node !== "object" || depth > LIMITS.ast_depth) return;
+    if (node.op === "sampled_grid")
+      found.set(node.artifact_id + ":vdb", {
+        artifact_id: node.artifact_id,
+        format: "vdb",
+      });
+    for (const key of ["a", "b", "source"])
+      if (node[key]) walk(node[key], depth + 1);
+  };
+  for (const f of features) {
+    if (f.construction.operator === "imported")
+      found.set(f.construction.artifact_id + ":" + f.construction.format, {
+        artifact_id: f.construction.artifact_id,
+        format: f.construction.format,
+      });
+    if (f.construction.operator === "field") walk(f.construction.expression, 0);
+    // A certified edit compares against the previous expression, which may sample a grid too.
+    if (f.reference_expression) walk(f.reference_expression, 0);
+  }
+  return [...found.values()];
 }
 export function fieldContract(
   node: any,
@@ -268,6 +456,13 @@ function fieldContractNode(
     return n;
   };
   if (node.center) node.center.forEach(num);
+  if (node.op === "sampled_grid") {
+    // Claimed bound; the worker refuses the grid when its measured difference bound is larger.
+    return {
+      semantics: "sampled_implicit_trilinear",
+      lipschitz: pos(node.lipschitz),
+    };
+  }
   if (node.op === "gyroid") {
     node.origin.forEach(num);
     num(node.threshold);
@@ -451,13 +646,26 @@ export function compile(input: unknown) {
       "OUT_OF_SCOPE",
       "Repräsentation passt nicht zum Operator.",
     );
-    if (f.construction.operator === "imported")
+    if (f.construction.operator === "imported") {
       requireThat(
         f.authoritative_representation ===
-          (f.construction.format === "stl" ? "mesh" : "brep"),
+          (f.construction.format === "stl"
+            ? "mesh"
+            : f.construction.format === "vdb"
+              ? "implicit"
+              : "brep"),
         "OUT_OF_SCOPE",
         "Importformat und geometrische Hoheit müssen übereinstimmen.",
       );
+      requireThat(
+        (f.construction.component === undefined ||
+          f.construction.format === "step") &&
+          (f.construction.grid === undefined ||
+            f.construction.format === "vdb"),
+        "INVALID_SCHEMA",
+        "component gilt für STEP-Komponenten, grid für OpenVDB-Dateien.",
+      );
+    }
     const specs: Record<string, Param> = contract.params;
     const values: Record<string, number> = {};
     const solved = new Set<string>(),
@@ -503,12 +711,21 @@ export function compile(input: unknown) {
         "INVALID_SCHEMA",
         `Parameter ${k} ist für ${name} nicht registriert.`,
       );
-    for (const dep of f.depends_on)
+    for (const dep of f.depends_on) {
       requireThat(
-        map.get(dep)!.authoritative_representation === "brep",
+        map.get(dep)!.authoritative_representation === contract.inputs,
         "OUT_OF_SCOPE",
-        "Native Operatoren benötigen B-Rep-Eingänge. Feldoperationen gehören in den Feld-AST.",
+        contract.inputs === "brep"
+          ? "Native Operatoren benötigen B-Rep-Eingänge. Feldoperationen gehören in den Feld-AST."
+          : `Operator ${name} benötigt Eingänge mit Repräsentation ${contract.inputs}.`,
       );
+      if (contract.output === "mesh")
+        requireThat(
+          map.get(dep)!.local_frame === f.local_frame,
+          "OUT_OF_SCOPE",
+          "Netzoperatoren arbeiten im Bezugsrahmen ihres Eingangs.",
+        );
+    }
     for (const [k, s] of Object.entries(specs)) {
       const q = f.parameters[k];
       requireThat(q || s.optional, "INVALID_SCHEMA", `Parameter ${k} fehlt.`);
@@ -610,6 +827,33 @@ export function compile(input: unknown) {
           "Ein Kreismuster mit mehreren Vorkommen benötigt einen von null verschiedenen Winkelbereich.",
         );
     }
+    if (f.construction.operator === "local_mesh_deform") {
+      const c = f.construction;
+      requireThat(
+        c.handles.every((h) =>
+          [...h.point, ...h.displacement].every(
+            (x) => Math.abs(Number(x)) <= 1e6,
+          ),
+        ),
+        "GEOMETRY_INVALID",
+        "Handle-Koordinaten außerhalb des Bereichs.",
+      );
+      requireThat(
+        c.handles.every(
+          (h) =>
+            Math.hypot(...h.displacement.map(Number)) <= values.radius &&
+            Math.hypot(...h.displacement.map(Number)) > 0,
+        ),
+        "GEOMETRY_INVALID",
+        "Handle-Verschiebungen müssen von null verschieden und kleiner als der Regionsradius sein.",
+      );
+    }
+    if (f.construction.operator === "offset_solid")
+      requireThat(
+        Math.abs(values.distance) >= 1e-5,
+        "GEOMETRY_INVALID",
+        "Versatzabstand darf nicht null sein.",
+      );
     if (f.construction.operator === "trim_surface")
       requireThat(
         map.get(f.depends_on[0])!.construction.operator === "nurbs_surface" &&
@@ -618,13 +862,40 @@ export function compile(input: unknown) {
         "GEOMETRY_INVALID",
         "Trimmung benötigt einen NURBS-Patch und ein gültiges UV-Rechteck in [0,1].",
       );
+    let threadProfile: ReturnType<typeof isoBasicProfile> | null = null;
     if (f.construction.operator === "thread") {
+      if (f.construction.standard === "iso_metric_basic") {
+        requireThat(
+          f.construction.designation &&
+            [
+              "root_radius",
+              "pitch",
+              "tooth_depth",
+              "tooth_width",
+              "crest_width",
+            ].every((k) => !Object.hasOwn(f.parameters, k)),
+          "INVALID_SCHEMA",
+          "ISO-Grundprofil benötigt eine Bezeichnung und leitet Radius, Steigung und Zahnmaße selbst ab.",
+        );
+        threadProfile = isoBasicProfile(f.construction.designation);
+        Object.assign(values, threadProfile.values);
+      } else
+        requireThat(
+          !f.construction.designation &&
+            ["root_radius", "pitch", "tooth_depth", "tooth_width"].every((k) =>
+              Object.hasOwn(values, k),
+            ),
+          "INVALID_SCHEMA",
+          "Benutzerdefiniertes Gewinde benötigt Kernradius, Steigung, Zahntiefe und Zahnbreite.",
+        );
       requireThat(
         f.depends_on.length === (f.construction.mode === "internal" ? 1 : 0) &&
           values.tooth_width < values.pitch &&
-          values.tooth_depth < values.root_radius,
+          values.tooth_depth < values.root_radius &&
+          (values.crest_width ?? 0) < values.tooth_width &&
+          (values.runout ?? 0) * 2 < values.height,
         "GEOMETRY_INVALID",
-        "Gewinde benötigt passenden Eingang, getrennte Windungen und ein gültiges Dreiecksprofil.",
+        "Gewinde benötigt passenden Eingang, getrennte Windungen, ein gültiges Profil und einen kürzeren Auslauf als die halbe Höhe.",
       );
       requireThat(
         values.height / values.pitch <= 32,
@@ -636,6 +907,22 @@ export function compile(input: unknown) {
       instances <= LIMITS.instances,
       "BUDGET_EXCEEDED",
       "Instanzbudget überschritten.",
+      {
+        alternatives: [
+          {
+            action: "reduce_pattern_count",
+            maximum_instances: LIMITS.instances,
+          },
+          {
+            action: "split_into_separate_parts",
+            note: "each part has its own instance budget and job",
+          },
+          {
+            action: "request_larger_approved_budget",
+            note: "operator policy change; no silent relaxation",
+          },
+        ],
+      },
     );
     let field;
     if (f.construction.operator === "field") {
@@ -650,10 +937,28 @@ export function compile(input: unknown) {
         "GEOMETRY_INVALID",
         "Ungültige Felddomäne oder Zellweite.",
       );
+      const extent = Math.max(...max.map((v, i) => v - min[i]));
       requireThat(
-        Math.max(...max.map((v, i) => (v - min[i]) / cell)) <= 1024,
+        extent / cell <= 1024,
         "BUDGET_EXCEEDED",
         "Die lokale Feldauflösung überschreitet das Budget.",
+        {
+          alternatives: [
+            {
+              action: "increase_cell_size",
+              minimum_cell_size_mm: Number((extent / 1024).toPrecision(6)),
+            },
+            {
+              action: "shrink_domain",
+              maximum_extent_mm: Number((cell * 1024).toPrecision(6)),
+              note: "edit a smaller region as its own detail feature",
+            },
+            {
+              action: "coarser_preview_then_refine",
+              note: "preview quality may be reduced; model tolerance is never relaxed",
+            },
+          ],
+        },
       );
       field = {
         ...field,
@@ -688,6 +993,13 @@ export function compile(input: unknown) {
       inputs: f.depends_on.map((d) => hashes[d]),
       tolerance: ir.tolerance,
     });
+    const blendRegions = ir.constraints
+      .filter((c) => c.kind === "blend_free_region" && c.feature_id === f.id)
+      .map((c: any) => ({
+        id: c.id,
+        min: c.min.map(Number),
+        max: c.max.map(Number),
+      }));
     compiled.push({
       ...f,
       values,
@@ -698,6 +1010,8 @@ export function compile(input: unknown) {
           : hash([hashes[f.id], "local"]),
       placement: structure.placements[f.local_frame],
       field,
+      ...(threadProfile ? { thread_profile: threadProfile } : {}),
+      ...(blendRegions.length ? { blend_free_regions: blendRegions } : {}),
     });
     visiting.delete(fid);
     visited.add(fid);
@@ -714,6 +1028,42 @@ export function compile(input: unknown) {
       "OUT_OF_SCOPE",
       "Das Meshkörperprofil benötigt ausdrücklich maßgebliche Mesh-Ausgaben; B-Rep und Feld behalten ihre eigenen Profile.",
     );
+  if (ir.profile === "manufacturing_candidate") {
+    requireThat(
+      !!ir.manufacturing,
+      "INVALID_SCHEMA",
+      "Das Fertigungskandidatenprofil benötigt ausdrückliche Prozessregeln (manufacturing).",
+    );
+    requireThat(
+      ir.outputs.every(
+        (fid) => map.get(fid)!.authoritative_representation === "brep",
+      ),
+      "OUT_OF_SCOPE",
+      "Fertigungsregeln werden an nativen B-Rep-Ausgaben abgetastet.",
+    );
+    const wall = quantity(ir.manufacturing!.minimum_wall, "length");
+    const hole = ir.manufacturing!.minimum_hole_diameter
+      ? quantity(ir.manufacturing!.minimum_hole_diameter, "length")
+      : 0;
+    const overhang = ir.manufacturing!.maximum_overhang
+      ? quantity(ir.manufacturing!.maximum_overhang, "angle")
+      : null;
+    requireThat(
+      wall > 0 &&
+        wall <= 1000 &&
+        hole >= 0 &&
+        hole <= 1000 &&
+        (overhang === null || (overhang >= 0 && overhang <= Math.PI / 2)) &&
+        Math.hypot(...ir.manufacturing!.build_direction.map(Number)) >= 1e-9,
+      "GEOMETRY_INVALID",
+      "Ungültige Fertigungsregeln.",
+    );
+  } else
+    requireThat(
+      !ir.manufacturing,
+      "INVALID_SCHEMA",
+      "Fertigungsregeln gelten nur im Fertigungskandidatenprofil.",
+    );
   requireThat(
     ir.constraints.filter((c) => c.kind === "patch_continuity").length <=
       LIMITS.patch_join_constraints,
@@ -721,12 +1071,47 @@ export function compile(input: unknown) {
     "Zu viele exakte Patchanschlussprüfungen.",
   );
   for (const c of ir.constraints) {
-    if (c.kind === "protected_region")
+    if (c.kind === "protected_region" || c.kind === "change_region")
       requireThat(
         Object.hasOwn(structure.placements, c.local_frame ?? "world"),
         "INVALID_SCHEMA",
         "Unbekannter Rahmen der Schutzregion.",
       );
+    if (c.kind === "blend_free_region") {
+      requireThat(
+        map.get(c.feature_id)!.construction.operator === "field",
+        "OUT_OF_SCOPE",
+        "Passregionen ohne Blend sind für analytische Felder registriert.",
+      );
+      requireThat(
+        c.min.every(
+          (x, i) =>
+            Number(c.max[i]) > Number(x) &&
+            Math.abs(Number(x)) <= 1e6 &&
+            Math.abs(Number(c.max[i])) <= 1e6,
+        ),
+        "GEOMETRY_INVALID",
+        "Ungültige Passregion.",
+      );
+    }
+    if (c.kind === "change_region") {
+      requireThat(
+        map.get(c.feature_id)!.construction.operator === "field",
+        "OUT_OF_SCOPE",
+        "Änderungsregionen sind für analytische Felder registriert.",
+      );
+      const radius = Number(c.radius),
+        margin = Number(c.compute_margin ?? "0");
+      requireThat(
+        c.center.every((x) => Math.abs(Number(x)) <= 1e6) &&
+          radius >= 1e-5 &&
+          radius <= 1e6 &&
+          margin >= 0 &&
+          margin <= 1e6,
+        "GEOMETRY_INVALID",
+        "Ungültige Änderungsregion.",
+      );
+    }
     if (c.kind === "patch_continuity")
       requireThat(
         map.get(c.feature_id)?.local_frame ===
@@ -791,6 +1176,19 @@ export function compile(input: unknown) {
         "Ungültiger Volumenvertrag.",
       );
     if (c.kind === "protected_bounds") quantity(c.tolerance, "length");
+    if (c.kind === "surface_deviation") {
+      requireThat(
+        map.get(c.feature_id)!.construction.operator === "field",
+        "OUT_OF_SCOPE",
+        "Oberflächenabweichung wird für analytische Felder zertifiziert.",
+      );
+      const maximum = quantity(c.maximum, "length");
+      requireThat(
+        maximum >= 1e-6 && maximum <= 1000,
+        "PRECISION_UNSUPPORTED",
+        "Abweichungsschranke: 0.000001 bis 1000 mm.",
+      );
+    }
     if (c.kind === "protected_region")
       requireThat(
         c.max.every((v, i) => Number(v) > Number(c.min[i])),
@@ -809,6 +1207,21 @@ export function compile(input: unknown) {
     "PRECISION_UNSUPPORTED",
     "Unterstützte Modell-Toleranz: 0.00001 bis 0.1 mm.",
   );
+  // Conditioning (Bauplan 6.2): world coordinate magnitude versus the requested tolerance.
+  let magnitude = 0;
+  for (const f of compiled) {
+    for (const value of Object.values(f.values as Record<string, number>))
+      magnitude = Math.max(magnitude, Math.abs(value));
+    for (const x of f.placement?.translation ?? [])
+      magnitude = Math.max(magnitude, Math.abs(x));
+  }
+  const ulp = Math.pow(2, Math.floor(Math.log2(Math.max(magnitude, 1))) - 52);
+  requireThat(
+    ulp * 1000 <= tolerance,
+    "PRECISION_UNSUPPORTED",
+    "Weltkoordinaten sind für die verlangte Toleranz zu groß; lokale Bezugsrahmen mit kleinem Ursprung verwenden.",
+    { max_coordinate_magnitude_mm: magnitude, binary64_ulp_mm: ulp },
+  );
   return {
     ir,
     features: compiled,
@@ -816,6 +1229,20 @@ export function compile(input: unknown) {
     hashes,
     tolerance,
     profile: ir.profile,
+    manufacturing: ir.manufacturing
+      ? {
+          process: ir.manufacturing.process,
+          minimum_wall_mm: quantity(ir.manufacturing.minimum_wall, "length"),
+          minimum_hole_diameter_mm: ir.manufacturing.minimum_hole_diameter
+            ? quantity(ir.manufacturing.minimum_hole_diameter, "length")
+            : null,
+          maximum_overhang_deg: ir.manufacturing.maximum_overhang
+            ? (quantity(ir.manufacturing.maximum_overhang, "angle") * 180) /
+              Math.PI
+            : null,
+          build_direction: ir.manufacturing.build_direction.map(Number),
+        }
+      : null,
     registry_hash: REGISTRY_HASH,
     structure_hash: structure.structure_hash,
     structure: structure.structure,
@@ -824,7 +1251,150 @@ export function compile(input: unknown) {
       instances,
       maximum_seconds: LIMITS.job_seconds,
     },
+    conditioning: {
+      max_coordinate_magnitude_mm: magnitude,
+      binary64_ulp_at_max_mm: ulp,
+      tolerance_mm: tolerance,
+      ulp_to_tolerance_ratio: ulp / tolerance,
+      rule: "1000 ulp must not exceed the model tolerance; frames with local origins keep details conditioned",
+    },
   };
+}
+/** Registered dimension derivatives (mm per mm) with respect to constructor parameters. */
+const DIMENSION_SOURCES: Record<string, Record<string, [string, number][]>> = {
+  box: {
+    width: [["width", 1]],
+    depth: [["depth", 1]],
+    height: [["height", 1]],
+  },
+  sphere: { radius: [["radius", 1]] },
+  cylinder: { radius: [["radius", 1]], height: [["height", 1]] },
+  groove: {
+    depth: [["depth", 1]],
+    width: [["width", 1]],
+    remaining_wall: [
+      ["depth", -1],
+      ["base.height", 1],
+    ],
+  },
+  hole: { radius: [["radius", 1]], depth: [["depth", 1]] },
+  pocket: {
+    width: [["width", 1]],
+    length: [["length", 1]],
+    depth: [["depth", 1]],
+  },
+};
+/** Explain which measured quantities a changed parameter drives; local linearization only. */
+export function sensitivityReport(
+  base: ModelIR,
+  ir: ModelIR,
+  changed: Set<string>,
+) {
+  const entries: any[] = [];
+  const touched = new Set<string>();
+  for (const f of ir.features) {
+    const before = base.features.find((x) => x.id === f.id);
+    for (const [name, q] of Object.entries(f.parameters))
+      if (
+        !before ||
+        !before.parameters[name] ||
+        !equalQuantity(before.parameters[name], q)
+      )
+        touched.add(f.id + ":" + name);
+  }
+  if (!touched.size) return entries;
+  const dependants = (fid: string) =>
+    ir.features.filter((x) => x.depends_on.includes(fid)).map((x) => x.id);
+  for (const f of ir.features) {
+    const sources = DIMENSION_SOURCES[f.construction.operator] ?? {};
+    for (const [quantityName, terms] of Object.entries(sources))
+      for (const [source, derivative] of terms) {
+        const [ownerId, parameter] = source.startsWith("base.")
+          ? [f.depends_on[0], source.slice(5)]
+          : [f.id, source];
+        if (!ownerId || !touched.has(ownerId + ":" + parameter)) continue;
+        entries.push({
+          feature_id: f.id,
+          quantity: quantityName,
+          parameter_feature: ownerId,
+          parameter,
+          derivative,
+          unit: "mm_per_mm",
+          method: "registered_analytic_dimension",
+        });
+      }
+    for (const [target, expression] of Object.entries(f.expressions)) {
+      const references = new Set<string>();
+      const walk = (e: any) => {
+        if (e.parameter) references.add(e.parameter);
+        e.args?.forEach(walk);
+      };
+      walk(expression);
+      for (const parameter of references) {
+        if (!touched.has(f.id + ":" + parameter) || !f.parameters[parameter])
+          continue;
+        const current = quantity(f.parameters[parameter]);
+        const h = Math.max(1e-6, Math.abs(current) * 1e-6);
+        const at = (value: number) =>
+          evaluate(expression, {
+            ...f.parameters,
+            [parameter]: {
+              value: value.toFixed(12),
+              unit: f.parameters[parameter].unit,
+            },
+          }).value;
+        const derivative = (at(current + h) - at(current - h)) / (2 * h);
+        if (!Number.isFinite(derivative)) continue;
+        entries.push({
+          feature_id: f.id,
+          quantity: "parameter:" + target,
+          parameter_feature: f.id,
+          parameter,
+          derivative,
+          unit: "per_parameter_unit",
+          method: "expression_finite_difference",
+        });
+      }
+    }
+    for (const [ownerId] of [...touched].map((t) => t.split(":")))
+      if (ownerId === f.id)
+        for (const consumer of dependants(f.id))
+          if (
+            !entries.some(
+              (e) =>
+                e.feature_id === consumer &&
+                e.quantity === "dependent_geometry",
+            )
+          )
+            entries.push({
+              feature_id: consumer,
+              quantity: "dependent_geometry",
+              parameter_feature: f.id,
+              parameter: "*",
+              derivative: 1,
+              unit: "dirty_flag",
+              method: "registered_analytic_dimension",
+            });
+  }
+  return entries.slice(0, 64);
+}
+/** Bind changed field features to their base expression so the worker can certify d_H(Z_old, Z_new). */
+export function attachDeviationReferences(base: ModelIR, plan: any) {
+  for (const f of plan.features) {
+    if (f.construction.operator !== "field") continue;
+    const limits = plan.ir.constraints
+      .filter(
+        (c: any) => c.kind === "surface_deviation" && c.feature_id === f.id,
+      )
+      .map((c: any) => quantity(c.maximum, "length"));
+    const previous = base.features.find((x) => x.id === f.id);
+    if (!limits.length || previous?.construction.operator !== "field") continue;
+    const before = previous.construction.expression;
+    if (hash(before) === hash(f.construction.expression)) continue;
+    f.reference_expression = before;
+    f.deviation_epsilon = Math.min(...limits);
+  }
+  return plan;
 }
 export function applyPatch(base: ModelIR, patch: Patch) {
   const ir = structuredClone(base);
@@ -1099,5 +1669,6 @@ export function applyPatch(base: ModelIR, patch: Patch) {
     dependent_features: [...dirty].filter((x) => !changed.has(x)),
     dirty_features: [...dirty],
     refinement_reports: refinementReports,
+    sensitivity: sensitivityReport(base, plan.ir, changed),
   };
 }

@@ -17,3 +17,8 @@ Unversionierte frühere Prüfnachweise bleiben unter einem eigenen geschlossenen
 Die angekündigten Werkzeugschemas verwenden ausdrücklich JSON Schema Draft 7: Der installierte MCP-SDK-Validator unterstützt damit insbesondere Tupel und rekursive Referenzen korrekt. Das ist unabhängig von der MCP-Protokollversion. Die Dateien werden aus demselben Zod-Vertrag wie die Laufzeitprüfung erzeugt. Die Integrationstests prüfen tatsächlich serialisierte Antworten zusätzlich mit dem SDK-JSON-Schema-Validator. Fehlereinspeisungen prüfen Transaktionsrollback, Wiederholung, Workerabbruch, ungültige native Zahlen und manipulierte Nachweise. HTTP-Tests verwenden den tatsächlichen SDK-Client einschließlich Flächen- und Bounds-Tupeln.
 
 Diese Verträge ersetzen keine vollständige Fertigungs-, Fehlerfortpflanzungs- oder Remote-Hostabnahme. Der Gesamtplan bleibt offen, bis die gesonderten Anforderungen ebenfalls nachgewiesen sind.
+
+## Ergänzte Verträge
+
+Jobs der Art `probe` (strukturerhaltender STEP-Import) liefern den Strukturbericht und eine `continuation`: entweder den Kandidatenjob mit `transaction_id` und `candidate_revision` oder einen ehrlichen Fehler. `cad_measure` besitzt zusätzliche Analysevarianten für `surface_distance`, `wall_thickness`, `blend_activity` und den bewegten Freigang; jede trägt `guarantee` (`sampled`, `bounded`, `exact_for_declared_domain` oder `not_certified`) und `certified_error_bound`. `cad_render` kann `diagnostic_view` im Artefaktmanifest und `resolution`/`clip` für adaptive beziehungsweise ausgeschnittene Vorschauen tragen. Jobansichten führen `phase`, `budget_seconds`, `started_at`, `heartbeat_at`, `finished_at` und `elapsed_seconds`. Validierungsberichte der Version 2 enthalten `error_budget`; ältere Berichte bleiben lesbar.
+

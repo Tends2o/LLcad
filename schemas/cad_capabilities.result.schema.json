@@ -107,11 +107,19 @@
             },
             "export": {
               "$ref": "#/definitions/__schema9"
+            },
+            "step_structure": {
+              "$ref": "#/definitions/__schema10"
+            },
+            "vdb_import": {
+              "$ref": "#/definitions/__schema10"
             }
           },
           "required": [
             "import",
-            "export"
+            "export",
+            "step_structure",
+            "vdb_import"
           ],
           "additionalProperties": false
         },
@@ -122,9 +130,13 @@
             "enum": [
               "precision_cad",
               "render_surface",
-              "watertight_solid"
+              "watertight_solid",
+              "manufacturing_candidate"
             ]
           }
+        },
+        "manufacturing_candidate": {
+          "$ref": "#/definitions/__schema12"
         },
         "mesh_validation": {
           "$ref": "#/definitions/__schema12"
@@ -162,6 +174,15 @@
         "model_hierarchy": {
           "$ref": "#/definitions/__schema12"
         },
+        "thread_library": {
+          "$ref": "#/definitions/__schema12"
+        },
+        "sweep_contract": {
+          "$ref": "#/definitions/__schema12"
+        },
+        "field_certificates": {
+          "$ref": "#/definitions/__schema12"
+        },
         "limits": {
           "type": "object",
           "propertyNames": {
@@ -187,6 +208,15 @@
             "available",
             "unavailable"
           ]
+        },
+        "worker_pool": {
+          "$ref": "#/definitions/__schema12"
+        },
+        "observability": {
+          "$ref": "#/definitions/__schema12"
+        },
+        "pipeline_policy": {
+          "$ref": "#/definitions/__schema12"
         },
         "unsupported": {
           "$ref": "#/definitions/__schema9"
@@ -217,6 +247,7 @@
         "policy_hash",
         "formats",
         "quality_profiles",
+        "manufacturing_candidate",
         "mesh_validation",
         "analysis",
         "field_operators",
@@ -229,11 +260,17 @@
         "transformations",
         "field_values",
         "model_hierarchy",
+        "thread_library",
+        "sweep_contract",
+        "field_certificates",
         "limits",
         "protocols",
         "host_test_status",
         "face_selection",
         "worker_isolation",
+        "worker_pool",
+        "observability",
+        "pipeline_policy",
         "unsupported"
       ],
       "additionalProperties": false

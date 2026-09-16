@@ -158,6 +158,15 @@ export const FieldNode: z.ZodType<any> = z.lazy(() =>
       radius: DecimalString,
       displacement: Point,
     }),
+    z.strictObject({
+      op: z.literal("sampled_grid"),
+      artifact_id: Id,
+      grid: z.string().min(1).max(200).optional(),
+      lipschitz: DecimalString,
+      value_unit: z.enum(["length", "dimensionless"]).default("length"),
+      source_unit: z.enum(["mm", "m", "um"]).default("mm"),
+      interpolation: z.literal("trilinear").default("trilinear"),
+    }),
   ]),
 );
 const PatternOverride = z.strictObject({
@@ -189,7 +198,11 @@ export const Construction = z.discriminatedUnion("operator", [
     operator: z.literal("thread"),
     mode: z.enum(["external", "internal"]).default("external"),
     handedness: z.enum(["right", "left"]).default("right"),
-    standard: z.literal("custom").default("custom"),
+    standard: z.enum(["custom", "iso_metric_basic"]).default("custom"),
+    designation: z
+      .string()
+      .regex(/^M\d+(\.\d+)?(x\d+(\.\d+)?)?$/)
+      .optional(),
   }),
   z.strictObject({
     operator: z.enum(["box", "sphere", "cylinder", "cone", "torus"]),
@@ -212,7 +225,35 @@ export const Construction = z.discriminatedUnion("operator", [
     weights: z.array(DecimalString).min(2).max(256),
     basis: SplineBasis,
   }),
-  z.strictObject({ operator: z.enum(["extrude", "revolve", "loft", "sweep"]) }),
+  z.strictObject({ operator: z.enum(["extrude", "revolve"]) }),
+  z.strictObject({
+    operator: z.literal("loft"),
+    ruled: z.boolean().optional(),
+    check_compatibility: z.boolean().optional(),
+  }),
+  z.strictObject({
+    operator: z.literal("sweep"),
+    frame: z.enum(["corrected_frenet", "rotation_minimizing"]).optional(),
+    self_contact_check: z.boolean().optional(),
+  }),
+  z.strictObject({ operator: z.literal("offset_solid") }),
+  z.strictObject({
+    operator: z.literal("mesh_repair"),
+    remove_degenerate: z.boolean().optional(),
+    remove_duplicates: z.boolean().optional(),
+    orient: z.boolean().optional(),
+    fill_holes_max_edges: z.int().min(0).max(256).optional(),
+  }),
+  z.strictObject({ operator: z.literal("remesh_region") }),
+  z.strictObject({
+    operator: z.literal("local_mesh_deform"),
+    handles: z
+      .array(z.strictObject({ point: Point, displacement: Point }))
+      .min(1)
+      .max(32),
+  }),
+  z.strictObject({ operator: z.literal("tessellate") }),
+  z.strictObject({ operator: z.literal("extract_isosurface") }),
   z.strictObject({ operator: z.enum(["hole", "pocket", "groove"]) }),
   z.strictObject({
     operator: z.enum(["fillet", "chamfer"]),
@@ -253,12 +294,28 @@ export const Construction = z.discriminatedUnion("operator", [
     expression: FieldNode,
     domain: z.strictObject({ min: Point, max: Point }),
     cell_size: Quantity,
+    extraction: z
+      .strictObject({
+        method: z
+          .enum(["marching_tetrahedra", "dual_contouring"])
+          .default("marching_tetrahedra"),
+        pruning: z.enum(["lipschitz", "interval"]).default("lipschitz"),
+      })
+      .optional(),
   }),
   z.strictObject({
     operator: z.literal("imported"),
     artifact_id: Id,
-    format: z.enum(["step", "stl"]),
+    format: z.enum(["step", "stl", "vdb"]),
     source_unit: z.enum(["mm", "m", "um"]),
+    /** XCAF label entry of a STEP prototype shape (structure-preserving assembly import). */
+    component: z
+      .string()
+      .max(64)
+      .regex(/^0(:[0-9]{1,6}){1,16}$/)
+      .optional(),
+    /** Named grid inside an OpenVDB file with several grids. */
+    grid: z.string().min(1).max(200).optional(),
   }),
 ]);
 export const Feature = z.strictObject({
@@ -307,6 +364,19 @@ export const SolverProblem = z.strictObject({
     .min(1)
     .max(12),
   equations: z.array(Equation).min(1).max(32),
+  objectives: z
+    .array(
+      z.strictObject({
+        id: Id,
+        expression: ExpressionSchema,
+        weight: DecimalString.default("1"),
+        scale: DecimalString.default("1"),
+        loss: z.enum(["none", "huber", "cauchy"]).default("none"),
+      }),
+    )
+    .max(32)
+    .default([]),
+  regularization: DecimalString.default("1"),
   max_iterations: z.int().min(1).max(200).default(100),
 });
 export const Constraint = z.discriminatedUnion("kind", [
@@ -381,6 +451,29 @@ export const Constraint = z.discriminatedUnion("kind", [
     min: Point,
     max: Point,
   }),
+  z.strictObject({
+    id: Id,
+    kind: z.literal("surface_deviation"),
+    feature_id: Id,
+    maximum: Quantity,
+  }),
+  z.strictObject({
+    id: Id,
+    kind: z.literal("change_region"),
+    feature_id: Id,
+    local_frame: Id.optional(),
+    center: Point,
+    radius: DecimalString,
+    compute_margin: DecimalString.optional(),
+  }),
+  /** Mating region of a field with smooth unions: every blend must stay inactive inside the box (Bauplan 6.8). */
+  z.strictObject({
+    id: Id,
+    kind: z.literal("blend_free_region"),
+    feature_id: Id,
+    min: Point,
+    max: Point,
+  }),
 ]);
 const SemanticEntity = {
   id: Id,
@@ -428,8 +521,23 @@ export const ModelIR = z.strictObject({
   assumptions: z.array(z.string().max(1000)).max(64).default([]),
   tolerance: Quantity.default({ value: "0.001", unit: "mm" }),
   profile: z
-    .enum(["precision_cad", "render_surface", "watertight_solid"])
+    .enum([
+      "precision_cad",
+      "render_surface",
+      "watertight_solid",
+      "manufacturing_candidate",
+    ])
     .default("precision_cad"),
+  /** Explicit process rules for manufacturing_candidate; sampled checks only, never a certification. */
+  manufacturing: z
+    .strictObject({
+      process: z.enum(["fdm", "sla", "cnc_3axis", "sheet_metal", "generic"]),
+      minimum_wall: Quantity,
+      minimum_hole_diameter: Quantity.optional(),
+      maximum_overhang: Quantity.optional(),
+      build_direction: Point.default(["0", "0", "1"]),
+    })
+    .optional(),
 });
 export type ModelIR = z.infer<typeof ModelIR>;
 export const SetParameter = z.strictObject({
@@ -517,6 +625,12 @@ export const Patch = z.strictObject({
   ...WriteBinding,
   operations: z.array(PatchOperation).min(1).max(64),
   selection_handle: Id.optional(),
+  repair: z
+    .strictObject({
+      of_transaction: Id,
+      cause: z.string().min(1).max(200),
+    })
+    .optional(),
 });
 export type Patch = z.infer<typeof Patch>;
 export const ReadBinding = { model_id: Id, revision: Id.optional() };
@@ -533,7 +647,12 @@ export const ToolSchemas = {
     purpose: z.string().max(1000).default(""),
     unit: z.literal("mm").default("mm"),
     profile: z
-      .enum(["precision_cad", "render_surface", "watertight_solid"])
+      .enum([
+        "precision_cad",
+        "render_surface",
+        "watertight_solid",
+        "manufacturing_candidate",
+      ])
       .default("precision_cad"),
     idempotency_key: z.string().min(16).max(128),
   }),
@@ -556,6 +675,7 @@ export const ToolSchemas = {
     kind: z.string().max(64).optional(),
     owner_part: Id.optional(),
     point: Point.optional(),
+    box: z.strictObject({ min: Point, max: Point }).optional(),
     limit: z.int().min(1).max(32).default(16),
   }),
   cad_inspect: z.strictObject({
@@ -569,6 +689,30 @@ export const ToolSchemas = {
     rebind: z.boolean().default(false),
     face_offset: z.int().min(0).default(0),
     face_limit: z.int().min(1).max(16).default(8),
+    sections: z
+      .array(
+        z.enum([
+          "faces",
+          "constraints",
+          "facts",
+          "contracts",
+          "quality",
+          "adjacency",
+        ]),
+      )
+      .max(6)
+      .optional(),
+    anchor: z
+      .strictObject({
+        point: Point,
+        normal: Point.optional(),
+        barycentric: z
+          .tuple([DecimalString, DecimalString, DecimalString])
+          .optional(),
+        triangle_index: z.int().min(0).max(10000000).optional(),
+        view_direction: Point.optional(),
+      })
+      .optional(),
   }),
   cad_measure: z.strictObject({
     ...ReadBinding,
@@ -587,9 +731,17 @@ export const ToolSchemas = {
         "angle",
         "curvature",
         "clearance",
+        "surface_deviation",
+        "thread_fit",
+        "fit_primitives",
+        "surface_distance",
+        "wall_thickness",
+        "blend_activity",
       ])
       .default("all"),
     other_feature_id: Id.optional(),
+    other_revision: Id.optional(),
+    maximum_deviation: Quantity.optional(),
     face_id: z
       .string()
       .regex(/^face_[a-f0-9]{32}$/)
@@ -603,6 +755,17 @@ export const ToolSchemas = {
     curve_parameter: DecimalString.optional(),
     other_curve_parameter: DecimalString.optional(),
     minimum_clearance: Quantity.optional(),
+    point: Point.optional(),
+    step: Quantity.optional(),
+    /** clearance only: sample the clearance along a linear motion of the other feature. */
+    motion: z
+      .strictObject({
+        translation: Point,
+        steps: z.int().min(1).max(64).default(8),
+      })
+      .optional(),
+    /** blend_activity only: local-frame box in which every smooth union must stay inactive. */
+    region: z.strictObject({ min: Point, max: Point }).optional(),
     idempotency_key: z.string().min(16).max(128).optional(),
   }),
   cad_plan_edit: Patch,
@@ -634,15 +797,36 @@ export const ToolSchemas = {
     idempotency_key: z.string().min(16).max(128),
     feature_id: Id.optional(),
     deflection: Quantity.default({ value: "0.05", unit: "mm" }),
+    adaptive: z
+      .strictObject({
+        target_error: Quantity,
+        feature_factor: DecimalString.default("0.5"),
+        max_deflection: Quantity.optional(),
+      })
+      .optional(),
+    region: z.strictObject({ center: Point, radius: DecimalString }).optional(),
+    view: z
+      .strictObject({
+        kind: z.enum(["section", "orthographic"]),
+        origin: Point.optional(),
+        normal: Point.optional(),
+        direction: Point.optional(),
+        hidden_lines: z.boolean().optional(),
+        discretization: Quantity.optional(),
+      })
+      .optional(),
   }),
   cad_import: z.strictObject({
     ...WriteBinding,
     artifact_id: Id,
-    format: z.enum(["ir", "step", "stl"]),
+    format: z.enum(["ir", "step", "stl", "vdb"]),
     validation_profile: z
       .enum(["render_surface", "watertight_solid"])
       .optional(),
     source_unit: z.enum(["mm", "m", "um"]),
+    /** STEP only: preserve the product structure as frames, assemblies and parts via a probe job. */
+    structure: z.enum(["flatten", "preserve"]).default("flatten"),
+    grid: z.string().min(1).max(200).optional(),
   }),
   cad_export: z.strictObject({
     model_id: Id,

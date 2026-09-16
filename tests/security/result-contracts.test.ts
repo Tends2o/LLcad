@@ -345,6 +345,7 @@ test("full validation resources preserve their digest and reject malformed or co
     };
     const legacy = structuredClone(report);
     delete legacy.schema_version;
+    delete legacy.error_budget;
     for (const check of legacy.checks) {
       delete check.revision;
       delete check.engine_build;

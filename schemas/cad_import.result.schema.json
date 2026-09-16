@@ -2,85 +2,264 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "anyOf": [
     {
-      "type": "object",
-      "properties": {
-        "result_schema_version": {
-          "$ref": "#/definitions/__schema0"
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "result_schema_version": {
+              "$ref": "#/definitions/__schema0"
+            },
+            "status": {
+              "$ref": "#/definitions/__schema1"
+            },
+            "trace_id": {
+              "$ref": "#/definitions/__schema2"
+            },
+            "model_id": {
+              "$ref": "#/definitions/__schema2"
+            },
+            "revision": {
+              "$ref": "#/definitions/__schema3"
+            },
+            "candidate_revision": {
+              "$ref": "#/definitions/__schema2"
+            },
+            "transaction_id": {
+              "$ref": "#/definitions/__schema2"
+            },
+            "job_id": {
+              "$ref": "#/definitions/__schema2"
+            },
+            "measurements": {
+              "$ref": "#/definitions/__schema4"
+            },
+            "checks": {
+              "$ref": "#/definitions/__schema5"
+            },
+            "warnings": {
+              "$ref": "#/definitions/__schema6"
+            },
+            "errors": {
+              "$ref": "#/definitions/__schema8"
+            },
+            "assumptions": {
+              "$ref": "#/definitions/__schema6"
+            },
+            "artifacts": {
+              "$ref": "#/definitions/__schema12"
+            },
+            "recommended_next_actions": {
+              "$ref": "#/definitions/__schema6"
+            },
+            "committed": {
+              "$ref": "#/definitions/__schema14"
+            },
+            "base_revision": {
+              "$ref": "#/definitions/__schema2"
+            },
+            "repair_attempt": {
+              "type": "object",
+              "properties": {
+                "attempt": {
+                  "$ref": "#/definitions/__schema13"
+                },
+                "of_transaction": {
+                  "$ref": "#/definitions/__schema2"
+                },
+                "cause": {
+                  "$ref": "#/definitions/__schema7"
+                },
+                "remaining": {
+                  "$ref": "#/definitions/__schema13"
+                },
+                "intent_comparison": {
+                  "type": "object",
+                  "properties": {
+                    "original_changed_features": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/definitions/__schema2"
+                      }
+                    },
+                    "this_changed_features": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/definitions/__schema2"
+                      }
+                    },
+                    "same_targets": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "original_changed_features",
+                    "this_changed_features",
+                    "same_targets"
+                  ],
+                  "additionalProperties": false
+                },
+                "previous_attempts": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "transaction_id": {
+                        "$ref": "#/definitions/__schema2"
+                      },
+                      "cause": {
+                        "anyOf": [
+                          {
+                            "$ref": "#/definitions/__schema7"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "state": {
+                        "$ref": "#/definitions/__schema7"
+                      },
+                      "cost_seconds": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "transaction_id",
+                      "cause",
+                      "state",
+                      "cost_seconds"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "attempt",
+                "of_transaction",
+                "cause",
+                "remaining",
+                "intent_comparison",
+                "previous_attempts"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "result_schema_version",
+            "status",
+            "trace_id",
+            "model_id",
+            "revision",
+            "candidate_revision",
+            "transaction_id",
+            "job_id",
+            "measurements",
+            "checks",
+            "warnings",
+            "errors",
+            "assumptions",
+            "artifacts",
+            "recommended_next_actions",
+            "committed",
+            "base_revision"
+          ],
+          "additionalProperties": false
         },
-        "status": {
-          "type": "string",
-          "const": "queued"
-        },
-        "trace_id": {
-          "$ref": "#/definitions/__schema1"
-        },
-        "model_id": {
-          "$ref": "#/definitions/__schema1"
-        },
-        "revision": {
-          "$ref": "#/definitions/__schema2"
-        },
-        "candidate_revision": {
-          "$ref": "#/definitions/__schema1"
-        },
-        "transaction_id": {
-          "$ref": "#/definitions/__schema1"
-        },
-        "job_id": {
-          "$ref": "#/definitions/__schema1"
-        },
-        "measurements": {
-          "$ref": "#/definitions/__schema3"
-        },
-        "checks": {
-          "$ref": "#/definitions/__schema4"
-        },
-        "warnings": {
-          "$ref": "#/definitions/__schema5"
-        },
-        "errors": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/__schema7"
-          }
-        },
-        "assumptions": {
-          "$ref": "#/definitions/__schema5"
-        },
-        "artifacts": {
-          "$ref": "#/definitions/__schema10"
-        },
-        "recommended_next_actions": {
-          "$ref": "#/definitions/__schema5"
-        },
-        "committed": {
-          "type": "boolean",
-          "const": false
-        },
-        "base_revision": {
-          "$ref": "#/definitions/__schema1"
+        {
+          "type": "object",
+          "properties": {
+            "result_schema_version": {
+              "$ref": "#/definitions/__schema0"
+            },
+            "status": {
+              "$ref": "#/definitions/__schema1"
+            },
+            "trace_id": {
+              "$ref": "#/definitions/__schema2"
+            },
+            "model_id": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/__schema2"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "revision": {
+              "$ref": "#/definitions/__schema3"
+            },
+            "candidate_revision": {
+              "$ref": "#/definitions/__schema15"
+            },
+            "transaction_id": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/__schema2"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "job_id": {
+              "$ref": "#/definitions/__schema2"
+            },
+            "measurements": {
+              "$ref": "#/definitions/__schema4"
+            },
+            "checks": {
+              "$ref": "#/definitions/__schema5"
+            },
+            "warnings": {
+              "$ref": "#/definitions/__schema6"
+            },
+            "errors": {
+              "$ref": "#/definitions/__schema8"
+            },
+            "assumptions": {
+              "$ref": "#/definitions/__schema6"
+            },
+            "artifacts": {
+              "$ref": "#/definitions/__schema12"
+            },
+            "recommended_next_actions": {
+              "$ref": "#/definitions/__schema6"
+            },
+            "committed": {
+              "$ref": "#/definitions/__schema14"
+            }
+          },
+          "required": [
+            "result_schema_version",
+            "status",
+            "trace_id",
+            "model_id",
+            "revision",
+            "candidate_revision",
+            "transaction_id",
+            "job_id",
+            "measurements",
+            "checks",
+            "warnings",
+            "errors",
+            "assumptions",
+            "artifacts",
+            "recommended_next_actions",
+            "committed"
+          ],
+          "additionalProperties": false
         }
-      },
-      "required": [
-        "result_schema_version",
-        "status",
-        "trace_id",
-        "model_id",
-        "revision",
-        "candidate_revision",
-        "transaction_id",
-        "job_id",
-        "measurements",
-        "checks",
-        "warnings",
-        "errors",
-        "assumptions",
-        "artifacts",
-        "recommended_next_actions",
-        "committed",
-        "base_revision"
-      ],
-      "additionalProperties": false
+      ]
     },
     {
       "type": "object",
@@ -93,16 +272,16 @@
           "const": "failed"
         },
         "trace_id": {
-          "$ref": "#/definitions/__schema1"
+          "$ref": "#/definitions/__schema2"
         },
         "model_id": {
           "type": "null"
         },
         "revision": {
-          "$ref": "#/definitions/__schema2"
+          "$ref": "#/definitions/__schema3"
         },
         "candidate_revision": {
-          "type": "null"
+          "$ref": "#/definitions/__schema15"
         },
         "transaction_id": {
           "type": "null"
@@ -111,29 +290,29 @@
           "type": "null"
         },
         "measurements": {
-          "$ref": "#/definitions/__schema3"
-        },
-        "checks": {
           "$ref": "#/definitions/__schema4"
         },
-        "warnings": {
+        "checks": {
           "$ref": "#/definitions/__schema5"
+        },
+        "warnings": {
+          "$ref": "#/definitions/__schema6"
         },
         "errors": {
           "minItems": 1,
           "type": "array",
           "items": {
-            "$ref": "#/definitions/__schema7"
+            "$ref": "#/definitions/__schema9"
           }
         },
         "assumptions": {
-          "$ref": "#/definitions/__schema5"
+          "$ref": "#/definitions/__schema6"
         },
         "artifacts": {
-          "$ref": "#/definitions/__schema10"
+          "$ref": "#/definitions/__schema12"
         },
         "recommended_next_actions": {
-          "$ref": "#/definitions/__schema5"
+          "$ref": "#/definitions/__schema6"
         },
         "committed": {
           "type": "boolean",
@@ -168,45 +347,55 @@
     },
     "__schema1": {
       "type": "string",
-      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
+      "const": "queued"
     },
     "__schema2": {
-      "type": "null"
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$"
     },
     "__schema3": {
       "type": "null"
     },
     "__schema4": {
+      "type": "null"
+    },
+    "__schema5": {
       "type": "array",
       "items": [],
       "additionalItems": false,
       "maxItems": 0
     },
-    "__schema5": {
+    "__schema6": {
       "type": "array",
       "items": {
-        "$ref": "#/definitions/__schema6"
+        "$ref": "#/definitions/__schema7"
       }
     },
-    "__schema6": {
+    "__schema7": {
       "type": "string"
     },
-    "__schema7": {
+    "__schema8": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/__schema9"
+      }
+    },
+    "__schema9": {
       "type": "object",
       "properties": {
         "code": {
           "minLength": 1,
           "allOf": [
             {
-              "$ref": "#/definitions/__schema6"
+              "$ref": "#/definitions/__schema7"
             }
           ]
         },
         "message": {
-          "$ref": "#/definitions/__schema6"
+          "$ref": "#/definitions/__schema7"
         },
         "details": {
-          "$ref": "#/definitions/__schema8"
+          "$ref": "#/definitions/__schema10"
         }
       },
       "required": [
@@ -216,16 +405,16 @@
       ],
       "additionalProperties": false
     },
-    "__schema8": {
+    "__schema10": {
       "type": "object",
       "propertyNames": {
-        "$ref": "#/definitions/__schema6"
+        "$ref": "#/definitions/__schema7"
       },
       "additionalProperties": {
-        "$ref": "#/definitions/__schema9"
+        "$ref": "#/definitions/__schema11"
       }
     },
-    "__schema9": {
+    "__schema11": {
       "anyOf": [
         {
           "type": "string"
@@ -242,7 +431,7 @@
         {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/__schema9"
+            "$ref": "#/definitions/__schema11"
           }
         },
         {
@@ -251,24 +440,24 @@
             "type": "string"
           },
           "additionalProperties": {
-            "$ref": "#/definitions/__schema9"
+            "$ref": "#/definitions/__schema11"
           }
         }
       ]
     },
-    "__schema10": {
+    "__schema12": {
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
           "artifact_id": {
-            "$ref": "#/definitions/__schema1"
+            "$ref": "#/definitions/__schema2"
           },
           "uri": {
             "pattern": "^cad:\\/\\/artifacts\\/[a-zA-Z0-9_-]+\\/manifest$",
             "allOf": [
               {
-                "$ref": "#/definitions/__schema6"
+                "$ref": "#/definitions/__schema7"
               }
             ]
           },
@@ -276,7 +465,7 @@
             "pattern": "^\\/api\\/artifacts\\/[a-zA-Z0-9_-]+$",
             "allOf": [
               {
-                "$ref": "#/definitions/__schema6"
+                "$ref": "#/definitions/__schema7"
               }
             ]
           },
@@ -284,20 +473,18 @@
             "pattern": "^[a-f0-9]{64}$",
             "allOf": [
               {
-                "$ref": "#/definitions/__schema6"
+                "$ref": "#/definitions/__schema7"
               }
             ]
           },
           "mime": {
-            "$ref": "#/definitions/__schema6"
+            "$ref": "#/definitions/__schema7"
           },
           "size": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 9007199254740991
+            "$ref": "#/definitions/__schema13"
           },
           "manifest": {
-            "$ref": "#/definitions/__schema8"
+            "$ref": "#/definitions/__schema10"
           }
         },
         "required": [
@@ -311,6 +498,18 @@
         ],
         "additionalProperties": false
       }
+    },
+    "__schema13": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "__schema14": {
+      "type": "boolean",
+      "const": false
+    },
+    "__schema15": {
+      "type": "null"
     }
   },
   "type": "object"

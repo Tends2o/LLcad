@@ -577,8 +577,180 @@
                   "max"
                 ],
                 "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/__schema1"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "const": "surface_deviation"
+                  },
+                  "feature_id": {
+                    "$ref": "#/definitions/__schema1"
+                  },
+                  "maximum": {
+                    "$ref": "#/definitions/__schema16"
+                  }
+                },
+                "required": [
+                  "id",
+                  "kind",
+                  "feature_id",
+                  "maximum"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/__schema1"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "const": "change_region"
+                  },
+                  "feature_id": {
+                    "$ref": "#/definitions/__schema1"
+                  },
+                  "local_frame": {
+                    "allOf": [
+                      {
+                        "$ref": "#/definitions/__schema1"
+                      }
+                    ]
+                  },
+                  "center": {
+                    "$ref": "#/definitions/__schema19"
+                  },
+                  "radius": {
+                    "$ref": "#/definitions/__schema17"
+                  },
+                  "compute_margin": {
+                    "allOf": [
+                      {
+                        "$ref": "#/definitions/__schema17"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "kind",
+                  "feature_id",
+                  "center",
+                  "radius"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/__schema1"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "const": "blend_free_region"
+                  },
+                  "feature_id": {
+                    "$ref": "#/definitions/__schema1"
+                  },
+                  "min": {
+                    "$ref": "#/definitions/__schema19"
+                  },
+                  "max": {
+                    "$ref": "#/definitions/__schema19"
+                  }
+                },
+                "required": [
+                  "id",
+                  "kind",
+                  "feature_id",
+                  "min",
+                  "max"
+                ],
+                "additionalProperties": false
               }
             ]
+          }
+        },
+        "conditioning": {
+          "type": "object",
+          "properties": {
+            "max_coordinate_magnitude_mm": {
+              "type": "number",
+              "minimum": 0
+            },
+            "binary64_ulp_at_max_mm": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "tolerance_mm": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "ulp_to_tolerance_ratio": {
+              "type": "number",
+              "minimum": 0
+            },
+            "rule": {
+              "$ref": "#/definitions/__schema9"
+            }
+          },
+          "required": [
+            "max_coordinate_magnitude_mm",
+            "binary64_ulp_at_max_mm",
+            "tolerance_mm",
+            "ulp_to_tolerance_ratio",
+            "rule"
+          ],
+          "additionalProperties": false
+        },
+        "sensitivity": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "feature_id": {
+                "$ref": "#/definitions/__schema1"
+              },
+              "quantity": {
+                "$ref": "#/definitions/__schema9"
+              },
+              "parameter_feature": {
+                "$ref": "#/definitions/__schema1"
+              },
+              "parameter": {
+                "$ref": "#/definitions/__schema9"
+              },
+              "derivative": {
+                "type": "number"
+              },
+              "unit": {
+                "$ref": "#/definitions/__schema9"
+              },
+              "method": {
+                "type": "string",
+                "enum": [
+                  "registered_analytic_dimension",
+                  "expression_finite_difference"
+                ]
+              }
+            },
+            "required": [
+              "feature_id",
+              "quantity",
+              "parameter_feature",
+              "parameter",
+              "derivative",
+              "unit",
+              "method"
+            ],
+            "additionalProperties": false
           }
         },
         "committed": {
@@ -611,6 +783,8 @@
         "refinement_reports",
         "resolved_parameters",
         "protected_constraints",
+        "conditioning",
+        "sensitivity",
         "committed"
       ],
       "additionalProperties": false

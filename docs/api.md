@@ -8,13 +8,13 @@ Die Eingabeschemas unter `schemas/cad_*.schema.json` und die werkzeugspezifische
 |---|---|
 | `cad_capabilities` | Tatsächliche Operatoren, Formate, Limits und Grenzen |
 | `cad_list_models` | Eigene und ausdrücklich freigegebene Modelle nach Name/Zweck suchen und seitenweise lesen; keine bekannten Modell-IDs oder Viewer-Bedienung nötig |
-| `cad_access` | Aktuelle Rolle, Feature-Grenze und Budget lesen; als Eigentümer gebundene Grant-/Widerrufsanträge erstellen und ihren Status lesen; gesonderte vertrauenswürdige Bestätigung erforderlich |
+| `cad_access` | Aktuelle Rolle, Feature-Grenze und Budget lesen; als Eigentümer gebundene Grant-/Widerrufs- und interne Veröffentlichungsanträge erstellen, Veröffentlichungen mit kurzlebigen signierten Links lesen; gesonderte vertrauenswürdige Bestätigung erforderlich ([publication-and-retention.md](publication-and-retention.md)) |
 | `cad_create_model` | Privates leeres Modell; eigener Idempotenzschlüssel |
 | `cad_get_model` | Revisionsübersicht mit Buildkompatibilität und Seiten von höchstens 64 Features |
 | `cad_structure` | Versionierte Projekt-, Baugruppen-, Teil- und Rahmenpakete mit Suche, Paging, Definitionen, Ausdehnungen und Strukturhash |
 | `cad_find` | Semantische/räumliche Kandidaten und kurzlebige Auswahlhandles |
 | `cad_inspect` | Feature, Konstruktion, Maße, Schutzregeln, native Flächen mit Paging, Auswahlhandle und ausdrückliche Neuzuordnung |
-| `cad_measure` | Vorliegende Messwerte; Abstand zwischen zwei B-Reps als Job |
+| `cad_measure` | Vorliegende Messwerte; Jobs für Abstand, Winkel, Krümmung (nativ und implizit), statischen und bewegten Freigang, Oberflächenabstand (Chamfer/Hausdorff-Proben, exaktes Minimum, IoU), Wandstärke, Gewindepaarung, Primitivhypothesen, Blendaktivität und zertifizierte Oberflächenabweichung; jede Zahl mit Beweisstärke ([measures.md](measures.md)) |
 | `cad_plan_edit` | Kompilierter Eingriff, gelöste Parameter, Abhängigkeiten und Budget |
 | `cad_solve_constraints` | Begrenzte gekoppelte Maßlösung; Job liefert Patchvorschläge und gespeicherte Gleichungsconstraints, danach regulär prüfen/übernehmen |
 | `cad_apply_patch` | Transaktion und isolierter Berechnungsjob; kein Commit |
@@ -24,8 +24,8 @@ Die Eingabeschemas unter `schemas/cad_*.schema.json` und die werkzeugspezifische
 | `cad_discard` | Nicht übernommenen Kandidaten verwerfen |
 | `cad_revert` | Frühere Konstruktion als neu zu prüfender Kandidat |
 | `cad_rebuild` | Unveränderte Konstruktion ausdrücklich für den Ziel-Build planen und als neu zu prüfenden Kandidaten berechnen |
-| `cad_render` | Autorisiertes abgeleitetes Vorschauartefakt |
-| `cad_import` | Eigenes hochgeladenes Artefakt in einen Kandidaten einlesen |
+| `cad_render` | Autorisiertes abgeleitetes Vorschauartefakt; adaptive Tessellation je Fläche mit Auflösungsbericht, räumlicher Ausschnitt (`region`) und SVG-Schnitt-/Projektionsansichten (`view`, [diagnostic-views.md](diagnostic-views.md)) |
+| `cad_import` | Eigenes hochgeladenes Artefakt in einen Kandidaten einlesen: IR, STEP (flach oder mit Produktstruktur über einen Probe-Job), STL, OpenVDB ([imports.md](imports.md)) |
 | `cad_export` | Geprüfte Revision mit Format-/Roundtrip-Bericht exportieren |
 | `cad_job_get` | Dauerhafter Jobstatus und Ergebnis |
 | `cad_job_cancel` | Fachlicher Jobabbruch mit Fencing |
@@ -44,7 +44,7 @@ Der primäre Bedienweg ist das LLM über MCP. Der Viewer ist optional. Das LLM k
 4. Nur bei `checks_passed_within_profile`: `cad_commit` mit exakt dem zurückgegebenen `validation_digest`.
 5. Die neue maßgebliche Revision für spätere Bearbeitung, Messung oder Export verwenden.
 
-Patchvarianten: `add_feature`, `set_outputs`, `add_constraint`, `set_parameter`, `set_expression`, `solve_volume`, `set_surface_poles`, `insert_surface_knots`, `set_field`, `set_construction`, `set_pattern_occurrence`, `set_structure`, `set_feature_context`. Es gibt keine beliebigen Payloads oder ausführbaren Programme.
+Patchvarianten: `add_feature`, `set_outputs`, `add_constraint`, `set_parameter`, `set_expression`, `solve_volume`, `set_surface_poles`, `insert_surface_knots`, `set_field`, `set_construction`, `set_pattern_occurrence`, `set_structure`, `set_feature_context`. Ein Patch kann mit `repair` an einen fehlgeschlagenen Kandidaten derselben Basis gebunden werden; höchstens drei Reparaturversuche mit Ursache, Kosten und Absichtsvergleich sind erlaubt. Es gibt keine beliebigen Payloads oder ausführbaren Programme. `cad_plan_edit` liefert zusätzlich Sensitivitäten geänderter Parameter und eine Konditionierungsprüfung der Weltkoordinaten; `cad_inspect` liefert wahlweise Abschnitte (`sections`), Nachbarflächen, den getrennten Qualitätsstatus je Entität und einen semantischen Auswahlanker (`anchor`).
 
 Projekt-, Baugruppen- und Teilnamen werden mit `cad_structure` aufgelöst. `kind` wählt die Ebene, `query` die semantischen Suchwörter; `entity_id` begrenzt optional auf ein bekanntes Element. Für Features innerhalb eines gefundenen Teils dient `cad_find.owner_part`. `set_structure` bindet an den zurückgegebenen `structure_hash`; `set_feature_context` bindet an `cad_inspect.context_hash`. Struktur- und Kontextänderungen können im selben Kandidatenpatch stehen. Definierte Teilausgaben und Modellausgaben müssen zusammenpassen. Details zu Koordinaten und Cachegrenzen stehen in `docs/structure-and-frames.md`.
 

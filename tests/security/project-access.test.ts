@@ -155,7 +155,7 @@ test("schema 4 migration preserves historical rows and binds only already import
     db.exec("PRAGMA user_version=4");
     db.close();
     reopened = new Store(env.dir);
-    assert.equal(reopened.get("PRAGMA user_version").user_version, 5);
+    assert.equal(reopened.get("PRAGMA user_version").user_version, 6);
     for (const [table, rows] of Object.entries(before))
       assert.deepEqual(
         reopened.all(`SELECT * FROM ${table} ORDER BY id`),

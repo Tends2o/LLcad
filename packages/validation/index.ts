@@ -6,11 +6,16 @@ import { POLICY_HASH } from "../policy/index.js";
 import { patchContinuity } from "../compiler/patches.js";
 import { Decimal } from "decimal.js";
 import { equationValues, checkEquation } from "../compiler/constraints.js";
-import { sameFieldInRegion } from "../compiler/field-regions.js";
+import {
+  sameFieldInRegion,
+  differenceSupports,
+  compactSupportWithin,
+} from "../compiler/field-regions.js";
 import { compileStructure } from "../compiler/structure.js";
 import { MeshQuality } from "../semantic-ir/mesh.js";
 import { NATIVE_MESH_SOURCE_HASH } from "../compiler/native-build.js";
 import * as R from "../compiler/bernstein.js";
+import { errorBudget } from "../compiler/error-budget.js";
 /** Preserve every binary64 bit when comparing an interval to decimal intent. */
 function binaryRational(value: number) {
   const bytes = Buffer.alloc(8);
@@ -64,6 +69,7 @@ export function validate(
   baseIR: ModelIR,
   baseResult: any,
   candidate: string,
+  refinements: { feature_id: string; report: any }[] = [],
 ) {
   const checks: Check[] = [];
   const plan = compile(ir);
@@ -238,7 +244,63 @@ export function validate(
         );
     }
   }
-  if (ir.profile === "precision_cad")
+  if (ir.profile === "manufacturing_candidate" && ir.manufacturing) {
+    const rules = ir.manufacturing;
+    const wall = quantity(rules.minimum_wall, "length");
+    for (const target of plan.outputs) {
+      const report = result.facts[target]?.manufacturing_rules;
+      add(
+        "manufacturing-wall-" + target,
+        target,
+        typeof report?.wall_thickness?.minimum_mm === "number" &&
+          report.wall_thickness.minimum_mm >= wall,
+        report?.wall_thickness ?? null,
+        "inward_normal_ray_to_first_exit_over_area_weighted_surface_samples",
+        "finite_surface_samples_not_a_global_minimum_certificate",
+        "sampled",
+        { minimum_wall_mm: wall, process: rules.process },
+      );
+      if (rules.maximum_overhang) {
+        const limit =
+          (quantity(rules.maximum_overhang, "angle") * 180) / Math.PI;
+        add(
+          "manufacturing-overhang-" + target,
+          target,
+          typeof report?.overhang?.maximum_sampled_deg === "number" &&
+            report.overhang.maximum_sampled_deg <= limit + 1e-9,
+          report?.overhang ?? null,
+          "downward_facing_surface_normal_samples_against_build_direction",
+          "finite_surface_samples",
+          "sampled",
+          {
+            maximum_overhang_deg: limit,
+            build_direction: rules.build_direction,
+          },
+        );
+      }
+    }
+    if (rules.minimum_hole_diameter) {
+      const minimum = quantity(rules.minimum_hole_diameter, "length");
+      for (const f of ir.features)
+        if (f.construction.operator === "hole") {
+          const diameter = 2 * quantity(f.parameters.radius, "length");
+          add(
+            "manufacturing-hole-" + f.id,
+            f.id,
+            diameter >= minimum,
+            diameter,
+            "declared_hole_parameter",
+            "registered_hole_features_only",
+            "exact_for_declared_domain",
+            { minimum_hole_diameter_mm: minimum },
+          );
+        }
+    }
+  }
+  if (
+    ir.profile === "precision_cad" ||
+    ir.profile === "manufacturing_candidate"
+  )
     add(
       "solid",
       "model",
@@ -397,6 +459,95 @@ export function validate(
         "OCCT_bounding_box_comparison",
         "axis_aligned_extents_only",
       );
+    } else if (c.kind === "surface_deviation") {
+      const old = baseIR.features.find((x) => x.id === f.id);
+      const maximum = quantity(c.maximum, "length");
+      const report = fact?.surface_deviation;
+      const unchanged =
+        !!old &&
+        old.construction.operator === "field" &&
+        f.construction.operator === "field" &&
+        hash(old.construction.expression) === hash(f.construction.expression) &&
+        hash(old.construction.domain) === hash(f.construction.domain);
+      const sameFrame =
+        !!old &&
+        old.local_frame === f.local_frame &&
+        compileStructure(baseIR).placements[old.local_frame].hash ===
+          compileStructure(ir).placements[f.local_frame].hash;
+      const certified =
+        !!report &&
+        report.status === "certified" &&
+        typeof report.certified_hausdorff_bound_mm === "number" &&
+        report.certified_hausdorff_bound_mm <= maximum &&
+        report.epsilon_mm <= maximum;
+      add(
+        c.id,
+        f.id,
+        !old || (sameFrame && (unchanged || certified)),
+        !old
+          ? { status: "no_reference_revision" }
+          : unchanged
+            ? {
+                status: "identical_expression",
+                certified_hausdorff_bound_mm: 0,
+              }
+            : (report ?? null),
+        !old || unchanged
+          ? "canonical_expression_identity"
+          : "interval_arithmetic_gradient_flow_certificate",
+        "entire_declared_field_domain",
+        !old || unchanged || certified ? "bounded" : "sampled",
+        { maximum_mm: maximum },
+      );
+    } else if (c.kind === "change_region") {
+      const old: any = baseIR.features.find((x) => x.id === f.id);
+      const current: any = f.construction;
+      const region = { center: c.center, radius: c.radius };
+      const sameFrame =
+        !!old &&
+        old.local_frame === f.local_frame &&
+        (c.local_frame ?? "world") === f.local_frame &&
+        compileStructure(baseIR).placements[old.local_frame].hash ===
+          compileStructure(ir).placements[f.local_frame].hash &&
+        hash(old.construction.domain) === hash(current.domain);
+      const supports = old
+        ? differenceSupports(old.construction.expression, current.expression)
+        : [];
+      const contained =
+        supports !== null &&
+        supports.every((node: any) => compactSupportWithin(node, region));
+      add(
+        c.id,
+        f.id,
+        !old || (sameFrame && contained),
+        {
+          differing_supports: supports === null ? null : supports.length,
+          change_region: region,
+          compute_region: {
+            center: c.center,
+            radius: (
+              Number(c.radius) + Number(c.compute_margin ?? "0")
+            ).toString(),
+            note: "evaluation and certificates may use this larger region; geometry may only change inside change_region",
+          },
+          global_change: supports === null,
+        },
+        "exact_rational_compact_support_containment",
+        "every_differing_compact_edit_between_base_and_candidate",
+        "exact_for_declared_domain",
+      );
+    } else if (c.kind === "blend_free_region") {
+      const report = fact?.blend_free_regions?.[c.id];
+      add(
+        c.id,
+        f.id,
+        report?.status === "certified",
+        report ?? null,
+        "interval_arithmetic_blend_inactivity",
+        "entire_declared_region",
+        report?.status === "certified" ? "bounded" : "sampled",
+        { min: c.min, max: c.max },
+      );
     } else if (c.kind === "protected_region") {
       const old = baseIR.features.find((x) => x.id === f.id);
       let proven = !old;
@@ -442,6 +593,17 @@ export function validate(
       );
     }
   }
+  const budget = errorBudget(ir, result.facts, refinements);
+  add(
+    "error-budget",
+    "model",
+    budget.status === "within_planned_budget",
+    budget,
+    "compatible_error_budget_ledger",
+    "listed_certified_and_reported_stages",
+    budget.certified_chain_bound_mm === null ? "sampled" : "bounded",
+    { tolerance_mm: budget.requested_tolerance_mm, policy: budget.policy },
+  );
   const failed = checks.filter((c) => c.status === "failed");
   const body = {
     schema_version: "2",
@@ -454,6 +616,7 @@ export function validate(
     profile: ir.profile,
     status: failed.length ? "failed" : "checks_passed_within_profile",
     checks,
+    error_budget: budget,
     warnings: ["Keine globale Fertigungs- oder Statikzertifizierung."],
     created_at: new Date().toISOString(),
   };

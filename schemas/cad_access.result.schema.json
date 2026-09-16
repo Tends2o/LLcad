@@ -305,71 +305,145 @@
             "result": {
               "anyOf": [
                 {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "const": "approved"
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "const": "approved"
+                        },
+                        "model_id": {
+                          "$ref": "#/definitions/__schema2"
+                        },
+                        "approval_request_id": {
+                          "$ref": "#/definitions/__schema2"
+                        },
+                        "action_digest": {
+                          "$ref": "#/definitions/__schema20"
+                        },
+                        "grant_id": {
+                          "$ref": "#/definitions/__schema2"
+                        },
+                        "grant_version": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "acl_generation": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "action": {
+                          "type": "string",
+                          "enum": [
+                            "grant",
+                            "revoke"
+                          ]
+                        },
+                        "recipient": {
+                          "$ref": "#/definitions/__schema18"
+                        },
+                        "cancelled_jobs": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/definitions/__schema2"
+                          }
+                        },
+                        "approved_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "model_id",
+                        "approval_request_id",
+                        "action_digest",
+                        "grant_id",
+                        "grant_version",
+                        "acl_generation",
+                        "action",
+                        "recipient",
+                        "cancelled_jobs",
+                        "approved_at"
+                      ],
+                      "additionalProperties": false
                     },
-                    "model_id": {
-                      "$ref": "#/definitions/__schema2"
-                    },
-                    "approval_request_id": {
-                      "$ref": "#/definitions/__schema2"
-                    },
-                    "action_digest": {
-                      "type": "string",
-                      "pattern": "^[a-f0-9]{64}$"
-                    },
-                    "grant_id": {
-                      "$ref": "#/definitions/__schema2"
-                    },
-                    "grant_version": {
-                      "type": "integer",
-                      "exclusiveMinimum": 0,
-                      "maximum": 9007199254740991
-                    },
-                    "acl_generation": {
-                      "type": "integer",
-                      "exclusiveMinimum": 0,
-                      "maximum": 9007199254740991
-                    },
-                    "action": {
-                      "type": "string",
-                      "enum": [
-                        "grant",
-                        "revoke"
-                      ]
-                    },
-                    "recipient": {
-                      "$ref": "#/definitions/__schema18"
-                    },
-                    "cancelled_jobs": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/definitions/__schema2"
-                      }
-                    },
-                    "approved_at": {
-                      "type": "string",
-                      "format": "date-time",
-                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "const": "approved"
+                        },
+                        "model_id": {
+                          "$ref": "#/definitions/__schema2"
+                        },
+                        "approval_request_id": {
+                          "$ref": "#/definitions/__schema2"
+                        },
+                        "action_digest": {
+                          "$ref": "#/definitions/__schema20"
+                        },
+                        "action": {
+                          "type": "string",
+                          "const": "publish"
+                        },
+                        "publication_id": {
+                          "$ref": "#/definitions/__schema2"
+                        },
+                        "revision": {
+                          "$ref": "#/definitions/__schema2"
+                        },
+                        "package_hash": {
+                          "$ref": "#/definitions/__schema20"
+                        },
+                        "recipient": {
+                          "$ref": "#/definitions/__schema18"
+                        },
+                        "expires_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "artifacts": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/definitions/__schema21"
+                          }
+                        },
+                        "transfer": {
+                          "type": "string",
+                          "const": "internal_recipient_only_no_external_transmission"
+                        },
+                        "approved_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "model_id",
+                        "approval_request_id",
+                        "action_digest",
+                        "action",
+                        "publication_id",
+                        "revision",
+                        "package_hash",
+                        "recipient",
+                        "expires_at",
+                        "artifacts",
+                        "transfer",
+                        "approved_at"
+                      ],
+                      "additionalProperties": false
                     }
-                  },
-                  "required": [
-                    "status",
-                    "model_id",
-                    "approval_request_id",
-                    "action_digest",
-                    "grant_id",
-                    "grant_version",
-                    "acl_generation",
-                    "action",
-                    "recipient",
-                    "cancelled_jobs",
-                    "approved_at"
-                  ],
-                  "additionalProperties": false
+                  ]
                 },
                 {
                   "type": "null"
@@ -401,6 +475,112 @@
             "result"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "result_schema_version": {
+              "$ref": "#/definitions/__schema0"
+            },
+            "status": {
+              "$ref": "#/definitions/__schema1"
+            },
+            "trace_id": {
+              "$ref": "#/definitions/__schema2"
+            },
+            "model_id": {
+              "$ref": "#/definitions/__schema22"
+            },
+            "revision": {
+              "$ref": "#/definitions/__schema3"
+            },
+            "candidate_revision": {
+              "$ref": "#/definitions/__schema4"
+            },
+            "transaction_id": {
+              "$ref": "#/definitions/__schema5"
+            },
+            "job_id": {
+              "$ref": "#/definitions/__schema6"
+            },
+            "measurements": {
+              "$ref": "#/definitions/__schema7"
+            },
+            "checks": {
+              "$ref": "#/definitions/__schema8"
+            },
+            "warnings": {
+              "$ref": "#/definitions/__schema9"
+            },
+            "errors": {
+              "$ref": "#/definitions/__schema11"
+            },
+            "assumptions": {
+              "$ref": "#/definitions/__schema9"
+            },
+            "artifacts": {
+              "$ref": "#/definitions/__schema15"
+            },
+            "recommended_next_actions": {
+              "$ref": "#/definitions/__schema9"
+            },
+            "publications": {
+              "maxItems": 16,
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/__schema23"
+              }
+            },
+            "total": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "next_offset": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "link_lifetime_seconds": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "external_transmission": {
+              "type": "boolean",
+              "const": false
+            }
+          },
+          "required": [
+            "result_schema_version",
+            "status",
+            "trace_id",
+            "model_id",
+            "revision",
+            "candidate_revision",
+            "transaction_id",
+            "job_id",
+            "measurements",
+            "checks",
+            "warnings",
+            "errors",
+            "assumptions",
+            "artifacts",
+            "recommended_next_actions",
+            "publications",
+            "total",
+            "next_offset",
+            "link_lifetime_seconds",
+            "external_transmission"
+          ],
+          "additionalProperties": false
         }
       ]
     },
@@ -418,7 +598,7 @@
           "$ref": "#/definitions/__schema2"
         },
         "model_id": {
-          "type": "null"
+          "$ref": "#/definitions/__schema22"
         },
         "revision": {
           "$ref": "#/definitions/__schema3"
@@ -866,6 +1046,41 @@
                 "recipient"
               ],
               "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "string",
+                  "const": "publish"
+                },
+                "recipient": {
+                  "$ref": "#/definitions/__schema18"
+                },
+                "revision": {
+                  "$ref": "#/definitions/__schema2"
+                },
+                "package_artifact_id": {
+                  "$ref": "#/definitions/__schema2"
+                },
+                "package_hash": {
+                  "$ref": "#/definitions/__schema20"
+                },
+                "validity_days": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 30
+                }
+              },
+              "required": [
+                "action",
+                "recipient",
+                "revision",
+                "package_artifact_id",
+                "package_hash",
+                "validity_days"
+              ],
+              "additionalProperties": false
             }
           ]
         }
@@ -879,6 +1094,126 @@
         "policy_hash",
         "acl_generation",
         "change"
+      ],
+      "additionalProperties": false
+    },
+    "__schema20": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "__schema21": {
+      "type": "object",
+      "properties": {
+        "artifact_id": {
+          "$ref": "#/definitions/__schema2"
+        },
+        "filename": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sha256": {
+          "$ref": "#/definitions/__schema20"
+        },
+        "download": {
+          "type": "string",
+          "pattern": "^\\/api\\/artifacts\\/[a-zA-Z0-9_-]+$"
+        },
+        "signed_download": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 4096
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expires_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "artifact_id",
+        "filename",
+        "sha256",
+        "download",
+        "signed_download",
+        "expires_at"
+      ],
+      "additionalProperties": false
+    },
+    "__schema22": {
+      "type": "null"
+    },
+    "__schema23": {
+      "type": "object",
+      "properties": {
+        "publication_id": {
+          "$ref": "#/definitions/__schema2"
+        },
+        "model_id": {
+          "$ref": "#/definitions/__schema2"
+        },
+        "revision": {
+          "$ref": "#/definitions/__schema2"
+        },
+        "package_hash": {
+          "$ref": "#/definitions/__schema20"
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "owner",
+            "recipient"
+          ]
+        },
+        "recipient": {
+          "$ref": "#/definitions/__schema18"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/__schema21"
+          }
+        }
+      },
+      "required": [
+        "publication_id",
+        "model_id",
+        "revision",
+        "package_hash",
+        "role",
+        "recipient",
+        "expires_at",
+        "created",
+        "artifacts"
       ],
       "additionalProperties": false
     }

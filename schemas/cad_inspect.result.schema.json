@@ -93,11 +93,14 @@
                 "uv_bounds": {
                   "$ref": "#/definitions/__schema20"
                 },
-                "unit": {
+                "adjacent_face_ids": {
                   "$ref": "#/definitions/__schema21"
                 },
-                "area_unit": {
+                "unit": {
                   "$ref": "#/definitions/__schema22"
+                },
+                "area_unit": {
+                  "$ref": "#/definitions/__schema23"
                 },
                 "geometry_feature_id": {
                   "$ref": "#/definitions/__schema1"
@@ -134,7 +137,7 @@
               "maxItems": 16,
               "type": "array",
               "items": {
-                "$ref": "#/definitions/__schema23"
+                "$ref": "#/definitions/__schema24"
               }
             },
             "next_offset": {
@@ -171,7 +174,8 @@
           "enum": [
             "precision_cad",
             "render_surface",
-            "watertight_solid"
+            "watertight_solid",
+            "manufacturing_candidate"
           ]
         },
         "known_facts": {
@@ -192,7 +196,7 @@
         "purpose": {
           "anyOf": [
             {
-              "$ref": "#/definitions/__schema24"
+              "$ref": "#/definitions/__schema25"
             },
             {
               "type": "null"
@@ -206,7 +210,7 @@
             "pattern": "^[a-z][a-z0-9_]{0,63}$"
           },
           "additionalProperties": {
-            "$ref": "#/definitions/__schema25"
+            "$ref": "#/definitions/__schema26"
           }
         },
         "expressions": {
@@ -216,7 +220,7 @@
             "pattern": "^[a-z][a-z0-9_]{0,63}$"
           },
           "additionalProperties": {
-            "$ref": "#/definitions/__schema27"
+            "$ref": "#/definitions/__schema28"
           }
         },
         "parameter_sources": {
@@ -225,7 +229,7 @@
             "type": "string"
           },
           "additionalProperties": {
-            "$ref": "#/definitions/__schema24"
+            "$ref": "#/definitions/__schema25"
           }
         },
         "construction_summary": {
@@ -254,10 +258,10 @@
                   "const": "line"
                 },
                 "start": {
-                  "$ref": "#/definitions/__schema28"
+                  "$ref": "#/definitions/__schema29"
                 },
                 "end": {
-                  "$ref": "#/definitions/__schema28"
+                  "$ref": "#/definitions/__schema29"
                 }
               },
               "required": [
@@ -278,13 +282,13 @@
                   "type": "array",
                   "items": [
                     {
-                      "$ref": "#/definitions/__schema28"
+                      "$ref": "#/definitions/__schema29"
                     },
                     {
-                      "$ref": "#/definitions/__schema28"
+                      "$ref": "#/definitions/__schema29"
                     },
                     {
-                      "$ref": "#/definitions/__schema28"
+                      "$ref": "#/definitions/__schema29"
                     }
                   ],
                   "additionalItems": false,
@@ -359,7 +363,14 @@
                 "standard": {
                   "default": "custom",
                   "type": "string",
-                  "const": "custom"
+                  "enum": [
+                    "custom",
+                    "iso_metric_basic"
+                  ]
+                },
+                "designation": {
+                  "type": "string",
+                  "pattern": "^M\\d+(\\.\\d+)?(x\\d+(\\.\\d+)?)?$"
                 }
               },
               "required": [
@@ -419,7 +430,7 @@
                   "maxItems": 256,
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/__schema28"
+                    "$ref": "#/definitions/__schema29"
                   }
                 }
               },
@@ -457,7 +468,7 @@
                   "maxItems": 256,
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/__schema28"
+                    "$ref": "#/definitions/__schema29"
                   }
                 }
               },
@@ -479,7 +490,7 @@
                   "maxItems": 256,
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/__schema28"
+                    "$ref": "#/definitions/__schema29"
                   }
                 },
                 "weights": {
@@ -487,11 +498,11 @@
                   "maxItems": 256,
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/__schema26"
+                    "$ref": "#/definitions/__schema27"
                   }
                 },
                 "basis": {
-                  "$ref": "#/definitions/__schema29"
+                  "$ref": "#/definitions/__schema30"
                 }
               },
               "required": [
@@ -509,10 +520,151 @@
                   "type": "string",
                   "enum": [
                     "extrude",
-                    "revolve",
-                    "loft",
-                    "sweep"
+                    "revolve"
                   ]
+                }
+              },
+              "required": [
+                "operator"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "operator": {
+                  "type": "string",
+                  "const": "loft"
+                },
+                "ruled": {
+                  "type": "boolean"
+                },
+                "check_compatibility": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "operator"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "operator": {
+                  "type": "string",
+                  "const": "sweep"
+                },
+                "frame": {
+                  "type": "string",
+                  "enum": [
+                    "corrected_frenet",
+                    "rotation_minimizing"
+                  ]
+                },
+                "self_contact_check": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "operator"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "operator": {
+                  "type": "string",
+                  "const": "offset_solid"
+                }
+              },
+              "required": [
+                "operator"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "operator": {
+                  "type": "string",
+                  "const": "mesh_repair"
+                },
+                "remove_degenerate": {
+                  "type": "boolean"
+                },
+                "remove_duplicates": {
+                  "type": "boolean"
+                },
+                "orient": {
+                  "type": "boolean"
+                },
+                "fill_holes_max_edges": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 256
+                }
+              },
+              "required": [
+                "operator"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "operator": {
+                  "type": "string",
+                  "const": "remesh_region"
+                }
+              },
+              "required": [
+                "operator"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "operator": {
+                  "type": "string",
+                  "const": "local_mesh_deform"
+                },
+                "handles": {
+                  "minItems": 1,
+                  "maxItems": 32,
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/__schema32"
+                  }
+                }
+              },
+              "required": [
+                "operator",
+                "handles"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "operator": {
+                  "type": "string",
+                  "const": "tessellate"
+                }
+              },
+              "required": [
+                "operator"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "operator": {
+                  "type": "string",
+                  "const": "extract_isosurface"
                 }
               },
               "required": [
@@ -608,7 +760,7 @@
                   "const": "pattern"
                 },
                 "overrides": {
-                  "$ref": "#/definitions/__schema31"
+                  "$ref": "#/definitions/__schema33"
                 }
               },
               "required": [
@@ -624,13 +776,13 @@
                   "const": "circular_pattern"
                 },
                 "axis": {
-                  "$ref": "#/definitions/__schema28"
+                  "$ref": "#/definitions/__schema29"
                 },
                 "origin": {
-                  "$ref": "#/definitions/__schema28"
+                  "$ref": "#/definitions/__schema29"
                 },
                 "overrides": {
-                  "$ref": "#/definitions/__schema31"
+                  "$ref": "#/definitions/__schema33"
                 }
               },
               "required": [
@@ -648,10 +800,10 @@
                   "const": "affine_transform"
                 },
                 "matrix": {
-                  "$ref": "#/definitions/__schema33"
+                  "$ref": "#/definitions/__schema35"
                 },
                 "translation": {
-                  "$ref": "#/definitions/__schema28"
+                  "$ref": "#/definitions/__schema29"
                 }
               },
               "required": [
@@ -669,10 +821,10 @@
                   "const": "rotate"
                 },
                 "axis": {
-                  "$ref": "#/definitions/__schema28"
+                  "$ref": "#/definitions/__schema29"
                 },
                 "origin": {
-                  "$ref": "#/definitions/__schema28"
+                  "$ref": "#/definitions/__schema29"
                 }
               },
               "required": [
@@ -694,7 +846,7 @@
                   "maxItems": 16,
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/__schema34"
+                    "$ref": "#/definitions/__schema36"
                   }
                 },
                 "weights": {
@@ -702,20 +854,20 @@
                   "maxItems": 16,
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/__schema35"
+                    "$ref": "#/definitions/__schema37"
                   }
                 },
                 "u_basis": {
                   "allOf": [
                     {
-                      "$ref": "#/definitions/__schema29"
+                      "$ref": "#/definitions/__schema30"
                     }
                   ]
                 },
                 "v_basis": {
                   "allOf": [
                     {
-                      "$ref": "#/definitions/__schema29"
+                      "$ref": "#/definitions/__schema30"
                     }
                   ]
                 }
@@ -735,16 +887,16 @@
                   "const": "field"
                 },
                 "expression": {
-                  "$ref": "#/definitions/__schema36"
+                  "$ref": "#/definitions/__schema38"
                 },
                 "domain": {
                   "type": "object",
                   "properties": {
                     "min": {
-                      "$ref": "#/definitions/__schema28"
+                      "$ref": "#/definitions/__schema29"
                     },
                     "max": {
-                      "$ref": "#/definitions/__schema28"
+                      "$ref": "#/definitions/__schema29"
                     }
                   },
                   "required": [
@@ -754,7 +906,33 @@
                   "additionalProperties": false
                 },
                 "cell_size": {
-                  "$ref": "#/definitions/__schema25"
+                  "$ref": "#/definitions/__schema26"
+                },
+                "extraction": {
+                  "type": "object",
+                  "properties": {
+                    "method": {
+                      "default": "marching_tetrahedra",
+                      "type": "string",
+                      "enum": [
+                        "marching_tetrahedra",
+                        "dual_contouring"
+                      ]
+                    },
+                    "pruning": {
+                      "default": "lipschitz",
+                      "type": "string",
+                      "enum": [
+                        "lipschitz",
+                        "interval"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "method",
+                    "pruning"
+                  ],
+                  "additionalProperties": false
                 }
               },
               "required": [
@@ -779,7 +957,8 @@
                   "type": "string",
                   "enum": [
                     "step",
-                    "stl"
+                    "stl",
+                    "vdb"
                   ]
                 },
                 "source_unit": {
@@ -789,6 +968,16 @@
                     "m",
                     "um"
                   ]
+                },
+                "component": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "pattern": "^0(:[0-9]{1,6}){1,16}$"
+                },
+                "grid": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
                 }
               },
               "required": [
@@ -862,7 +1051,7 @@
                     "$ref": "#/definitions/__schema1"
                   },
                   "expression": {
-                    "$ref": "#/definitions/__schema27"
+                    "$ref": "#/definitions/__schema28"
                   },
                   "relation": {
                     "type": "string",
@@ -873,7 +1062,7 @@
                     ]
                   },
                   "tolerance": {
-                    "$ref": "#/definitions/__schema26"
+                    "$ref": "#/definitions/__schema27"
                   },
                   "kind": {
                     "type": "string",
@@ -943,7 +1132,7 @@
                     ]
                   },
                   "tolerance": {
-                    "$ref": "#/definitions/__schema25"
+                    "$ref": "#/definitions/__schema26"
                   }
                 },
                 "required": [
@@ -973,7 +1162,7 @@
                     "type": "object",
                     "properties": {
                       "value": {
-                        "$ref": "#/definitions/__schema26"
+                        "$ref": "#/definitions/__schema27"
                       },
                       "unit": {
                         "type": "string",
@@ -990,7 +1179,7 @@
                     "type": "object",
                     "properties": {
                       "value": {
-                        "$ref": "#/definitions/__schema26"
+                        "$ref": "#/definitions/__schema27"
                       },
                       "unit": {
                         "type": "string",
@@ -1031,10 +1220,10 @@
                     "maxLength": 64
                   },
                   "target": {
-                    "$ref": "#/definitions/__schema25"
+                    "$ref": "#/definitions/__schema26"
                   },
                   "tolerance": {
-                    "$ref": "#/definitions/__schema25"
+                    "$ref": "#/definitions/__schema26"
                   }
                 },
                 "required": [
@@ -1065,10 +1254,10 @@
                     "maxLength": 64
                   },
                   "target": {
-                    "$ref": "#/definitions/__schema25"
+                    "$ref": "#/definitions/__schema26"
                   },
                   "tolerance": {
-                    "$ref": "#/definitions/__schema25"
+                    "$ref": "#/definitions/__schema26"
                   }
                 },
                 "required": [
@@ -1099,7 +1288,7 @@
                     "const": "remaining_wall"
                   },
                   "target": {
-                    "$ref": "#/definitions/__schema25"
+                    "$ref": "#/definitions/__schema26"
                   }
                 },
                 "required": [
@@ -1172,7 +1361,7 @@
                     "$ref": "#/definitions/__schema1"
                   },
                   "tolerance": {
-                    "$ref": "#/definitions/__schema25"
+                    "$ref": "#/definitions/__schema26"
                   }
                 },
                 "required": [
@@ -1204,10 +1393,107 @@
                     ]
                   },
                   "min": {
-                    "$ref": "#/definitions/__schema28"
+                    "$ref": "#/definitions/__schema29"
                   },
                   "max": {
-                    "$ref": "#/definitions/__schema28"
+                    "$ref": "#/definitions/__schema29"
+                  }
+                },
+                "required": [
+                  "id",
+                  "kind",
+                  "feature_id",
+                  "min",
+                  "max"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/__schema1"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "const": "surface_deviation"
+                  },
+                  "feature_id": {
+                    "$ref": "#/definitions/__schema1"
+                  },
+                  "maximum": {
+                    "$ref": "#/definitions/__schema26"
+                  }
+                },
+                "required": [
+                  "id",
+                  "kind",
+                  "feature_id",
+                  "maximum"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/__schema1"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "const": "change_region"
+                  },
+                  "feature_id": {
+                    "$ref": "#/definitions/__schema1"
+                  },
+                  "local_frame": {
+                    "allOf": [
+                      {
+                        "$ref": "#/definitions/__schema1"
+                      }
+                    ]
+                  },
+                  "center": {
+                    "$ref": "#/definitions/__schema29"
+                  },
+                  "radius": {
+                    "$ref": "#/definitions/__schema27"
+                  },
+                  "compute_margin": {
+                    "allOf": [
+                      {
+                        "$ref": "#/definitions/__schema27"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "kind",
+                  "feature_id",
+                  "center",
+                  "radius"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/__schema1"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "const": "blend_free_region"
+                  },
+                  "feature_id": {
+                    "$ref": "#/definitions/__schema1"
+                  },
+                  "min": {
+                    "$ref": "#/definitions/__schema29"
+                  },
+                  "max": {
+                    "$ref": "#/definitions/__schema29"
                   }
                 },
                 "required": [
@@ -1443,6 +1729,168 @@
               "type": "null"
             }
           ]
+        },
+        "quality_status": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "dimensional_status": {
+                  "type": "string",
+                  "enum": [
+                    "checks_passed",
+                    "failed",
+                    "not_evaluated"
+                  ]
+                },
+                "topology_status": {
+                  "type": "string",
+                  "enum": [
+                    "checks_passed",
+                    "failed",
+                    "not_evaluated"
+                  ]
+                },
+                "manufacturing_status": {
+                  "type": "string",
+                  "enum": [
+                    "not_certified",
+                    "rules_sampled",
+                    "not_evaluated"
+                  ]
+                },
+                "source": {
+                  "$ref": "#/definitions/__schema8"
+                },
+                "check_ids": {
+                  "maxItems": 64,
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/__schema8"
+                  }
+                }
+              },
+              "required": [
+                "dimensional_status",
+                "topology_status",
+                "manufacturing_status",
+                "source",
+                "check_ids"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "selection_anchor": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "point_mm": {
+                  "$ref": "#/definitions/__schema18"
+                },
+                "normal": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/definitions/__schema18"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "barycentric": {
+                  "anyOf": [
+                    {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "number"
+                        }
+                      ],
+                      "additionalItems": false,
+                      "minItems": 3,
+                      "maxItems": 3
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "triangle_index": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/definitions/__schema14"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "local_frame": {
+                  "$ref": "#/definitions/__schema1"
+                },
+                "geometry_feature_id": {
+                  "$ref": "#/definitions/__schema1"
+                },
+                "face_id": {
+                  "$ref": "#/definitions/__schema1"
+                },
+                "view_relative": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "facing_camera": {
+                          "type": [
+                            "boolean",
+                            "null"
+                          ]
+                        },
+                        "note": {
+                          "$ref": "#/definitions/__schema8"
+                        }
+                      },
+                      "required": [
+                        "facing_camera",
+                        "note"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "point_mm",
+                "normal",
+                "barycentric",
+                "triangle_index",
+                "local_frame",
+                "geometry_feature_id",
+                "face_id",
+                "view_relative"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sections": {
+          "$ref": "#/definitions/__schema7"
         }
       },
       "required": [
@@ -1488,7 +1936,10 @@
         "pattern_contract",
         "transformation_contract",
         "surface_poles_hash",
-        "field_expression_hash"
+        "field_expression_hash",
+        "quality_status",
+        "selection_anchor",
+        "sections"
       ],
       "additionalProperties": false
     },
@@ -1855,14 +2306,21 @@
       "maxItems": 4
     },
     "__schema21": {
-      "type": "string",
-      "const": "mm"
+      "maxItems": 256,
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/__schema1"
+      }
     },
     "__schema22": {
       "type": "string",
-      "const": "mm2"
+      "const": "mm"
     },
     "__schema23": {
+      "type": "string",
+      "const": "mm2"
+    },
+    "__schema24": {
       "type": "object",
       "properties": {
         "face_id": {
@@ -1886,11 +2344,14 @@
         "uv_bounds": {
           "$ref": "#/definitions/__schema20"
         },
-        "unit": {
+        "adjacent_face_ids": {
           "$ref": "#/definitions/__schema21"
         },
-        "area_unit": {
+        "unit": {
           "$ref": "#/definitions/__schema22"
+        },
+        "area_unit": {
+          "$ref": "#/definitions/__schema23"
         }
       },
       "required": [
@@ -1905,7 +2366,7 @@
       ],
       "additionalProperties": false
     },
-    "__schema24": {
+    "__schema25": {
       "type": "object",
       "properties": {
         "value": {
@@ -1935,11 +2396,11 @@
       ],
       "additionalProperties": false
     },
-    "__schema25": {
+    "__schema26": {
       "type": "object",
       "properties": {
         "value": {
-          "$ref": "#/definitions/__schema26"
+          "$ref": "#/definitions/__schema27"
         },
         "unit": {
           "type": "string",
@@ -1959,18 +2420,18 @@
       ],
       "additionalProperties": false
     },
-    "__schema26": {
+    "__schema27": {
       "type": "string",
       "maxLength": 48,
       "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
     },
-    "__schema27": {
+    "__schema28": {
       "anyOf": [
         {
           "type": "object",
           "properties": {
             "constant": {
-              "$ref": "#/definitions/__schema25"
+              "$ref": "#/definitions/__schema26"
             }
           },
           "required": [
@@ -2019,7 +2480,7 @@
               "maxItems": 3,
               "type": "array",
               "items": {
-                "$ref": "#/definitions/__schema27"
+                "$ref": "#/definitions/__schema28"
               }
             }
           },
@@ -2031,24 +2492,24 @@
         }
       ]
     },
-    "__schema28": {
+    "__schema29": {
       "type": "array",
       "items": [
         {
-          "$ref": "#/definitions/__schema26"
+          "$ref": "#/definitions/__schema27"
         },
         {
-          "$ref": "#/definitions/__schema26"
+          "$ref": "#/definitions/__schema27"
         },
         {
-          "$ref": "#/definitions/__schema26"
+          "$ref": "#/definitions/__schema27"
         }
       ],
       "additionalItems": false,
       "minItems": 3,
       "maxItems": 3
     },
-    "__schema29": {
+    "__schema30": {
       "type": "object",
       "properties": {
         "degree": {
@@ -2061,7 +2522,7 @@
           "maxItems": 256,
           "type": "array",
           "items": {
-            "$ref": "#/definitions/__schema26"
+            "$ref": "#/definitions/__schema27"
           }
         },
         "multiplicities": {
@@ -2069,7 +2530,7 @@
           "maxItems": 256,
           "type": "array",
           "items": {
-            "$ref": "#/definitions/__schema30"
+            "$ref": "#/definitions/__schema31"
           }
         }
       },
@@ -2080,19 +2541,35 @@
       ],
       "additionalProperties": false
     },
-    "__schema30": {
+    "__schema31": {
       "type": "integer",
       "minimum": 1,
       "maximum": 16
     },
-    "__schema31": {
+    "__schema32": {
+      "type": "object",
+      "properties": {
+        "point": {
+          "$ref": "#/definitions/__schema29"
+        },
+        "displacement": {
+          "$ref": "#/definitions/__schema29"
+        }
+      },
+      "required": [
+        "point",
+        "displacement"
+      ],
+      "additionalProperties": false
+    },
+    "__schema33": {
       "maxItems": 128,
       "type": "array",
       "items": {
-        "$ref": "#/definitions/__schema32"
+        "$ref": "#/definitions/__schema34"
       }
     },
-    "__schema32": {
+    "__schema34": {
       "type": "object",
       "properties": {
         "index": {
@@ -2110,7 +2587,7 @@
         "translation": {
           "allOf": [
             {
-              "$ref": "#/definitions/__schema28"
+              "$ref": "#/definitions/__schema29"
             }
           ]
         }
@@ -2120,40 +2597,40 @@
       ],
       "additionalProperties": false
     },
-    "__schema33": {
+    "__schema35": {
       "type": "array",
       "items": [
         {
-          "$ref": "#/definitions/__schema28"
+          "$ref": "#/definitions/__schema29"
         },
         {
-          "$ref": "#/definitions/__schema28"
+          "$ref": "#/definitions/__schema29"
         },
         {
-          "$ref": "#/definitions/__schema28"
+          "$ref": "#/definitions/__schema29"
         }
       ],
       "additionalItems": false,
       "minItems": 3,
       "maxItems": 3
     },
-    "__schema34": {
-      "minItems": 2,
-      "maxItems": 16,
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/__schema28"
-      }
-    },
-    "__schema35": {
-      "minItems": 2,
-      "maxItems": 16,
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/__schema26"
-      }
-    },
     "__schema36": {
+      "minItems": 2,
+      "maxItems": 16,
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/__schema29"
+      }
+    },
+    "__schema37": {
+      "minItems": 2,
+      "maxItems": 16,
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/__schema27"
+      }
+    },
+    "__schema38": {
       "oneOf": [
         {
           "type": "object",
@@ -2163,13 +2640,13 @@
               "const": "gyroid"
             },
             "period": {
-              "$ref": "#/definitions/__schema26"
+              "$ref": "#/definitions/__schema27"
             },
             "origin": {
-              "$ref": "#/definitions/__schema28"
+              "$ref": "#/definitions/__schema29"
             },
             "threshold": {
-              "$ref": "#/definitions/__schema26"
+              "$ref": "#/definitions/__schema27"
             }
           },
           "required": [
@@ -2188,7 +2665,7 @@
               "const": "convert_field_unit"
             },
             "source": {
-              "$ref": "#/definitions/__schema36"
+              "$ref": "#/definitions/__schema38"
             },
             "to": {
               "type": "string",
@@ -2198,7 +2675,7 @@
               ]
             },
             "reference_length": {
-              "$ref": "#/definitions/__schema25"
+              "$ref": "#/definitions/__schema26"
             }
           },
           "required": [
@@ -2217,10 +2694,10 @@
               "const": "sphere"
             },
             "center": {
-              "$ref": "#/definitions/__schema28"
+              "$ref": "#/definitions/__schema29"
             },
             "radius": {
-              "$ref": "#/definitions/__schema26"
+              "$ref": "#/definitions/__schema27"
             }
           },
           "required": [
@@ -2238,10 +2715,10 @@
               "const": "box"
             },
             "center": {
-              "$ref": "#/definitions/__schema28"
+              "$ref": "#/definitions/__schema29"
             },
             "half_size": {
-              "$ref": "#/definitions/__schema28"
+              "$ref": "#/definitions/__schema29"
             }
           },
           "required": [
@@ -2259,10 +2736,10 @@
               "const": "plane"
             },
             "normal": {
-              "$ref": "#/definitions/__schema28"
+              "$ref": "#/definitions/__schema29"
             },
             "offset": {
-              "$ref": "#/definitions/__schema26"
+              "$ref": "#/definitions/__schema27"
             }
           },
           "required": [
@@ -2280,13 +2757,13 @@
               "const": "cylinder"
             },
             "center": {
-              "$ref": "#/definitions/__schema28"
+              "$ref": "#/definitions/__schema29"
             },
             "radius": {
-              "$ref": "#/definitions/__schema26"
+              "$ref": "#/definitions/__schema27"
             },
             "half_height": {
-              "$ref": "#/definitions/__schema26"
+              "$ref": "#/definitions/__schema27"
             }
           },
           "required": [
@@ -2305,13 +2782,13 @@
               "const": "capsule"
             },
             "start": {
-              "$ref": "#/definitions/__schema28"
+              "$ref": "#/definitions/__schema29"
             },
             "end": {
-              "$ref": "#/definitions/__schema28"
+              "$ref": "#/definitions/__schema29"
             },
             "radius": {
-              "$ref": "#/definitions/__schema26"
+              "$ref": "#/definitions/__schema27"
             }
           },
           "required": [
@@ -2330,13 +2807,13 @@
               "const": "torus"
             },
             "center": {
-              "$ref": "#/definitions/__schema28"
+              "$ref": "#/definitions/__schema29"
             },
             "major": {
-              "$ref": "#/definitions/__schema26"
+              "$ref": "#/definitions/__schema27"
             },
             "minor": {
-              "$ref": "#/definitions/__schema26"
+              "$ref": "#/definitions/__schema27"
             }
           },
           "required": [
@@ -2359,10 +2836,10 @@
               ]
             },
             "a": {
-              "$ref": "#/definitions/__schema36"
+              "$ref": "#/definitions/__schema38"
             },
             "b": {
-              "$ref": "#/definitions/__schema36"
+              "$ref": "#/definitions/__schema38"
             }
           },
           "required": [
@@ -2380,13 +2857,13 @@
               "const": "smooth_union"
             },
             "a": {
-              "$ref": "#/definitions/__schema36"
+              "$ref": "#/definitions/__schema38"
             },
             "b": {
-              "$ref": "#/definitions/__schema36"
+              "$ref": "#/definitions/__schema38"
             },
             "k": {
-              "$ref": "#/definitions/__schema26"
+              "$ref": "#/definitions/__schema27"
             }
           },
           "required": [
@@ -2405,10 +2882,10 @@
               "const": "offset"
             },
             "source": {
-              "$ref": "#/definitions/__schema36"
+              "$ref": "#/definitions/__schema38"
             },
             "distance": {
-              "$ref": "#/definitions/__schema26"
+              "$ref": "#/definitions/__schema27"
             }
           },
           "required": [
@@ -2426,17 +2903,17 @@
               "const": "shell"
             },
             "source": {
-              "$ref": "#/definitions/__schema36"
+              "$ref": "#/definitions/__schema38"
             },
             "thickness": {
-              "$ref": "#/definitions/__schema26"
+              "$ref": "#/definitions/__schema27"
             },
             "variations": {
               "default": [],
               "maxItems": 32,
               "type": "array",
               "items": {
-                "$ref": "#/definitions/__schema37"
+                "$ref": "#/definitions/__schema39"
               }
             }
           },
@@ -2456,13 +2933,13 @@
               "const": "transform"
             },
             "source": {
-              "$ref": "#/definitions/__schema36"
+              "$ref": "#/definitions/__schema38"
             },
             "translation": {
-              "$ref": "#/definitions/__schema28"
+              "$ref": "#/definitions/__schema29"
             },
             "scale": {
-              "$ref": "#/definitions/__schema28"
+              "$ref": "#/definitions/__schema29"
             }
           },
           "required": [
@@ -2481,13 +2958,13 @@
               "const": "affine_transform"
             },
             "source": {
-              "$ref": "#/definitions/__schema36"
+              "$ref": "#/definitions/__schema38"
             },
             "matrix": {
-              "$ref": "#/definitions/__schema33"
+              "$ref": "#/definitions/__schema35"
             },
             "translation": {
-              "$ref": "#/definitions/__schema28"
+              "$ref": "#/definitions/__schema29"
             }
           },
           "required": [
@@ -2506,16 +2983,16 @@
               "const": "rotate"
             },
             "source": {
-              "$ref": "#/definitions/__schema36"
+              "$ref": "#/definitions/__schema38"
             },
             "axis": {
-              "$ref": "#/definitions/__schema28"
+              "$ref": "#/definitions/__schema29"
             },
             "origin": {
-              "$ref": "#/definitions/__schema28"
+              "$ref": "#/definitions/__schema29"
             },
             "angle": {
-              "$ref": "#/definitions/__schema25"
+              "$ref": "#/definitions/__schema26"
             }
           },
           "required": [
@@ -2535,16 +3012,16 @@
               "const": "local_field_delta"
             },
             "source": {
-              "$ref": "#/definitions/__schema36"
+              "$ref": "#/definitions/__schema38"
             },
             "center": {
-              "$ref": "#/definitions/__schema28"
+              "$ref": "#/definitions/__schema29"
             },
             "radius": {
-              "$ref": "#/definitions/__schema26"
+              "$ref": "#/definitions/__schema27"
             },
             "amplitude": {
-              "$ref": "#/definitions/__schema26"
+              "$ref": "#/definitions/__schema27"
             }
           },
           "required": [
@@ -2564,16 +3041,16 @@
               "const": "local_deform"
             },
             "source": {
-              "$ref": "#/definitions/__schema36"
+              "$ref": "#/definitions/__schema38"
             },
             "center": {
-              "$ref": "#/definitions/__schema28"
+              "$ref": "#/definitions/__schema29"
             },
             "radius": {
-              "$ref": "#/definitions/__schema26"
+              "$ref": "#/definitions/__schema27"
             },
             "displacement": {
-              "$ref": "#/definitions/__schema28"
+              "$ref": "#/definitions/__schema29"
             }
           },
           "required": [
@@ -2584,20 +3061,71 @@
             "displacement"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "type": "string",
+              "const": "sampled_grid"
+            },
+            "artifact_id": {
+              "$ref": "#/definitions/__schema1"
+            },
+            "grid": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "lipschitz": {
+              "$ref": "#/definitions/__schema27"
+            },
+            "value_unit": {
+              "default": "length",
+              "type": "string",
+              "enum": [
+                "length",
+                "dimensionless"
+              ]
+            },
+            "source_unit": {
+              "default": "mm",
+              "type": "string",
+              "enum": [
+                "mm",
+                "m",
+                "um"
+              ]
+            },
+            "interpolation": {
+              "default": "trilinear",
+              "type": "string",
+              "const": "trilinear"
+            }
+          },
+          "required": [
+            "op",
+            "artifact_id",
+            "lipschitz",
+            "value_unit",
+            "source_unit",
+            "interpolation"
+          ],
+          "additionalProperties": false
         }
       ]
     },
-    "__schema37": {
+    "__schema39": {
       "type": "object",
       "properties": {
         "center": {
-          "$ref": "#/definitions/__schema28"
+          "$ref": "#/definitions/__schema29"
         },
         "radius": {
-          "$ref": "#/definitions/__schema26"
+          "$ref": "#/definitions/__schema27"
         },
         "amplitude": {
-          "$ref": "#/definitions/__schema26"
+          "$ref": "#/definitions/__schema27"
         }
       },
       "required": [

@@ -18,7 +18,13 @@
     "STEP export",
     "native face picking after local GPU coordinate conversion at large world coordinates",
     "20-micrometre edit with base/candidate overlay at large world coordinates",
-    "preserved object placement after explosion toggle, section and orthographic view"
+    "preserved object placement after explosion toggle, section and orthographic view",
+    "part and assembly tree from cad_structure",
+    "scale bar from camera millimetres per pixel",
+    "unlit, normal and native curvature display channels",
+    "pixel-size LOD preview with adaptive per-face resolution report",
+    "semantic selection anchor from a native face hit",
+    "measurement markers between two preview points"
   ],
   "errors": []
 }

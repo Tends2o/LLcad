@@ -35,8 +35,16 @@ def rotated_local(node,point):
     rotation=rotation_matrix(tuple(node['axis']),angle['value'],angle['unit'])
     return origin+rotation.T@(np.asarray(point,float)-origin)
 
+def sampled_grid(node):
+    from volume_io import load_grid
+    g=load_grid('input-'+node['artifact_id']+'.vdb',node.get('grid'),node.get('source_unit','mm'))
+    require(float(node['lipschitz'])>=g['lipschitz'],'Deklarierte Lipschitz-Schranke des Gitters (%s) liegt unter der gemessenen Schranke %.6g.'%(node['lipschitz'],g['lipschitz']),'CONSTRAINT_CONFLICT')
+    require(g['declared_value_unit'] in (None,node.get('value_unit','length')),'Werteinheit des Gitters widerspricht der deklarierten Werteinheit.','UNIT_MISMATCH')
+    return g
+
 def evaluate(node, point):
     p=np.asarray(point,dtype=float);op=node['op']
+    if op=='sampled_grid':return sampled_grid(node)['sample'](p)
     if op=='gyroid':
         x,y,z=2*math.pi*(p-np.asarray(node['origin'],float))/float(node['period'])
         return math.sin(x)*math.cos(y)+math.sin(y)*math.cos(z)+math.sin(z)*math.cos(x)-float(node['threshold'])
@@ -125,6 +133,8 @@ def compile_field(node):
         count+=1;max_depth=max(max_depth,depth)
         require(count<=4096 and depth<=32,'Kompiliertes Feld-AST überschreitet das Budget.','BUDGET_EXCEEDED')
         op=n['op']
+        if op=='sampled_grid':
+            return sampled_grid(n)['sample']
         if op=='gyroid':
             origin=vector(n['origin']);period=number(n['period']);threshold=number(n['threshold'])
             def gyroid(p):
@@ -218,12 +228,22 @@ def field_facts(f,compiled=None):
     evaluated=compiled if compiled is not None else compile_field(c['expression'])
     vals=[evaluated(p) for p in [lo,hi,(lo+hi)/2]]
     require(all(math.isfinite(v) for v in vals),'Nichtendliches Feld.')
-    return dict(valid=True,bounds=[*lo,*hi],field_semantics=f['field']['semantics'],value_unit=f['field'].get('value_unit','length'),lipschitz_bound=f['field']['lipschitz'],
+    from intervals import ERROR_MODEL
+    facts=dict(valid=True,bounds=[*lo,*hi],field_semantics=f['field']['semantics'],value_unit=f['field'].get('value_unit','length'),lipschitz_bound=f['field']['lipschitz'],
                 dimensions={},geometry_hash=f['cache_key'],engine_build='mathforge-field-1',
-                volume=None,area=None,solids=None,coverage='analytic_contract_and_sampled_finiteness',manufacturing_status='not_certified')
+                volume=None,area=None,solids=None,coverage='analytic_contract_and_sampled_finiteness',manufacturing_status='not_certified',
+                interval_evaluation_error_model=ERROR_MODEL)
+    if f.get('reference_expression') is not None:
+        from intervals import certify_deviation
+        facts['surface_deviation']=certify_deviation(f['reference_expression'],c['expression'],c['domain'],f['field']['cell_size'],f['deviation_epsilon'])
+    return facts
 
 def extract(f,sampler=None):
     c=f['construction'];node=c['expression'];lo=np.array(c['domain']['min'],float);hi=np.array(c['domain']['max'],float)
+    if c.get('extraction'):
+        from extract import extract_with_options
+        compiled=sampler.compiled if hasattr(sampler,'compiled') else compile_field(node)
+        return extract_with_options(f,sampler if sampler is not None else compiled,compiled,c['extraction'])
     step=f['field']['cell_size'];L=f['field']['lipschitz'];depth=max(0,math.ceil(math.log2(max(hi-lo)/step)))
     compiled=sampler.compiled if hasattr(sampler,'compiled') else compile_field(node)
     sampled=sampler if sampler is not None else compiled

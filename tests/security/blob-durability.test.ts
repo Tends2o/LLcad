@@ -45,7 +45,7 @@ test("migration syncs and verifies legacy blobs before atomically recording stor
     writeFileSync(path, payload);
     const current = new Store(root);
     try {
-      assert.equal(current.get("PRAGMA user_version").user_version, 5);
+      assert.equal(current.get("PRAGMA user_version").user_version, 6);
       const migration = JSON.parse(
         current.get(
           "SELECT data FROM audit WHERE event='storage_durability_migrated' ORDER BY seq DESC LIMIT 1",

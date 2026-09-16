@@ -434,6 +434,103 @@
                       "max"
                     ],
                     "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "$ref": "#/definitions/__schema1"
+                      },
+                      "kind": {
+                        "type": "string",
+                        "const": "surface_deviation"
+                      },
+                      "feature_id": {
+                        "$ref": "#/definitions/__schema1"
+                      },
+                      "maximum": {
+                        "$ref": "#/definitions/__schema18"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "kind",
+                      "feature_id",
+                      "maximum"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "$ref": "#/definitions/__schema1"
+                      },
+                      "kind": {
+                        "type": "string",
+                        "const": "change_region"
+                      },
+                      "feature_id": {
+                        "$ref": "#/definitions/__schema1"
+                      },
+                      "local_frame": {
+                        "allOf": [
+                          {
+                            "$ref": "#/definitions/__schema1"
+                          }
+                        ]
+                      },
+                      "center": {
+                        "$ref": "#/definitions/__schema20"
+                      },
+                      "radius": {
+                        "$ref": "#/definitions/__schema19"
+                      },
+                      "compute_margin": {
+                        "allOf": [
+                          {
+                            "$ref": "#/definitions/__schema19"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "kind",
+                      "feature_id",
+                      "center",
+                      "radius"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "$ref": "#/definitions/__schema1"
+                      },
+                      "kind": {
+                        "type": "string",
+                        "const": "blend_free_region"
+                      },
+                      "feature_id": {
+                        "$ref": "#/definitions/__schema1"
+                      },
+                      "min": {
+                        "$ref": "#/definitions/__schema20"
+                      },
+                      "max": {
+                        "$ref": "#/definitions/__schema20"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "kind",
+                      "feature_id",
+                      "min",
+                      "max"
+                    ],
+                    "additionalProperties": false
                   }
                 ]
               }
@@ -551,6 +648,100 @@
             },
             "base_revision": {
               "$ref": "#/definitions/__schema1"
+            },
+            "repair_attempt": {
+              "type": "object",
+              "properties": {
+                "attempt": {
+                  "$ref": "#/definitions/__schema16"
+                },
+                "of_transaction": {
+                  "$ref": "#/definitions/__schema1"
+                },
+                "cause": {
+                  "$ref": "#/definitions/__schema9"
+                },
+                "remaining": {
+                  "$ref": "#/definitions/__schema16"
+                },
+                "intent_comparison": {
+                  "type": "object",
+                  "properties": {
+                    "original_changed_features": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/definitions/__schema1"
+                      }
+                    },
+                    "this_changed_features": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/definitions/__schema1"
+                      }
+                    },
+                    "same_targets": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "original_changed_features",
+                    "this_changed_features",
+                    "same_targets"
+                  ],
+                  "additionalProperties": false
+                },
+                "previous_attempts": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "transaction_id": {
+                        "$ref": "#/definitions/__schema1"
+                      },
+                      "cause": {
+                        "anyOf": [
+                          {
+                            "$ref": "#/definitions/__schema9"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "state": {
+                        "$ref": "#/definitions/__schema9"
+                      },
+                      "cost_seconds": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "transaction_id",
+                      "cause",
+                      "state",
+                      "cost_seconds"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "attempt",
+                "of_transaction",
+                "cause",
+                "remaining",
+                "intent_comparison",
+                "previous_attempts"
+              ],
+              "additionalProperties": false
             }
           },
           "required": [
