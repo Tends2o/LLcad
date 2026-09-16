@@ -1,44 +1,44 @@
 # MathForge 3D
 
-Eine lokale, ausführbare Umsetzung des [Mathematik-zuerst-Bauplans](Mathematik_First_3D_MCP_Bauplan.md): echte Open-CASCADE-Geometrie, versionierte mathematische Konstruktionen und 21 MCP-Werkzeuge. **Die Modellierung erfolgt vollständig über das LLM.** Ein Browser-Viewer ist optional. Änderungen durchlaufen **Kandidat → Prüfung → atomare Übernahme**.
+A local, executable implementation of the [mathematics-first blueprint](Mathematik_First_3D_MCP_Bauplan.md): real Open CASCADE geometry, versioned mathematical constructions and 23 MCP tools. **All modelling happens through the LLM.** A browser viewer is optional. Every change passes through **candidate → validation → atomic commit**.
 
-**Status: getestete Entwicklungsversion 0.1.0.** Die vollständige Produktionsabnahme des Bauplans ist noch offen. Der lokale Codex-Transport ist eingerichtet und geprüft. Drei echte LLM-Sprachaufträge sind im lokalen Codex-Host geprüft. Offen bleiben die produktive Remote-OAuth-/HTTPS-Einrichtung sowie die in [Umsetzungsstand](docs/implementation-status.md) aufgeführten weiterführenden Funktionen. Diese Version meldet ausschließlich tatsächlich implementierte Fähigkeiten.
+**Status: tested development version 0.1.0.** Full production acceptance of the blueprint is still open. The local Codex transport is installed and verified. Ten real LLM language tasks have passed in the local Codex host; twelve tasks are defined. Still open are the production remote OAuth/HTTPS setup and the items listed in the [implementation status](docs/implementation-status.md). This version reports only capabilities that are actually implemented.
 
-![MathForge-Viewer mit gemessener Nuttiefe](reports/viewer.png)
+![MathForge viewer with a measured groove depth](reports/viewer.png)
 
-## Über das LLM bedienen
+## Operating through the LLM
 
-Das LLM entdeckt Modelle mit `cad_list_models`, erstellt mathematische Konstruktionen und findet Merkmale mit `cad_find` und `cad_inspect`. Es plant die Änderung, fragt Jobs ab, liest Prüfnachweise, übernimmt gültige Kandidaten und exportiert Dateien. Dazu sind weder eine manuelle Modellwahl noch Klicks im Viewer erforderlich. Echte Mehrdeutigkeiten werden über weitere Werkzeugabfragen oder eine kurze Rückfrage im Gespräch geklärt.
+The LLM discovers models with `cad_list_models`, creates mathematical constructions and locates features with `cad_find` and `cad_inspect`. It plans the change, polls jobs, reads validation proofs, commits valid candidates and exports files. No manual model selection and no clicks in the viewer are required. Genuine ambiguities are resolved through further tool queries or a short question in the conversation.
 
-Auf diesem Rechner läuft bereits `llcad.service`; Codex ist mit dem gemeinsamen lokalen HTTP-Dienst verbunden und lädt die Zugangsdaten automatisch. Zwei gleichzeitige Verbindungen und ein vollständiger Modellierablauf wurden geprüft. Details stehen im [lokalen Codex-Betrieb](docs/local-codex.md).
+On this machine `llcad.service` is already running; Codex is connected to the shared local HTTP service and loads its credentials automatically. Two concurrent connections and a complete modelling workflow have been verified. Details are in [local Codex operation](docs/local-codex.md).
 
-Alternativ kann ein lokaler MCP-Host `deployment/start-mcp.sh` starten. Dieser Einstieg verwendet stdio, öffnet keinen Netzwerkport und benötigt keine Browseranmeldung oder Tokeneingabe. Der private Betriebssystemprozess bestimmt die lokale Identität. Die vorhandene exklusive Datensperre gilt weiterhin: HTTP- und stdio-Dienst dürfen dasselbe Datenverzeichnis nicht gleichzeitig öffnen.
+Alternatively, a local MCP host can start `deployment/start-mcp.sh`. This entry point uses stdio, opens no network port and needs neither a browser login nor a token. The private operating-system process determines the local identity. The existing exclusive data lock still applies: the HTTP service and the stdio service must not open the same data directory at the same time.
 
 ```bash
 npm run test:mcp
 ```
 
-Der Integrationstest steuert Konstruktion, semantische Suche, Flächenauswahl, 20-µm-Nutänderung, Prüfung, Commit, Neuzuordnung und STEP-Export über das offizielle MCP-SDK. `reports/mcp-workflow.json` dokumentiert die Werkzeugaufrufe und **null Browserinteraktionen**. Dies ist ein SDK-/Controller-Test. Zusätzlich prüft `npm run test:host` den tatsächlich installierten Codex-App-Server; `reports/codex-host.json` enthält diesen Host-Transportnachweis. `npm run test:llm` ergänzt drei tatsächlich vom Modell bearbeitete Sprachaufträge: Nutkorrektur mit STEP-Export, Durchmesserkorrektur und Klärung mehrdeutiger Auswahl. Der Bericht `reports/llm-eval.json` enthält die tatsächlichen CAD-Aufrufe, numerische Prüfergebnisse, Host-/Modellversion, Latenz und Tokenverbrauch. Die Remote-OAuth-Abnahme und eine breite allgemeine LLM-Evaluation bleiben gesondert offen.
+The integration test drives construction, semantic search, face selection, a 20 µm groove change, validation, commit, rebinding and STEP export through the official MCP SDK. `reports/mcp-workflow.json` documents the tool calls and **zero browser interactions**. This is an SDK/controller test. In addition, `npm run test:host` checks the actually installed Codex app server; `reports/codex-host.json` holds that host transport proof. `npm run test:llm` runs the language tasks that the model itself has to solve: groove correction with STEP export, diameter correction, ambiguous selection, a single instance, an existing local field correction, a pocket in a rotated part, circular-pattern occurrences, same-named housings in an assembly structure, a scoped shared project, a mesh round trip, a hidden inner groove under a flange and refinding the same groove after a topology change. The report `reports/llm-eval.json` contains the actual CAD calls, numerical checks, host/model version, latency and token usage. Remote OAuth acceptance and a broad general LLM evaluation remain open.
 
-## Optionalen Viewer starten
+## Starting the optional viewer
 
-Der optionale Viewer wird hier bereits vom laufenden Dienst bereitgestellt. Auf einer separaten Installation ohne laufenden Dienst:
+Here the optional viewer is already served by the running service. On a separate installation without a running service:
 
 ```bash
 npm start
 ```
 
-Öffne **http://127.0.0.1:4310**. Der Server erzeugt beim ersten Start einen privaten lokalen Schlüssel. Zum Anzeigen in deinem Terminal:
+Open **http://127.0.0.1:4310**. On first start the server generates a private local key. To show it in your terminal:
 
 ```bash
 cat data/local-token
 ```
 
-Für die optionale manuelle Ansicht den Schlüssel im Anmeldedialog eingeben. Der lokale Modus bindet ausschließlich an Loopback. Die LLM-Bedienung benötigt diesen Dialog nicht.
+Enter the key in the login dialog for the optional manual view. Local mode binds to loopback only. Operating through the LLM does not need this dialog.
 
-## Auf einem neuen Rechner installieren
+## Installing on a new machine
 
-Getestet mit Linux x86-64, Node **24.19.0**, Python **3.13.5**, Bubblewrap und den exakt gesperrten Abhängigkeiten. Erforderliche Systempakete: `python3-venv`, `bubblewrap`, `libgl1`, `python3-openvdb=10.0.1-2.3+b1` (Debian 13, passend zu Python 3.13), `util-linux` (für `/usr/bin/flock`); die passende Python-/Node-Version muss installiert sein. User-Namespaces müssen für den Worker verfügbar sein.
+Tested with Linux x86-64, Node **24.19.0**, Python **3.13.5**, Bubblewrap and the exactly locked dependencies. Required system packages: `python3-venv`, `bubblewrap`, `libgl1`, `python3-openvdb=10.0.1-2.3+b1` (Debian 13, matching Python 3.13), `util-linux` (for `/usr/bin/flock`); the matching Python and Node versions must be installed. User namespaces must be available for the worker.
 
 ```bash
 npm run setup
@@ -47,64 +47,64 @@ npm run verify
 npm start
 ```
 
-`deployment/setup.sh` verwendet `requirements.lock` und `npm ci`. Kein Shell-, Python- oder JavaScript-Code aus Modelldaten wird ausgeführt. Der Python-Adapter ruft die nativen OCCT-Bindings auf; jede Berechnung läuft in einem separaten Bubblewrap-Namespace ohne Netzzugang.
+`deployment/setup.sh` uses `requirements.lock` and `npm ci`. No shell, Python or JavaScript code from model data is ever executed. The Python adapter calls the native OCCT bindings; every computation runs in a separate Bubblewrap namespace without network access.
 
-## Was funktioniert
+## What works
 
-- Typisierte Dezimalparameter mit Einheiten, gespeicherte mathematische Ausdrücke, DAG-Compiler, geschützte Parameter und begrenzte Ressourcen.
-- Quader, Kugel, Zylinder, Kegel, Torus; Profile, Bézier-/B-Spline-Kurven, rationale Flächen; Extrusion, Rotation, Loft, Sweep; CSG; Bohrungen, Taschen, Nuten, Verrundungen, Fasen und Schalen innerhalb ihrer Operatorverträge.
-- Punkte, Linien, Bögen, endliche Ebenen, UV-Trimmung, Deckflächen, Vernähen, Regularisierung und benutzerdefinierte Helixgewinde.
-- Transformationen, Spiegelung, Instanzen sowie lineare und zyklische Muster mit gezielten Einzelvarianten; analytische inverse Volumenkonstruktion und gekoppelter begrenzter SLSQP-Maßsolver; tatsächliche B-Rep-Messungen und Abstandsjobs.
-- Implizite Feldgraphen, kompakte lokale Änderungen, invertierbare lokale Deformation, konservative Lipschitz-Schranken und sparse Octree-Oberflächenextraktion.
-- Lokale Kontrollpunktänderungen mit exakten rationalen C0-/C1-/C2-Schranken und Regularitätsprüfung für registrierte Patchanschlüsse; gebrochene Anschlüsse verhindern den Commit.
-- Ausdrückliche Neuberechnung nach einem Buildwechsel mit `cad_rebuild`, vollständiger Prüfung und unveränderten alten Revisionen.
-- Dauerhafte SQLite-Revisionen, isolierte Kandidaten, Inhaltscache, Jobs mit Fencing, Idempotenz, Pflichtprüfungen, Compare-and-Swap und Audit-/Outbox-Verarbeitung.
-- Authentifizierung und objektbezogene Eigentümerprüfung für Modelle, Jobs, Auswahlen, Ressourcen und Dateien.
-- Versionierte Projekte, Baugruppen und Teile, getrennte geometrische Hoheiten und hierarchische lokale Bezugsrahmen; LLM-Abfragen über `cad_structure`.
-- Native Flächenherkunft für registrierte Primitive, boolesche Operationen, Nut/Bohrung/Tasche, Transformationen und Instanzen; gespeicherte Flächenhandles und ausdrückliche eindeutige Neuzuordnung. Teilungen, Zusammenführungen und unbekannte Herkunft werden sicher abgewiesen.
-- Dauerhafte faire Jobverteilung zwischen Nutzern, Offline-Betriebssperre, geprüfter Backup-/Restorepfad und mandantenbezogene Löschung des aktiven Datenspeichers.
-- IR-/STEP-/STL-/OpenVDB-Import (STEP wahlweise mit Produktstruktur als Rahmen, Baugruppen und Teile) sowie IR-, STEP-, B-Rep-, STL-, GLB- und OpenVDB-Export mit erneuter Prüfung. Mesh- und Feldvorschauen behalten ihren ausdrücklich begrenzten Nachweisstatus.
-- Rigorose Intervallarithmetik mit Gradientenfluss-Zertifikaten für Feldänderungen, blendfreie Passregionen, Dual Contouring, implizite Krümmung, ISO-Gewindegrundprofile, Offsets, Sweeps mit rotationsminimierenden Rahmen, Netzreparatur, lokales Remeshing und ARAP-Deformation maßgeblicher Netze.
-- Messungen mit ausgewiesener Beweisstärke: Chamfer-/Hausdorff-Proben, exakter Minimalabstand und IoU, abgetastete Wandstärke, Freigang entlang einer Bewegung; Profil `manufacturing_candidate` mit abgetasteten Prozessregeln ohne Zertifizierung.
-- Adaptive Tessellation je Fläche mit Auflösungsbericht, räumliche Ausschnitte, SVG-Schnitt- und Projektionsansichten, Fehlerbudget, Reparaturketten, interne Veröffentlichung mit kurzlebigen signierten Links, Aufbewahrungspolitik, Kennzahlen und ein kleiner Pool vorgewärmter isolierter Worker.
-- Viewer mit Struktur- und Featurebaum, Parametern, Messwerten, Revisionen, Schnitt, Drahtgitter, Zoom, orthografischer Ansicht, Punktmessung mit Markierungen, Vorher-/Nachher-Überlagerung, Schutz-/Änderungsregionen, Maßstabsbalken, Diagnosekanälen und Pixel-LOD.
+- Typed decimal parameters with units, stored mathematical expressions, a DAG compiler, protected parameters and bounded resources.
+- Box, sphere, cylinder, cone, torus; profiles, Bézier/B-spline curves, rational surfaces; extrusion, revolution, loft, sweep; CSG; holes, pockets, grooves, fillets, chamfers and shells within their operator contracts.
+- Points, lines, arcs, finite planes, UV trimming, caps, sewing, regularisation and custom helical threads.
+- Transformations, mirroring, instances and linear and circular patterns with targeted single-occurrence variants; analytic inverse volume construction and a coupled, bounded SLSQP dimension solver; real B-Rep measurements and distance jobs.
+- Implicit field graphs, compact local edits, invertible local deformation, conservative Lipschitz bounds and sparse octree surface extraction.
+- Local control-point edits with exact rational C0/C1/C2 bounds and regularity checks for registered patch joins; broken joins block the commit.
+- Explicit recomputation after a build change with `cad_rebuild`, full validation and unchanged old revisions.
+- Durable SQLite revisions, isolated candidates, content cache, jobs with fencing, idempotency, mandatory checks, compare-and-swap and audit/outbox processing.
+- Authentication and object-level ownership checks for models, jobs, selections, resources and files.
+- Versioned projects, assemblies and parts, separate geometric authorities and hierarchical local frames; LLM queries through `cad_structure`.
+- Native face provenance for registered primitives, boolean operations, groove/hole/pocket, transformations and instances; stored face handles and explicit unambiguous rebinding. Splits, merges and unknown provenance are safely rejected.
+- Durable fair job scheduling between users, offline maintenance lock, verified backup/restore path and tenant-scoped erasure of the active data store.
+- IR/STEP/STL/OpenVDB import (STEP optionally with its product structure as frames, assemblies and parts) and IR, STEP, B-Rep, STL, GLB and OpenVDB export with re-verification. Mesh and field previews keep their explicitly limited proof status.
+- Rigorous interval arithmetic with gradient-flow certificates for field changes, blend-free mating regions, dual contouring, implicit curvature, ISO basic thread profiles, offsets, sweeps with rotation-minimising frames, mesh repair, local remeshing and ARAP deformation of authoritative meshes.
+- Measurements with declared proof strength: Chamfer/Hausdorff samples, exact minimum distance and IoU, sampled wall thickness, clearance along a motion; the `manufacturing_candidate` profile with sampled process rules and no certification.
+- Adaptive per-face tessellation with a resolution report, spatial excerpts, SVG section and projection views, error budget, repair chains, internal publication with short-lived signed links, retention policy, metrics and a small pool of pre-warmed isolated workers.
+- Viewer with structure and feature tree, parameters, measurements, revisions, section, wireframe, zoom, orthographic view, point measurement with markers, before/after overlay, protected/change regions, scale bar, diagnostic display channels and pixel LOD.
 
-Die aktuelle Liste kommt aus `cad_capabilities`. Eine Fertigungszertifizierung, GPU-Auswertung oder eine allgemeine OCAF-Flächenwiederauflösung werden nicht als verfügbar ausgegeben.
+The current list comes from `cad_capabilities`. Manufacturing certification, GPU evaluation and general OCAF face re-resolution are not reported as available.
 
-## Prüfbarer Beispielablauf
+## Verifiable example workflow
 
 ```bash
 npm run demo
 ```
 
-Den Server dafür zunächst stoppen: Ein Datenverzeichnis hat genau einen aktiven Dienst- oder Wartungsprozess. Der Befehl baut das Gehäuse auf, prüft und übernimmt die Basis, verändert die Nut von **0,80 auf 0,82 mm**, prüft erneut und schreibt den STEP-Roundtrip nach `reports/demo/`. Er erzeugt jeweils ein eigenes Modell.
+Stop the server first: a data directory has exactly one active service or maintenance process. The command builds the housing, validates and commits the base, changes the groove from **0.80 to 0.82 mm**, validates again and writes the STEP round trip to `reports/demo/`. Each run creates its own model.
 
-Gemessen werden unter anderem **1,20 mm Nutbreite** und **2,18 mm Restwand in der deklarierten ebenen Boxzone**. Die ursprüngliche Revision bleibt erhalten. Der Bericht nennt die tatsächliche Abdeckung; die lokale Restwandprüfung ist keine globale Wandstärkenzertifizierung.
+Among the measured values are **1.20 mm groove width** and **2.18 mm remaining wall in the declared planar box zone**. The original revision is preserved. The report states the actual coverage; the local remaining-wall check is not a global wall-thickness certification.
 
-## MCP-Anbindung
+## MCP connection
 
-Endpunkt: `POST /mcp`. Der lokale Entwicklungsschlüssel wird als `Authorization: Bearer …` übertragen. Für Remote-Nutzung ist der OAuth-Modus vorgesehen. Werkzeug-Argumente enthalten keine frei wählbare Nutzer-/Mandantenidentität.
+Endpoint: `POST /mcp`. The local development key is sent as `Authorization: Bearer …`. OAuth mode is intended for remote use. Tool arguments never carry a freely chosen user or tenant identity.
 
-Getrennt implementiert und lokal getestet:
+Implemented separately and tested locally:
 
-| Protokoll | Adapter |
+| Protocol | Adapter |
 |---|---|
-| `2025-03-26`, `2025-06-18`, `2025-11-25` | Offizielles TypeScript-SDK 1.30.0 mit `initialize`, Versionsaushandlung und Streamable HTTP |
-| `2026-07-28` | Separater Adapter mit `server/discover`, erforderlichen Anfrage-Metadaten, Header-Abgleich und `resultType` |
+| `2025-03-26`, `2025-06-18`, `2025-11-25` | Official TypeScript SDK 1.30.0 with `initialize`, version negotiation and Streamable HTTP |
+| `2026-07-28` | Separate adapter with `server/discover`, required request metadata, header matching and `resultType` |
 
-Alle 23 Werkzeuge sind in [Schnittstellen](docs/api.md) beschrieben. Zusätzlich zum HTTP-Endpunkt ist der lokale stdio-Transport implementiert und mit Wiederverbindung getestet. Die [Kompatibilitätsmatrix](docs/compatibility-matrix.md) trennt Protokolltests von noch nicht ausgeführten Hosttests.
+All 23 tools are described in [Interfaces](docs/api.md). Besides the HTTP endpoint, the local stdio transport is implemented and tested with reconnection. The [compatibility matrix](docs/compatibility-matrix.md) separates protocol tests from host tests that have not been run yet.
 
-## Entwicklung und Betrieb
+## Development and operation
 
 ```bash
-npm run verify          # TypeScript, Integration, native Geometrie, MCP-Ablauf, Build, Chromium
-npm run test:llm        # Zwölf echte Sprachaufträge im installierten Codex-Host; Modellnutzung
-npm run benchmark       # Gemessene lokale Latenzen und Ressourcen
-npm run schemas         # JSON-Schemas und Operatorregister aus dem Quellcode
+npm run verify          # TypeScript, integration, native geometry, MCP workflow, build, Chromium
+npm run test:llm        # Twelve real language tasks in the installed Codex host; consumes model usage
+npm run benchmark       # Measured local latencies and resources
+npm run schemas         # JSON schemas and operator registry generated from the source
 npm run format:check
-npm run release:check   # Exit 2, solange Produktionsnachweise fehlen
+npm run release:check   # Exit 2 while production proofs are missing
 ```
 
-Die Ergebnisse stehen in `reports/`; insbesondere `verification.json`, `benchmark.json`, `release-manifest.json` und `demo/report.json`. [Architektur](docs/architecture.md), [Mathematikverträge](docs/mathematical-contracts.md), [Intervallzertifikate](docs/intervals-and-certificates.md), [Messungen](docs/measures.md), [Importe](docs/imports.md), [Viewer](docs/viewer.md), [Bedrohungsmodell](docs/threat-model.md) und [Betriebsanleitung](docs/operating-runbook.md) beschreiben Grenzen und Wiederherstellung. `tsx scripts/minimize-fixture.ts <fixture.json> --expect <CODE>` verkleinert ein fehlschlagendes IR auf eine minimale Reproduktion; `tests/regression/corpus.ts` hält die geometrischen Grenzklassen mit deklarierten Erwartungen.
+Results are written to `reports/`, in particular `verification.json`, `benchmark.json`, `release-manifest.json` and `demo/report.json`. [Architecture](docs/architecture.md), [mathematical contracts](docs/mathematical-contracts.md), [interval certificates](docs/intervals-and-certificates.md), [measurements](docs/measures.md), [imports](docs/imports.md), [viewer](docs/viewer.md), [threat model](docs/threat-model.md) and [operating runbook](docs/operating-runbook.md) describe limits and recovery. `tsx scripts/minimize-fixture.ts <fixture.json> --expect <CODE>` shrinks a failing IR to a minimal reproduction; `tests/regression/corpus.ts` keeps the geometric boundary classes with declared expectations. The remaining documentation under `docs/` is written in German.
 
-Die lokale systemd-Installation ist aktiv. Weitere systemd- und HTTPS-Proxy-Vorlagen liegen unter `deployment/`. Ein öffentlicher Dienst wurde nicht veröffentlicht.
+The local systemd installation is active. Further systemd and HTTPS proxy templates are under `deployment/`. No public service has been published.
