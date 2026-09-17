@@ -5,6 +5,6 @@
     "resolveJsonModule": true, "outDir": "dist", "rootDir": ".",
     "lib": ["ES2023", "DOM"], "types": ["node"]
   },
-  "include": ["packages/**/*.ts", "hooks/**/*.ts", "scripts/**/*.ts", "tests/**/*.ts", "benchmarks/**/*.ts"],
+  "include": ["packages/**/*.ts", "hooks/**/*.ts", "scripts/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

@@ -11,17 +11,6 @@ playwright-report/
 workers/cad-occt/meshcheck
 workers/cad-occt/.meshcheck*
 
-# Generated evidence: only the machine-independent gate reports stay versioned.
-reports/*
-!reports/verification.json
-!reports/benchmark.json
-!reports/license-check.json
-!reports/license-inventory.json
-!reports/npm-audit.json
-!reports/python-audit.json
-!reports/mcp-workflow.json
-!reports/browser.json
-!reports/plan-audit.json
-!reports/demo/
-reports/demo/*
-!reports/demo/report.json
+# Generated locally, no longer versioned: tool schemas and gate reports.
+reports/
+schemas/
