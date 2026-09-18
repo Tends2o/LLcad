@@ -10,8 +10,11 @@ import {
   statSync,
   lstatSync,
 } from "node:fs";
+import { linkSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { tmpdir } from "node:os";
+import { readdirSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { Store } from "../model-service/store.js";
 import { CadError, requireThat } from "../semantic-ir/errors.js";
 import { LIMITS, referencedArtifacts } from "../compiler/index.js";
@@ -20,6 +23,100 @@ import { checkNativeMeshBuild } from "../compiler/native-build.js";
 export const PROJECT_ROOT = resolve(
   process.env.MATHFORGE_ROOT ?? process.cwd(),
 );
+/** A run that ran out of time still built something. Every finished feature is
+ *  a file named after its own cache key, and a feature's archive says which
+ *  bytes it belongs to — so the pieces can be checked and kept even though the
+ *  run as a whole failed. The next attempt then starts where this one stopped,
+ *  which is what lets a model of any size be built inside a fixed time budget. */
+/** Putting the cache into the sandbox: a hard link where the blob store and the
+ *  work directory share a filesystem, a copy where they do not. Linking costs
+ *  nothing and the blobs are read-only for everyone, so the sandbox cannot
+ *  change what it borrows. */
+function stage(store: Store, blob: string, path: string) {
+  try {
+    linkSync(store.path(blob), path);
+  } catch {
+    writeFileSync(path, store.readBlob(blob), { mode: 0o444 });
+  }
+}
+function salvage(store: Store, tenant: string, dir: string) {
+  const out = join(dir, "out");
+  let kept = 0;
+  if (!existsSync(out)) return kept;
+  for (const name of readdirSync(out)) {
+    const key = /^([a-f0-9]{64})\.topology\.json$/.exec(name)?.[1];
+    if (!key) continue;
+    try {
+      const history = readFileSync(join(out, name)),
+        archive = JSON.parse(history.toString("utf8")),
+        shape = readFileSync(join(out, key + ".brep"));
+      // The archive names the exact bytes it describes; a half-written pair
+      // cannot pass this and is left behind.
+      if (
+        archive.cache_key !== key ||
+        archive.brep_sha256 !== createHash("sha256").update(shape).digest("hex")
+      )
+        continue;
+      store.atomic(() => {
+        store.run(
+          "INSERT OR IGNORE INTO cache(tenant,key,blob,created) VALUES(?,?,?,?)",
+          tenant,
+          key,
+          store.blob(shape),
+          Date.now(),
+        );
+        store.run(
+          "INSERT OR IGNORE INTO cache(tenant,key,blob,created) VALUES(?,?,?,?)",
+          tenant,
+          key + ":topology",
+          store.blob(history),
+          Date.now(),
+        );
+      });
+      const measured = join(out, key + ".facts.json");
+      if (existsSync(measured))
+        store.run(
+          "INSERT OR IGNORE INTO cache(tenant,key,blob,created) VALUES(?,?,?,?)",
+          tenant,
+          key + ":facts",
+          store.blob(readFileSync(measured)),
+          Date.now(),
+        );
+      kept++;
+    } catch {
+      /* an unfinished pair is simply not kept */
+    }
+  }
+  return kept;
+}
+/** The features this run actually has to open: the outputs, everything whose
+ *  shape or measured facts are missing from the cache, and whatever those build
+ *  on. The rest is reported from its stored facts without ever being loaded —
+ *  the cache is staged in full regardless, so the decision can never leave the
+ *  run without a shape it turns out to need. */
+function shapesNeeded(store: Store, tenant: string, request: any) {
+  const plan = request.plan;
+  if (request.action === "render" || !plan?.features?.length) return null;
+  const has = (key: string) =>
+    !!store.get("SELECT 1 FROM cache WHERE tenant=? AND key=?", tenant, key);
+  const needed = new Set<string>(plan.outputs ?? []);
+  for (const f of [...plan.features].reverse()) {
+    const local = f.local_cache_key ?? f.cache_key,
+      complete =
+        f.authoritative_representation === "brep" &&
+        has(f.cache_key + ":facts") &&
+        has(local) &&
+        has(local + ":topology");
+    // Only a feature that has to be rebuilt needs what it was built from. One
+    // that comes out of the cache is simply read back, and its own inputs stay
+    // where they are — otherwise a single changed screw would drag the whole
+    // construction tree into the sandbox.
+    if (complete) continue;
+    needed.add(f.id);
+    for (const dependency of f.depends_on ?? []) needed.add(dependency);
+  }
+  return needed;
+}
 /** One isolated, single-use bubblewrap process bound to its own work directory. */
 type Sandbox = {
   dir: string;
@@ -28,7 +125,10 @@ type Sandbox = {
   exited: Promise<number | null>;
   warm: boolean;
   spawned: number;
+  script: string;
 };
+/** main.py evaluates; preview.py only tessellates cached shapes. */
+const WARM_SCRIPTS = ["main", "preview"] as const;
 const WARM_POOL_TARGET = Math.max(
   0,
   Math.min(2, Number(process.env.MATHFORGE_WARM_WORKERS ?? "1")),
@@ -37,6 +137,7 @@ export class Worker {
   private static pythonPrefix: string | null = null;
   private static pool: Sandbox[] = [];
   private static warming = 0;
+  private static draining = false;
   process: ChildProcess | null = null;
   cancelled = false;
   static probe() {
@@ -101,7 +202,7 @@ export class Worker {
     return Worker.pythonPrefix;
   }
   /** Spawn the isolated process; with wait=true it imports the kernel and idles until request.json exists. */
-  private static launch(dir: string, wait: boolean): Sandbox {
+  private static launch(dir: string, wait: boolean, script: string): Sandbox {
     const prefix = Worker.prefix();
     const args = [
       "--die-with-parent",
@@ -160,7 +261,7 @@ export class Worker {
       "1",
       "--",
       "/opt/venv/bin/python",
-      "/worker/main.py",
+      `/worker/${script}.py`,
       ...(wait ? ["--wait"] : []),
     ];
     const child = spawn("bwrap", args, {
@@ -181,41 +282,64 @@ export class Worker {
       }),
       warm: wait,
       spawned: Date.now(),
+      script,
     };
     child.stderr?.on("data", (chunk) => {
       if (sandbox.errors.length < 4096) sandbox.errors += chunk.toString();
     });
     return sandbox;
   }
+  /** Work directories live beside the blob store, so staging can link instead
+   *  of copy; /tmp is the fallback when that directory cannot be used. */
+  private static workRoot() {
+    const root = join(
+      resolve(process.env.MATHFORGE_DATA ?? join(PROJECT_ROOT, "data")),
+      "work",
+    );
+    try {
+      mkdirSync(root, { recursive: true, mode: 0o700 });
+      return root;
+    } catch {
+      return tmpdir();
+    }
+  }
   private static newDirectory() {
-    const dir = mkdtempSync(join(tmpdir(), "mathforge-"));
+    const dir = mkdtempSync(join(Worker.workRoot(), "mathforge-"));
     chmodSync(dir, 0o700);
     mkdirSync(join(dir, "out"), { mode: 0o700 });
     mkdirSync(join(dir, "cache"), { mode: 0o755 });
     return dir;
   }
-  /** Keep one idle pre-warmed sandbox ready; each sandbox serves exactly one job and then exits. */
+  /** Keep one idle pre-warmed sandbox per script ready; each sandbox serves
+   *  exactly one job and then exits. */
   static ensurePool() {
-    if (WARM_POOL_TARGET === 0 || !Worker.probe()) return;
-    while (Worker.pool.length + Worker.warming < WARM_POOL_TARGET) {
-      Worker.warming++;
-      try {
-        const sandbox = Worker.launch(Worker.newDirectory(), true);
-        Worker.pool.push(sandbox);
-        void sandbox.exited.then(() => {
-          // An idle sandbox that timed out or died leaves the pool silently.
-          const index = Worker.pool.indexOf(sandbox);
-          if (index >= 0) {
-            Worker.pool.splice(index, 1);
-            rmSync(sandbox.dir, { recursive: true, force: true });
-          }
-        });
-      } finally {
-        Worker.warming--;
+    if (WARM_POOL_TARGET === 0 || Worker.draining || !Worker.probe()) return;
+    for (const script of WARM_SCRIPTS)
+      while (
+        Worker.pool.filter((s) => s.script === script).length + Worker.warming <
+        WARM_POOL_TARGET
+      ) {
+        Worker.warming++;
+        try {
+          const sandbox = Worker.launch(Worker.newDirectory(), true, script);
+          Worker.pool.push(sandbox);
+          void sandbox.exited.then(() => {
+            // An idle sandbox that timed out or died leaves the pool silently;
+            // a fresh one follows, so the next job still starts warm.
+            const index = Worker.pool.indexOf(sandbox);
+            if (index >= 0) {
+              Worker.pool.splice(index, 1);
+              rmSync(sandbox.dir, { recursive: true, force: true });
+              setTimeout(() => Worker.ensurePool(), 5000).unref();
+            }
+          });
+        } finally {
+          Worker.warming--;
+        }
       }
-    }
   }
   static drainPool() {
+    Worker.draining = true;
     for (const sandbox of Worker.pool.splice(0)) {
       Worker.killSandbox(sandbox.process);
       rmSync(sandbox.dir, { recursive: true, force: true });
@@ -224,9 +348,9 @@ export class Worker {
   static poolSize() {
     return Worker.pool.length;
   }
-  private static takeWarm(): Sandbox | null {
-    while (Worker.pool.length) {
-      const sandbox = Worker.pool.shift()!;
+  private static takeWarm(script: string): Sandbox | null {
+    for (const sandbox of Worker.pool.filter((s) => s.script === script)) {
+      Worker.pool.splice(Worker.pool.indexOf(sandbox), 1);
       if (
         sandbox.process.exitCode === null &&
         Date.now() - sandbox.spawned < 540000
@@ -261,9 +385,15 @@ export class Worker {
     );
     if (this.cancelled)
       throw new CadError("CANCELLED", "Job wurde abgebrochen.");
-    const warm = Worker.takeWarm();
+    const script = request.script === "preview" ? "preview" : "main";
+    const warm = Worker.takeWarm(script);
     const dir = warm?.dir ?? Worker.newDirectory();
     try {
+      // Only what this run has to touch is copied into the sandbox. A feature
+      // whose shape and measured facts are both in the cache, and that nothing
+      // being rebuilt depends on, travels as its facts alone — a few kilobytes
+      // instead of a few hundred.
+      const staged = shapesNeeded(store, tenant, request);
       for (const f of request.plan.features) {
         if (
           f.construction.operator === "field" &&
@@ -282,6 +412,17 @@ export class Worker {
               { mode: 0o444 },
             );
         }
+        const measured = store.get(
+          "SELECT blob FROM cache WHERE tenant=? AND key=?",
+          tenant,
+          f.cache_key + ":facts",
+        );
+        if (measured)
+          stage(
+            store,
+            measured.blob,
+            join(dir, "cache", f.cache_key + ".facts.json"),
+          );
         for (const key of new Set<string>([
           f.cache_key,
           f.local_cache_key ?? f.cache_key,
@@ -292,21 +433,17 @@ export class Worker {
             key,
           );
           if (cached)
-            writeFileSync(
-              join(dir, "cache", key + ".brep"),
-              store.readBlob(cached.blob),
-              { mode: 0o444 },
-            );
+            stage(store, cached.blob, join(dir, "cache", key + ".brep"));
           const topology = store.get(
             "SELECT blob FROM cache WHERE tenant=? AND key=?",
             tenant,
             key + ":topology",
           );
           if (topology)
-            writeFileSync(
+            stage(
+              store,
+              topology.blob,
               join(dir, "cache", key + ".topology.json"),
-              store.readBlob(topology.blob),
-              { mode: 0o444 },
             );
         }
       }
@@ -332,11 +469,15 @@ export class Worker {
         );
       }
       // The request is always the last input written: a pre-warmed sandbox starts on its appearance.
-      const sandbox = warm ?? Worker.launch(dir, false);
+      const sandbox = warm ?? Worker.launch(dir, false, script);
       this.process = sandbox.process;
-      writeFileSync(join(dir, "request.json"), JSON.stringify(request), {
-        mode: 0o444,
-      });
+      writeFileSync(
+        join(dir, "request.json"),
+        JSON.stringify(
+          staged ? { ...request, shapes_needed: [...staged] } : request,
+        ),
+        { mode: 0o444 },
+      );
       const started = Date.now();
       let timedOut = false;
       const timer = setTimeout(
@@ -361,6 +502,7 @@ export class Worker {
         throw new CadError(
           "BUDGET_EXCEEDED",
           "Worker-Zeitbudget überschritten.",
+          { salvaged: salvage(store, tenant, dir) },
         );
       if (code === -1)
         throw new CadError(
@@ -373,6 +515,7 @@ export class Worker {
           "Worker wurde vorzeitig beendet.",
           {
             exit_code: code,
+            salvaged: salvage(store, tenant, dir),
           },
         );
       // Native stderr is deliberately not persisted: it may contain imported data.
@@ -400,8 +543,14 @@ export class Worker {
         "KERNEL_FAILURE",
         "Ungültiges Worker-Ausgabeverzeichnis.",
       );
+      // A preview re-emits nothing it merely read from the cache.
       const names = [
-        ...(request.action === "solve_constraints" ? [] : request.plan.features)
+        ...(request.action === "solve_constraints" ||
+        request.action === "render" ||
+        staged
+          ? []
+          : request.plan.features
+        )
           .filter((f: any) => f.authoritative_representation === "brep")
           .flatMap((f: any) =>
             [
@@ -412,10 +561,16 @@ export class Worker {
             ].flatMap((key) => [key + ".brep", key + ".topology.json"]),
           ),
         ...result.files,
+        // Measured facts are written per feature as the run goes; they are
+        // picked up from the directory rather than from the result list, so the
+        // kernel does not have to announce each one.
+        ...readdirSync(join(dir, "out")).filter((name) =>
+          /^[a-f0-9]{64}\.facts\.json$/.test(name),
+        ),
       ];
       for (const name of new Set<string>(names)) {
         requireThat(
-          /^(model\.(brep|step|stl|vdb)|preview\.json|roundtrip\.json|view\.(svg|json)|[a-f0-9]{64}\.(brep|topology\.json|field\.json|mesh\.json))$/.test(
+          /^(model\.(brep|step|stl|vdb)|preview\.json|roundtrip\.json|view\.(svg|json)|[a-f0-9]{64}\.(brep|topology\.json|facts\.json|field\.json|mesh\.json))$/.test(
             name,
           ),
           "KERNEL_FAILURE",

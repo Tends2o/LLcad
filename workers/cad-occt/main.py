@@ -57,6 +57,9 @@ def run(request):
     shapes={}; local_shapes={}; local_histories={}; facts={}; histories={}; face_records={}; samplers={}; hits=0; started=time.monotonic()
     plan=request['plan'];features=plan['features'];field_results={};mesh_results={}
     definitions={f['id']:f for f in features}
+    # What is already in the cache is read, never written back: a job that
+    # re-emits the whole model spends its budget copying bytes that the store
+    # already has, which is what made a one-parameter change cost half a minute.
     def cached_shape(key):
         cache='cache/'+key+'.brep';history_cache='cache/'+key+'.topology.json'
         if not (os.path.isfile(cache) and os.path.isfile(history_cache)):return None
@@ -64,10 +67,24 @@ def run(request):
         with open(history_cache) as h:records=json.load(h)
         with open(cache,'rb') as h:source_hash=hashlib.sha256(h.read()).hexdigest()
         trace=topology.restore(shape,records,key,source_hash)
-        shutil.copyfile(cache,'out/'+key+'.brep')
         return shape,trace,records
-    def history_file(key,records):
-        with open('out/'+key+'.topology.json','w') as h:json.dump(records,h,allow_nan=False)
+    def history_file(key,records,fresh):
+        if fresh:
+            with open('out/'+key+'.topology.json','w') as h:json.dump(records,h,allow_nan=False)
+    # The measured facts of a feature belong to its cache key just as much as its
+    # shape does, so an unchanged feature is never measured twice.
+    def cached_facts(key):
+        path='cache/'+key+'.facts.json'
+        if not os.path.isfile(path):return None
+        try:
+            with open(path) as h:return json.load(h)
+        except Exception:return None
+    def facts_file(key,props):
+        with open('out/'+key+'.facts.json','w') as h:json.dump(props,h,allow_nan=False)
+    # Which shapes this run has to hold. The gateway staged the cache and knows
+    # exactly which features it left out, so it says so; without that list every
+    # feature is rebuilt, which is what any older caller expects.
+    needed=set(request['shapes_needed']) if request.get('shapes_needed') is not None else {f['id'] for f in features}
     for f in features:
         fid=f['id'];op=f['construction']['operator']
         if op=='imported' and f['construction']['format']=='stl':
@@ -135,27 +152,46 @@ def run(request):
             facts[fid]['local_frame']=f.get('local_frame','world')
             facts[fid]['coordinate_frame']='world'
             continue
-        converted=[frames.place(local_shapes[d],local_histories[d],definitions[d].get('placement'),f.get('placement')) for d in f['depends_on']]
-        deps=[item[0] for item in converted];dep_histories=[item[1] for item in converted]
         key=f['cache_key'];local_key=f.get('local_cache_key',key)
+        if fid not in needed:
+            # Nothing in this run builds on this feature, and what it measures is
+            # already known: it is reported from its facts and never reopened.
+            stored=cached_facts(key)
+            if stored is not None:
+                facts[fid]=stored;hits+=1
+                continue
+        # The inputs are only placed when something is actually built from them:
+        # a feature that comes back from the cache must not force the run to hold
+        # everything underneath it.
+        def inputs(f=f):
+            converted=[frames.place(local_shapes[d],local_histories[d],definitions[d].get('placement'),f.get('placement')) for d in f['depends_on']]
+            return [item[0] for item in converted],[item[1] for item in converted]
+        deps=None
         cached=cached_shape(local_key)
         if cached:
             local_shape,local_trace,local_records=cached;hits+=1
         else:
+            deps,dep_histories=inputs()
             local_shape,local_trace=topology.evaluate_feature(f,deps,dep_histories)
             local_shape,local_trace,local_records=topology.archive(local_shape,local_trace,local_key,'out/'+local_key+'.brep')
         local_shapes[fid]=local_shape;local_histories[fid]=local_trace
-        history_file(local_key,local_records)
+        history_file(local_key,local_records,not cached)
+        world_cached_used=False
         if local_key==key:shape,trace,records=local_shape,local_trace,local_records
         else:
             world_cached=cached_shape(key)
-            if world_cached:shape,trace,records=world_cached
+            if world_cached:shape,trace,records=world_cached;world_cached_used=True
             else:
                 shape,trace=frames.place(local_shape,local_trace,f.get('placement'))
                 shape,trace,records=topology.archive(shape,trace,key,'out/'+key+'.brep')
         histories[fid]=trace;face_records[fid]=records
-        history_file(key,records)
+        history_file(key,records,not cached or local_key!=key and not world_cached_used)
         require(not shape.IsNull(),'Leeres Operatorergebnis.')
+        stored=cached_facts(key)
+        if stored is not None:
+            # The shape was needed for something else, its measurements were not.
+            shapes[fid]=shape;facts[fid]=stored
+            continue
         props=properties(shape);require(props['valid'],'OCCT meldet eine ungültige Geometrie.')
         if plan['profile'] in ('precision_cad','manufacturing_candidate'):
             require(max(props['native_tolerances_mm'].values())<=plan['tolerance'],
@@ -163,6 +199,7 @@ def run(request):
         if f['depends_on']:
             base=definitions[f['depends_on'][0]]
             f=dict(f,base_operator=base['construction']['operator'] if base.get('local_frame','world')==f.get('local_frame','world') else 'transformed_source')
+        if deps is None:deps,_=inputs()
         props['dimensions']=dimensions(f,local_shape,deps);props['geometry_hash']=records['brep_sha256']
         props['local_frame']=f.get('local_frame','world');props['local_bounds']=bounds(local_shape)
         props['coordinate_frame']='world';props['dimension_frame']=f.get('local_frame','world')
@@ -170,6 +207,7 @@ def run(request):
         import advanced
         if fid in advanced.CONSTRUCTION_REPORTS:props['construction_report']=advanced.CONSTRUCTION_REPORTS[fid]
         props['topology']={'version':topology.VERSION,'face_count':len(records['faces']),'tracked_faces':sum(bool(x['origins']) for x in records['faces'])}
+        facts_file(key,props)
         shapes[fid]=shape;facts[fid]=props
     output_shapes=[shapes[fid] for fid in plan['outputs'] if fid in shapes]
     root=compound(output_shapes) if len(output_shapes)>1 else output_shapes[0] if output_shapes else None

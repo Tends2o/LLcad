@@ -44,7 +44,7 @@ export class Store {
       const version = (this.db.prepare("PRAGMA user_version").get() as any)
         .user_version;
       requireThat(
-        [0, 1, 2, 3, 4, 5, 6].includes(version),
+        [0, 1, 2, 3, 4, 5, 6, 7].includes(version),
         "BUILD_MISMATCH",
         "Unbekannte Datenbankschemaversion; explizite Migration erforderlich.",
       );
@@ -69,7 +69,12 @@ export class Store {
       CREATE TABLE IF NOT EXISTS cache(tenant TEXT NOT NULL,key TEXT NOT NULL,blob TEXT NOT NULL,created INTEGER,PRIMARY KEY(tenant,key));
       CREATE TABLE IF NOT EXISTS audit(seq INTEGER PRIMARY KEY AUTOINCREMENT,event TEXT NOT NULL,data TEXT NOT NULL,previous_hash TEXT NOT NULL,hash TEXT NOT NULL,created TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS outbox(id TEXT PRIMARY KEY,event TEXT NOT NULL,payload TEXT NOT NULL,delivered INTEGER NOT NULL DEFAULT 0);
-      CREATE TABLE IF NOT EXISTS scheduler(tenant TEXT NOT NULL,owner TEXT NOT NULL,last_tick INTEGER NOT NULL,PRIMARY KEY(tenant,owner));`);
+      CREATE TABLE IF NOT EXISTS scheduler(tenant TEXT NOT NULL,owner TEXT NOT NULL,last_tick INTEGER NOT NULL,PRIMARY KEY(tenant,owner));
+      CREATE TABLE IF NOT EXISTS render_cache(tenant TEXT NOT NULL,key TEXT NOT NULL,result TEXT NOT NULL,artifacts TEXT NOT NULL,created INTEGER NOT NULL,PRIMARY KEY(tenant,key));
+      CREATE TABLE IF NOT EXISTS annotations(id TEXT PRIMARY KEY,tenant TEXT NOT NULL,owner TEXT NOT NULL,model TEXT NOT NULL,revision TEXT NOT NULL,created TEXT NOT NULL,note TEXT NOT NULL,state TEXT NOT NULL,payload TEXT NOT NULL,region_artifact TEXT,view_artifact TEXT,run TEXT);
+      CREATE INDEX IF NOT EXISTS annotations_model ON annotations(tenant,model,created);
+      CREATE INDEX IF NOT EXISTS transactions_committed ON transactions(committed_revision);
+      CREATE TABLE IF NOT EXISTS agent_settings(tenant TEXT PRIMARY KEY,config TEXT NOT NULL,updated TEXT NOT NULL);`);
       requireThat(
         this.get("PRAGMA synchronous").synchronous === 2 &&
           this.get("PRAGMA journal_mode").journal_mode === "wal",
@@ -150,6 +155,27 @@ export class Store {
             existing_jobs: this.get("SELECT COUNT(*) AS n FROM jobs").n,
             existing_revisions_unchanged: this.get(
               "SELECT COUNT(*) AS n FROM revisions",
+            ).n,
+          });
+        });
+      if (version < 7)
+        this.atomic(() => {
+          // A hidden model keeps everything it has; only the viewer's model
+          // list passes it by. The tools still find it.
+          if (
+            !this.all("PRAGMA table_info(models)").some(
+              (c: any) => c.name === "hidden",
+            )
+          )
+            this.db.exec(
+              "ALTER TABLE models ADD COLUMN hidden INTEGER NOT NULL DEFAULT 0",
+            );
+          this.run("PRAGMA user_version=7");
+          this.audit("model_visibility_migrated", {
+            from_store_version: version,
+            to_store_version: 7,
+            existing_models_visible: this.get(
+              "SELECT COUNT(*) AS n FROM models",
             ).n,
           });
         });
@@ -303,6 +329,16 @@ export class Store {
   }
   blob(data: Uint8Array | string) {
     return durableBlob(this.root, data);
+  }
+  /** Where a blob lies on disk. Only for readers that hand the file to someone
+   *  else unchanged, such as staging a sandbox; everything else reads it. */
+  path(h: string) {
+    requireThat(
+      /^[a-f0-9]{64}$/.test(h),
+      "ACCESS_DENIED",
+      "Ungültige Blob-ID.",
+    );
+    return join(this.root, "blobs", h);
   }
   readBlob(h: string) {
     requireThat(

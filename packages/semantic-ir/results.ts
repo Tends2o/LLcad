@@ -646,10 +646,7 @@ const summary = z.strictObject({
       owner_part: Id,
       local_frame: Id,
       representation: z.enum(["brep", "implicit", "mesh"]),
-      parameters: z.record(
-        text,
-        z.strictObject({ value: text, unit: text }),
-      ),
+      parameters: z.record(text, z.strictObject({ value: text, unit: text })),
     }),
   ),
   next_offset: pageOffset,
@@ -884,7 +881,15 @@ export const ToolPayloadSchemas = {
   cad_rebuild: z.union([planned, candidate]),
   cad_revert: candidate,
   cad_import: z.union([candidate, queued]),
-  cad_render: queued,
+  // A preview that has been rendered before is handed over directly, without a
+  // job; a preview that still has to be computed answers with one.
+  cad_render: z.union([
+    queued,
+    z.strictObject({
+      status: z.literal("succeeded"),
+      artifacts: z.array(Artifact).min(1),
+    }),
+  ]),
   cad_export: z.union([
     queued,
     z.strictObject({ status: z.literal("succeeded"), ...exported }),

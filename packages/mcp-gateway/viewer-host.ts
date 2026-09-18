@@ -63,7 +63,10 @@ export function launchBrowser(url: string): {
     const child = spawn(command, args, { detached: true, stdio: "ignore" });
     child.on("error", () => {});
     child.unref();
-    return { launched: true, note: `The default browser was asked to open the viewer.` };
+    return {
+      launched: true,
+      note: `The default browser was asked to open the viewer.`,
+    };
   } catch (error) {
     return {
       launched: false,
@@ -75,7 +78,10 @@ export function launchBrowser(url: string): {
 function maybeLaunch(url: string, wanted: boolean) {
   return wanted
     ? launchBrowser(url)
-    : { launched: false, note: "No browser was started because launch_browser is false." };
+    : {
+        launched: false,
+        note: "No browser was started because launch_browser is false.",
+      };
 }
 
 export class SharedViewer implements ViewerHost {
@@ -180,7 +186,8 @@ export class EmbeddedViewer implements ViewerHost {
       transport: "stdio",
       url: null,
       browser_launched: false,
-      message: "The local viewer has been stopped and its browser sessions were closed.",
+      message:
+        "The local viewer has been stopped and its browser sessions were closed.",
     };
   }
   async stop() {

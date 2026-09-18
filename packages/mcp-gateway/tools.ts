@@ -46,7 +46,7 @@ export const descriptions: Record<ToolName, string> = {
   cad_rebuild:
     "Explicitly rebuild the current immutable construction for target_registry_hash from cad_capabilities. Read mode:plan first, then mode:candidate with a new idempotency key. Preserves all constraints and the old revision; requires normal validation and commit. Use when cad_get_model reports rebuild_required after a build upgrade.",
   cad_render:
-    "Create a derived geometric preview artifact for an exact revision or feature. Returns a job.",
+    "Create a derived geometric preview artifact for an exact revision or feature. Returns a job; a preview that has been rendered before answers directly with status succeeded, job_id null and its artifacts.",
   cad_import:
     "Decode an uploaded, authorized artifact into a new candidate. Units must be explicit.",
   cad_export:

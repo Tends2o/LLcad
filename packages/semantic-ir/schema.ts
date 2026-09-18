@@ -529,9 +529,9 @@ export const ModelIR = z.strictObject({
   schema_version: z.literal("1"),
   unit: z.literal("mm"),
   structure: ModelStructure.optional(),
-  features: z.array(Feature).max(512),
-  outputs: z.array(Id).max(128),
-  constraints: z.array(Constraint).max(256).default([]),
+  features: z.array(Feature).max(4096),
+  outputs: z.array(Id).max(512),
+  constraints: z.array(Constraint).max(1024).default([]),
   assumptions: z.array(z.string().max(1000)).max(64).default([]),
   tolerance: Quantity.default({ value: "0.001", unit: "mm" }),
   profile: z
