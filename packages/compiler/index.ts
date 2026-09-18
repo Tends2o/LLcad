@@ -312,7 +312,11 @@ export const OPERATORS = {
   extract_isosurface: one({}, [1, 1], "mesh", "implicit"),
 } as const;
 export const LIMITS = {
-  features: 512,
+  // How complex a model may get. The ceiling exists so that one model still
+  // fits in one machine's memory, not to cap the design: a build that needs
+  // more time than one job budget now continues in the next job instead of
+  // failing, so complexity costs time, never success.
+  features: 4096,
   ast_nodes: 4096,
   ast_depth: 32,
   instances: 10000,

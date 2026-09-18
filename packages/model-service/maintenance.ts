@@ -133,7 +133,7 @@ export const RETENTION_POLICY = {
 /** Remove expired preview artifacts, stale publications and cache generations no revision references. */
 export function applyRetention(store: Store, now = Date.now()) {
   const previews = store.all(
-    "SELECT id,created,manifest FROM artifacts WHERE json_extract(manifest,'$.quality')='preview_only' AND json_extract(manifest,'$.filename')='preview.json'",
+    "SELECT id,created,manifest FROM artifacts WHERE json_extract(manifest,'$.quality')='preview_only' AND json_extract(manifest,'$.filename') IN ('preview.json','preview.bin')",
   );
   let removedPreviews = 0;
   for (const row of previews)
@@ -144,6 +144,18 @@ export function applyRetention(store: Store, now = Date.now()) {
       store.run("DELETE FROM artifacts WHERE id=?", row.id);
       removedPreviews++;
     }
+  // A cached preview lives exactly as long as the artifacts it points to.
+  for (const row of store.all("SELECT tenant,key,artifacts FROM render_cache"))
+    if (
+      !(JSON.parse(row.artifacts) as string[]).every((aid) =>
+        store.get("SELECT 1 FROM artifacts WHERE id=?", aid),
+      )
+    )
+      store.run(
+        "DELETE FROM render_cache WHERE tenant=? AND key=?",
+        row.tenant,
+        row.key,
+      );
   const referencedKeys = new Set<string>();
   for (const row of store.all(
     "SELECT geometry FROM revisions WHERE geometry IS NOT NULL",
@@ -163,7 +175,8 @@ export function applyRetention(store: Store, now = Date.now()) {
   let removedCache = 0;
   for (const row of store.all("SELECT tenant,key,created FROM cache"))
     if (
-      !referencedKeys.has(row.key) &&
+      // Tessellations (key:mesh:deflection) follow the feature they belong to.
+      !referencedKeys.has(row.key.split(":mesh:")[0]) &&
       !row.key.startsWith("field:") &&
       row.created !== null &&
       now - row.created >= RETENTION_POLICY.orphan_cache_ttl_ms
@@ -229,6 +242,201 @@ export function garbageCollect(
   return { deleted_count: deleted.length };
 }
 
+/** Operator-only, offline removal of whole model projects. Everything that
+ *  belongs to a named model goes with it; everything another model still holds
+ *  stays, because shapes and files are addressed by content and shared between
+ *  models that build them the same way. Without `apply` it only counts. */
+export function eraseModels(store: Store, ids: string[], apply = false) {
+  requireThat(
+    Array.isArray(ids) && ids.length > 0 && ids.length <= 256,
+    "INVALID_SCHEMA",
+    "Ein bis 256 Modelle.",
+  );
+  const models = ids.map((id) => {
+    const row = store.get("SELECT id,name FROM models WHERE id=?", id);
+    requireThat(row, "ACCESS_DENIED", "Modell nicht vorhanden: " + id);
+    return row;
+  });
+  const list = models.map((m) => m.id),
+    marks = list.map(() => "?").join(",");
+  requireThat(
+    store.get(
+      `SELECT COUNT(*) AS n FROM jobs WHERE state IN ('queued','running') AND model IN (${marks})`,
+      ...list,
+    ).n === 0,
+    "CONSTRAINT_CONFLICT",
+    "Zu diesen Modellen laufen noch Jobs.",
+  );
+  const owned = (table: string) =>
+    store
+      .all(`SELECT id FROM ${table} WHERE model IN (${marks})`, ...list)
+      .map((r: any) => r.id);
+  const selections = owned("selections"),
+    jobs = owned("jobs"),
+    transactions = owned("transactions"),
+    publications = owned("publications"),
+    grants = owned("model_grants"),
+    approvals = owned("approval_requests"),
+    revisions = store.get(
+      `SELECT COUNT(*) AS n FROM revisions WHERE model IN (${marks})`,
+      ...list,
+    ).n,
+    artifacts = store.get(
+      `SELECT COUNT(*) AS n FROM artifacts WHERE model IN (${marks})`,
+      ...list,
+    ).n;
+  const counts: Record<string, number> = {
+    models: list.length,
+    revisions,
+    artifacts,
+    transactions: transactions.length,
+    jobs: jobs.length,
+    selections: selections.length,
+    publications: publications.length,
+  };
+  if (!apply) return { status: "dry_run", models, counts };
+  const removed: Record<string, number> = {};
+  const del = (name: string, sql: string, ...params: any[]) => {
+    removed[name] =
+      (removed[name] ?? 0) + Number(store.run(sql, ...params).changes);
+  };
+  // Long lists are deleted in bounded statements; SQLite takes only so many
+  // parameters at once.
+  const byId = (name: string, sql: string, values: string[]) => {
+    for (let i = 0; i < values.length; i += 400) {
+      const chunk = values.slice(i, i + 400);
+      del(name, sql.replace("?IN?", chunk.map(() => "?").join(",")), ...chunk);
+    }
+  };
+  store.atomic(() => {
+    byId(
+      "selection_faces",
+      "DELETE FROM selection_faces WHERE selection_id IN (?IN?)",
+      selections,
+    );
+    byId("selections", "DELETE FROM selections WHERE id IN (?IN?)", selections);
+    byId(
+      "job_authorizations",
+      "DELETE FROM job_authorizations WHERE job IN (?IN?)",
+      jobs,
+    );
+    byId("jobs", "DELETE FROM jobs WHERE id IN (?IN?)", jobs);
+    byId(
+      "transaction_authorizations",
+      "DELETE FROM transaction_authorizations WHERE tx IN (?IN?)",
+      transactions,
+    );
+    byId(
+      "transactions",
+      "DELETE FROM transactions WHERE id IN (?IN?)",
+      transactions,
+    );
+    byId(
+      "grant_actions",
+      "DELETE FROM grant_actions WHERE grant_id IN (?IN?)",
+      grants,
+    );
+    byId("model_grants", "DELETE FROM model_grants WHERE id IN (?IN?)", grants);
+    byId(
+      "approval_consumptions",
+      "DELETE FROM approval_consumptions WHERE request IN (?IN?)",
+      approvals,
+    );
+    byId(
+      "approval_requests",
+      "DELETE FROM approval_requests WHERE id IN (?IN?)",
+      approvals,
+    );
+    byId(
+      "publication_artifacts",
+      "DELETE FROM publication_artifacts WHERE publication IN (?IN?)",
+      publications,
+    );
+    byId(
+      "publications",
+      "DELETE FROM publications WHERE id IN (?IN?)",
+      publications,
+    );
+    del(
+      "model_acl",
+      `DELETE FROM model_acl WHERE model IN (${marks})`,
+      ...list,
+    );
+    del(
+      "annotations",
+      `DELETE FROM annotations WHERE model IN (${marks})`,
+      ...list,
+    );
+    // A file stays as long as any surviving model still declares it.
+    del(
+      "artifact_models",
+      `DELETE FROM artifact_models WHERE model IN (${marks})`,
+      ...list,
+    );
+    del(
+      "artifacts",
+      `DELETE FROM artifacts WHERE model IN (${marks})
+         AND NOT EXISTS (SELECT 1 FROM artifact_models am WHERE am.artifact=artifacts.id)`,
+      ...list,
+    );
+    del(
+      "revisions",
+      `DELETE FROM revisions WHERE model IN (${marks})`,
+      ...list,
+    );
+    del("models", `DELETE FROM models WHERE id IN (${marks})`, ...list);
+    for (const id of list)
+      del(
+        "idempotency",
+        "DELETE FROM idempotency WHERE result LIKE ?",
+        "%" + id + "%",
+      );
+    // Shapes, tessellations and measurements that no revision references any
+    // more. Field caches carry their own key space and are left alone.
+    const referenced = new Set<string>();
+    for (const row of store.all(
+      "SELECT geometry FROM revisions WHERE geometry IS NOT NULL",
+    ))
+      for (const fact of Object.values<any>(
+        JSON.parse(row.geometry).facts ?? {},
+      )) {
+        if (fact?.cache_key) referenced.add(fact.cache_key);
+        if (fact?.local_cache_key) referenced.add(fact.local_cache_key);
+      }
+    for (const row of store.all("SELECT tenant,key FROM cache"))
+      if (
+        !row.key.startsWith("field:") &&
+        !referenced.has(row.key.split(":")[0])
+      )
+        del(
+          "cache",
+          "DELETE FROM cache WHERE tenant=? AND key=?",
+          row.tenant,
+          row.key,
+        );
+    for (const row of store.all(
+      "SELECT tenant,key,artifacts FROM render_cache",
+    ))
+      if (
+        !(JSON.parse(row.artifacts) as string[]).every((aid) =>
+          store.get("SELECT 1 FROM artifacts WHERE id=?", aid),
+        )
+      )
+        del(
+          "render_cache",
+          "DELETE FROM render_cache WHERE tenant=? AND key=?",
+          row.tenant,
+          row.key,
+        );
+    store.audit("models_erased", {
+      models: models.map((m) => ({ model_id: m.id, name: m.name })),
+      removed,
+      surviving_models: store.get("SELECT COUNT(*) AS n FROM models").n,
+    });
+  });
+  return { status: "erased", models, removed };
+}
+
 /** Operator-only, offline erasure. The Store lock excludes gateways and workers. */
 export function eraseTenant(store: Store, tenant: string, apply = false) {
   requireThat(
@@ -257,7 +465,14 @@ export function eraseTenant(store: Store, tenant: string, apply = false) {
     counts[table] = rows.length;
     for (const row of rows) objects.add(row.id);
   }
-  for (const table of ["idempotency", "cache", "scheduler"] as const)
+  for (const table of [
+    "idempotency",
+    "cache",
+    "render_cache",
+    "annotations",
+    "agent_settings",
+    "scheduler",
+  ] as const)
     counts[table] = store.get(
       `SELECT COUNT(*) AS n FROM ${table} WHERE tenant=?`,
       tenant,
@@ -295,6 +510,9 @@ export function eraseTenant(store: Store, tenant: string, apply = false) {
       "artifacts",
       "idempotency",
       "cache",
+      "render_cache",
+      "annotations",
+      "agent_settings",
       "scheduler",
     ] as const)
       store.run(`DELETE FROM ${table} WHERE tenant=?`, tenant);

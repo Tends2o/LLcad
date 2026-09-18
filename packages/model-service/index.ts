@@ -1,4 +1,6 @@
 import { Store } from "./store.js";
+import { Agents } from "./agent.js";
+import { SCOPES } from "../policy/index.js";
 import { Jobs } from "../job-service/index.js";
 import { Worker } from "../job-service/worker.js";
 import {
@@ -37,6 +39,7 @@ import { compileStructure, contextHash } from "../compiler/structure.js";
 import { threadFit, THREAD_LIBRARY } from "../compiler/threads.js";
 import { DownloadTokens } from "../policy/downloads.js";
 import { structurePage } from "./structure.js";
+import { history, setHead, HistoryProbe } from "./history.js";
 import {
   ArtifactResource,
   ToolPayloadSchemas,
@@ -75,8 +78,11 @@ export class ModelService {
   store: Store;
   gates: Gates;
   jobs: Jobs;
+  agents: Agents;
   constructor(root: string) {
     this.store = new Store(root);
+    this.agents = new Agents(this.store);
+    this.agents.recover();
     this.gates = new Gates((event, data) => this.store.audit(event, data));
     this.jobs = new Jobs(this.store, this.gates);
     this.store.access.onRevoked = (jobs) => this.jobs.cancelRevoked(jobs);
@@ -84,6 +90,11 @@ export class ModelService {
       this.gates.run("before_publish", context, check);
     this.jobs.continuation = (p, request, report) =>
       this.importStructure(p, request.import, report);
+    this.jobs.evaluated = (p, model, revision) =>
+      void this.previewAhead(p, model, revision);
+    // Previews of every model head are rendered ahead while the queue is idle,
+    // so the first open after a restart answers from the cache as well.
+    setTimeout(() => void this.warmPreviews(), 1500).unref();
   }
   /** Set by the HTTP gateway; without it publications list plain authenticated links only. */
   downloads: DownloadTokens | null = null;
@@ -236,6 +247,137 @@ export class ModelService {
       "Kandidat ist an eine andere Basis gebunden.",
     );
     return tx;
+  }
+  /** Identity of a preview: who asked, which revision, which rendering. */
+  private renderKey(
+    p: Principal,
+    model: string,
+    revision: string,
+    rendering: Record<string, unknown>,
+  ) {
+    return hash({
+      v: 1,
+      tenant: p.tenant,
+      user: p.user,
+      model,
+      revision,
+      registry: REGISTRY_HASH,
+      ...rendering,
+    });
+  }
+  /** The viewer's default preview, queued ahead of the first open. A preview
+   *  is a convenience: nothing here may fail the caller. */
+  previewAhead(p: Principal, model: string, revision: string) {
+    try {
+      // Approved budgets of shared projects are never spent on a convenience.
+      if (this.store.access.context(p, model, "model:read").grant) return null;
+      const r = this.store.revision(p, model, revision),
+        deflection = 0.02,
+        render_key = this.renderKey(p, model, r.id, {
+          feature_id: null,
+          deflection,
+          adaptive: null,
+          clip: null,
+          view: null,
+        });
+      if (
+        this.store.get(
+          "SELECT 1 FROM render_cache WHERE tenant=? AND key=?",
+          p.tenant,
+          render_key,
+        )
+      )
+        return null;
+      return this.jobs.enqueue(p, model, "render", {
+        plan: this.revisionPlan(r),
+        action: "render",
+        revision: r.id,
+        deflection,
+        adaptive: null,
+        clip_region: null,
+        view: null,
+        render_key,
+        ahead: true,
+      });
+    } catch {
+      return null;
+    }
+  }
+  private async warmPreviews() {
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    const busy = () =>
+      this.store.get(
+        "SELECT COUNT(*) AS n FROM jobs WHERE state IN ('queued','running')",
+      ).n > 0;
+    for (const m of this.store.all(
+      "SELECT m.id,m.tenant,m.owner,m.head FROM models m JOIN revisions r ON r.id=m.head ORDER BY r.created DESC",
+    )) {
+      if (this.jobs.isClosed) return;
+      while (busy() && !this.jobs.isClosed) await sleep(500);
+      const queued = this.previewAhead(
+        { tenant: m.tenant, user: m.owner, scopes: [...SCOPES] },
+        m.id,
+        m.head,
+      );
+      if (!queued) continue;
+      while (
+        !this.jobs.isClosed &&
+        ["queued", "running"].includes(
+          this.store.get("SELECT state FROM jobs WHERE id=?", queued.job_id)
+            ?.state,
+        )
+      )
+        await sleep(300);
+    }
+  }
+  /** Which earlier states can be shown again right away, and how warm they are. */
+  private historyProbe(p: Principal, model: string): HistoryProbe {
+    return {
+      compatible: (revision: any) =>
+        this.buildCompatibility(revision).status === "current",
+      warm: (revision: string) =>
+        !!this.store.get(
+          "SELECT 1 FROM render_cache WHERE tenant=? AND key=?",
+          p.tenant,
+          this.renderKey(p, model, revision, {
+            feature_id: null,
+            deflection: 0.02,
+            adaptive: null,
+            clip: null,
+            view: null,
+          }),
+        ),
+    };
+  }
+  /** The model's own history. Asking for it also warms the nearest states, so
+   *  the way back is a swap rather than a render. */
+  history(p: Principal, model: string, limit?: number) {
+    const result = history(
+      this.store,
+      p,
+      model,
+      this.historyProbe(p, model),
+      limit,
+    );
+    let warming = 0;
+    for (const r of result.revisions) {
+      if (warming >= 2) break;
+      if (r.state === "ready" && this.previewAhead(p, model, r.revision))
+        warming++;
+    }
+    return result;
+  }
+  /** Go back to an earlier state, or forward again: one pointer, no rebuild. */
+  switchHead(p: Principal, model: string, revision: string) {
+    const result = setHead(
+      this.store,
+      p,
+      model,
+      revision,
+      this.historyProbe(p, model),
+    );
+    this.previewAhead(p, model, result.revision);
+    return result;
   }
   revisionPlan(revision: any) {
     const plan = compile(revision.ir);
@@ -809,7 +951,9 @@ export class ModelService {
         });
         const now = new Date().toISOString();
         this.store.run(
-          "INSERT INTO models VALUES(?,?,?,?,?,?,?)",
+          // Named columns: a model carries more than it did, and a new one
+          // must not depend on the order they were added in.
+          "INSERT INTO models(id,tenant,owner,name,purpose,head,created) VALUES(?,?,?,?,?,?,?)",
           mid,
           p.tenant,
           p.user,
@@ -1732,6 +1876,7 @@ export class ModelService {
           "revision_committed",
           JSON.stringify({ model_id: a.model_id, revision: rev }),
         );
+        this.previewAhead(p, a.model_id, rev);
         return {
           status: "committed",
           model_id: a.model_id,
@@ -1944,6 +2089,22 @@ export class ModelService {
             "Ungültiger Schnittursprung.",
           );
         }
+        const render_key = this.renderKey(p, a.model_id, r.id, {
+          feature_id: a.feature_id ?? null,
+          deflection,
+          adaptive,
+          clip,
+          view,
+        });
+        // A preview that exists already is handed over as it is. Compiling the
+        // whole construction first, only to find the answer in the cache, is
+        // what made going back to an earlier state slow; a shared project keeps
+        // the ordinary path, where its job budget is accounted for.
+        const ready = this.store.access.context(p, a.model_id, "model:read")
+          .grant
+          ? null
+          : this.jobs.cachedRender(p.tenant, render_key);
+        if (ready) return { status: "succeeded", artifacts: ready.artifacts };
         return this.jobs.enqueue(p, a.model_id, "render", {
           plan: this.revisionPlan(r),
           action: "render",
@@ -1953,6 +2114,7 @@ export class ModelService {
           adaptive,
           clip_region: clip,
           view,
+          render_key,
         });
       }
       case "cad_import": {

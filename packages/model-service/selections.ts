@@ -5,14 +5,20 @@ import { requireThat } from "../semantic-ir/errors.js";
 
 export function faces(store: Store, revision: any, feature: string): any[] {
   const key = revision.geometry?.facts?.[feature]?.cache_key;
-  const blob = revision.geometry?.blobs?.[key + ".topology.json"];
+  if (!key) return [];
+  // A revision names the archives it produced itself; everything it merely
+  // reused stands in the cache under the same content key, and both are stored
+  // by the hash of their bytes, so the integrity check reads the same either way.
+  const stored = (suffix: string, name: string) =>
+    revision.geometry?.blobs?.[key + name] ??
+    store.get("SELECT blob FROM cache WHERE key=?", key + suffix)?.blob;
+  const blob = stored(":topology", ".topology.json");
   if (!blob) return [];
   const data = JSON.parse(store.readBlob(blob).toString());
   requireThat(
     [1, 2, 3].includes(data.version) &&
       data.cache_key === key &&
-      (data.version !== 3 ||
-        data.brep_sha256 === revision.geometry.blobs[key + ".brep"]),
+      (data.version !== 3 || data.brep_sha256 === stored("", ".brep")),
     "INTEGRITY_FAILURE",
     "Flächenhistorie passt nicht zur Revision.",
   );

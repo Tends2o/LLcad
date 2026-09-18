@@ -8,6 +8,12 @@ import { safeError, requireThat } from "../semantic-ir/errors.js";
 import { LIMITS, REGISTRY_HASH } from "../compiler/index.js";
 import { validate } from "../validation/index.js";
 import { packGLB } from "../model-service/glb.js";
+import {
+  packMesh,
+  packPreview,
+  PREVIEW_BINARY_MIME,
+  type PackedMesh,
+} from "./preview-binary.js";
 import { exportPackage } from "../model-service/export-package.js";
 import { claimQueuedJob } from "./scheduler.js";
 import { checkEquation } from "../compiler/constraints.js";
@@ -21,6 +27,8 @@ import {
 import { NativeWorkerResult } from "../semantic-ir/results.js";
 import { MeshQuality } from "../semantic-ir/mesh.js";
 import { NATIVE_MESH_SOURCE_HASH } from "../compiler/native-build.js";
+/** A build may take many turns of the time budget, but not forever. */
+const MAX_CONTINUATIONS = 120;
 const HEARTBEAT_MS = 5000;
 export class Jobs {
   /** Most recently started native worker; tests and revocation may cancel it directly. */
@@ -36,6 +44,12 @@ export class Jobs {
     Math.min(4, Number(process.env.MATHFORGE_WORKERS ?? "2") || 1),
   );
   metrics: Metrics;
+  get isClosed() {
+    return this.closed;
+  }
+  /** Registered by the model service: a candidate revision is previewed ahead of the viewer. */
+  evaluated: ((p: Principal, model: string, revision: string) => void) | null =
+    null;
   /** Registered by the model service: turns a probe report into the follow-up candidate. */
   continuation: ((p: Principal, request: any, report: any) => any) | null =
     null;
@@ -46,6 +60,8 @@ export class Jobs {
     this.metrics = new Metrics(store);
     this.timer = setInterval(() => void this.pump(), 300);
     this.timer.unref();
+    // The first job after a start should not pay for a cold sandbox either.
+    setTimeout(() => Worker.ensurePool(), 1000).unref();
   }
   enqueue(
     p: Principal,
@@ -248,6 +264,58 @@ export class Jobs {
       let result: any,
         preparedGLB: ReturnType<typeof packGLB> | null = null;
       let glbMeshReport: any = null;
+      let executed = request;
+      let assembledSummary: any = null,
+        previewBinary: Buffer | null = null;
+      if (job.kind === "render" && request.render_key) {
+        // A preview rendered before answers from the cache, without a worker;
+        // one being rendered right now by another job is waited for, not repeated.
+        let hit = this.renderCacheHit(job.tenant, request.render_key);
+        const deadline = Date.now() + authorization.seconds * 1000;
+        while (
+          !hit &&
+          Date.now() < deadline &&
+          this.store.get(
+            "SELECT 1 FROM jobs WHERE state='running' AND kind='render' AND tenant=? AND id!=? AND json_extract(request,'$.render_key')=?",
+            job.tenant,
+            job.id,
+            request.render_key,
+          )
+        ) {
+          await new Promise((r) => setTimeout(r, 100));
+          this.store.run(
+            "UPDATE jobs SET heartbeat=?,lease_until=? WHERE id=? AND lease=? AND state='running'",
+            Date.now(),
+            Date.now() + 60000,
+            job.id,
+            lease,
+          );
+          hit = this.renderCacheHit(job.tenant, request.render_key);
+        }
+        if (hit) {
+          this.metrics.increment("render_cache_hits");
+          this.store.atomic(() => {
+            const current = this.store.get(
+              "SELECT state,lease FROM jobs WHERE id=?",
+              job.id,
+            );
+            if (current?.state !== "running" || current.lease !== lease) return;
+            this.store.run(
+              "UPDATE jobs SET state='succeeded',result=?,lease=NULL,lease_until=NULL,phase='succeeded',finished=? WHERE id=? AND lease=?",
+              JSON.stringify(hit),
+              Date.now(),
+              job.id,
+              lease,
+            );
+            this.store.run(
+              "UPDATE outbox SET delivered=1 WHERE event='job_queued' AND json_extract(payload,'$.job_id')=?",
+              job.id,
+            );
+            this.metrics.increment("jobs_succeeded", 1, job.kind);
+          });
+          return;
+        }
+      }
       if (job.kind === "validate") {
         const tx = this.store.transaction(p, job.tx);
         requireThat(
@@ -287,43 +355,54 @@ export class Jobs {
           job_id: job.id,
           input_hash: hash(request),
         });
-        worker = new Worker();
-        this.workers.set(job.id, worker);
-        this.active = worker;
-        this.activeID = job.id;
-        heartbeat = setInterval(() => {
-          try {
-            this.store.run(
-              "UPDATE jobs SET heartbeat=?,lease_until=? WHERE id=? AND lease=? AND state='running'",
-              Date.now(),
-              Date.now() + 60000,
-              job.id,
-              lease,
-            );
-          } catch {
-            /* heartbeat is telemetry; fencing still decides publication */
-          }
-        }, HEARTBEAT_MS);
-        heartbeat.unref();
         const nativeDeadline = Date.now() + authorization.seconds * 1000;
         const effectiveExpiry = Math.min(
           nativeDeadline,
           authorization.expires ?? Infinity,
         );
-        result = await worker.run(this.store, job.tenant, {
-          ...request,
-          cache_owner: job.owner,
-          cache_model: job.model,
-          policy_budget_seconds: authorization.seconds,
-          policy_expires_at: effectiveExpiry,
-        });
-        assertResult(
-          NativeWorkerResult,
-          result,
-          "native_worker_result",
-          LIMITS.request_bytes * 8,
-        );
-        this.recordWorkerMetrics(result.metrics);
+        const preview =
+          job.kind === "render" ? this.planPreview(job.tenant, request) : null;
+        if (preview) executed = preview.request;
+        if (executed) {
+          worker = new Worker();
+          this.workers.set(job.id, worker);
+          this.active = worker;
+          this.activeID = job.id;
+          heartbeat = setInterval(() => {
+            try {
+              this.store.run(
+                "UPDATE jobs SET heartbeat=?,lease_until=? WHERE id=? AND lease=? AND state='running'",
+                Date.now(),
+                Date.now() + 60000,
+                job.id,
+                lease,
+              );
+            } catch {
+              /* heartbeat is telemetry; fencing still decides publication */
+            }
+          }, HEARTBEAT_MS);
+          heartbeat.unref();
+          result = await worker.run(this.store, job.tenant, {
+            ...executed,
+            cache_owner: job.owner,
+            cache_model: job.model,
+            policy_budget_seconds: authorization.seconds,
+            policy_expires_at: effectiveExpiry,
+          });
+          assertResult(
+            NativeWorkerResult,
+            result,
+            "native_worker_result",
+            LIMITS.request_bytes * 8,
+          );
+          this.recordWorkerMetrics(result.metrics);
+        }
+        if (preview) {
+          const assembled = preview.assemble(result);
+          result = assembled.result;
+          assembledSummary = assembled.summary;
+          previewBinary = assembled.binary;
+        }
         if (
           (job.kind === "export" || job.kind === "render") &&
           request.format === "glb"
@@ -444,12 +523,26 @@ export class Jobs {
                   Date.now(),
                 );
             }
+            // The measurements of a feature belong to its key as much as its
+            // shape does; kept here, an unchanged feature is never measured again.
+            const measured = result.blobs[f.cache_key + ".facts.json"];
+            if (measured)
+              this.store.run(
+                "INSERT OR IGNORE INTO cache(tenant,key,blob,created) VALUES(?,?,?,?)",
+                job.tenant,
+                f.cache_key + ":facts",
+                measured,
+                Date.now(),
+              );
           }
           this.metrics.observe(
             "dirty_features",
             (tx.plan.dirty_features ?? []).length,
           );
           this.metrics.observe("total_features", request.plan.features.length);
+          this.store.afterCommit(() =>
+            this.evaluated?.(p, tx.model, tx.candidate),
+          );
           result = {
             status: "candidate_ready",
             transaction_id: tx.id,
@@ -640,10 +733,10 @@ export class Jobs {
                 manifest,
               ),
             );
-          } else
+          } else {
+            let previewData: any = null;
             for (const file of result.files) {
-              if (file.endsWith(".field.json") || file.endsWith(".mesh.json"))
-                continue;
+              if (/\.(field|mesh(\.[0-9a-z]+)?)\.json$/.test(file)) continue;
               if (
                 file === "model.brep" &&
                 (job.kind === "render" || request.format !== "brep")
@@ -651,9 +744,10 @@ export class Jobs {
                 continue;
               const previewSummary =
                 file === "preview.json"
-                  ? JSON.parse(
+                  ? (assembledSummary ??
+                    JSON.parse(
                       this.store.readBlob(result.blobs[file]).toString(),
-                    )
+                    ))
                   : null;
               const viewReport =
                 file.startsWith("view.") && result.blobs["view.json"]
@@ -664,10 +758,11 @@ export class Jobs {
               if (previewSummary)
                 this.metrics.observe(
                   "preview_triangles",
-                  previewSummary.meshes.reduce(
-                    (n: number, m: any) => n + m.triangles.length,
-                    0,
-                  ),
+                  previewSummary.triangle_count ??
+                    previewSummary.meshes.reduce(
+                      (n: number, m: any) => n + m.triangles.length,
+                      0,
+                    ),
                 );
               const roundtrip = result.blobs["roundtrip.json"]
                 ? JSON.parse(
@@ -718,7 +813,52 @@ export class Jobs {
                   { ...manifest, filename: file },
                 ),
               );
+              if (file === "preview.json")
+                previewData = { summary: previewSummary, manifest };
             }
+            // The viewer reads the compact twin of the preview; the JSON stays
+            // the authoritative artifact for every client that asked for one.
+            // A preview rendered ahead carries the binary alone.
+            if (previewBinary) {
+              const summary = previewData?.summary ?? assembledSummary;
+              if (!previewData && typeof summary?.triangle_count === "number")
+                this.metrics.observe(
+                  "preview_triangles",
+                  summary.triangle_count,
+                );
+              artifacts.push(
+                this.store.artifact(
+                  p,
+                  previewBinary,
+                  PREVIEW_BINARY_MIME,
+                  job.model,
+                  request.revision,
+                  {
+                    ...(previewData?.manifest ?? {
+                      model_id: job.model,
+                      revision: request.revision,
+                      source_geometry_hash: hash(result.facts),
+                      engine_build: result.engine_build,
+                      unit: "mm",
+                      quality: "preview_only",
+                      requested_deflection: request.deflection,
+                      ...(summary?.resolution
+                        ? { resolution: summary.resolution }
+                        : {}),
+                      ...(summary?.clip ? { clip: summary.clip } : {}),
+                      certified_surface_bound: null,
+                      roundtrip: null,
+                    }),
+                    filename: "preview.bin",
+                    derived_from: previewData
+                      ? "preview.json"
+                      : "tessellation_cache",
+                    encoding: "mathforge-preview-binary-1",
+                  },
+                ),
+              );
+            }
+          }
           const exported =
             job.kind === "export"
               ? exportPackage(
@@ -740,6 +880,15 @@ export class Jobs {
             ...(job.kind === "export" ? { result_schema_version: "1" } : {}),
             metrics: result.metrics,
           };
+          if (job.kind === "render" && request.render_key)
+            this.store.run(
+              "INSERT OR REPLACE INTO render_cache(tenant,key,result,artifacts,created) VALUES(?,?,?,?,?)",
+              job.tenant,
+              request.render_key,
+              JSON.stringify(result),
+              JSON.stringify(exported.artifacts.map((a: any) => a.artifact_id)),
+              Date.now(),
+            );
         }
         assertJobResult(job.kind, result);
         this.store.run(
@@ -760,6 +909,17 @@ export class Jobs {
       // Operator diagnostics only; nothing from here is persisted or returned to clients.
       if (process.env.MATHFORGE_DEBUG_ERRORS)
         console.error("[job-service]", error);
+      // A build that ran out of time but got further than the last attempt is
+      // not a failure: its finished features are in the cache, so the job goes
+      // back into the queue and carries on from there. That is what keeps a
+      // fixed time budget from putting a ceiling on how complex a model may be.
+      if (
+        job &&
+        !this.closed &&
+        ["BUDGET_EXCEEDED", "KERNEL_FAILURE"].includes(failure.code) &&
+        this.continue_(job, lease)
+      )
+        return;
       if (job && !this.closed)
         this.store.atomic(() => {
           const current = this.store.get(
@@ -800,6 +960,337 @@ export class Jobs {
         this.activeID = null;
       }
     }
+  }
+  /** How many of a plan's features already have their shape in the cache. */
+  private built(tenant: string, plan: any) {
+    const keys = (plan?.features ?? []).map((f: any) => f.cache_key);
+    let done = 0;
+    for (let i = 0; i < keys.length; i += 200) {
+      const chunk = keys.slice(i, i + 200);
+      done += this.store.get(
+        `SELECT COUNT(*) AS n FROM cache WHERE tenant=? AND key IN (${chunk.map(() => "?").join(",")})`,
+        tenant,
+        ...chunk,
+      ).n;
+    }
+    return { done, total: keys.length };
+  }
+  /** Put a build that made progress back into the queue. Whether the run was
+   *  stopped by the wall clock or by the kernel's own processor limit does not
+   *  matter — what counts is that it left finished features behind. A round
+   *  that adds nothing ends the attempt for good. */
+  private continue_(job: any, lease: string) {
+    const request = JSON.parse(job.request);
+    if (job.kind !== "evaluate" || !request.plan?.features?.length)
+      return false;
+    const progress = this.built(job.tenant, request.plan),
+      previous = request.built ?? 0,
+      round = (request.continuation ?? 0) + 1;
+    if (progress.done <= previous || round > MAX_CONTINUATIONS) return false;
+    return this.store.atomic(() => {
+      const current = this.store.get(
+        "SELECT state,lease FROM jobs WHERE id=?",
+        job.id,
+      );
+      if (current?.state !== "running" || current.lease !== lease) return false;
+      this.store.run(
+        "UPDATE jobs SET state='queued',lease=NULL,lease_until=NULL,attempts=0,phase='queued',request=? WHERE id=?",
+        JSON.stringify({
+          ...request,
+          continuation: round,
+          built: progress.done,
+        }),
+        job.id,
+      );
+      this.metrics.increment("job_continuations");
+      this.store.audit("job_continued", {
+        job_id: job.id,
+        round,
+        built: progress.done,
+        of: progress.total,
+      });
+      this.store.afterCommit(() => setImmediate(() => void this.pump()));
+      return true;
+    });
+  }
+  /** A preview that has already been rendered, for callers that can answer
+   *  with it directly instead of queueing a job that would only find it here. */
+  cachedRender(tenant: string, key: string) {
+    const hit = this.renderCacheHit(tenant, key);
+    if (hit) this.metrics.increment("render_cache_hits");
+    return hit;
+  }
+  /** A cached preview is only served while every artifact it lists still exists. */
+  private renderCacheHit(tenant: string, key: string) {
+    const row = this.store.get(
+      "SELECT result,artifacts FROM render_cache WHERE tenant=? AND key=?",
+      tenant,
+      key,
+    );
+    if (!row) return null;
+    const alive = (JSON.parse(row.artifacts) as string[]).every((aid) =>
+      this.store.get("SELECT 1 FROM artifacts WHERE id=?", aid),
+    );
+    if (alive) return JSON.parse(row.result);
+    this.store.run(
+      "DELETE FROM render_cache WHERE tenant=? AND key=?",
+      tenant,
+      key,
+    );
+    return null;
+  }
+  /** What a preview still has to compute. A target whose tessellation is
+   *  cached is served from the cache. The rest is tessellated from its cached
+   *  B-Rep by the preview worker, or — when a target has no cached shape —
+   *  evaluated by the full worker together with everything it depends on.
+   *  Restoring every feature of a large model for every preview was where a
+   *  render's time went; now the sandbox sees only what it draws, and every
+   *  tessellation it produces is kept as JSON, as binary and as a header
+   *  entry, so the next preview of that shape is concatenation, not work. */
+  private planPreview(tenant: string, request: any) {
+    if (request.view) return null;
+    const plan = request.plan,
+      byID = new Map<string, any>(plan.features.map((f: any) => [f.id, f])),
+      targets: string[] = request.feature_id
+        ? [request.feature_id]
+        : plan.outputs,
+      row = (key: string) =>
+        this.store.get(
+          "SELECT blob FROM cache WHERE tenant=? AND key=?",
+          tenant,
+          key,
+        ),
+      tag =
+        request.adaptive || request.clip_region
+          ? null
+          : String(request.deflection).replace(".", "p").replace("-", "m"),
+      meshKey = (f: any) =>
+        tag && f.authoritative_representation === "brep"
+          ? `${f.cache_key}:mesh:${tag}`
+          : null;
+    type Part = { json: string; bin: string; meta: any; chunk?: Buffer };
+    const parts = new Map<string, Part>(),
+      pending: string[] = [];
+    for (const fid of targets) {
+      const f = byID.get(fid);
+      requireThat(f, "OUT_OF_SCOPE", "Vorschauziel fehlt im Plan.");
+      const key = meshKey(f),
+        json = key ? row(key) : null,
+        bin = key ? row(key + ":bin") : null,
+        meta = key ? row(key + ":meta") : null;
+      if (json && bin && meta)
+        parts.set(fid, {
+          json: json.blob,
+          bin: bin.blob,
+          meta: JSON.parse(this.store.readBlob(meta.blob).toString("utf8")),
+        });
+      else pending.push(fid);
+    }
+    const shapeCached = (f: any) =>
+      f.authoritative_representation === "brep" &&
+      !!row(f.cache_key) &&
+      !!row(f.cache_key + ":topology");
+    let executed: any = null;
+    if (pending.length && pending.every((fid) => shapeCached(byID.get(fid))))
+      executed = {
+        ...request,
+        script: "preview",
+        plan: {
+          ...plan,
+          features: pending.map((fid) => byID.get(fid)),
+          outputs: pending,
+        },
+      };
+    else if (pending.length) {
+      const needed = new Set<string>();
+      const visit = (fid: string) => {
+        if (needed.has(fid)) return;
+        needed.add(fid);
+        for (const d of byID.get(fid)?.depends_on ?? []) visit(d);
+      };
+      pending.forEach(visit);
+      executed = {
+        ...request,
+        plan: {
+          ...plan,
+          features: plan.features.filter((f: any) => needed.has(f.id)),
+          outputs: plan.outputs.filter((fid: string) => pending.includes(fid)),
+        },
+      };
+    }
+    const keep = (fid: string, part: Part) => {
+      const key = meshKey(byID.get(fid));
+      if (!key) return;
+      for (const [suffix, blob] of [
+        ["", part.json],
+        [":bin", part.bin],
+        [":meta", this.store.blob(JSON.stringify(part.meta))],
+      ])
+        this.store.run(
+          "INSERT OR IGNORE INTO cache(tenant,key,blob,created) VALUES(?,?,?,?)",
+          tenant,
+          key + suffix,
+          blob,
+          Date.now(),
+        );
+    };
+    const fresh = (fid: string, m: any, json: string) => {
+      const packed = packMesh(m),
+        part: Part = {
+          json,
+          bin: this.store.blob(packed.chunk),
+          meta: packed.meta,
+          chunk: packed.chunk,
+        };
+      parts.set(fid, part);
+      keep(fid, part);
+    };
+    const assemble = (result: any) => {
+      let summary: any = null;
+      if (result && executed.script === "preview")
+        for (const fid of pending) {
+          const blob = result.blobs[`${byID.get(fid).cache_key}.mesh.json`];
+          requireThat(blob, "KERNEL_FAILURE", "Vorschau unvollständig.");
+          fresh(
+            fid,
+            JSON.parse(this.store.readBlob(blob).toString("utf8")),
+            blob,
+          );
+        }
+      else if (result) {
+        summary = JSON.parse(
+          this.store.readBlob(result.blobs["preview.json"]).toString("utf8"),
+        );
+        // The full worker answers in target order; imported meshes carry no id.
+        const order: string[] = request.feature_id
+            ? [request.feature_id]
+            : executed.plan.outputs,
+          produced = new Map<string, any>(
+            (summary.meshes ?? []).map((m: any, i: number) => [
+              m.feature_id ?? order[i],
+              m,
+            ]),
+          );
+        for (const fid of pending) {
+          const m = produced.get(fid);
+          requireThat(m, "KERNEL_FAILURE", "Vorschau unvollständig.");
+          const mesh = {
+            ...m,
+            geometry_hash: result.facts[fid]?.geometry_hash ?? null,
+            engine_build: result.engine_build,
+          };
+          fresh(fid, mesh, this.store.blob(JSON.stringify(mesh)));
+        }
+      }
+      const ordered = targets.map((fid) => {
+        const part = parts.get(fid);
+        requireThat(part, "KERNEL_FAILURE", "Vorschau unvollständig.");
+        return part;
+      });
+      const resolutions = ordered.map((p) => p.meta.resolution).filter(Boolean);
+      const extra: Record<string, unknown> = {
+        ...(summary?.resolution
+          ? { resolution: summary.resolution }
+          : resolutions.length
+            ? {
+                resolution: {
+                  absolute_resolution_mm: Math.max(
+                    ...resolutions.map((r: any) => r.absolute_resolution_mm),
+                  ),
+                  finest_deflection_mm: Math.min(
+                    ...resolutions.map((r: any) => r.finest_deflection_mm),
+                  ),
+                  reference_scale_mm: Math.max(
+                    ...resolutions.map((r: any) => r.reference_scale_mm),
+                  ),
+                  minimum_feature_resolved_mm: Math.max(
+                    ...resolutions.map(
+                      (r: any) => r.minimum_feature_resolved_mm,
+                    ),
+                  ),
+                  method: resolutions[0].method,
+                  policy: resolutions[0].policy,
+                  certified_surface_bound: null,
+                },
+              }
+            : {}),
+        ...(summary?.clip
+          ? { clip: summary.clip }
+          : request.clip_region
+            ? { clip: request.clip_region }
+            : {}),
+      };
+      const tail =
+        '],"unit":"mm","quality":"preview_only"' +
+        (Object.keys(extra).length
+          ? "," + JSON.stringify(extra).slice(1, -1)
+          : "") +
+        "}";
+      // A preview rendered ahead is a convenience nobody is waiting for: it
+      // keeps the compact binary the viewer reads and leaves the JSON twin —
+      // four times the size, written, hashed and kept for a week — unbuilt.
+      const compact = request.ahead === true;
+      const pieces: Buffer[] = compact ? [] : [Buffer.from('{"meshes":[')];
+      if (!compact) {
+        ordered.forEach((part, i) => {
+          if (i) pieces.push(Buffer.from(","));
+          pieces.push(this.store.readBlob(part.json));
+        });
+        pieces.push(Buffer.from(tail));
+      }
+      const packed: PackedMesh[] = ordered.map((part) => ({
+          meta: part.meta,
+          chunk: part.chunk ?? this.store.readBlob(part.bin),
+        })),
+        facts = Object.fromEntries(
+          targets.map((fid) => [
+            fid,
+            {
+              geometry_hash: parts.get(fid)!.meta.geometry_hash ?? null,
+              cache_key: byID.get(fid).cache_key,
+            },
+          ]),
+        ),
+        triangle_count = ordered.reduce(
+          (n, part) => n + (part.meta.triangle_count as number),
+          0,
+        );
+      return {
+        result: {
+          status: "succeeded",
+          facts,
+          aggregate: null,
+          files: compact ? [] : ["preview.json"],
+          engine_build:
+            result?.engine_build ?? ordered[0]?.meta.engine_build ?? "",
+          metrics: {
+            ...(result?.metrics ?? { seconds: 0, warm_start: true }),
+            cache_hits:
+              parts.size - pending.length + (result?.metrics?.cache_hits ?? 0),
+            total_features: targets.length,
+            tessellations_cached: targets.length - pending.length,
+            tessellations_computed: pending.length,
+          },
+          blobs: {
+            ...(result?.blobs ?? {}),
+            ...(compact
+              ? {}
+              : { "preview.json": this.store.blob(Buffer.concat(pieces)) }),
+          },
+        },
+        summary: {
+          ...extra,
+          unit: "mm",
+          quality: "preview_only",
+          triangle_count,
+        },
+        binary: packPreview(
+          { unit: "mm", quality: "preview_only", ...extra },
+          packed,
+        ),
+      };
+    };
+    return { request: executed, assemble };
   }
   private recordWorkerMetrics(metrics: any) {
     if (!metrics || typeof metrics !== "object") return;
