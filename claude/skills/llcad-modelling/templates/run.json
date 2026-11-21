@@ -1,0 +1,31 @@
+{
+  "_comment": "Run contract for one LLcad build. Copy to .llcad/run.json (ledger.py init does it). The stop gate, time signal and hooks read it.",
+  "model_id": null,
+  "product_name": null,
+  "started_at": null,
+  "budget_min": 60,
+  "budget_grace_min": 5,
+  "time_signal_min": 5,
+  "scope": {
+    "in": ["visible exterior", "main internals"],
+    "out": ["variant", "accessory", "state"]
+  },
+  "acceptance": {
+    "gates": "floor",
+    "ledger": "advisory",
+    "assumptions": "required"
+  },
+  "assumptions_file": ".llcad/assumptions.md",
+  "max_stop_blocks": 6,
+  "stop_gate": true,
+  "lanes": {},
+  "hooks": {
+    "auto_validate": false,
+    "cw": "error"
+  },
+  "server": {
+    "url": "http://127.0.0.1:4310",
+    "token_file": "/root/projects/LLcad/data/local-token",
+    "root": "/root/projects/LLcad"
+  }
+}

@@ -1,0 +1,1 @@
+- [Fillet on fine polygons fails](fillet-fine-polygon-precision.md) — llcad fillet on profiles segmented finer than 22.5° gives PRECISION_UNSUPPORTED; 8 segments per semicircle works

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "llcad": {
+      "type": "http",
+      "url": "http://127.0.0.1:4310/mcp",
+      "headers": {
+        "Authorization": "Bearer <token from LLcad/data/local-token>"
+      }
+    }
+  }
+}

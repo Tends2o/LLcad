@@ -1,0 +1,1110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <title>LLcad · MathForge 3D viewer</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="/"
+        ><span class="brand-symbol">M<span>∕</span></span
+        ><strong>MathForge <em>3D</em></strong></a
+      ><span class="header-divider"></span
+      ><span class="workspace-label">MODEL WORKSHOP</span>
+      <div class="header-actions">
+        <span id="connection" class="connection">● Local</span
+        ><button
+          id="layout-toggle"
+          class="layout-toggle"
+          type="button"
+          aria-pressed="false"
+          title="Switch between desktop and phone layout"
+        >
+          <span class="layout-toggle-icon" aria-hidden="true">▤</span
+          ><span class="layout-toggle-text">Phone view</span></button
+        ><button id="new-model" title="Create a new model">
+          +<span class="button-text"> New model</span></button
+        ><button id="logout" class="quiet" title="Sign out">
+          <span class="button-text">Sign out</span
+          ><span class="button-icon" aria-hidden="true">⏻</span>
+        </button>
+      </div>
+    </header>
+    <main>
+      <aside class="left" id="panel-left">
+        <section
+          class="panel-group"
+          data-group="workspace"
+          data-home="left"
+          data-order="0"
+        >
+          <h2 class="group-heading section-label">
+            <button
+              class="group-toggle"
+              type="button"
+              aria-expanded="true"
+              aria-controls="group-workspace"
+            >
+              <span class="group-title">WORKSPACE</span
+              ><span class="group-meta">01</span
+              ><span class="group-chevron" aria-hidden="true"></span>
+            </button>
+          </h2>
+          <div class="group-body" id="group-workspace">
+            <div class="model-card">
+              <div class="part-icon">◈</div>
+              <div>
+                <strong id="model-title">Your next part</strong>
+                <p id="model-meta">Parametric. Traceable.</p>
+              </div>
+            </div>
+            <div id="model-purpose" class="model-purpose" hidden></div>
+            <div id="model-list" class="model-list"></div>
+          </div>
+        </section>
+        <section
+          class="panel-group"
+          data-group="reference"
+          data-home="left"
+          data-order="0.5"
+        >
+          <h2 class="group-heading section-heading">
+            <button
+              class="group-toggle"
+              type="button"
+              aria-expanded="true"
+              aria-controls="group-reference"
+            >
+              <span class="group-title">Reference review</span
+              ><span class="group-chevron" aria-hidden="true"></span>
+            </button>
+          </h2>
+          <div class="group-body" id="group-reference">
+            <p id="reference-status" role="status">No model selected.</p>
+            <p id="reference-coverage" class="muted"></p>
+            <label class="reference-upload"
+              >Set reference images<input
+                id="reference-upload"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                multiple
+            /></label>
+            <div id="reference-views" class="reference-views" hidden>
+              <label class="select-row" for="reference-select"
+                ><span>Reference view</span
+                ><select id="reference-select"></select
+              ></label>
+              <div class="reference-actions">
+                <button
+                  id="reference-snap"
+                  type="button"
+                  aria-pressed="false"
+                  disabled
+                >
+                  Snap to view</button
+                ><button
+                  id="reference-overlay-toggle"
+                  type="button"
+                  aria-pressed="false"
+                  title="Lay the photo over the model (onion skin)"
+                >
+                  Overlay</button
+                ><button
+                  id="reference-split"
+                  type="button"
+                  aria-pressed="false"
+                  title="Photo and model side by side, zoomed and panned together"
+                >
+                  Side by side
+                </button>
+              </div>
+              <button
+                id="reference-compare"
+                type="button"
+                class="primary full"
+                title="Ask the deterministic gates for ranked residuals; in a snapped view also compare the silhouettes here"
+              >
+                Compare to photo
+              </button>
+              <p id="reference-camera" class="muted"></p>
+              <div id="reference-residuals" class="reference-residuals"></div>
+            </div>
+            <button id="reference-inspect" disabled>Quick view check</button>
+            <button id="reference-check" disabled>
+              Final reference review
+            </button>
+            <p class="muted">
+              Build the basic shape first, then refine visible details. Quick
+              view check captures this view locally without paid AI. Final
+              review checks the complete reference set.
+            </p>
+            <div id="reference-findings"></div>
+            <button id="reference-more" hidden>More findings and images</button>
+          </div>
+        </section>
+        <section
+          class="panel-group"
+          data-group="structure"
+          data-home="left"
+          data-order="1"
+        >
+          <h2 class="group-heading section-heading">
+            <button
+              class="group-toggle"
+              type="button"
+              aria-expanded="true"
+              aria-controls="group-structure"
+            >
+              <span class="group-title">Structure</span
+              ><span class="group-meta" id="structure-count">—</span
+              ><span class="group-chevron" aria-hidden="true"></span>
+            </button>
+          </h2>
+          <div class="group-body" id="group-structure">
+            <div id="structure" class="structure">
+              <p class="muted empty-tree">Parts and assemblies appear here.</p>
+            </div>
+          </div>
+        </section>
+        <section
+          class="panel-group"
+          data-group="features"
+          data-home="left"
+          data-order="2"
+        >
+          <h2 class="group-heading section-heading">
+            <button
+              class="group-toggle"
+              type="button"
+              aria-expanded="true"
+              aria-controls="group-features"
+            >
+              <span class="group-title">Construction tree</span
+              ><span class="group-meta" id="feature-count">0</span
+              ><span class="group-chevron" aria-hidden="true"></span>
+            </button>
+          </h2>
+          <div class="group-body" id="group-features">
+            <div id="features" class="features">
+              <p class="muted empty-tree">
+                The mathematical construction of your model grows here.
+              </p>
+            </div>
+            <button id="add-feature" class="add-feature">
+              + Add primitive
+            </button>
+          </div>
+        </section>
+        <section
+          class="panel-group sidebar-bottom"
+          data-group="examples"
+          data-home="left"
+          data-order="3"
+        >
+          <h2 class="group-heading section-label">
+            <button
+              class="group-toggle"
+              type="button"
+              aria-expanded="true"
+              aria-controls="group-examples"
+            >
+              <span class="group-title">EXAMPLE MODELS</span
+              ><span class="group-meta">3</span
+              ><span class="group-chevron" aria-hidden="true"></span>
+            </button>
+          </h2>
+          <div class="group-body" id="group-examples">
+            <button class="example" data-example="housing">
+              <span>◉</span>
+              <div>Seal housing<small>CAD · detail change of 20 µm</small></div>
+              <span>↗</span></button
+            ><button class="example" data-example="organic">
+              <span>∿</span>
+              <div>
+                Implicit body<small>Field · local support region</small>
+              </div>
+              <span>↗</span></button
+            ><button class="example" data-example="assembly">
+              <span>▦</span>
+              <div>
+                Parametric pin row<small>Assembly · 100 instances</small>
+              </div>
+              <span>↗</span>
+            </button>
+            <p class="sidebar-note">
+              The parameters are the original.<br />The view makes them visible.
+            </p>
+          </div>
+        </section>
+      </aside>
+      <section class="stage">
+        <div class="stage-heading">
+          <div class="breadcrumbs">
+            Workspace <span>/</span>
+            <strong id="breadcrumb-model">New model</strong>
+          </div>
+          <div class="revision-line">
+            <span id="quality" class="badge">No model</span
+            ><span id="revision">—</span>
+          </div>
+        </div>
+        <div id="viewport">
+          <div id="empty-state">
+            <span class="eyebrow">FROM EQUATION TO GEOMETRY</span>
+            <h1>Form follows<br /><i>mathematics.</i></h1>
+            <p>
+              Build precise solids. Change single details.<br />Verify every
+              step before it becomes part of the model.
+            </p>
+            <button id="start-demo" class="primary">
+              Open the seal housing <span>↗</span>
+            </button>
+          </div>
+          <div id="view-label">PERSPECTIVE <span>·</span> Z ↑</div>
+          <canvas id="reference-pane" hidden></canvas>
+          <canvas id="reference-overlay" hidden></canvas>
+          <div id="reference-bar" class="reference-bar" hidden>
+            <strong id="reference-bar-label">Reference</strong
+            ><label for="reference-opacity"
+              >Opacity
+              <input
+                id="reference-opacity"
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                value="50" /></label
+            ><select
+              id="reference-source"
+              aria-label="What lies over the model"
+            >
+              <option value="photo">Photo</option>
+              <option value="heatmap" disabled>Difference heatmap</option>
+              <option value="gates" disabled>Gates heatmap</option></select
+            ><button
+              id="reference-leave"
+              type="button"
+              title="Close the reference view"
+            >
+              ✕
+            </button>
+          </div>
+          <div id="time-travel" hidden>
+            <span class="time-travel-text"
+              ><strong
+                ><span id="time-travel-kind">Earlier state</span
+                ><b id="time-travel-time"></b></strong
+              ><small id="time-travel-detail">—</small></span
+            ><button
+              id="time-travel-swap"
+              type="button"
+              title="Switch between this state and the one before it"
+            >
+              ⇄ <span>Compare</span></button
+            ><button id="time-travel-adopt" class="primary" type="button">
+              Make current</button
+            ><button
+              id="time-travel-exit"
+              type="button"
+              title="Back to the current state"
+            >
+              ✕
+            </button>
+          </div>
+          <div id="markup" hidden>
+            <canvas id="markup-canvas"></canvas>
+            <p id="markup-hint">
+              The view is frozen. Draw around what should change.
+            </p>
+            <div class="markup-pens" role="radiogroup" aria-label="Pen">
+              <button
+                id="pen-red"
+                class="pen"
+                type="button"
+                role="radio"
+                aria-checked="true"
+                data-pen="red"
+                title="Red pen · circle the area that should change (R)"
+              >
+                <i></i><span>Area</span></button
+              ><button
+                id="pen-blue"
+                class="pen"
+                type="button"
+                role="radio"
+                aria-checked="false"
+                data-pen="blue"
+                title="Blue pen · sketch the change itself (B)"
+              >
+                <i></i><span>Sketch</span>
+              </button>
+            </div>
+            <div class="markup-bar">
+              <button id="markup-cancel" type="button">Cancel</button
+              ><button id="markup-undo" type="button" disabled>Undo</button
+              ><button id="markup-save" class="primary" type="button" disabled>
+                Describe …
+              </button>
+            </div>
+          </div>
+          <div class="view-toolbar">
+            <button id="fit" title="Fit the model">⊞ <span>Fit</span></button
+            ><button id="ortho" title="Orthographic view">
+              ◫ <span>Orthographic</span></button
+            ><button id="wireframe" title="Wireframe">
+              ◇ <span>Wireframe</span></button
+            ><button id="section" title="Section plane">
+              ◧ <span>Section</span></button
+            ><button id="measure" title="Measure between two surface points">
+              ↔ <span>Measure</span></button
+            ><button
+              id="explode"
+              title="Explode the parts outwards from the model centre"
+              aria-pressed="false"
+            >
+              ⤢ <span>Explode</span></button
+            ><button id="lod" title="Adapt the preview to the pixel size">
+              ◍ <span>Pixel LOD</span></button
+            ><button id="mark" title="Freeze the view and mark an area">
+              ✎ <span>Mark</span></button
+            ><button
+              id="states"
+              title="Earlier states of this model"
+              aria-pressed="false"
+            >
+              ⟲ <span>States</span></button
+            ><button
+              id="truecolour"
+              title="Show the model in the colours of the real device"
+              aria-pressed="false"
+            >
+              ◑ <span>Original</span></button
+            ><select id="overlay" aria-label="Display channel">
+              <option value="parts">Parts</option>
+              <option value="original">Original colours</option>
+              <option value="lit">Lit</option>
+              <option value="unlit">Unlit</option>
+              <option value="normals">Normals</option>
+              <option value="curvature">Curvature</option></select
+            ><button
+              id="decals"
+              title="Prints projected onto the surface: visual only, never in STEP"
+              aria-pressed="true"
+              hidden
+            >
+              ✿ <span>Decals</span></button
+            ><select
+              id="configuration"
+              aria-label="Configuration"
+              hidden
+            ></select>
+          </div>
+          <div id="explode-control" class="explode-control" hidden>
+            <label for="explode-amount">Explode</label
+            ><input
+              id="explode-amount"
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value="0"
+              aria-describedby="explode-hint"
+            /><output id="explode-value" for="explode-amount">0 %</output>
+            <p id="explode-hint">
+              Parts move outwards from the model centre, outer parts further
+              than inner ones.
+            </p>
+          </div>
+          <div id="scale-bar">
+            <span id="scale-bar-line"></span><span id="scale-bar-text">—</span>
+          </div>
+          <div id="legend" aria-label="Part colours" hidden></div>
+          <div id="measurement" hidden></div>
+          <div class="axis-widget">
+            <span class="axis-z">Z</span><span class="axis-y">Y</span
+            ><span class="axis-x">X</span><span class="axis-origin">●</span>
+          </div>
+          <div class="viewport-footer">
+            <span id="resolution">Geometric preview</span
+            ><span id="triangle-count">—</span>
+          </div>
+          <div id="busy" hidden>
+            <span class="spinner"></span
+            ><span id="busy-text">Computing geometry …</span>
+          </div>
+        </div>
+        <div class="timeline">
+          <span class="timeline-dot"></span>
+          <div>
+            <strong id="activity-title">Ready for your construction</strong>
+            <p id="activity-detail">
+              Every change stays a candidate until it has been verified and
+              committed.
+            </p>
+          </div>
+          <span class="timeline-end">mm</span>
+        </div>
+      </section>
+      <aside class="right" id="panel-right">
+        <section
+          class="panel-group"
+          data-group="versions"
+          data-home="right"
+          data-order="0"
+        >
+          <h2 class="group-heading section-label">
+            <button
+              class="group-toggle"
+              type="button"
+              aria-expanded="true"
+              aria-controls="group-versions"
+            >
+              <span class="group-title">Model states</span
+              ><span class="group-meta" id="history-count">—</span
+              ><span class="group-chevron" aria-hidden="true"></span>
+            </button>
+          </h2>
+          <div class="group-body" id="group-versions">
+            <div id="history" class="history">
+              <p class="muted empty-tree">
+                Every committed state stays available here.
+              </p>
+            </div>
+          </div>
+        </section>
+        <section
+          class="panel-group"
+          data-group="orders"
+          data-home="right"
+          data-order="3"
+        >
+          <h2 class="group-heading section-label">
+            <button
+              class="group-toggle"
+              type="button"
+              aria-expanded="true"
+              aria-controls="group-orders"
+            >
+              <span class="group-title">AI orders</span
+              ><span class="group-meta" id="orders-count"></span
+              ><span class="group-chevron" aria-hidden="true"></span>
+            </button>
+          </h2>
+          <div class="group-body" id="group-orders">
+            <div
+              id="run-progress"
+              class="run-progress"
+              aria-live="polite"
+              hidden
+            ></div>
+            <details id="agent-settings-box" class="agent-settings-box">
+              <summary>AI settings</summary>
+              <div class="inset-list" id="agent-settings">
+                <label class="select-row" for="agent-model"
+                  ><span>AI model</span
+                  ><select id="agent-model">
+                    <optgroup label="Claude Code">
+                      <option value="claude-opus-5-5">Claude Opus 5.5</option>
+                      <option value="opus">Claude Opus (alias)</option>
+                      <option value="sonnet">Claude Sonnet 5</option>
+                      <option value="fable">Claude Fable 5.1</option>
+                      <option value="haiku">Claude Haiku 4.5</option>
+                    </optgroup>
+                  </select></label
+                ><label class="select-row" for="agent-intake-model"
+                  ><span>Model · plan</span
+                  ><select id="agent-intake-model">
+                    <option value="">same as AI model</option>
+                  </select></label
+                ><label class="select-row" for="agent-intake-effort"
+                  ><span>Effort · plan</span
+                  ><select id="agent-intake-effort">
+                    <option value="low">low</option>
+                    <option value="medium">medium</option>
+                    <option value="high">high</option>
+                    <option value="xhigh">xhigh</option>
+                    <option value="max">max</option>
+                  </select></label
+                ><label class="select-row" for="agent-build-model"
+                  ><span>Model · build</span
+                  ><select id="agent-build-model">
+                    <option value="">same as AI model</option>
+                  </select></label
+                ><label class="select-row" for="agent-effort"
+                  ><span>Effort · build</span
+                  ><select id="agent-effort">
+                    <option value="low">low</option>
+                    <option value="medium">medium</option>
+                    <option value="high">high</option>
+                    <option value="xhigh">xhigh</option>
+                    <option value="max">max</option>
+                  </select></label
+                ><label class="select-row" for="agent-execution-model"
+                  ><span>Model · change</span
+                  ><select id="agent-execution-model">
+                    <option value="">same as AI model</option>
+                  </select></label
+                ><label class="select-row" for="agent-execution-effort"
+                  ><span>Effort · change</span
+                  ><select id="agent-execution-effort">
+                    <option value="low">low</option>
+                    <option value="medium">medium</option>
+                    <option value="high">high</option>
+                    <option value="xhigh">xhigh</option>
+                    <option value="max">max</option>
+                  </select></label
+                ><label class="select-row" for="agent-proposal-model"
+                  ><span>Model · proposal</span
+                  ><select id="agent-proposal-model">
+                    <option value="">same as AI model</option>
+                  </select></label
+                ><label class="select-row" for="agent-proposal-effort"
+                  ><span>Effort · proposal</span
+                  ><select id="agent-proposal-effort">
+                    <option value="low">low</option>
+                    <option value="medium">medium</option>
+                    <option value="high">high</option>
+                    <option value="xhigh">xhigh</option>
+                    <option value="max">max</option>
+                  </select></label
+                ><label class="select-row" for="agent-drawing-backend"
+                  ><span>Drawing · engine</span
+                  ><select id="agent-drawing-backend">
+                    <option value="local">local (no AI model)</option>
+                    <option value="claude">AI model (Model · drawing)</option>
+                  </select></label
+                ><label class="select-row" for="agent-drawing-model"
+                  ><span>Model · drawing</span
+                  ><select id="agent-drawing-model">
+                    <option value="">same as AI model</option>
+                  </select></label
+                ><label class="select-row" for="agent-drawing-effort"
+                  ><span>Effort · drawing</span
+                  ><select id="agent-drawing-effort">
+                    <option value="low">low</option>
+                    <option value="medium">medium</option>
+                    <option value="high">high</option>
+                    <option value="xhigh">xhigh</option>
+                    <option value="max">max</option>
+                  </select></label
+                ><label class="select-row" for="agent-change-mode"
+                  ><span>Change requests</span
+                  ><select id="agent-change-mode">
+                    <option value="proposal_if_ambiguous">
+                      proposal if unclear
+                    </option>
+                    <option value="proposal_first">always propose first</option>
+                    <option value="direct">carry out directly</option>
+                  </select></label
+                ><label class="select-row" for="agent-permissions"
+                  ><span>Permissions</span
+                  ><select id="agent-permissions">
+                    <option value="dontAsk">all tools</option>
+                    <option value="acceptEdits">edits only</option>
+                    <option value="auto">automatic</option>
+                    <option value="plan">plan only</option>
+                  </select></label
+                ><label class="select-row" for="agent-time-box"
+                  ><span>Time box · min</span
+                  ><input
+                    id="agent-time-box"
+                    type="number"
+                    min="5"
+                    max="240"
+                    step="5"
+                    title="The time the agent plans for; its hooks report against it" /></label
+                ><label class="select-row" for="agent-timeout"
+                  ><span>Hard limit · min</span
+                  ><input
+                    id="agent-timeout"
+                    type="number"
+                    min="5"
+                    max="240"
+                    step="5"
+                    title="The run is stopped after this" /></label
+                ><label class="select-row" for="agent-budget"
+                  ><span>Budget · USD</span
+                  ><input
+                    id="agent-budget"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.5"
+                    placeholder="none" /></label
+                ><label class="check-row" for="agent-fast"
+                  ><span
+                    >Fast mode
+                    <small>faster output, twice the price</small></span
+                  ><input id="agent-fast" type="checkbox" /></label
+                ><label class="check-row" for="agent-skill"
+                  ><span
+                    >Modelling skill
+                    <small>phase plan, DSL client, gate hooks</small></span
+                  ><input id="agent-skill" type="checkbox"
+                /></label>
+                <p id="agent-settings-note" class="muted"></p>
+              </div>
+            </details>
+            <div id="orders" class="orders"></div>
+            <div id="proposals" class="proposals" hidden></div>
+          </div>
+        </section>
+        <section
+          class="panel-group"
+          data-group="detail"
+          data-home="right"
+          data-order="0"
+        >
+          <h2 class="group-heading section-label">
+            <button
+              class="group-toggle"
+              type="button"
+              aria-expanded="true"
+              aria-controls="group-detail"
+            >
+              <span class="group-title">DETAIL INSPECTION</span
+              ><span class="group-meta" aria-hidden="true">↗</span
+              ><span class="group-chevron" aria-hidden="true"></span>
+            </button>
+          </h2>
+          <div class="group-body" id="group-detail">
+            <h3 id="detail-name">Select a feature</h3>
+            <p id="detail-purpose" class="muted">
+              Pick a feature in the construction tree to see its parameters and
+              evidence.
+            </p>
+            <div id="detail-body" hidden>
+              <div class="section-heading">
+                <h3>Parameters</h3>
+                <span class="mini-label">DECIMAL</span>
+              </div>
+              <form id="parameters"></form>
+              <div class="section-heading">
+                <h3>Measured geometry</h3>
+                <span class="mini-label">mm</span>
+              </div>
+              <div id="measurements" class="measurements"></div>
+              <div id="protections" class="protections"></div>
+              <div id="regions" class="regions"></div>
+              <div id="anchor" class="anchor"></div>
+              <button id="isolate" class="full">
+                View feature in isolation</button
+              ><button id="stage-edit" class="primary full">
+                Prepare a change <span>→</span>
+              </button>
+            </div>
+          </div>
+        </section>
+        <section
+          class="panel-group"
+          data-group="change"
+          data-home="right"
+          data-order="1"
+        >
+          <h2 class="group-heading section-label">
+            <button
+              class="group-toggle"
+              type="button"
+              aria-expanded="true"
+              aria-controls="group-change"
+            >
+              <span class="group-title">CHANGE VERIFICATION</span
+              ><span class="group-meta" id="change-state">idle</span
+              ><span class="group-chevron" aria-hidden="true"></span>
+            </button>
+          </h2>
+          <div class="group-body" id="group-change">
+            <div class="change-panel">
+              <ol class="steps">
+                <li id="step-candidate"><span>1</span>Compute candidate</li>
+                <li id="step-validation">
+                  <span>2</span>Check dimensions &amp; protections
+                </li>
+                <li id="step-commit"><span>3</span>Commit new revision</li>
+              </ol>
+              <div id="validation-summary" class="muted">
+                No pending change.
+              </div>
+              <div class="change-actions">
+                <button id="validate" disabled>Validate</button
+                ><button id="commit" class="primary" disabled>Commit</button>
+              </div>
+              <button id="discard" class="quiet full" hidden>
+                Discard candidate
+              </button>
+            </div>
+          </div>
+        </section>
+        <section
+          class="panel-group"
+          data-group="export"
+          data-home="right"
+          data-order="2"
+        >
+          <h2 class="group-heading section-label">
+            <button
+              class="group-toggle"
+              type="button"
+              aria-expanded="true"
+              aria-controls="group-export"
+            >
+              <span class="group-title">EXPORT &amp; IMPORT</span
+              ><span class="group-meta" aria-hidden="true">↓</span
+              ><span class="group-chevron" aria-hidden="true"></span>
+            </button>
+          </h2>
+          <div class="group-body" id="group-export">
+            <div class="export-area">
+              <label for="export-format">Export the verified revision</label>
+              <p id="export-scope" class="muted" aria-live="polite"></p>
+              <div>
+                <select id="export-format">
+                  <option value="step">STEP · CAD</option>
+                  <option value="ir">JSON · construction</option>
+                  <option value="stl">STL · triangles</option>
+                  <option value="glb">GLB · view</option>
+                  <option value="brep">B-Rep · native</option></select
+                ><button id="export" title="Export">↓</button>
+              </div>
+              <div id="downloads"></div>
+              <div class="drawing-export" id="drawing-export">
+                <button
+                  id="drawing-export-run"
+                  type="button"
+                  title="Technical drawing (DIN/ISO, PDF) of the verified revision, created and checked by the AI agent"
+                >
+                  Drawing Export
+                </button>
+                <p id="drawing-export-status" class="muted" aria-live="polite"></p>
+                <div id="drawing-export-links"></div>
+              </div>
+              <label class="upload-label"
+                >Import a file<input
+                  id="upload"
+                  type="file"
+                  accept=".json,.step,.stp,.stl" /></label
+              ><select id="import-unit" aria-label="Import unit">
+                <option value="mm">Import unit: mm</option>
+                <option value="m">Import unit: m</option>
+                <option value="um">Import unit: µm</option>
+              </select>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </main>
+    <!-- Phone app shell. The model owns the screen; the panels arrive in a
+         sheet from the tab bar and the two top buttons — the presentation
+         patterns of an iOS app (navigation bar, round glass buttons, sheet
+         with grabber and detents, tab bar). -->
+    <div id="app-shell" hidden>
+      <header class="topbar">
+        <button
+          id="top-models"
+          class="round-button"
+          type="button"
+          aria-label="Models"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="4" y="7.5" width="13" height="12.5" rx="2.5" />
+            <path d="M8 4.5h9.5A2.5 2.5 0 0 1 20 7v9.5" />
+          </svg>
+        </button>
+        <div class="topbar-title">
+          <strong id="app-title">MathForge 3D</strong>
+          <span id="app-subtitle">Your private model workshop</span>
+        </div>
+        <button
+          id="top-more"
+          class="round-button"
+          type="button"
+          aria-label="More"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="5.5" cy="12" r="1.6" />
+            <circle cx="12" cy="12" r="1.6" />
+            <circle cx="18.5" cy="12" r="1.6" />
+          </svg>
+        </button>
+      </header>
+      <div class="fab-cluster">
+        <button
+          id="fab-mark"
+          class="round-button large"
+          type="button"
+          aria-label="Freeze the view and mark an area"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M4 20.2v-3.4L15.4 5.4a1.8 1.8 0 0 1 2.5 0l1.1 1.1a1.8 1.8 0 0 1 0 2.5L7.6 20.2Z"
+            />
+            <path d="M13.8 7 17 10.2" />
+          </svg>
+        </button>
+        <button
+          id="fab-fit"
+          class="round-button large"
+          type="button"
+          aria-label="Fit the model"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="5.5" />
+            <path d="M12 2.5v3.2M12 18.3v3.2M2.5 12h3.2M18.3 12h3.2" />
+          </svg>
+        </button>
+        <button
+          id="fab-explode"
+          class="round-button large"
+          type="button"
+          aria-pressed="false"
+          aria-label="Exploded view"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M14 4.5h5.5V10M19.5 4.5 13.6 10.4M10 19.5H4.5V14M4.5 19.5l5.9-5.9"
+            />
+          </svg>
+        </button>
+        <button
+          id="fab-view"
+          class="round-button large"
+          type="button"
+          aria-label="View options"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M2.5 12s3.4-6.3 9.5-6.3S21.5 12 21.5 12s-3.4 6.3-9.5 6.3S2.5 12 2.5 12Z"
+            />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        </button>
+      </div>
+      <button
+        id="sheet-backdrop"
+        type="button"
+        tabindex="-1"
+        aria-label="Close the panel"
+      ></button>
+      <section
+        id="app-sheet"
+        aria-labelledby="sheet-title"
+        tabindex="-1"
+        data-detent="medium"
+      >
+        <div id="sheet-grabber"><span></span></div>
+        <header class="sheet-header">
+          <h2 id="sheet-title">Parts</h2>
+          <button id="sheet-close" type="button" class="sheet-close">
+            Done
+          </button>
+        </header>
+        <div id="sheet-body">
+          <section class="panel-group" data-group="view" data-home="viewport">
+            <h2 class="group-heading section-label">
+              <button
+                class="group-toggle"
+                type="button"
+                aria-expanded="true"
+                aria-controls="group-view"
+              >
+                <span class="group-title">View</span
+                ><span class="group-meta"></span
+                ><span class="group-chevron" aria-hidden="true"></span>
+              </button>
+            </h2>
+            <div class="group-body" id="group-view"></div>
+          </section>
+          <section class="panel-group" data-group="system" data-home="header">
+            <h2 class="group-heading section-label">
+              <button
+                class="group-toggle"
+                type="button"
+                aria-expanded="true"
+                aria-controls="group-system"
+              >
+                <span class="group-title">Workshop</span
+                ><span class="group-meta"></span
+                ><span class="group-chevron" aria-hidden="true"></span>
+              </button>
+            </h2>
+            <div class="group-body" id="group-system"></div>
+          </section>
+        </div>
+      </section>
+      <nav id="tabbar" role="tablist" aria-label="Sections">
+        <button
+          class="tab"
+          type="button"
+          role="tab"
+          data-tab="model"
+          aria-selected="true"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3 4 7.5v9L12 21l8-4.5v-9L12 3Z" />
+            <path d="M4 7.5 12 12l8-4.5M12 12v9" /></svg
+          ><span>Model</span>
+        </button>
+        <button
+          class="tab"
+          type="button"
+          role="tab"
+          data-tab="structure"
+          aria-selected="false"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 8.2 12 4l8 4.2-8 4.2-8-4.2Z" />
+            <path d="m4 12.6 8 4.2 8-4.2" />
+            <path d="m4 17 8 4.2L20 17" /></svg
+          ><span>Parts</span>
+        </button>
+        <button
+          class="tab"
+          type="button"
+          role="tab"
+          data-tab="features"
+          aria-selected="false"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 6h11M9 12h11M9 18h11" />
+            <circle cx="4.5" cy="6" r="1.5" />
+            <circle cx="4.5" cy="12" r="1.5" />
+            <circle cx="4.5" cy="18" r="1.5" /></svg
+          ><span>Tree</span>
+        </button>
+        <button
+          class="tab"
+          type="button"
+          role="tab"
+          data-tab="detail"
+          aria-selected="false"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 11v5.5" />
+            <circle cx="12" cy="7.8" r="1" /></svg
+          ><span>Detail</span>
+        </button>
+      </nav>
+    </div>
+    <div id="toast" role="alert" hidden></div>
+    <dialog id="login-dialog">
+      <form id="login-form">
+        <span class="eyebrow">YOUR PRIVATE MODEL WORKSHOP</span>
+        <h2>Welcome to MathForge.</h2>
+        <p>
+          Enter your local access key.<br />It is stored in
+          <code>data/local-token</code>.
+        </p>
+        <label for="token">Access key</label
+        ><input
+          type="password"
+          id="token"
+          required
+          autocomplete="current-password"
+        /><button class="primary full" type="submit">
+          Open the workshop →
+        </button>
+        <p id="login-error" role="alert"></p>
+      </form>
+    </dialog>
+    <dialog id="new-dialog">
+      <form id="new-form">
+        <h2>A new construction</h2>
+        <label for="new-name">Model name</label
+        ><input
+          id="new-name"
+          placeholder="e.g. sensor housing"
+          required
+          maxlength="200"
+        /><label for="new-purpose">Plan</label
+        ><textarea
+          id="new-purpose"
+          rows="3"
+          placeholder="What should be built? Pictures may say it better."
+          maxlength="4000"
+        ></textarea>
+        <div id="new-images" class="thumbs"></div>
+        <label class="upload-label" for="new-image"
+          >+ Add pictures<input
+            id="new-image"
+            type="file"
+            accept="image/*"
+            multiple
+        /></label>
+        <p class="dialog-note">
+          The plan is written from your words and pictures while you carry on;
+          you can have it built from there. Pictures go up as they are, so the
+          AI can read small print; they stay with the model for its build.
+        </p>
+        <div class="dialog-actions">
+          <button type="button" data-close="new-dialog">Cancel</button
+          ><button class="primary">Create model</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="primitive-dialog">
+      <form id="primitive-form">
+        <h2>Mathematical primitive</h2>
+        <label for="primitive-type">Construction</label
+        ><select id="primitive-type">
+          <option value="box">Box</option>
+          <option value="sphere">Sphere</option>
+          <option value="cylinder">Cylinder</option>
+          <option value="torus">Torus</option>
+        </select>
+        <div id="primitive-parameters"></div>
+        <p class="muted">
+          Lengths in millimetres. The solid is first computed as a candidate.
+        </p>
+        <div class="dialog-actions">
+          <button type="button" data-close="primitive-dialog">Cancel</button
+          ><button class="primary">Compute candidate</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="note-dialog">
+      <form id="note-form">
+        <h2>What should change here?</h2>
+        <textarea
+          id="note-text"
+          rows="4"
+          required
+          maxlength="4000"
+          placeholder="e.g. widen the knurled ring by 0.5 mm and round its edge"
+        ></textarea>
+        <div id="note-files" class="thumbs"></div>
+        <label class="upload-label" for="note-file"
+          >+ Add pictures or STL<input
+            id="note-file"
+            type="file"
+            accept="image/*,.stl,model/stl"
+            multiple
+        /></label>
+        <p class="muted" id="note-context">
+          The mark, the touched parts and a picture of the area are saved with
+          it. Anything you attach goes to the AI as well.
+        </p>
+        <div class="dialog-actions">
+          <button type="button" data-close="note-dialog">Cancel</button
+          ><button class="primary">Save request</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="build-plan-dialog" class="build-plan-dialog">
+      <form method="dialog">
+        <h2>Plan</h2>
+        <pre id="build-plan-text"></pre>
+        <div class="dialog-actions">
+          <button class="primary">Close</button>
+        </div>
+      </form>
+    </dialog>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,42 @@
+{
+  "_comment": "Pinned downloads for drawing generation, read by install.ps1. Sizes in bytes, SHA-256 of the file content.",
+  "ocr": {
+    "description": "RapidOCR PP-OCRv4 ONNX models for the legibility check of generated drawings (CPU, offline)",
+    "license": "Apache-2.0",
+    "repo": "SWHL/RapidOCR",
+    "revision": "1cfba2e90fc938db55889873735088de210cc173",
+    "dir": "rapidocr",
+    "files": [
+      { "path": "PP-OCRv4/ch_PP-OCRv4_det_infer.onnx", "name": "ch_PP-OCRv4_det_infer.onnx", "size": 4745517, "sha256": "d2a7720d45a54257208b1e13e36a8479894cb74155a5efe29462512d42f49da9" },
+      { "path": "PP-OCRv4/ch_PP-OCRv4_rec_infer.onnx", "name": "ch_PP-OCRv4_rec_infer.onnx", "size": 10857958, "sha256": "48fc40f24f6d2a207a2b1091d3437eb3cc3eb6b676dc3ef9c37384005483683b" },
+      { "path": "PP-OCRv1/ch_ppocr_mobile_v2.0_cls_infer.onnx", "name": "ch_ppocr_mobile_v2.0_cls_infer.onnx", "size": 585532, "sha256": "e47acedf663230f8863ff1ab0e64dd2d82b838fceb5957146dab185a89d6215c" }
+    ]
+  },
+  "llama_cpp": {
+    "description": "llama.cpp llama-server, runs the local vision model",
+    "license": "MIT",
+    "version": "b12360",
+    "builds": {
+      "vulkan": { "url": "https://github.com/ggml-org/llama.cpp/releases/download/b12360/llama-b12360-bin-win-vulkan-x64.zip", "size": 38090978, "sha256": "42a6f9df608b99c1c83fcaf77284a516e3f167b32a4690f4e4e364c377547055" },
+      "cpu": { "url": "https://github.com/ggml-org/llama.cpp/releases/download/b12360/llama-b12360-bin-win-cpu-x64.zip", "size": 25097627, "sha256": "eae1726047e0eaa707b1302929d196c999b96c2f243b21aea6e93bcebacc4e17" }
+    }
+  },
+  "vision_model": {
+    "description": "MiniCPM-V 4.7 (35B-A3B, IQ3_XS) with its vision projector, the local model of the drawing generator",
+    "license": "Apache-2.0",
+    "profile": "minicpm-v-4.7",
+    "repo": "openbmb/MiniCPM-V-4.7-35B-A3B-gguf",
+    "revision": "adc779c0f3c4936016d7124395ccf260ec696567",
+    "dir": "minicpm-v-4.7",
+    "files": [
+      { "role": "model", "path": "MiniCPM-V-4_7-35B-A3B-IQ3_XS.gguf", "name": "MiniCPM-V-4_7-35B-A3B-IQ3_XS.gguf", "size": 14483689408, "sha256": "a01df9378ee4c53ad2f7c2fda93bb2e2ece8a40112a81687b204717ed8896d32" },
+      { "role": "mmproj", "path": "mmproj-model-f16-4x.gguf", "name": "mmproj-model-f16-4x.gguf", "size": 910491648, "sha256": "30f4daac0f61c2ca28d68b5f901c0501cb7a269a1357a9e380d2c376c6ed6518" }
+    ],
+    "server": {
+      "port": 8091,
+      "ctx": 16384,
+      "args": ["-ngl", "99", "-fa", "on", "-np", "1", "--temp", "0.7", "--top-p", "0.95", "--top-k", "100", "--min-p", "0", "--repeat-penalty", "1.03"],
+      "min_total_ram_gb": 24
+    }
+  }
+}

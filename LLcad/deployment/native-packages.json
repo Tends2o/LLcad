@@ -1,0 +1,29 @@
+{
+  "distribution": "Debian 13 (trixie), amd64",
+  "python3-openvdb": "10.0.1-2.3+b1",
+  "libopenvdb10.0t64": "10.0.1-2.3+b1",
+  "python_module": "pyopenvdb",
+  "module_path": "/usr/lib/python3/dist-packages",
+  "library_version": "10.0.1",
+  "libcgal-dev": "6.0.1-1",
+  "libgmp-dev": "2:6.3.0+dfsg-3",
+  "libgmp10": "2:6.3.0+dfsg-3",
+  "libmpfr-dev": "4.2.2-1",
+  "libmpfr6": "4.2.2-1",
+  "libboost1.83-dev": "1.83.0-4.2",
+  "g++-14": "14.2.0-19",
+  "windows": {
+    "distribution": "Windows 10/11, x86-64 (install.ps1, no administrator rights)",
+    "zig": "0.16.0",
+    "cgal": "6.0.1",
+    "boost": "1.83.0",
+    "gmp": "6.3.0",
+    "mpfr": "4.2.1",
+    "runtime_dlls": ["gmp-10.dll", "mpfr-6.dll"],
+    "archives": {
+      "CGAL-6.0.1-library.zip": "7b0bb231d57261491722b7a0950f8026e17a08ae4a93315495cfb9d91faa31e3",
+      "CGAL-6.0.1-win64-auxiliary-libraries-gmp-mpfr.zip": "606e242c7d3b2dcdd7a04143282b4594debbe6d182f9b094ece0f3c8c6bc7988",
+      "boost_1_83_0.tar.bz2": "6478edfe2f3305127cffe8caf73ea0176c53769f4bf1585be237eb30798c3b8e"
+    }
+  }
+}

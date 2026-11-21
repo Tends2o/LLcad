@@ -1,0 +1,14 @@
+# Downloaded and built by install.ps1
+/tools/
+/models/
+/fonts/DejaVu*.ttf
+/fonts/Liberation*.ttf
+
+# Written by install.ps1 with absolute local paths
+/llcad.env
+/llcad.cmd
+
+# Offline bundles and local leftovers
+*.zip
+__pycache__/
+*.pyc

@@ -1,0 +1,26 @@
+# Lock file for tool and bench packages of drawing generation (tools/drawing_bench.py, packages/drawing/legibility.py).
+# Tool packages never go into requirements.txt or requirements.lock: those define the build hash.
+# install.ps1 installs this file into the LLcad venv; manually:
+#   .venv/Scripts/python.exe -X utf8 -m pip install -r requirements-tools.lock
+pypdfium2==5.15.2
+# Legibility check: RapidOCR (PP-OCRv4 ONNX, CPU) with local model paths (LLCAD_RAPIDOCR_DIR, default <package root>/models/rapidocr,
+# downloaded by install.ps1). Runs offline. Licences: rapidocr Apache-2.0, onnxruntime MIT, opencv-python-headless Apache-2.0,
+# pyclipper MIT, omegaconf BSD-3, PyYAML MIT, colorlog MIT, tqdm MPL-2.0/MIT, requests Apache-2.0, certifi MPL-2.0, urllib3 MIT,
+# idna BSD-3, charset-normalizer MIT, protobuf BSD-3, flatbuffers Apache-2.0, colorama BSD-3. tqdm and certifi (MPL-2.0, weak
+# file-level copyleft) are only tool dependencies of rapidocr (model download, progress) and unused at run time.
+rapidocr==3.10.0
+onnxruntime==1.32.0
+opencv-python-headless==5.0.0.93
+pyclipper==1.4.0
+omegaconf==2.4.0
+PyYAML==6.0.3
+colorlog==6.12.0
+colorama==0.4.6
+tqdm==4.70.1
+requests==2.34.2
+certifi==2026.10.23
+urllib3==2.8.0
+idna==3.20
+charset-normalizer==3.5.2
+protobuf==7.36.2
+flatbuffers==25.12.19

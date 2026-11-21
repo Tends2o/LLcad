@@ -1,0 +1,18 @@
+node_modules
+.venv
+dist/
+public/app.js
+data/
+__pycache__/
+*.pyc
+.env
+test-results/
+playwright-report/
+workers/cad-occt/meshcheck
+workers/cad-occt/meshcheck.exe
+workers/cad-occt/*.dll
+workers/cad-occt/.meshcheck*
+
+# Generated locally, no longer versioned: tool schemas and gate reports.
+reports/
+schemas/

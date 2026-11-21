@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "llcad": {
+      "command": "C:\\llcad\\LLcad\\tools\\node\\node.exe",
+      "args": ["C:\\llcad\\LLcad\\LLcad\\bin\\llcad-bridge.mjs"]
+    }
+  }
+}

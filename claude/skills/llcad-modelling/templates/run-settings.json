@@ -1,0 +1,29 @@
+{
+  "env": {
+    "LLCAD_HOOK_ALLOW": "1"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {"matcher": "mcp__llcad__cad_apply_patch|mcp__llcad__cad_plan_edit",
+       "hooks": [{"type": "command", "command": "python3 /root/.claude/skills/llcad-modelling/scripts/lint_hook.py", "timeout": 15}]}
+    ],
+    "PostToolUse": [
+      {"matcher": "mcp__llcad__cad_(apply_patch|validate|measure|render|export|rebuild|import|revert|solve_constraints|job_get)",
+       "hooks": [{"type": "command", "command": "python3 /root/.claude/skills/llcad-modelling/scripts/wait_hook.py", "timeout": 130}]},
+      {"matcher": "mcp__llcad__cad_(commit|apply_patch|discard|job_get)|Bash",
+       "hooks": [{"type": "command", "command": "python3 /root/.claude/skills/llcad-modelling/scripts/gates_hook.py", "timeout": 200}]},
+      {"matcher": "mcp__llcad__.*|Bash",
+       "hooks": [{"type": "command", "command": "python3 /root/.claude/skills/llcad-modelling/scripts/time_signal.py", "timeout": 5}]}
+    ],
+    "UserPromptSubmit": [
+      {"hooks": [{"type": "command", "command": "python3 /root/.claude/skills/llcad-modelling/scripts/time_signal.py", "timeout": 5}]}
+    ],
+    "Stop": [
+      {"hooks": [{"type": "command", "command": "python3 /root/.claude/skills/llcad-modelling/scripts/stop_gate.py", "timeout": 200}]}
+    ],
+    "SessionStart": [
+      {"matcher": "compact|resume",
+       "hooks": [{"type": "command", "command": "python3 /root/.claude/skills/llcad-modelling/scripts/sessionstart_ledger.py", "timeout": 10}]}
+    ]
+  }
+}

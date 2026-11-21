@@ -1,0 +1,2 @@
+osifont-lgpl3fe.ttf — ISO 3098 lettering font by hikikomori82 (https://github.com/hikikomori82/osifont).
+License: GNU LGPL v3 with font exception (see upstream repository). Used unmodified for drawing lettering (ISO 3098 type B).
